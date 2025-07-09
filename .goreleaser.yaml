@@ -11,7 +11,7 @@ version: 1
 before:
   hooks:
     # You may remove this if you don't use go modules.
-    #- go mod tidy
+    - go mod tidy
     # you may remove this if you don't need go generate
     - go generate ./...
 
@@ -44,7 +44,7 @@ dockers:
   - image_templates:
       - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:{{ .Tag }}"
       - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:latest"
-    dockerfile: DockerfileGoreleaser
+    dockerfile: DockerfileGoReleaser
     use: buildx
     build_flag_templates:
       - "--platform=linux/amd64"
