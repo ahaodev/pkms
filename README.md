@@ -69,7 +69,7 @@ goreleaser release --snapshot --clean
 正式发布并推送到github releases
 
 ```shell
-# 设置token 
+# 设置token(windows) 
 setx GITHUB_TOKEN "you token xxxxxx"
 goreleaser release --clean
 ```
