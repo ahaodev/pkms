@@ -37,6 +37,9 @@ npm run dev
 ### GO的后端
 
 根据ent目录定义的schema,生成数据库相关代码
+```bash
+go install entgo.io/ent/cmd/ent@latest
+```
 > 可在ent/generate.go文件中点击generate file生成
 
 ```bash
@@ -70,7 +73,7 @@ goreleaser release --snapshot --clean
 
 ```shell
 # 设置token(windows) 
-setx GITHUB_TOKEN "you token xxxxxx"
+$env:GITHUB_TOKEN="token_here"
 
 goreleaser release --clean
 ```
