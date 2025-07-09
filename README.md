@@ -75,5 +75,7 @@ goreleaser release --snapshot --clean
 # 设置token(windows) 
 $env:GITHUB_TOKEN="token_here"
 
+$env:DOCKER_USERNAME="hao88"
+
 goreleaser release --clean
 ```
