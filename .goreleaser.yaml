@@ -10,10 +10,7 @@ version: 1
 
 before:
   hooks:
-    - cd frontend
-    - npm ci
-    - npm run build
-    - cd ..
+    - cd frontend && npm ci && npm run build && cd ..
     - go mod tidy
     - go generate ./...
 
