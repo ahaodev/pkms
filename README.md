@@ -17,14 +17,22 @@
 - vite + react + shadcn-ui
 
 ## 跑起来
-
+###  前端
 ```bash
 
-# 前端 
-# frontend 目录下
+cd ./frontend
+
 npm install 
+
 npm run dev 
-# 后端 
-# 生成 ent 
 
 ``` 
+### GO的后端
+ 根据ent目录定义的schema,生成数据库相关代码
+ > 可在ent/generate.go文件中点击generate file生成
+```bash
+# 运行
+go run ./cmd/main.go
+# 编译(先编译前端 npm run build)
+go build -o pkms ./cmd/main.go
+```
