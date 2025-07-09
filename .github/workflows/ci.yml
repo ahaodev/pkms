@@ -45,6 +45,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Verify Docker login
+        run: docker info
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
