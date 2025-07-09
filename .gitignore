@@ -1,0 +1,15 @@
+.DS_Store
+bin/
+/.idea
+.idea
+.env
+.vscode
+
+# 忽略所有 ent 下的内容
+ent/*
+
+# 但保留 schema 和 gen 目录
+!ent/schema/
+!ent/schema/**
+!ent/gen/
+!ent/gen/**

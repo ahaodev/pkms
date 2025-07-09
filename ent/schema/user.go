@@ -1,0 +1,88 @@
+package schema
+
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+)
+
+/**
+CREATE TABLE users (
+    id VARCHAR(50) PRIMARY KEY, -- 用户唯一标识
+    username VARCHAR(100) NOT NULL UNIQUE, -- 用户名，唯一
+    email VARCHAR(255) NOT NULL UNIQUE, -- 邮箱，唯一
+    password_hash VARCHAR(255) NOT NULL, -- 加密后的密码
+    avatar VARCHAR(255), -- 头像链接
+    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'user')), -- 角色，admin 或 user
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 创建时间
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 更新时间
+    is_active BOOLEAN NOT NULL DEFAULT 1 -- 是否激活
+);
+*/
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").
+			MaxLen(50).
+			Unique(),
+		field.String("username").
+			MaxLen(100).
+			Unique(),
+		field.String("email").
+			MaxLen(255).
+			Unique(),
+		field.String("password_hash").
+			MaxLen(255),
+		field.String("avatar").
+			MaxLen(255).
+			Optional(),
+		field.Enum("role").
+			Values("admin", "user"),
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+		field.Bool("is_active").
+			Default(true),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		// User creates projects
+		edge.To("created_projects", Project.Type),
+		// User creates groups
+		edge.To("created_groups", Group.Type),
+		// User project assignments
+		edge.To("project_assignments", UserProjectAssignment.Type),
+		// User group memberships
+		edge.To("group_memberships", GroupMembership.Type),
+		// User project permissions
+		edge.To("project_permissions", ProjectPermission.Type),
+		// User assignments (as assigner)
+		edge.To("assigned_project_assignments", UserProjectAssignment.Type),
+		// User group memberships (as adder)
+		edge.To("added_group_memberships", GroupMembership.Type),
+	}
+}
+
+// Indexes of the User.
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("username"),
+		index.Fields("email"),
+		index.Fields("role"),
+		index.Fields("is_active"),
+	}
+}
