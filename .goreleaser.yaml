@@ -10,7 +10,7 @@ version: 1
 
 before:
   hooks:
-    - go mod tidy
+    #- go mod tidy
     - go generate ./...
     - npm ci --prefix frontend
     - npm run build --prefix frontend
