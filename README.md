@@ -12,7 +12,7 @@
 
 ## 后端
 
-- [go-clean-architecture ](https://github.com/amitshekhariitbhu/go-backend-clean-architecture)
+- [go-clean-architecture](https://github.com/amitshekhariitbhu/go-backend-clean-architecture)
 - ent sqlite (默认)
 - gin
 
@@ -71,5 +71,6 @@ goreleaser release --snapshot --clean
 ```shell
 # 设置token(windows) 
 setx GITHUB_TOKEN "you token xxxxxx"
+
 goreleaser release --clean
 ```
