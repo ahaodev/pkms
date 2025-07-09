@@ -69,5 +69,5 @@ goreleaser release --snapshot --clean
 正式发布并推送到github releases
 
 ```shell
-goreleaser release --clean --rm-dist
+goreleaser release --clean
 ```
