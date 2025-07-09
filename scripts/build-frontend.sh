@@ -1,5 +1,4 @@
-#!/bin/bash
-set -e
-cd "$(dirname "$0")/../frontend"
-npm ci
-npm run build
+@echo off
+cd /d "%~dp0\..\frontend"
+call npm ci
+call npm run build
