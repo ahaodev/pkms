@@ -47,7 +47,7 @@ jobs:
           name: frontend-build
           path: frontend/dist/
 
-  # 使用 GoReleaser 构建 Go 后端
+  # 使用 GoReleaser 构建 Go 后端和打包前端
   goreleaser:
     needs: [ frontend-build ]
     runs-on: ubuntu-latest
@@ -55,6 +55,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist/
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -72,7 +78,7 @@ jobs:
 
   # Docker 构建
   docker-build:
-    needs: [ frontend-build, goreleaser ]
+    needs: [ goreleaser ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
