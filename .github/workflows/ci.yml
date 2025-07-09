@@ -1,11 +1,8 @@
 name: CI/CD Pipeline
 
 on:
-  # 只在推送 tag 时触发
   push:
-    tags:
-      - 'v*'
-  # 保留 pull request 触发用于代码检查
+    branches: [ main, dev ]
   pull_request:
     branches: [ main, dev ]
 
