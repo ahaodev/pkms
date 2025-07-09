@@ -45,6 +45,7 @@ dockers:
       - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:latest"
     dockerfile: DockerfileGoReleaser
     use: buildx
+    skip_push: false  # 添加这行，强制推送
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"

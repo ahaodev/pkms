@@ -37,9 +37,11 @@ npm run dev
 ### GO的后端
 
 根据ent目录定义的schema,生成数据库相关代码
+
 ```bash
 go install entgo.io/ent/cmd/ent@latest
 ```
+
 > 可在ent/generate.go文件中点击generate file生成
 
 ```bash
@@ -72,10 +74,25 @@ goreleaser release --snapshot --clean
 正式发布并推送到github releases
 
 ```shell
+
 # 设置token(windows) 
 $env:GITHUB_TOKEN="token_here"
 
+# 设置docker用户名(windows)
 $env:DOCKER_USERNAME="hao88"
 
+# 构建发布
 goreleaser release --clean
+```
+
+## docker
+
+构建
+```shell
+docker build -t hao88/pkms:latest .
+```
+
+发布
+```shell
+docker push hao88/pkms:latest
 ```
