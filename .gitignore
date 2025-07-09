@@ -12,3 +12,5 @@ ent/*
 !ent/schema/
 !ent/schema/**
 !ent/generate.go
+
+dist/

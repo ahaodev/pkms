@@ -10,5 +10,9 @@ import (
 var Static embed.FS
 
 func Register(r *gin.Engine) {
-	r.Use(static.Serve("/", static.EmbedFolder(Static, "dist")))
+	fs, err := static.EmbedFolder(Static, "dist")
+	if err != nil {
+		panic("静态文件映射错误,请检查前端是否构建" + err.Error())
+	}
+	r.Use(static.Serve("/", fs))
 }
