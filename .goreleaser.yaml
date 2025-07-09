@@ -25,8 +25,8 @@ archives:
 
 dockers:
   - image_templates:
-      - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:{{ .Tag }}"
-      - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:latest"
+      - "docker.io/hao88/pkms:{{ .Tag }}"
+      - "docker.io/hao88/pkms:latest"
     dockerfile: DockerfileGoReleaser
     use: buildx
     skip_push: false
@@ -38,6 +38,7 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+
 changelog:
   sort: asc
   filters:
