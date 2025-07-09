@@ -49,7 +49,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
-          version: v5.18.0
+          version: latest
           args: ${{ github.ref_type == 'tag' && 'release' || 'build --snapshot' }} --clean --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -25,8 +25,8 @@ archives:
 
 dockers:
   - image_templates:
-      - "hao88/{{ .ProjectName }}:{{ .Tag }}"
-      - "hao88/{{ .ProjectName }}:latest"
+      - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:{{ .Tag }}"
+      - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:latest"
     dockerfile: DockerfileGoReleaser
     use: buildx
     skip_push: false
