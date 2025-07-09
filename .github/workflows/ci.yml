@@ -53,4 +53,4 @@ jobs:
           args: ${{ github.ref_type == 'tag' && 'release' || 'build --snapshot' }} --clean --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_USERNAME: hao88
