@@ -15,3 +15,16 @@
 
 ## 前端  
 - vite + react + shadcn-ui
+
+## 跑起来
+
+```bash
+
+# 前端 
+# frontend 目录下
+npm install 
+npm run dev 
+# 后端 
+# 生成 ent 
+
+``` 

@@ -11,5 +11,4 @@ ent/*
 # 但保留 schema 和 gen 目录
 !ent/schema/
 !ent/schema/**
-!ent/gen/
-!ent/gen/**
+!ent/generate.go
