@@ -1,13 +1,13 @@
 package route
 
 import (
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/frontend"
+	"pkms/frontend"
 	"time"
 
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/api/middleware"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/bootstrap"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent"
 	"github.com/gin-gonic/gin"
+	"pkms/api/middleware"
+	"pkms/bootstrap"
+	"pkms/ent"
 )
 
 func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, gin *gin.Engine) {

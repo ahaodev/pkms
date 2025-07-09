@@ -3,9 +3,9 @@ package main
 import (
 	"time"
 
-	route "github.com/amitshekhariitbhu/go-backend-clean-architecture/api/route"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/bootstrap"
 	"github.com/gin-gonic/gin"
+	route "pkms/api/route"
+	"pkms/bootstrap"
 )
 
 func main() {

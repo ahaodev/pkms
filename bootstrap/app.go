@@ -1,6 +1,6 @@
 package bootstrap
 
-import "github.com/amitshekhariitbhu/go-backend-clean-architecture/ent"
+import "pkms/ent"
 
 type Application struct {
 	Env *Env

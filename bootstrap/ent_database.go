@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent/user"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
+	"pkms/ent"
+	"pkms/ent/user"
 )
 
 func NewEntDatabase(env *Env) *ent.Client {

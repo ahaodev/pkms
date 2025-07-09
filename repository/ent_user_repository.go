@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/domain"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent/user"
+	"pkms/domain"
+	"pkms/ent"
+	"pkms/ent/user"
 )
 
 type entUserRepository struct {
