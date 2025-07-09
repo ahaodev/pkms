@@ -1,11 +1,8 @@
-name: CI/CD Pipeline
+name: Release
 
 on:
   push:
-    branches: [ main, dev ]
     tags: [ 'v*' ]
-  pull_request:
-    branches: [ main, dev ]
 
 permissions:
   contents: write
@@ -17,7 +14,7 @@ env:
   NODE_VERSION: "22"
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +47,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: ${{ github.ref_type == 'tag' && 'release' || 'build --snapshot' }} --clean --debug
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
