@@ -45,6 +45,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug environment
+        run: |
+          echo "DOCKER_USERNAME from secret: ${{ secrets.DOCKER_USERNAME }}"
+          echo "Length: ${#DOCKER_USERNAME}"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
