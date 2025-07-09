@@ -37,14 +37,14 @@ archives:
     # use zip for windows archives
     format_overrides:
       - goos: windows
-        format: zip'
+        format: zip
 
 # Docker 配置 - 发布到 Docker Hub
 dockers:
   - image_templates:
       - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:{{ .Tag }}"
       - "{{ .Env.DOCKER_USERNAME }}/{{ .ProjectName }}:latest"
-    dockerfile: Dockerfile.goreleaser
+    dockerfile: DockerfileGoreleaser
     use: buildx
     build_flag_templates:
       - "--platform=linux/amd64"
