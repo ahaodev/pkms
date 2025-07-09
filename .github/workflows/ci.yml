@@ -19,7 +19,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # 使用 GoReleaser 构建前端、后端并发布到 Docker
   goreleaser:
     runs-on: ubuntu-latest
     steps:
@@ -31,22 +30,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install frontend dependencies
         run: npm ci --prefix frontend
+
+      - name: Build frontend (test)
+        run: npm run build --prefix frontend
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
