@@ -10,9 +10,11 @@ version: 1
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
+    - cd frontend
+    - npm ci
+    - npm run build
+    - cd ..
     - go mod tidy
-    # you may remove this if you don't need go generate
     - go generate ./...
 
 builds:
