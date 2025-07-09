@@ -10,12 +10,7 @@ version: 1
 
 before:
   hooks:
-    # Unix 环境 (Linux, macOS)
-    - platform: [linux, darwin]
-      command: cd frontend && npm install && npm run build &&্র
-    # Windows 环境
-    - platform: windows
-      command: cd frontend && npm install && npm run build && cd ..
+    - npm run build --prefix frontend
     - go mod tidy
     - go generate ./...
 
