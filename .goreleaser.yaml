@@ -10,7 +10,7 @@ version: 1
 
 before:
   hooks:
-    - scripts/build-frontend
+    - scripts/build-frontend.cmd
     - go mod tidy
     - go generate ./...
 
