@@ -33,7 +33,7 @@ type Project struct {
 func (Project) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			MaxLen(50).
+			MaxLen(20).
 			Unique(),
 		field.String("name").
 			MaxLen(255),

@@ -33,7 +33,7 @@ type Group struct {
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			MaxLen(50).
+			MaxLen(20).
 			Unique(),
 		field.String("name").
 			MaxLen(255),

@@ -32,13 +32,10 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			MaxLen(50).
+			MaxLen(20).
 			Unique(),
 		field.String("username").
 			MaxLen(100).
-			Unique(),
-		field.String("email").
-			MaxLen(255).
 			Unique(),
 		field.String("password_hash").
 			MaxLen(255),
@@ -81,7 +78,6 @@ func (User) Edges() []ent.Edge {
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("username"),
-		index.Fields("email"),
 		index.Fields("role"),
 		index.Fields("is_active"),
 	}

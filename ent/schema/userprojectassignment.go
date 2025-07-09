@@ -35,9 +35,9 @@ func (UserProjectAssignment) Fields() []ent.Field {
 		field.Int("id").
 			Unique(),
 		field.String("user_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.String("project_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.Time("assigned_at").
 			Default(time.Now),
 		field.String("assigned_by").

@@ -30,7 +30,6 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 		Create().
 		SetID(u.ID).
 		SetUsername(u.Name).
-		SetEmail(u.Email).
 		SetPasswordHash(u.Password).
 		SetRole(user.Role(u.Role)).
 		Save(c)
@@ -55,7 +54,7 @@ func generateUniqueID() string {
 func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 	users, err := ur.client.User.
 		Query().
-		Select(user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldCreatedAt, user.FieldUpdatedAt).
+		Select(user.FieldID, user.FieldUsername, user.FieldCreatedAt, user.FieldUpdatedAt).
 		All(c)
 
 	if err != nil {
@@ -67,7 +66,6 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 		result = append(result, domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
-			Email:     u.Email,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
 		})
@@ -76,10 +74,10 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 	return result, nil
 }
 
-func (ur *entUserRepository) GetByEmail(c context.Context, email string) (domain.User, error) {
+func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (domain.User, error) {
 	u, err := ur.client.User.
 		Query().
-		Where(user.Email(email)).
+		Where(user.Username(userName)).
 		First(c)
 
 	if err != nil {
@@ -89,7 +87,6 @@ func (ur *entUserRepository) GetByEmail(c context.Context, email string) (domain
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
-		Email:     u.Email,
 		Password:  u.PasswordHash,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -109,7 +106,6 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
-		Email:     u.Email,
 		Password:  u.PasswordHash,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,

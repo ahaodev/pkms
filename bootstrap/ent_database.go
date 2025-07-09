@@ -3,12 +3,15 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"github.com/rs/xid"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent"
+	"github.com/amitshekhariitbhu/go-backend-clean-architecture/ent/user"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func NewEntDatabase(env *Env) *ent.Client {
@@ -16,6 +19,9 @@ func NewEntDatabase(env *Env) *ent.Client {
 	if dbPath == "" {
 		dbPath = "./database.db"
 	}
+
+	// 检查数据库是否已存在
+	isNewDB := !fileExists(dbPath)
 
 	// Ensure the directory exists
 	dir := filepath.Dir(dbPath)
@@ -39,10 +45,72 @@ func NewEntDatabase(env *Env) *ent.Client {
 		log.Fatal("❌ Failed to create schema resources:", err)
 	}
 
+	// 如果是新数据库，创建默认管理员用户
+	if isNewDB {
+		createDefaultAdmin(ctx, client, env)
+	}
+
 	log.Println("✅ Connected to SQLite database successfully with Ent")
 	return client
 }
 
+func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
+	// 检查是否已存在管理员用户
+	adminCount, err := client.User.Query().
+		Where(user.RoleEQ("admin")).
+		Count(ctx)
+
+	if err != nil {
+		log.Printf("⚠️ Failed to check admin users: %v", err)
+		return
+	}
+
+	if adminCount > 0 {
+		log.Println("✅ Admin user already exists")
+		return
+	}
+
+	// 从环境变量获取管理员信息，或使用默认值
+	adminPassword := getEnvOrDefault(env.AdminPassword, "admin123")
+	adminUsername := getEnvOrDefault(env.AdminUsername, "admin")
+
+	// 加密密码
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("❌ Failed to hash admin password: %v", err)
+		return
+	}
+
+	// 创建管理员用户
+	uid := xid.New().String()
+	_, err = client.User.Create().
+		SetID(uid).
+		SetUsername(adminUsername).
+		SetPasswordHash(string(hashedPassword)).
+		SetRole("admin").
+		SetIsActive(true).
+		Save(ctx)
+
+	if err != nil {
+		log.Printf("❌ Failed to create admin user: %v", err)
+		return
+	}
+
+	log.Printf("✅ Default admin user created: %s", adminUsername)
+	log.Println("⚠️ Please change the default password after first login!")
+}
+
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
+}
+
+func getEnvOrDefault(value, defaultValue string) string {
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
 func CloseEntConnection(client *ent.Client) {
 	if client == nil {
 		return

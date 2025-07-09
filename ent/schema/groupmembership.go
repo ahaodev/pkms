@@ -35,9 +35,9 @@ func (GroupMembership) Fields() []ent.Field {
 		field.Int("id").
 			Unique(),
 		field.String("user_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.String("group_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.Time("joined_at").
 			Default(time.Now),
 		field.String("added_by").

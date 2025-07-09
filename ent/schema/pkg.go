@@ -33,10 +33,10 @@ type Pkg struct {
 func (Pkg) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			MaxLen(50).
+			MaxLen(20).
 			Unique(),
 		field.String("project_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.String("name").
 			MaxLen(255),
 		field.String("description").

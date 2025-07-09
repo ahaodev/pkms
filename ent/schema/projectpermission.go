@@ -33,9 +33,9 @@ func (ProjectPermission) Fields() []ent.Field {
 		field.Int("id").
 			Unique(),
 		field.String("user_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.String("project_id").
-			MaxLen(50),
+			MaxLen(20),
 		field.Bool("can_view").
 			Default(false),
 		field.Bool("can_edit").
