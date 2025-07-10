@@ -33,13 +33,6 @@ RUN go generate ./...
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./cmd/main.go
 
-#-------------------压缩二进制文件------------------------
-# UPX compression stage
-FROM paketobuildpacks/upx AS compressor
-WORKDIR /app
-COPY --from=builder_go /app/runner .
-# Compress binary with UPX for smaller size
-RUN upx --best --lzma runner
 
 #-------------------runner--------------------------
 # Runtime stage
@@ -48,7 +41,7 @@ FROM alpine:3.22 AS runner
 HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q interface || exit 1" --interval=1m --timeout=5s --retries=3
 WORKDIR /app
 # Copy compiled binary and config
-COPY --from=compressor /app/runner .
+COPY --from=builder_go /app/runner .
 # Run the application
 CMD ["./runner"]
 # Expose required ports
