@@ -18,7 +18,7 @@ COPY . .
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
 # Use build arguments to specify target architecture
 ARG TARGETARCH
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build -ldflags="-s -w" -o runner
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./cmd/main.go
 # Compress binary with UPX for smaller size
 #RUN upx --best --lzma /app/runner
 
