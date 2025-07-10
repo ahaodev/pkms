@@ -17,6 +17,8 @@ require (
 	golang.org/x/crypto v0.37.0
 )
 
+require github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+
 require (
 	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
@@ -67,7 +69,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tebeka/strftime v0.1.5 // indirect
-	github.com/tinylib/msgp v1.3.0 // indirectgithub.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/tinylib/msgp v1.3.0 // indirect; indirectgithub.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect

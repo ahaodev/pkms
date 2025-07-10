@@ -51,24 +51,6 @@ func (pc *PackageController) GetPackage(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(pkg))
 }
 
-// UpdatePackage 更新包
-func (pc *PackageController) UpdatePackage(c *gin.Context) {
-	id := c.Param("id")
-	var pkg domain.Package
-	if err := c.ShouldBindJSON(&pkg); err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
-		return
-	}
-
-	pkg.ID = id
-	if err := pc.PackageUsecase.Update(c, &pkg); err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(pkg))
-}
-
 // DeletePackage 删除包
 func (pc *PackageController) DeletePackage(c *gin.Context) {
 	id := c.Param("id")
@@ -84,34 +66,47 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 	// 获取上传的文件
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError("File upload failed"))
+		c.JSON(http.StatusBadRequest, domain.RespError("File upload failed: "+err.Error()))
 		return
 	}
 	defer file.Close()
 
-	// 获取其他表单数据
-	projectID := c.PostForm("project_id")
-	name := c.PostForm("name")
-	description := c.PostForm("description")
-	version := c.PostForm("version")
+	// 构建上传请求
+	req := &domain.PackageUploadRequest{
+		ProjectID:   c.PostForm("project_id"),
+		Name:        c.PostForm("name"),
+		Description: c.PostForm("description"),
+		Version:     c.PostForm("version"),
+		Type:        c.PostForm("type"),
+		Changelog:   c.PostForm("changelog"),
+		File:        file,
+		FileName:    header.Filename,
+		FileSize:    header.Size,
+		FileHeader:  header.Header.Get("Content-Type"),
+	}
 
-	if projectID == "" || name == "" || version == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields"))
+	// 验证必需字段
+	if req.ProjectID == "" || req.Name == "" || req.Version == "" {
+		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: project_id, name, version"))
 		return
 	}
 
-	// 这里需要实现文件保存和包创建逻辑
-	response := map[string]interface{}{
-		"message":     "Package uploaded successfully",
-		"filename":    header.Filename,
-		"size":        header.Size,
-		"project_id":  projectID,
-		"name":        name,
-		"description": description,
-		"version":     version,
+	// 解析可选的布尔和数字字段
+	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
+		req.IsLatest = true
+	}
+	if isPublic := c.PostForm("is_public"); isPublic == "true" {
+		req.IsPublic = true
 	}
 
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
+	// 调用usecase进行文件上传和包创建
+	result, err := pc.PackageUsecase.UploadPackage(c, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("Upload failed: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // DownloadPackage 下载包
@@ -123,11 +118,17 @@ func (pc *PackageController) DownloadPackage(c *gin.Context) {
 		return
 	}
 
-	// 这里需要实现文件下载逻辑
-	// c.File(pkg.FileURL) // 实际文件路径
+	// 增加下载计数
+	pkg.DownloadCount++
+	pc.PackageUsecase.Update(c, &pkg)
+
+	// 提供下载链接（实际实现可能需要根据文件存储方式调整）
 	c.JSON(http.StatusOK, domain.RespSuccess(map[string]interface{}{
 		"download_url": pkg.FileURL,
 		"filename":     pkg.FileName,
+		"size":         pkg.FileSize,
+		"version":      pkg.Version,
+		"checksum":     pkg.Checksum,
 	}))
 }
 

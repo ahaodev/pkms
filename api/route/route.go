@@ -24,28 +24,28 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 
 	// Protected routes
-	projectRouter := protectedRouter.Group("/projects")
+	projectRouter := protectedRouter.Group("/project")
 	NewProjectRouter(env, timeout, db, projectRouter)
 
-	packageRouter := protectedRouter.Group("/packages")
-	NewPackageRouter(env, timeout, db, packageRouter)
+	packageRouter := protectedRouter.Group("/package")
+	NewPackageRouter(env, timeout, db, minioClient, packageRouter)
 
-	userRouter := protectedRouter.Group("/users")
+	userRouter := protectedRouter.Group("/user")
 	NewUserRouter(env, timeout, db, userRouter)
 
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
-	groupRouter := protectedRouter.Group("/groups")
+	groupRouter := protectedRouter.Group("/group")
 	NewGroupRouter(env, timeout, db, groupRouter)
 
-	permissionRouter := protectedRouter.Group("/permissions")
+	permissionRouter := protectedRouter.Group("/permission")
 	NewPermissionRouter(env, timeout, db, permissionRouter)
 
-	upgradeRouter := protectedRouter.Group("/upgrades")
+	upgradeRouter := protectedRouter.Group("/upgrade")
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
 	// File management routes
-	fileRouter := protectedRouter.Group("/files")
+	fileRouter := protectedRouter.Group("/file")
 	NewFileRouter(env, timeout, db, minioClient, fileRouter)
 }
