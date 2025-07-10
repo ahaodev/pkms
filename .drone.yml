@@ -3,8 +3,8 @@ type: docker
 name: default
 trigger:
   branch:
-    #- dev
-    - master
+    - dev
+    - main
 steps:
   - name: build_push
     image: docker:dind
