@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// 这里的 User 结构体定义了用户的基本信息
+// User 结构体定义了用户的基本信息
 type User struct {
 	ID        string    `json:"id" db:"id"`
 	Name      string    `json:"name" db:"name"`

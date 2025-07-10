@@ -24,9 +24,9 @@ func (lc *LoginController) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := lc.LoginUsecase.GetUserByUserName(c, request.Email)
+	user, err := lc.LoginUsecase.GetUserByUserName(c, request.UserName)
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: "User not found with the given email"})
+		c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: "User not found with the given UserName"})
 		return
 	}
 
@@ -52,5 +52,5 @@ func (lc *LoginController) Login(c *gin.Context) {
 		RefreshToken: refreshToken,
 	}
 
-	c.JSON(http.StatusOK, loginResponse)
+	c.JSON(http.StatusOK, domain.RespSuccess(loginResponse))
 }
