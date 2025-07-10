@@ -1,26 +1,27 @@
 package main
 
 import (
+	"pkms/pkg"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	route "pkms/api/route"
+	"pkms/api/route"
 	"pkms/bootstrap"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 
 	app := bootstrap.App()
-
-	env := app.Env
-
 	defer app.CloseDBConnection()
 
+	env := app.Env
+	db := app.DB
+	s3 := app.MinioClient
 	timeout := time.Duration(env.ContextTimeout) * time.Second
-
-	gin := gin.Default()
-
-	route.Setup(env, timeout, app.DB, gin)
-
-	gin.Run(env.ServerAddress)
+	route.Setup(env, timeout, db, s3, gin.Default())
+	err := gin.Default().Run(env.ServerAddress)
+	if err != nil {
+		pkg.Log.Error(err)
+	}
 }

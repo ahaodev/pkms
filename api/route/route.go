@@ -9,11 +9,10 @@ import (
 	"pkms/ent"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
 )
 
-var APIv1 *gin.RouterGroup
-
-func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, gin *gin.Engine) {
+func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClient *minio.Client, gin *gin.Engine) {
 	frontend.Register(gin)
 	publicRouter := gin.Group("/api/v1")
 	// All Public APIs
@@ -45,4 +44,8 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, gin *gin.E
 
 	upgradeRouter := protectedRouter.Group("/upgrades")
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
+
+	// File management routes
+	fileRouter := protectedRouter.Group("/files")
+	NewFileRouter(env, timeout, db, minioClient, fileRouter)
 }

@@ -1,9 +1,8 @@
 package bootstrap
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
+	"log"
 )
 
 type Env struct {
@@ -19,6 +18,19 @@ type Env struct {
 	// 管理员配置
 	AdminUsername string `mapstructure:"ADMIN_USERNAME"`
 	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
+
+	/**
+	S3_ADDRESS=192.168.99.17:9000"
+	S3_ACCESS_KEY=hiIXbRYqwM9N3lCduEDy"
+	S3_SECRET_KEY=qW4lTqUB5qJFwScP241O2ZKhCYwpcIWpaDw7MZjg
+	S3_BUCKET=pkms
+	S3_TOKEN=""
+	*/
+	S3Address   string `mapstructure:"S3_ADDRESS"`
+	S3AccessKey string `mapstructure:"S3_ACCESS_KEY"`
+	S3SecretKey string `mapstructure:"S3_SECRET_KEY"`
+	S3Bucket    string `mapstructure:"S3_BUCKET"`
+	S3Token     string `mapstructure:"S3_TOKEN"`
 }
 
 func NewEnv() *Env {

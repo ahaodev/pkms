@@ -13,9 +13,10 @@
 5. **permission_usecase.go** - 权限管理业务逻辑
 6. **upgrade_usecase.go** - 升级管理业务逻辑
 7. **dashboard_usecase.go** - 仪表盘统计业务逻辑
-8. **login_usecase.go** (已存在)
-9. **refresh_token_usecase.go** (已存在)  
-10. **signup_usecase.go** (已存在)
+8. **file_usecase.go** - 文件管理业务逻辑 (新增)
+9. **login_usecase.go** (已存在)
+10. **refresh_token_usecase.go** (已存在)  
+11. **signup_usecase.go** (已存在)
 
 ### Repository 层实现 (repository/)
 1. **ent_project_repository.go** - 项目数据访问层
@@ -23,7 +24,8 @@
 3. **ent_group_repository.go** - 组数据访问层
 4. **ent_permission_repository.go** - 权限数据访问层
 5. **ent_upgrade_repository.go** - 升级数据访问层
-6. **ent_user_repository.go** (已存在)
+6. **minio_file_repository.go** - 文件存储数据访问层 (新增)
+7. **ent_user_repository.go** (已存在)
 
 ## 架构特点
 
@@ -46,6 +48,11 @@
 - Ent ORM 模型到 Domain 模型的转换
 - 处理字段名称差异（如 MinSdkVersion vs MinSDKVersion）
 - 兼容性处理（权限字段的降级处理）
+
+### 5. 外部服务集成
+- MinIO 对象存储集成
+- 统一的文件操作接口
+- 流式文件传输支持
 
 ## 功能模块
 
@@ -84,6 +91,13 @@
 - 系统统计信息
 - 最近活动记录
 - 图表数据
+
+### 8. 文件管理 (File) - 新增
+- 文件上传和下载
+- 文件列表和删除
+- 对象存储集成 (MinIO)
+- 流式文件传输
+- 文件信息查询
 
 ## 技术实现细节
 
@@ -131,16 +145,51 @@ pkms/
 │   ├── permission_usecase.go
 │   ├── upgrade_usecase.go
 │   ├── dashboard_usecase.go
+│   ├── file_usecase.go          (新增)
 │   ├── login_usecase.go
 │   ├── refresh_token_usecase.go
 │   └── signup_usecase.go
-└── repository/
-    ├── ent_project_repository.go
-    ├── ent_package_repository.go
-    ├── ent_group_repository.go
-    ├── ent_permission_repository.go
-    ├── ent_upgrade_repository.go
-    └── ent_user_repository.go
+├── repository/
+│   ├── ent_project_repository.go
+│   ├── ent_package_repository.go
+│   ├── ent_group_repository.go
+│   ├── ent_permission_repository.go
+│   ├── ent_upgrade_repository.go
+│   ├── minio_file_repository.go  (新增)
+│   └── ent_user_repository.go
+├── api/controller/
+│   └── file_controller.go       (优化)
+├── api/route/
+│   └── file_route.go            (新增)
+└── domain/
+    └── file.go                  (新增)
 ```
 
 项目现在具备了完整的后端分层架构，可以支持所有核心业务功能的实现。
+
+## 文件管理优化要点
+
+### 1. 架构改进
+- **原控制器问题**: 直接调用 MinIO 客户端，违反分层原则
+- **优化后**: 遵循 Domain -> Usecase -> Repository -> Controller 分层架构
+- **依赖注入**: 通过构造函数注入依赖，便于测试和维护
+
+### 2. 代码组织优化
+- **Domain 层**: 定义了 FileInfo、UploadRequest、DownloadRequest 等领域模型
+- **Repository 层**: 封装了 MinIO 操作，提供统一的文件存储接口
+- **Usecase 层**: 实现文件操作的业务逻辑，包含超时控制
+- **Controller 层**: 处理 HTTP 请求，参数验证和响应格式化
+
+### 3. 功能完整性
+- ✅ 文件上传 (支持前缀路径)
+- ✅ 文件下载 (普通下载和流式下载)
+- ✅ 文件列表 (支持前缀过滤)
+- ✅ 文件删除
+- ✅ 文件信息查询
+- ✅ 文件类型识别
+
+### 4. 技术改进
+- **错误处理**: 统一的错误响应格式
+- **超时控制**: Context 超时管理
+- **流式传输**: 支持大文件的流式下载
+- **类型安全**: 使用强类型的 domain 模型
