@@ -36,7 +36,7 @@ export default function ProjectsPage() {
     icon: 'package2'
   });
 
-  const filteredProjects = projects?.filter(project =>
+  const filteredProjects = projects?.filter((project: Project) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.description.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];

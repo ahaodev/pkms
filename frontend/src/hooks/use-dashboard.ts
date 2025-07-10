@@ -1,9 +1,7 @@
 // use-dashboard.ts
-// Dashboard 相关数据的自定义 hooks，基于 react-query 实现，所有数据均通过 serviceFactory 获取
+// Dashboard 相关数据的自定义 hooks，基于 react-query 实现
 import {useQuery} from '@tanstack/react-query';
-import {serviceFactory} from '@/services/service-factory';
-
-const dashboardService = serviceFactory.getDashboardService();
+import * as DashboardAPI from '@/lib/api/dashboard';
 
 // Query keys
 export const dashboardKeys = {
@@ -21,7 +19,7 @@ export const dashboardKeys = {
 export const useDashboardStats = () => {
     return useQuery({
         queryKey: dashboardKeys.stats(),
-        queryFn: () => dashboardService.getDashboardStats(),
+        queryFn: () => DashboardAPI.getDashboardStats(),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };
@@ -30,7 +28,7 @@ export const useDashboardStats = () => {
 export const useDeploymentChartData = (days?: number) => {
     return useQuery({
         queryKey: dashboardKeys.deploymentChart(days),
-        queryFn: () => dashboardService.getDeploymentChartData(days),
+        queryFn: () => DashboardAPI.getPackageChartData(),
         staleTime: 2 * 60 * 1000, // 2 minutes
     });
 };
@@ -39,7 +37,7 @@ export const useDeploymentChartData = (days?: number) => {
 export const useDeploymentTimeData = (weeks?: number) => {
     return useQuery({
         queryKey: dashboardKeys.deploymentTime(weeks),
-        queryFn: () => dashboardService.getDeploymentTimeData(weeks),
+        queryFn: () => DashboardAPI.getDownloadChartData(),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };
@@ -48,7 +46,7 @@ export const useDeploymentTimeData = (weeks?: number) => {
 export const useEnvironmentDistribution = () => {
     return useQuery({
         queryKey: dashboardKeys.environment(),
-        queryFn: () => dashboardService.getEnvironmentDistribution(),
+        queryFn: () => DashboardAPI.getUserChartData(),
         staleTime: 10 * 60 * 1000, // 10 minutes
     });
 };
@@ -57,7 +55,7 @@ export const useEnvironmentDistribution = () => {
 export const useRecentActivity = (limit?: number) => {
     return useQuery({
         queryKey: dashboardKeys.activity(limit),
-        queryFn: () => dashboardService.getRecentActivity(limit),
+        queryFn: () => DashboardAPI.getRecentActivities(limit),
         staleTime: 1 * 60 * 1000, // 1 minute
     });
 };
@@ -66,7 +64,7 @@ export const useRecentActivity = (limit?: number) => {
 export const useSuccessRateMetrics = (days?: number) => {
     return useQuery({
         queryKey: dashboardKeys.successRate(days),
-        queryFn: () => dashboardService.getSuccessRateMetrics(days),
+        queryFn: () => DashboardAPI.getUserChartData(),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };
@@ -75,7 +73,7 @@ export const useSuccessRateMetrics = (days?: number) => {
 export const useAverageDeploymentTime = (days?: number) => {
     return useQuery({
         queryKey: dashboardKeys.avgTime(days),
-        queryFn: () => dashboardService.getAverageDeploymentTime(days),
+        queryFn: () => DashboardAPI.getDownloadChartData(),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };

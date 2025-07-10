@@ -1,18 +1,7 @@
 import axios from "axios";
 
-// 获取API基础URL，支持环境变量配置
+
 const getApiBaseURL = () => {
-    // 优先使用环境变量
-    if (import.meta.env.VITE_API_BASE) {
-        return import.meta.env.VITE_API_BASE;
-    }
-    
-    // 开发环境使用代理路径
-    if (import.meta.env.DEV) {
-        return '';
-    }
-    
-    // 生产环境使用完整URL
     return `${window.location.protocol}//${window.location.host}`;
 };
 
@@ -25,7 +14,7 @@ export const apiClient = axios.create({
 });
 
 // 动态设置 Authorization 头部
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use((config: any) => {
     console.log('API Request:', config.method?.toUpperCase(), config.url);
    
     // 从localStorage获取token
@@ -36,17 +25,17 @@ apiClient.interceptors.request.use((config) => {
     }
     
     return config;
-}, (error) => {
+}, (error: any) => {
     console.error('Request interceptor error:', error);
     return Promise.reject(error);
 });
 
 apiClient.interceptors.response.use(
-    (response) => {
-        console.log('API Response:', response.status, response.config.url);
+    (response: any) => {
+        console.log('API Response:', response.status, response.config?.url);
         return response;
     },
-    (error) => {
+    (error: any) => {
         console.error('API Error:', error.response?.status, error.config?.url, error.message);
         
         // 处理401未授权错误

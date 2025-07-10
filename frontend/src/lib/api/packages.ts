@@ -10,13 +10,13 @@ export async function getPackages(filters?: PackageFilters): Promise<ApiResponse
     if (filters?.isLatest !== undefined) params.append('is_latest', filters.isLatest.toString());
     if (filters?.search) params.append('search', filters.search);
 
-    const resp = await apiClient.get(`/api/v1/package/?${params.toString()}`);
+    const resp = await apiClient.get(`/api/v1/packages/?${params.toString()}`);
     return resp.data;
 }
 
 // 创建包（基本信息）
 export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt' | 'downloadCount'>): Promise<ApiResponse<Package>> {
-    const resp = await apiClient.post("/api/v1/package/", {
+    const resp = await apiClient.post("/api/v1/packages/", {
         project_id: pkg.projectId,
         name: pkg.name,
         description: pkg.description,
@@ -40,7 +40,7 @@ export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'upd
 
 // 获取特定包
 export async function getPackage(id: string): Promise<ApiResponse<Package>> {
-    const resp = await apiClient.get(`/api/v1/package/${id}`);
+    const resp = await apiClient.get(`/api/v1/packages/${id}`);
     return resp.data;
 }
 
@@ -66,13 +66,13 @@ export async function updatePackage(id: string, update: Partial<Package>): Promi
     if (update.shareExpiry !== undefined) backendUpdate.share_expiry = update.shareExpiry;
     if (update.isPublic !== undefined) backendUpdate.is_public = update.isPublic;
 
-    const resp = await apiClient.put(`/api/v1/package/${id}`, backendUpdate);
+    const resp = await apiClient.put(`/api/v1/packages/${id}`, backendUpdate);
     return resp.data;
 }
 
 // 删除包
 export async function deletePackage(id: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.delete(`/api/v1/package/${id}`);
+    const resp = await apiClient.delete(`/api/v1/packages/${id}`);
     return resp.data;
 }
 
@@ -91,11 +91,11 @@ export async function uploadPackage(
     if (upload.changelog) formData.append('changelog', upload.changelog);
     if (upload.isPublic !== undefined) formData.append('is_public', upload.isPublic.toString());
 
-    const resp = await apiClient.post("/api/v1/package/upload", formData, {
+    const resp = await apiClient.post("/api/v1/packages/upload", formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         },
-        onUploadProgress: onProgress ? (progressEvent) => {
+        onUploadProgress: onProgress ? (progressEvent: any) => {
             const progress: UploadProgress = {
                 loaded: progressEvent.loaded || 0,
                 total: progressEvent.total || 0,
@@ -109,19 +109,19 @@ export async function uploadPackage(
 
 // 下载包
 export async function downloadPackage(id: string): Promise<ApiResponse<{ download_url: string; filename: string; size: number; version: string; checksum: string }>> {
-    const resp = await apiClient.get(`/api/v1/package/${id}/download`);
+    const resp = await apiClient.get(`/api/v1/packages/${id}/download`);
     return resp.data;
 }
 
 // 获取包版本历史
 export async function getPackageVersions(id: string): Promise<ApiResponse<Package[]>> {
-    const resp = await apiClient.get(`/api/v1/package/${id}/versions`);
+    const resp = await apiClient.get(`/api/v1/packages/${id}/versions`);
     return resp.data;
 }
 
 // 创建分享链接
 export async function createShareLink(id: string, options: { expiryHours?: number; isPublic?: boolean }): Promise<ApiResponse<{ package_id: string; share_token: string; share_url: string; expiry_hours: number; is_public: boolean }>> {
-    const resp = await apiClient.post(`/api/v1/package/${id}/share`, {
+    const resp = await apiClient.post(`/api/v1/packages/${id}/share`, {
         expiry_hours: options.expiryHours || 24,
         is_public: options.isPublic || false
     });
@@ -130,13 +130,13 @@ export async function createShareLink(id: string, options: { expiryHours?: numbe
 
 // 通过分享令牌获取包
 export async function getSharedPackage(token: string): Promise<ApiResponse<Package>> {
-    const resp = await apiClient.get(`/api/v1/package/share/${token}`);
+    const resp = await apiClient.get(`/api/v1/packages/share/${token}`);
     return resp.data;
 }
 
 // 获取项目的所有包
 export async function getPackagesByProject(projectId: string): Promise<ApiResponse<Package[]>> {
-    const resp = await apiClient.get(`/api/v1/package/project/${projectId}`);
+    const resp = await apiClient.get(`/api/v1/packages/project/${projectId}`);
     return resp.data;
 }
 

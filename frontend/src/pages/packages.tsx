@@ -211,7 +211,7 @@ export default function PackagesPage() {
   const handleShare = async (pkg: Package) => {
     try {
       const response = await generateShareLink.mutateAsync({ packageId: pkg.id });
-      setShareUrl(response.data.shareUrl);
+      setShareUrl(response.share_url);
       setSharingPackage(pkg);
       setIsShareDialogOpen(true);
     } catch {

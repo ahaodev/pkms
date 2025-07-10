@@ -57,7 +57,7 @@ export async function uploadFile(
         headers: {
             'Content-Type': 'multipart/form-data'
         },
-        onUploadProgress: options?.onProgress ? (progressEvent) => {
+        onUploadProgress: options?.onProgress ? (progressEvent: any) => {
             const progress: FileUploadProgress = {
                 loaded: progressEvent.loaded || 0,
                 total: progressEvent.total || 0,
@@ -85,7 +85,7 @@ export async function downloadFileWithProgress(
     const resp = await apiClient.get("/api/v1/file/stream", {
         params: { file: fileName },
         responseType: 'blob',
-        onDownloadProgress: onProgress ? (progressEvent) => {
+        onDownloadProgress: onProgress ? (progressEvent: any) => {
             const progress: FileUploadProgress = {
                 loaded: progressEvent.loaded || 0,
                 total: progressEvent.total || 0,
