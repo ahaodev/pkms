@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -20,17 +21,19 @@ func (lc *LoginController) Login(c *gin.Context) {
 
 	err := c.ShouldBind(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		c.JSON(http.StatusBadRequest, domain.RespError("Invalid request format"))
 		return
 	}
 
 	user, err := lc.LoginUsecase.GetUserByUserName(c, request.UserName)
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("User not found"))
+		c.JSON(http.StatusUnauthorized, domain.RespError("Invalid credentials"))
 		return
 	}
-
-	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)) != nil {
+	fmt.Println(user.Password)
+	// 直接比较明文密码和存储的哈希值
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, domain.RespError("Invalid credentials"))
 		return
 	}

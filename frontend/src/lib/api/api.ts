@@ -18,7 +18,7 @@ apiClient.interceptors.request.use((config: any) => {
     console.log('API Request:', config.method?.toUpperCase(), config.url);
    
     // 从localStorage获取token
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('pkms_access_token');
     if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;
@@ -41,8 +41,9 @@ apiClient.interceptors.response.use(
         // 处理401未授权错误
         if (error.response && error.response.status === 401) {
             console.log('Unauthorized - clearing token and redirecting to login');
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('pkms_access_token');
+            localStorage.removeItem('pkms_refresh_token');
+            localStorage.removeItem('pkms_user');
             // 可以在这里触发重定向到登录页面
             window.location.href = '/login';
         }

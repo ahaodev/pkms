@@ -5,7 +5,7 @@ import (
 	"pkms/frontend"
 	"time"
 
-	//"pkms/api/middleware"
+	"pkms/api/middleware"
 	"pkms/bootstrap"
 	"pkms/ent"
 
@@ -31,7 +31,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 
 	protectedRouter := gin.Group(ApiUri)
 	// Middleware to verify AccessToken
-	//protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 
 	// Protected routes
 	projectRouter := protectedRouter.Group("/projects")

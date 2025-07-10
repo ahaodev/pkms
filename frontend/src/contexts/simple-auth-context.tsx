@@ -1,5 +1,6 @@
 import {createContext, useContext, useState, useEffect} from 'react';
 import {User, Group, CreateGroupRequest, UpdateGroupRequest} from '@/types/simplified';
+import * as authAPI from '@/lib/api/auth';
 
 interface AuthContextType {
     user: User | null;
@@ -115,61 +116,142 @@ const mockUsers: User[] = [
     },
 ];
 
-export function AuthProvider({children}: { children: React.ReactNode }) {
+export function AuthContextProvider({children}: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>(mockUsers);
     const [groups, setGroups] = useState<Group[]>(mockGroups);
 
     useEffect(() => {
-        // 检查本地存储中的登录状态
-        const storedUser = localStorage.getItem('pkms_user');
-        if (storedUser) {
-            try {
-                const parsedUser = JSON.parse(storedUser);
-                // 从最新的用户列表中找到对应用户
-                const currentUser = mockUsers.find(u => u.id === parsedUser.id);
-                if (currentUser && currentUser.isActive) {
-                    setUser(currentUser);
-                } else {
+        const initializeAuth = async () => {
+            console.log('AuthContext: initializing auth...');
+            // 检查本地存储中的登录状态和令牌
+            const storedUser = localStorage.getItem('pkms_user');
+            const accessToken = localStorage.getItem('pkms_access_token');
+            
+            console.log('AuthContext: stored data check:', { 
+                hasStoredUser: !!storedUser, 
+                hasAccessToken: !!accessToken 
+            });
+            
+            if (storedUser && accessToken) {
+                try {
+                    // 先解析并设置存储的用户信息
+                    const parsedUser = JSON.parse(storedUser);
+                    console.log('AuthContext: setting user from storage:', parsedUser.username);
+                    setUser(parsedUser);
+                    
+                    // 后台验证令牌（不阻塞用户体验）
+                    authAPI.validateToken()
+                        .then(response => {
+                            if (response.code === 0 && response.data) {
+                                // 令牌有效，静默更新用户信息
+                                console.log('AuthContext: token validation successful');
+                                setUser(response.data);
+                                localStorage.setItem('pkms_user', JSON.stringify(response.data));
+                            } else {
+                                console.warn('AuthContext: token validation failed with response:', response);
+                            }
+                        })
+                        .catch(tokenError => {
+                            console.warn('Background token validation failed:', tokenError);
+                            // 验证失败但不影响当前登录状态
+                        });
+                        
+                } catch (parseError) {
+                    console.error('Failed to parse stored user:', parseError);
+                    // 解析失败，清除损坏的数据
                     localStorage.removeItem('pkms_user');
+                    localStorage.removeItem('pkms_access_token');
+                    localStorage.removeItem('pkms_refresh_token');
                 }
-            } catch {
-                localStorage.removeItem('pkms_user');
+            } else {
+                console.log('AuthContext: no stored auth data found');
             }
-        }
-        setIsLoading(false);
+            console.log('AuthContext: setting isLoading to false');
+            setIsLoading(false);
+        };
+
+        initializeAuth();
     }, []);
 
     const login = async (username: string, password: string): Promise<boolean> => {
+        console.log('AuthContext: starting login for user:', username);
         setIsLoading(true);
 
-        // 模拟登录验证
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // 查找用户
-        const foundUser = users.find(u => u.username === username && u.isActive);
-        
-        if (foundUser) {
-            // 模拟密码验证（实际应用中应该进行加密验证）
-            const isValidPassword = password === 'password' || 
-                                   (foundUser.username === 'admin' && password === 'admin');
+        try {
+            // 调用真实的 API 接口
+            const response = await authAPI.login({ username, password });
+            console.log('AuthContext: login API response:', response);
             
-            if (isValidPassword) {
-                setUser(foundUser);
-                localStorage.setItem('pkms_user', JSON.stringify(foundUser));
+            if (response.code === 0 && response.data) {
+                const loginData = response.data;
+                
+                // 先存储令牌
+                localStorage.setItem('pkms_access_token', loginData.accessToken);
+                localStorage.setItem('pkms_refresh_token', loginData.refreshToken);
+                console.log('AuthContext: tokens stored successfully');
+                
+                // 尝试使用令牌获取用户信息
+                try {
+                    const userResponse = await authAPI.validateToken();
+                    console.log('AuthContext: user validation response:', userResponse);
+                    if (userResponse.code === 0 && userResponse.data) {
+                        console.log('AuthContext: setting real user data');
+                        setUser(userResponse.data);
+                        localStorage.setItem('pkms_user', JSON.stringify(userResponse.data));
+                    } else {
+                        // 如果获取用户信息失败，创建一个临时用户对象
+                        console.log('AuthContext: creating temporary user');
+                        const tempUser = {
+                            id: username, // 使用用户名作为临时ID
+                            username: username,
+                            email: `${username}@example.com`,
+                            avatar: '👤',
+                            role: 'user' as const,
+                            createdAt: new Date(),
+                            isActive: true,
+                        };
+                        setUser(tempUser);
+                        localStorage.setItem('pkms_user', JSON.stringify(tempUser));
+                    }
+                } catch (userError) {
+                    console.warn('Failed to get user info, using temporary user:', userError);
+                    // 创建一个临时用户对象
+                    const tempUser = {
+                        id: username,
+                        username: username,
+                        email: `${username}@example.com`,
+                        avatar: '👤',
+                        role: 'user' as const,
+                        createdAt: new Date(),
+                        isActive: true,
+                    };
+                    console.log('AuthContext: setting temporary user:', tempUser);
+                    setUser(tempUser);
+                    localStorage.setItem('pkms_user', JSON.stringify(tempUser));
+                }
+                
+                console.log('AuthContext: login successful, setting isLoading to false');
                 setIsLoading(false);
                 return true;
+            } else {
+                console.log('AuthContext: login failed - invalid response');
+                setIsLoading(false);
+                return false;
             }
+        } catch (error) {
+            console.error('Login error:', error);
+            setIsLoading(false);
+            return false;
         }
-        
-        setIsLoading(false);
-        return false;
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('pkms_user');
+        localStorage.removeItem('pkms_access_token');
+        localStorage.removeItem('pkms_refresh_token');
     };
 
     const isAdmin = (): boolean => {

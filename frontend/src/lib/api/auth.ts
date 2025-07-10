@@ -56,7 +56,7 @@ export async function logout(): Promise<ApiResponse<void>> {
 
 // 验证当前令牌是否有效
 export async function validateToken(): Promise<ApiResponse<User>> {
-    const resp = await apiClient.get("/api/v1/user/profile");
+    const resp = await apiClient.get("/api/v1/users/profile");
     return resp.data;
 }
 
