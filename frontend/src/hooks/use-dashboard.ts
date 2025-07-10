@@ -1,5 +1,5 @@
 // use-dashboard.ts
-// Dashboard 相关数据的自定义 hooks，基于 react-query 实现
+// Dashboard 相关数据的自定义 hooks，基于 react-query 实现，直接调用 API
 import {useQuery} from '@tanstack/react-query';
 import * as DashboardAPI from '@/lib/api/dashboard';
 

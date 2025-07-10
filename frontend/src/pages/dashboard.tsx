@@ -15,7 +15,7 @@ import {
  * 仪表板页：展示项目、包、上传、下载等核心统计信息和最近动态
  */
 
-export default function SimpleDashboard() {
+export default function Dashboard() {
   const navigate = useNavigate();
   const { data: projects, isLoading: projectsLoading } = useProjects();
   const { data: packagesResponse, isLoading: packagesLoading } = usePackages();
