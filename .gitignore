@@ -5,6 +5,7 @@ bin/
 .env
 .vscode
 
+logs
 # 忽略所有 ent 下的内容
 ent/*
 
