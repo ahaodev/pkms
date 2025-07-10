@@ -11,22 +11,7 @@ export const useProjects = () => {
         queryFn: async () => {
             const response = await ProjectsAPI.getProjects();
             return response.data.map(ProjectsAPI.transformProjectFromBackend);
-        },
-        select: (projects: Project[]) => {
-            if (!user || !projects) return [];
-            
-            // 管理员可以看到所有项目
-            if (isAdmin()) {
-                return projects;
-            }
-            
-            // 普通用户只能看到有权限的项目
-            return projects.filter((project: Project) => 
-                canAccessProject(project.id) || 
-                project.createdBy === user.id || 
-                project.isPublic
-            );
-        },
+        }
     });
 };
 

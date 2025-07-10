@@ -19,14 +19,9 @@ func NewProjectRepository(client *ent.Client) domain.ProjectRepository {
 }
 
 func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) error {
-	// Generate a unique ID if not provided
-	if p.ID == "" {
-		p.ID = generateUniqueID()
-	}
 
 	created, err := pr.client.Project.
 		Create().
-		SetID(p.ID).
 		SetName(p.Name).
 		SetDescription(p.Description).
 		SetIcon(p.Icon).
