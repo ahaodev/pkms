@@ -22,7 +22,7 @@ steps:
 #      - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
       - echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
-      - docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile -t hao88/pkms:amd64 -t hao88/pkms:arm64 --push . # Build and push multi-arch images
+      - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
       - docker buildx rm aBuildX  # Remove the Buildx builder
 volumes:
   - name: docker
