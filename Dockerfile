@@ -8,21 +8,30 @@ COPY frontend/ ./
 RUN npm run build
 
 #------------------build go---------------------------
-# Go build stage (multi-arch capable)
-FROM --platform=linux/amd64 golang:1.24-alpine3.22 AS builder_go
-RUN apk add --no-cache gcc musl-dev ca-certificates tzdata
+## Go build stage (multi-arch capable)
+#FROM --platform=linux/amd64 golang:1.24-alpine3.22 AS builder_go
+#RUN apk add --no-cache gcc musl-dev ca-certificates tzdata
+#WORKDIR /app
+#COPY go.mod .
+#COPY go.sum .
+#RUN go mod download
+#COPY . .
+#RUN go generate ./...
+#COPY --from=build_web /app/frontend/dist /app/frontend/dist
+## Use build arguments to specify target architecture
+#ARG TARGETARCH
+#RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./cmd/main.go
+
+
+# 使用基于 Debian 的镜像，自带完整的构建环境
+FROM --platform=linux/amd64 golang:1.24-bullseye AS builder_go
 WORKDIR /app
-COPY go.mod .
-COPY go.sum .
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go generate ./...
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
-# Use build arguments to specify target architecture
-ARG TARGETARCH
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./cmd/main.go
-# Compress binary with UPX for smaller size
-#RUN upx --best --lzma /app/runner
 
 #-------------------压缩二进制文件------------------------
 # UPX compression stage
