@@ -20,7 +20,7 @@ COPY --from=build_web /app/frontend/dist /app/frontend/dist
 ARG TARGETARCH
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build -ldflags="-s -w" -o runner
 # Compress binary with UPX for smaller size
-RUN upx --best --lzma /app/runner
+#RUN upx --best --lzma /app/runner
 
 #-------------------runner--------------------------
 # Runtime stage
