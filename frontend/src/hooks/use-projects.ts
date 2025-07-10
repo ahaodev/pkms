@@ -4,14 +4,15 @@ import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/contexts/simple-auth-context';
 
 export const useProjects = () => {
-    const {user, isAdmin, canAccessProject} = useAuth();
+    const {user} = useAuth();
     
     return useQuery({
         queryKey: ['projects', user?.id],
         queryFn: async () => {
             const response = await ProjectsAPI.getProjects();
             return response.data.map(ProjectsAPI.transformProjectFromBackend);
-        }
+        },
+        enabled: !!user && !!localStorage.getItem('pkms_access_token'), // 只有用户存在且有token时才执行
     });
 };
 

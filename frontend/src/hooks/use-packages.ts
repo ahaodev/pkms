@@ -12,6 +12,7 @@ export const usePackages = (filters?: PackageFilters) => {
             const response = await PackagesAPI.getPackages(filters);
             return response.data;
         },
+        enabled: !!user && !!localStorage.getItem('pkms_access_token'), // 只有用户存在且有token时才执行
         select: (data) => {
             if (!user || !data) return [];
             

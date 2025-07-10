@@ -82,7 +82,14 @@ export function AppRoutes() {
     const { user, isLoading } = useAuth();
 
     // Debug logging
-    console.log('AppRoutes render:', { user: user?.username, isLoading });
+    console.log('AppRoutes render:', { 
+        user: user?.username, 
+        userId: user?.id,
+        isLoading,
+        hasStoredUser: !!localStorage.getItem('pkms_user'),
+        hasStoredToken: !!localStorage.getItem('pkms_access_token'),
+        timestamp: new Date().toISOString()
+    });
 
     // Show loading screen while checking authentication
     if (isLoading) {

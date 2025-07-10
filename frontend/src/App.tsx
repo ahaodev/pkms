@@ -8,7 +8,10 @@ function App() {
     return (
         <div className="w-full h-screen">
             <AppProviders>
-                <Router future={{ v7_relativeSplatPath: true }}>
+                <Router future={{ 
+                    v7_relativeSplatPath: true,
+                    v7_startTransition: true 
+                }}>
                     <AppRoutes />
                     <Toaster />
                 </Router>

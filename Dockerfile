@@ -1,11 +1,37 @@
-FROM golang:1.24-alpine
+#---------------------build web------------------------
+# Frontend build stage (architecture-agnostic)
+FROM docker.io/library/node:22-alpine AS build_web
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
-RUN mkdir /app
-
-ADD . /app
-
+#------------------build go---------------------------
+# Go build stage (multi-arch capable)
+FROM golang:1.24-alpine3.20 AS builder_go
+RUN apk add --no-cache gcc musl-dev upx
 WORKDIR /app
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+COPY . .
+COPY --from=build_web /app/frontend/dist /app/frontend/dist
+# Use build arguments to specify target architecture
+ARG TARGETARCH
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build -ldflags="-s -w" -o runner
+# Compress binary with UPX for smaller size
+RUN upx --best --lzma /app/runner
 
-RUN go build -o main cmd/main.go
-
-CMD ["/app/main"]
+#-------------------runner--------------------------
+# Runtime stage
+FROM alpine:3.20 AS runner
+# Healthcheck
+HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q interface || exit 1" --interval=1m --timeout=5s --retries=3
+WORKDIR /app
+# Copy compiled binary and config
+COPY --from=builder_go /app/runner .
+# Run the application
+CMD ["./runner"]
+# Expose required ports
+EXPOSE 80/tcp

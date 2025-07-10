@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	jwt "github.com/golang-jwt/jwt/v4"
+	jwt "github.com/golang-jwt/jwt/v5"
 	"pkms/domain"
 )
 
 func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
-	exp := time.Now().Add(time.Hour * time.Duration(expiry)).Unix()
+	exp := jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expiry)))
 	claims := &domain.JwtCustomClaims{
 		Name: user.Name,
 		ID:   user.ID,
-		StandardClaims: jwt.StandardClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: exp,
 		},
 	}
@@ -26,10 +26,11 @@ func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToke
 }
 
 func CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshToken string, err error) {
+	exp := jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expiry)))
 	claimsRefresh := &domain.JwtCustomRefreshClaims{
 		ID: user.ID,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * time.Duration(expiry)).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: exp,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsRefresh)

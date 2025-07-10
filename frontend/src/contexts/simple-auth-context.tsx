@@ -121,6 +121,8 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>(mockUsers);
     const [groups, setGroups] = useState<Group[]>(mockGroups);
+    const [isValidatingToken, setIsValidatingToken] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -134,29 +136,46 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                 hasAccessToken: !!accessToken 
             });
             
-            if (storedUser && accessToken) {
+            if (storedUser) {
                 try {
                     // 先解析并设置存储的用户信息
                     const parsedUser = JSON.parse(storedUser);
                     console.log('AuthContext: setting user from storage:', parsedUser.username);
                     setUser(parsedUser);
                     
-                    // 后台验证令牌（不阻塞用户体验）
-                    authAPI.validateToken()
-                        .then(response => {
-                            if (response.code === 0 && response.data) {
-                                // 令牌有效，静默更新用户信息
-                                console.log('AuthContext: token validation successful');
-                                setUser(response.data);
-                                localStorage.setItem('pkms_user', JSON.stringify(response.data));
-                            } else {
-                                console.warn('AuthContext: token validation failed with response:', response);
-                            }
-                        })
-                        .catch(tokenError => {
-                            console.warn('Background token validation failed:', tokenError);
-                            // 验证失败但不影响当前登录状态
-                        });
+                    // 如果有访问令牌，尝试验证（但不影响用户状态）
+                    if (accessToken && !isValidatingToken) {
+                        setIsValidatingToken(true);
+                        console.log('AuthContext: starting background token validation, token preview:', accessToken.substring(0, 20) + '...');
+                        
+                        // 延迟验证，让用户先进入主页
+                        setTimeout(() => {
+                            // 后台验证令牌（不阻塞用户体验）
+                            authAPI.validateToken()
+                                .then(response => {
+                                    console.log('AuthContext: token validation response:', response);
+                                    if (response.code === 0 && response.data) {
+                                        // 令牌有效，静默更新用户信息
+                                        console.log('AuthContext: token validation successful, updating user data');
+                                        setUser(response.data);
+                                        localStorage.setItem('pkms_user', JSON.stringify(response.data));
+                                    } else {
+                                        console.warn('AuthContext: token validation failed with response:', response);
+                                        // 验证失败但保持当前用户状态
+                                    }
+                                })
+                                .catch(tokenError => {
+                                    console.warn('AuthContext: background token validation failed:', tokenError);
+                                    // 验证失败但不影响当前登录状态，token 可能已在拦截器中被清除
+                                    console.log('AuthContext: keeping user logged in despite token validation failure');
+                                })
+                                .finally(() => {
+                                    setIsValidatingToken(false);
+                                });
+                        }, 500); // 延迟500ms进行验证
+                    } else {
+                        console.log('AuthContext: no access token or already validating, keeping user logged in');
+                    }
                         
                 } catch (parseError) {
                     console.error('Failed to parse stored user:', parseError);
@@ -169,11 +188,12 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                 console.log('AuthContext: no stored auth data found');
             }
             console.log('AuthContext: setting isLoading to false');
+            setHasInitialized(true);
             setIsLoading(false);
         };
 
         initializeAuth();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const login = async (username: string, password: string): Promise<boolean> => {
         console.log('AuthContext: starting login for user:', username);
@@ -191,6 +211,17 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                 localStorage.setItem('pkms_access_token', loginData.accessToken);
                 localStorage.setItem('pkms_refresh_token', loginData.refreshToken);
                 console.log('AuthContext: tokens stored successfully');
+                
+                // 验证令牌是否真的被存储了
+                const storedAccessToken = localStorage.getItem('pkms_access_token');
+                const storedRefreshToken = localStorage.getItem('pkms_refresh_token');
+                console.log('AuthContext: verification - tokens stored:', {
+                    accessToken: !!storedAccessToken,
+                    accessTokenLength: storedAccessToken?.length || 0,
+                    refreshToken: !!storedRefreshToken,
+                    refreshTokenLength: storedRefreshToken?.length || 0,
+                    storedTokenPreview: storedAccessToken?.substring(0, 20) + '...'
+                });
                 
                 // 尝试使用令牌获取用户信息
                 try {
