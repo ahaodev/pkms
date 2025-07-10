@@ -9,7 +9,7 @@ RUN npm run build
 
 #------------------build go---------------------------
 # Go build stage (multi-arch capable)
-FROM golang:1.24-alpine3.20 AS builder_go
+FROM golang:1.24-alpine3.22 AS builder_go
 RUN apk add --no-cache gcc musl-dev upx
 WORKDIR /app
 COPY go.mod .
@@ -25,7 +25,7 @@ RUN upx --best --lzma /app/runner
 
 #-------------------runner--------------------------
 # Runtime stage
-FROM alpine:3.20 AS runner
+FROM alpine:3.22 AS runner
 # Healthcheck
 HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q interface || exit 1" --interval=1m --timeout=5s --retries=3
 WORKDIR /app
