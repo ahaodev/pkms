@@ -16,6 +16,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
+RUN go generate ./...
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
 # Use build arguments to specify target architecture
 ARG TARGETARCH
