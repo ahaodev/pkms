@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"github.com/rs/xid"
 	"time"
 
 	"entgo.io/ent"
@@ -32,8 +33,8 @@ type UserProjectAssignment struct {
 // Fields of the UserProjectAssignment.
 func (UserProjectAssignment) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
-			Unique(),
+		field.String("id").
+			Default(xid.New().String()),
 		field.String("user_id").
 			MaxLen(20),
 		field.String("project_id").

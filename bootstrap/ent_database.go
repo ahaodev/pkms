@@ -82,9 +82,7 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 	}
 
 	// 创建管理员用户
-	uid := xid.New().String()
 	_, err = client.User.Create().
-		SetID(uid).
 		SetUsername(adminUsername).
 		SetPasswordHash(string(hashedPassword)).
 		SetRole("admin").

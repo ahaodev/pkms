@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"github.com/rs/xid"
 	"time"
 
 	"entgo.io/ent"
@@ -32,8 +33,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			MaxLen(20).
-			Unique(),
+			Default(xid.New().String()),
 		field.String("username").
 			MaxLen(100).
 			Unique(),

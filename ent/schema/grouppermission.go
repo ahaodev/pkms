@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/rs/xid"
 )
 
 /**
@@ -30,8 +31,8 @@ type GroupPermission struct {
 // Fields of the GroupPermission.
 func (GroupPermission) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
-			Unique(),
+		field.String("id").
+			Default(xid.New().String()),
 		field.String("group_id").
 			MaxLen(20),
 		field.String("project_id").
