@@ -3,10 +3,10 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"github.com/rs/xid"
 	"log"
 	"os"
 	"path/filepath"
+	"pkms/ent/migrate"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -41,7 +41,10 @@ func NewEntDatabase(env *Env) *ent.Client {
 
 	// Auto migrate schema
 	ctx := context.Background()
-	if err := client.Schema.Create(ctx); err != nil {
+	if err := client.Schema.Create(ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	); err != nil {
 		log.Fatal("❌ Failed to create schema resources:", err)
 	}
 

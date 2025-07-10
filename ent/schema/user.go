@@ -35,10 +35,11 @@ func (User) Fields() []ent.Field {
 		field.String("id").
 			Default(xid.New().String()),
 		field.String("username").
-			MaxLen(100).
+			MaxLen(32).
 			Unique(),
 		field.String("password_hash").
-			MaxLen(255),
+			Sensitive().
+			MaxLen(128),
 		field.String("avatar").
 			MaxLen(255).
 			Optional(),
