@@ -49,6 +49,7 @@ WORKDIR /app
 COPY --from=compressor /app/runner .
 COPY .env.example .env
 # Run the application
-CMD ["./runner"]
+#CMD ["./runner"]
+CMD ["/bin/sh"]
 # Expose required ports
-EXPOSE 80/tcp
+EXPOSE 58080/tcp
