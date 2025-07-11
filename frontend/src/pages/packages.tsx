@@ -207,6 +207,12 @@ export default function PackagesPage() {
 
   // 版本历史处理
   const handleVersionHistory = (pkg: Package) => {
+    console.log('handleVersionHistory called with package:', pkg);
+    console.log('Current groupedPackages:', groupedPackages);
+    const key = getPackageKey(pkg);
+    console.log('Package key:', key);
+    console.log('Versions for this package:', groupedPackages[key]);
+    
     setVersionHistoryPackage(pkg);
     setVersionHistoryPage(1);
     setIsVersionHistoryDialogOpen(true);
@@ -225,9 +231,8 @@ export default function PackagesPage() {
         description: `版本 "${pkg.version}" 已成功删除。`,
       });
       
-      // 如果是当前查看的包的版本，重新获取版本列表
+      // 删除版本后，检查是否需要关闭对话框
       if (versionHistoryPackage && getPackageKey(pkg) === getPackageKey(versionHistoryPackage)) {
-        // 刷新版本历史
         const key = getPackageKey(pkg);
         const remainingVersions = groupedPackages[key]?.filter(v => v.id !== pkg.id) || [];
         if (remainingVersions.length === 0) {

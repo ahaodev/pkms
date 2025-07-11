@@ -32,7 +32,7 @@ export const usePackages = (filters?: PackageFilters) => {
                 console.log('usePackages - no user or result, returning empty');
                 return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };
             }
-            let filtered = result.data;
+            const filtered = result.data;
             
             // 临时禁用权限过滤进行调试
             console.log('usePackages - before filtering:', filtered.length);
@@ -185,5 +185,35 @@ export const useDownloadSharedPackage = () => {
             const response = await PackagesAPI.getSharedPackage(shareToken);
             return PackagesAPI.transformPackageFromBackend(response.data);
         },
+    });
+};
+
+export const usePackageVersions = (packageName?: string, packageType?: string) => {
+    const {user, isAdmin, canAccessProject} = useAuth();
+    
+    return useQuery({
+        queryKey: ['package-versions', packageName, packageType, user?.id],
+        queryFn: async () => {
+            if (!packageName || !packageType) {
+                return [];
+            }
+            const response = await PackagesAPI.getPackageVersionsByNameAndType(packageName, packageType);
+            const transformedPackages = (response.data || []).map(PackagesAPI.transformPackageFromBackend);
+            return transformedPackages;
+        },
+        select: (result) => {
+            if (!user || !result) {
+                return [];
+            }
+            let filtered = result;
+            if (!isAdmin()) {
+                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
+            }
+            // 按版本排序（最新版本在前）
+            return filtered.sort((a, b) => {
+                return b.createdAt.getTime() - a.createdAt.getTime();
+            });
+        },
+        enabled: !!(packageName && packageType && user),
     });
 };

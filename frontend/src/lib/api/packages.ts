@@ -121,6 +121,18 @@ export async function getPackageVersions(id: string): Promise<ApiResponse<Packag
     return resp.data;
 }
 
+// 按包名和类型获取版本历史
+export async function getPackageVersionsByNameAndType(packageName: string, packageType: string): Promise<ApiResponse<Package[]>> {
+    const params = new URLSearchParams();
+    params.append('name', packageName);
+    params.append('type', packageType);
+    // 获取所有版本，不分页
+    params.append('pageSize', '1000');
+    
+    const resp = await apiClient.get(`/api/v1/packages/?${params.toString()}`);
+    return resp.data;
+}
+
 // 创建分享链接
 export async function createShareLink(id: string, options: { expiryHours?: number; isPublic?: boolean }): Promise<ApiResponse<{ package_id: string; share_token: string; share_url: string; expiry_hours: number; is_public: boolean }>> {
     const resp = await apiClient.post(`/api/v1/packages/${id}/share`, {
