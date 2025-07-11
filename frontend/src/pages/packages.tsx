@@ -4,16 +4,14 @@ import { useToast } from '@/hooks/use-toast';
 import { usePackages, useUploadPackage, useDeletePackage, useGenerateShareLink } from '@/hooks/use-packages';
 import { useProjects } from '@/hooks/use-projects';
 import { Package, PackageUpload, UploadProgress } from '@/types/simplified';
-import type { PageResponse } from '@/types/api-response';
 import { ShareDialog } from '@/components/share-dialog';
 import {
-  PackageHeader,
   PackageLoadingView,
-  PackageFilterControls,
   PackageList,
   PackageEmptyView,
   PackageUploadDialog,
   PackageVersionHistoryDialog,
+  PackageHeader,
   SEARCH_DEBOUNCE_MS,
   VERSIONS_PER_PAGE,
   compareVersions,
@@ -21,15 +19,8 @@ import {
   formatFileSize,
   getTypeIcon
 } from '@/components/package';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
-} from '@/components/ui/pagination';
+import { PackageToolbar } from '@/components/package/PackageToolbar';
+import { PackagePagination } from '@/components/package/PackagePagination';
 
 /**
  * 包管理页：支持包的上传、搜索、分组、分享、删除等操作，支持多视图切换
@@ -48,7 +39,7 @@ export default function PackagesPage() {
   const [isFiltering, setIsFiltering] = useState(false);
   // 分页相关状态
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(20);
   
   // 上传相关状态
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -77,16 +68,18 @@ export default function PackagesPage() {
   // 数据获取
   const { data: projects } = useProjects();
   // usePackages 需支持分页参数
-  const { data: pageData, isLoading } = usePackages({ page, pageSize, projectId: selectedProjectId, type: selectedType, search: debouncedSearchTerm });
-  const packages = (pageData as PageResponse<Package> | undefined)?.data || [];
-  const totalPages = (pageData as PageResponse<Package> | undefined)?.totalPages || 1;
+  const { data: pageData, isLoading, error } = usePackages({ 
+    page, 
+    pageSize, 
+    projectId: selectedProjectId || undefined, 
+    type: selectedType, 
+    search: debouncedSearchTerm || undefined 
+  });
+  const packages = useMemo(() => pageData?.data || [], [pageData?.data]);
+  const totalPages = pageData?.totalPages || 1;
   const uploadPackage = useUploadPackage((progress) => setUploadProgress(progress));
   const deletePackage = useDeletePackage();
   const generateShareLink = useGenerateShareLink();
-
-  // 调试信息
-  console.log('PackagesPage - packages:', packages);
-  console.log('PackagesPage - isLoading:', isLoading);
 
   // 搜索防抖处理
   useEffect(() => {
@@ -259,13 +252,26 @@ export default function PackagesPage() {
     return <PackageLoadingView />;
   }
 
+  if (error) {
+    console.error('PackagesPage - error:', error);
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">加载失败</h3>
+          <p className="text-gray-500">无法加载包列表，请检查网络连接或刷新页面重试。</p>
+          <p className="text-sm text-red-500 mt-2">错误信息: {error?.message || '未知错误'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* 页面头部 */}
       <PackageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
 
-      {/* 筛选控制器 */}
-      <PackageFilterControls
+      {/* 工具栏 */}
+      <PackageToolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         selectedProjectId={selectedProjectId || 'all'}
@@ -279,8 +285,7 @@ export default function PackagesPage() {
         isFiltering={isFiltering}
       />
 
-      {/* 包列表 */}
-      <PackageList 
+      <PackageList
         displayPackages={packages}
         viewMode={viewMode}
         isFiltering={isFiltering}
@@ -292,12 +297,18 @@ export default function PackagesPage() {
         handleDelete={handleDelete}
       />
 
-      {/* 空状态 */}
       {packages.length === 0 && !isLoading && (
         <PackageEmptyView searchTerm={debouncedSearchTerm} />
       )}
 
-      {/* 上传对话框 */}
+      <PackagePagination
+        page={page}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
+
       <PackageUploadDialog
         open={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
@@ -308,7 +319,6 @@ export default function PackagesPage() {
         initialProjectId={selectedProjectId}
       />
 
-      {/* 分享对话框 */}
       <ShareDialog
         isOpen={isShareDialogOpen}
         onClose={() => setIsShareDialogOpen(false)}
@@ -316,7 +326,6 @@ export default function PackagesPage() {
         packageName={sharingPackage?.name || ''}
       />
 
-      {/* 版本历史对话框 */}
       {versionHistoryPackage && (
         <PackageVersionHistoryDialog
           open={isVersionHistoryDialogOpen}
@@ -331,58 +340,6 @@ export default function PackagesPage() {
           onDelete={handleDeleteVersion}
         />
       )}
-
-      {/* 分页控件 - shadcn ui，始终在页脚 */}
-      <div className="flex justify-center mt-8 mb-4">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => page > 1 && setPage(page - 1)}
-                aria-disabled={page <= 1}
-                tabIndex={page <= 1 ? -1 : 0}
-              />
-            </PaginationItem>
-            {/* 页码数字 */}
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              if (
-                idx + 1 === 1 ||
-                idx + 1 === totalPages ||
-                Math.abs(idx + 1 - page) <= 2
-              ) {
-                return (
-                  <PaginationItem key={idx}>
-                    <PaginationLink
-                      isActive={page === idx + 1}
-                      onClick={() => setPage(idx + 1)}
-                    >
-                      {idx + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-              if (
-                (idx + 1 === page - 3 && page - 3 > 1) ||
-                (idx + 1 === page + 3 && page + 3 < totalPages)
-              ) {
-                return (
-                  <PaginationItem key={idx}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              }
-              return null;
-            })}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => page < totalPages && setPage(page + 1)}
-                aria-disabled={page >= totalPages}
-                tabIndex={page >= totalPages ? -1 : 0}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
     </div>
   );
 }

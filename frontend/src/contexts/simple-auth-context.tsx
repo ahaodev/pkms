@@ -122,6 +122,7 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
     const [users, setUsers] = useState<User[]>(mockUsers);
     const [groups, setGroups] = useState<Group[]>(mockGroups);
     const [isValidatingToken, setIsValidatingToken] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -187,6 +188,7 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                 console.log('AuthContext: no stored auth data found');
             }
             console.log('AuthContext: setting isLoading to false');
+            setHasInitialized(true);
             setIsLoading(false);
         };
 

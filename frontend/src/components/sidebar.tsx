@@ -18,23 +18,29 @@ import {useAuth} from '@/contexts/simple-auth-context';
 /**
  * NavItem 组件：简化侧边栏导航项
  */
-function NavItem({to, icon, label, end, onClick}: NavItemProps & {onClick?: () => void}) {
-    return (
-        <NavLink
-            to={to}
-            end={end}
-            onClick={onClick}
-            className={({isActive}) =>
-                cn(
-                    "flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
-                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                )
-            }
-        >
-            {icon}
-            <span>{label}</span>
-        </NavLink>
-    );
+function NavItem({ to, icon, label, end, onClick }: NavItemProps & { onClick?: () => void }) {
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md"
+    >
+      <NavLink
+        to={to}
+        end={end}
+        onClick={onClick}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center space-x-3 w-full transition-all",
+            isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+          )
+        }
+      >
+        {icon}
+        <span>{label}</span>
+      </NavLink>
+    </Button>
+  );
 }
 
 /**
@@ -119,49 +125,49 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
 
                     {/* Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <div className="space-y-1">
-                            <NavItem
-                                to="/"
-                                icon={<BarChart3 className="h-5 w-5"/>}
-                                label="仪表板"
-                                end
-                                onClick={handleNavClick}
-                            />
-                            <NavItem
-                                to="/projects"
-                                icon={<FolderOpen className="h-5 w-5"/>}
-                                label="项目管理"
-                                onClick={handleNavClick}
-                            />
-                            <NavItem
-                                to="/packages"
-                                icon={<Package className="h-5 w-5"/>}
-                                label="包管理"
-                                onClick={handleNavClick}
-                            />
-                            {isAdmin() && (
-                                <NavItem
-                                    to="/users"
-                                    icon={<Users className="h-5 w-5"/>}
-                                    label="用户管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-                            {isAdmin() && (
-                                <NavItem
-                                    to="/groups"
-                                    icon={<Shield className="h-5 w-5"/>}
-                                    label="权限管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-                            <NavItem
-                                to="/settings"
-                                icon={<SettingsIcon className="h-5 w-5"/>}
-                                label="设置"
-                                onClick={handleNavClick}
-                            />
-                        </div>
+                      <div className="space-y-1">
+                        <NavItem
+                          to="/"
+                          icon={<BarChart3 className="h-5 w-5" />}
+                          label="仪表板"
+                          end
+                          onClick={handleNavClick}
+                        />
+                        <NavItem
+                          to="/projects"
+                          icon={<FolderOpen className="h-5 w-5" />}
+                          label="项目管理"
+                          onClick={handleNavClick}
+                        />
+                        <NavItem
+                          to="/packages"
+                          icon={<Package className="h-5 w-5" />}
+                          label="包管理"
+                          onClick={handleNavClick}
+                        />
+                        {isAdmin() && (
+                          <NavItem
+                            to="/users"
+                            icon={<Users className="h-5 w-5" />}
+                            label="用户管理"
+                            onClick={handleNavClick}
+                          />
+                        )}
+                        {isAdmin() && (
+                          <NavItem
+                            to="/groups"
+                            icon={<Shield className="h-5 w-5" />}
+                            label="权限管理"
+                            onClick={handleNavClick}
+                          />
+                        )}
+                        <NavItem
+                          to="/settings"
+                          icon={<SettingsIcon className="h-5 w-5" />}
+                          label="设置"
+                          onClick={handleNavClick}
+                        />
+                      </div>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
