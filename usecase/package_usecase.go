@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"github.com/rs/xid"
 	"io"
 	"strings"
 	"time"
@@ -72,9 +73,6 @@ func (pu *packageUsecase) UploadPackage(c context.Context, req *domain.PackageUp
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 
-	// 生成包ID
-	packageID := fmt.Sprintf("pkg_%d", time.Now().UnixNano())
-
 	// 构建文件存储路径：packages/{project_id}/{package_name}/{version}/
 	objectName := fmt.Sprintf("packages/%s/%s/%s/%s", req.ProjectID, req.Name, req.Version, req.FileName)
 
@@ -104,7 +102,6 @@ func (pu *packageUsecase) UploadPackage(c context.Context, req *domain.PackageUp
 
 	// 构建包对象
 	pkg := &domain.Package{
-		ID:               packageID,
 		ProjectID:        req.ProjectID,
 		Name:             req.Name,
 		Description:      req.Description,
@@ -123,6 +120,7 @@ func (pu *packageUsecase) UploadPackage(c context.Context, req *domain.PackageUp
 		MinSDKVersion:    req.MinSDKVersion,
 		TargetSDKVersion: req.TargetSDKVersion,
 		ShareExpiry:      req.ShareExpiry,
+		ShareToken:       xid.New().String(),
 		IsPublic:         req.IsPublic,
 	}
 

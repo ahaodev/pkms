@@ -66,10 +66,6 @@ func (Pkg) Fields() []ent.Field {
 			Default(time.Now).
 			UpdateDefault(time.Now),
 		field.Int("version_code"),
-		field.Int("min_sdk_version").
-			Optional(),
-		field.Int("target_sdk_version").
-			Optional(),
 		field.String("share_token").
 			MaxLen(255).
 			Unique(),

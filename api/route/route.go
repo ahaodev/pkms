@@ -22,6 +22,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	if err := gin.SetTrustedProxies(trustedProxies); err != nil {
 		fmt.Printf("server: %s", err)
 	}
+	gin.MaxMultipartMemory = 1000 << 20 // 1000 MB
 	gin.RedirectTrailingSlash = true
 	frontend.Register(gin)
 	publicRouter := gin.Group(ApiUri)

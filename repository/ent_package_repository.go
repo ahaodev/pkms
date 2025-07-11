@@ -40,8 +40,6 @@ func (pr *entPackageRepository) Create(c context.Context, p *domain.Package) err
 		SetIsLatest(p.IsLatest).
 		SetDownloadCount(p.DownloadCount).
 		SetVersionCode(p.VersionCode).
-		SetMinSdkVersion(p.MinSDKVersion).
-		SetTargetSdkVersion(p.TargetSDKVersion).
 		SetShareToken(p.ShareToken).
 		SetShareExpiry(p.ShareExpiry).
 		SetIsPublic(p.IsPublic).
@@ -69,27 +67,25 @@ func (pr *entPackageRepository) Fetch(c context.Context) ([]domain.Package, erro
 	var result []domain.Package
 	for _, p := range packages {
 		result = append(result, domain.Package{
-			ID:               p.ID,
-			ProjectID:        p.ProjectID,
-			Name:             p.Name,
-			Description:      p.Description,
-			Type:             string(p.Type),
-			Version:          p.Version,
-			FileURL:          p.FileURL,
-			FileName:         p.FileName,
-			FileSize:         p.FileSize,
-			Checksum:         p.Checksum,
-			Changelog:        p.Changelog,
-			IsLatest:         p.IsLatest,
-			DownloadCount:    p.DownloadCount,
-			CreatedAt:        p.CreatedAt,
-			UpdatedAt:        p.UpdatedAt,
-			VersionCode:      p.VersionCode,
-			MinSDKVersion:    p.MinSdkVersion,
-			TargetSDKVersion: p.TargetSdkVersion,
-			ShareToken:       p.ShareToken,
-			ShareExpiry:      p.ShareExpiry,
-			IsPublic:         p.IsPublic,
+			ID:            p.ID,
+			ProjectID:     p.ProjectID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Type:          string(p.Type),
+			Version:       p.Version,
+			FileURL:       p.FileURL,
+			FileName:      p.FileName,
+			FileSize:      p.FileSize,
+			Checksum:      p.Checksum,
+			Changelog:     p.Changelog,
+			IsLatest:      p.IsLatest,
+			DownloadCount: p.DownloadCount,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+			VersionCode:   p.VersionCode,
+			ShareToken:    p.ShareToken,
+			ShareExpiry:   p.ShareExpiry,
+			IsPublic:      p.IsPublic,
 		})
 	}
 
@@ -107,27 +103,25 @@ func (pr *entPackageRepository) GetByID(c context.Context, id string) (domain.Pa
 	}
 
 	return domain.Package{
-		ID:               p.ID,
-		ProjectID:        p.ProjectID,
-		Name:             p.Name,
-		Description:      p.Description,
-		Type:             string(p.Type),
-		Version:          p.Version,
-		FileURL:          p.FileURL,
-		FileName:         p.FileName,
-		FileSize:         p.FileSize,
-		Checksum:         p.Checksum,
-		Changelog:        p.Changelog,
-		IsLatest:         p.IsLatest,
-		DownloadCount:    p.DownloadCount,
-		CreatedAt:        p.CreatedAt,
-		UpdatedAt:        p.UpdatedAt,
-		VersionCode:      p.VersionCode,
-		MinSDKVersion:    p.MinSdkVersion,
-		TargetSDKVersion: p.TargetSdkVersion,
-		ShareToken:       p.ShareToken,
-		ShareExpiry:      p.ShareExpiry,
-		IsPublic:         p.IsPublic,
+		ID:            p.ID,
+		ProjectID:     p.ProjectID,
+		Name:          p.Name,
+		Description:   p.Description,
+		Type:          string(p.Type),
+		Version:       p.Version,
+		FileURL:       p.FileURL,
+		FileName:      p.FileName,
+		FileSize:      p.FileSize,
+		Checksum:      p.Checksum,
+		Changelog:     p.Changelog,
+		IsLatest:      p.IsLatest,
+		DownloadCount: p.DownloadCount,
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+		VersionCode:   p.VersionCode,
+		ShareToken:    p.ShareToken,
+		ShareExpiry:   p.ShareExpiry,
+		IsPublic:      p.IsPublic,
 	}, nil
 }
 
@@ -146,8 +140,6 @@ func (pr *entPackageRepository) Update(c context.Context, p *domain.Package) err
 		SetIsLatest(p.IsLatest).
 		SetDownloadCount(p.DownloadCount).
 		SetVersionCode(p.VersionCode).
-		SetMinSdkVersion(p.MinSDKVersion).
-		SetTargetSdkVersion(p.TargetSDKVersion).
 		SetShareToken(p.ShareToken).
 		SetShareExpiry(p.ShareExpiry).
 		SetIsPublic(p.IsPublic).
@@ -175,27 +167,25 @@ func (pr *entPackageRepository) GetByProjectID(c context.Context, projectID stri
 	var result []domain.Package
 	for _, p := range packages {
 		result = append(result, domain.Package{
-			ID:               p.ID,
-			ProjectID:        p.ProjectID,
-			Name:             p.Name,
-			Description:      p.Description,
-			Type:             string(p.Type),
-			Version:          p.Version,
-			FileURL:          p.FileURL,
-			FileName:         p.FileName,
-			FileSize:         p.FileSize,
-			Checksum:         p.Checksum,
-			Changelog:        p.Changelog,
-			IsLatest:         p.IsLatest,
-			DownloadCount:    p.DownloadCount,
-			CreatedAt:        p.CreatedAt,
-			UpdatedAt:        p.UpdatedAt,
-			VersionCode:      p.VersionCode,
-			MinSDKVersion:    p.MinSdkVersion,
-			TargetSDKVersion: p.TargetSdkVersion,
-			ShareToken:       p.ShareToken,
-			ShareExpiry:      p.ShareExpiry,
-			IsPublic:         p.IsPublic,
+			ID:            p.ID,
+			ProjectID:     p.ProjectID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Type:          string(p.Type),
+			Version:       p.Version,
+			FileURL:       p.FileURL,
+			FileName:      p.FileName,
+			FileSize:      p.FileSize,
+			Checksum:      p.Checksum,
+			Changelog:     p.Changelog,
+			IsLatest:      p.IsLatest,
+			DownloadCount: p.DownloadCount,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+			VersionCode:   p.VersionCode,
+			ShareToken:    p.ShareToken,
+			ShareExpiry:   p.ShareExpiry,
+			IsPublic:      p.IsPublic,
 		})
 	}
 
@@ -213,26 +203,24 @@ func (pr *entPackageRepository) GetByShareToken(c context.Context, token string)
 	}
 
 	return domain.Package{
-		ID:               p.ID,
-		ProjectID:        p.ProjectID,
-		Name:             p.Name,
-		Description:      p.Description,
-		Type:             string(p.Type),
-		Version:          p.Version,
-		FileURL:          p.FileURL,
-		FileName:         p.FileName,
-		FileSize:         p.FileSize,
-		Checksum:         p.Checksum,
-		Changelog:        p.Changelog,
-		IsLatest:         p.IsLatest,
-		DownloadCount:    p.DownloadCount,
-		CreatedAt:        p.CreatedAt,
-		UpdatedAt:        p.UpdatedAt,
-		VersionCode:      p.VersionCode,
-		MinSDKVersion:    p.MinSdkVersion,
-		TargetSDKVersion: p.TargetSdkVersion,
-		ShareToken:       p.ShareToken,
-		ShareExpiry:      p.ShareExpiry,
-		IsPublic:         p.IsPublic,
+		ID:            p.ID,
+		ProjectID:     p.ProjectID,
+		Name:          p.Name,
+		Description:   p.Description,
+		Type:          string(p.Type),
+		Version:       p.Version,
+		FileURL:       p.FileURL,
+		FileName:      p.FileName,
+		FileSize:      p.FileSize,
+		Checksum:      p.Checksum,
+		Changelog:     p.Changelog,
+		IsLatest:      p.IsLatest,
+		DownloadCount: p.DownloadCount,
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+		VersionCode:   p.VersionCode,
+		ShareToken:    p.ShareToken,
+		ShareExpiry:   p.ShareExpiry,
+		IsPublic:      p.IsPublic,
 	}, nil
 }
