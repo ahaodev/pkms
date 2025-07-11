@@ -52,4 +52,4 @@ COPY .env.example .env
 #CMD ["./runner"]
 CMD ["/bin/sh"]
 # Expose required ports
-EXPOSE 58080/tcp
+EXPOSE 8080/tcp

@@ -16,8 +16,9 @@ import (
 
 func NewEntDatabase(env *Env) *ent.Client {
 	dbPath := env.DBPath
+
 	if dbPath == "" {
-		dbPath = "./database.db"
+		dbPath = "./data.db"
 	}
 
 	// 检查数据库是否已存在
