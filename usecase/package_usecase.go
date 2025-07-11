@@ -32,10 +32,10 @@ func (pu *packageUsecase) Create(c context.Context, pkg *domain.Package) error {
 	return pu.packageRepository.Create(ctx, pkg)
 }
 
-func (pu *packageUsecase) Fetch(c context.Context) ([]domain.Package, error) {
+func (pu *packageUsecase) Fetch(c context.Context, page, pageSize int) ([]domain.Package, int, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
-	return pu.packageRepository.Fetch(ctx)
+	return pu.packageRepository.Fetch(ctx, page, pageSize)
 }
 
 func (pu *packageUsecase) GetByID(c context.Context, id string) (domain.Package, error) {

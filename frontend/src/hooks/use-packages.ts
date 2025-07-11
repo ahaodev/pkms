@@ -9,37 +9,28 @@ export const usePackages = (filters?: PackageFilters) => {
     return useQuery({
         queryKey: ['packages', filters, user?.id],
         queryFn: async () => {
-            console.log('usePackages queryFn called');
             const response = await PackagesAPI.getPackages(filters);
-            console.log('Raw API response:', response);
-            // 直接转换数组中的每个包
             const transformedPackages = (response.data || []).map(PackagesAPI.transformPackageFromBackend);
-            console.log('Transformed packages:', transformedPackages);
-            return transformedPackages;
+            return {
+                data: transformedPackages,
+                total: response.total,
+                page: response.page,
+                pageSize: response.pageSize,
+                totalPages: response.totalPages,
+            };
         },
-        // 暂时去掉 enabled 条件进行调试
-        // enabled: !!user && !!localStorage.getItem('pkms_access_token'),
-        select: (packages: Package[]) => {
-            if (!user || !packages) {
-                console.log('No user or packages:', { user, packages });
-                return [];
+        select: (result) => {
+            if (!user || !result) {
+                return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };
             }
-            
-            console.log('Before filtering - packages:', packages);
-            
-            // 管理员可以看到所有包
-            if (isAdmin()) {
-                console.log('User is admin, returning all packages');
-                return packages;
+            let filtered = result.data;
+            if (!isAdmin()) {
+                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
             }
-            
-            // 普通用户只能看到有权限访问的项目的包
-            const filteredPackages = packages.filter((pkg: Package) => 
-                canAccessProject(pkg.projectId) || 
-                pkg.isPublic
-            );
-            console.log('Filtered packages for user:', filteredPackages);
-            return filteredPackages;
+            return {
+                ...result,
+                data: filtered,
+            };
         },
     });
 };

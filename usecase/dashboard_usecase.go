@@ -41,7 +41,8 @@ func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, 
 		return domain.DashboardStats{}, err
 	}
 
-	packages, err := du.packageRepository.Fetch(ctx)
+	// 统计用，取全部包总数，取第一页最大页数
+	_, totalPackages, err := du.packageRepository.Fetch(ctx, 1, 1)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -58,7 +59,7 @@ func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, 
 
 	return domain.DashboardStats{
 		TotalProjects: len(projects),
-		TotalPackages: len(packages),
+		TotalPackages: totalPackages,
 		TotalUsers:    len(users),
 		TotalGroups:   len(groups),
 	}, nil
@@ -87,13 +88,10 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, limit int) ([
 		}
 	}
 
-	// Get recent packages
-	packages, err := du.packageRepository.Fetch(ctx)
+	// 只取最近的包（分页第一页，limit/3 条）
+	recentPackages, _, err := du.packageRepository.Fetch(ctx, 1, limit/3)
 	if err == nil {
-		for i, pkg := range packages {
-			if i >= limit/3 { // Limit to 1/3 of total limit
-				break
-			}
+		for _, pkg := range recentPackages {
 			activities = append(activities, domain.RecentActivity{
 				ID:          pkg.ID,
 				Type:        "package_uploaded",

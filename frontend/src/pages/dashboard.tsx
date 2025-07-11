@@ -18,10 +18,9 @@ import {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data: projects, isLoading: projectsLoading } = useProjects();
-  const { data: packagesResponse, isLoading: packagesLoading } = usePackages();
-
-  // 使用 useMemo 优化 packages 数组
-  const packages = useMemo(() => packagesResponse || [], [packagesResponse]);
+  const { data: packagesPage, isLoading: packagesLoading } = usePackages();
+  // 兼容 PageResponse 返回结构
+  const packages = useMemo(() => (Array.isArray(packagesPage) ? packagesPage : packagesPage?.data || []), [packagesPage]);
   
   // 使用 useMemo 优化统计数据计算
   const stats = useMemo(() => {

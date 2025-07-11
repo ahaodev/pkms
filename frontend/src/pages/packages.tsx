@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePackages, useUploadPackage, useDeletePackage, useGenerateShareLink } from '@/hooks/use-packages';
 import { useProjects } from '@/hooks/use-projects';
 import { Package, PackageUpload, UploadProgress } from '@/types/simplified';
+import type { PageResponse } from '@/types/api-response';
 import { ShareDialog } from '@/components/share-dialog';
 import {
   PackageHeader,
@@ -20,6 +21,15 @@ import {
   formatFileSize,
   getTypeIcon
 } from '@/components/package';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from '@/components/ui/pagination';
 
 /**
  * 包管理页：支持包的上传、搜索、分组、分享、删除等操作，支持多视图切换
@@ -31,11 +41,14 @@ export default function PackagesPage() {
   
   // 基础状态
   const [selectedProjectId, setSelectedProjectId] = useState(searchParams.get('projectId') || '');
-  const [selectedType, setSelectedType] = useState<Package['type'] | ''>('');
+  const [selectedType, setSelectedType] = useState<Package['type'] | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFiltering, setIsFiltering] = useState(false);
+  // 分页相关状态
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
   
   // 上传相关状态
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -63,7 +76,10 @@ export default function PackagesPage() {
 
   // 数据获取
   const { data: projects } = useProjects();
-  const { data: packages, isLoading } = usePackages({});
+  // usePackages 需支持分页参数
+  const { data: pageData, isLoading } = usePackages({ page, pageSize, projectId: selectedProjectId, type: selectedType, search: debouncedSearchTerm });
+  const packages = (pageData as PageResponse<Package> | undefined)?.data || [];
+  const totalPages = (pageData as PageResponse<Package> | undefined)?.totalPages || 1;
   const uploadPackage = useUploadPackage((progress) => setUploadProgress(progress));
   const deletePackage = useDeletePackage();
   const generateShareLink = useGenerateShareLink();
@@ -105,37 +121,6 @@ export default function PackagesPage() {
 
     return grouped;
   }, [packages]);
-
-  // 过滤包数据
-  const filteredPackages = useMemo(() => {
-    const packagesArray = packages || [];
-    let filtered = packagesArray.filter((pkg: Package) => {
-      const matchesSearch = pkg.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                          pkg.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      const matchesProject = !selectedProjectId || pkg.projectId === selectedProjectId;
-      const matchesType = !selectedType || pkg.type === selectedType;
-      
-      return matchesSearch && matchesProject && matchesType;
-    });
-
-    // 按名称+类型分组，每组只显示最新版本
-    const result: Package[] = [];
-    const seen = new Set<string>();
-    
-    filtered.forEach((pkg: Package) => {
-      const key = getPackageKey(pkg);
-      if (!seen.has(key)) {
-        const allVersions = groupedPackages[key] || [];
-        const latestVersion = allVersions[0]; // 已经按版本排序，第一个是最新的
-        if (latestVersion) {
-          result.push(latestVersion);
-          seen.add(key);
-        }
-      }
-    });
-
-    return result;
-  }, [packages, debouncedSearchTerm, selectedProjectId, selectedType, groupedPackages]);
 
   // 计算包统计
   const packageCounts = useMemo(() => {
@@ -286,7 +271,7 @@ export default function PackagesPage() {
         selectedProjectId={selectedProjectId || 'all'}
         onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
         selectedType={selectedType || 'all'}
-        onTypeChange={(value: string) => setSelectedType(value === 'all' ? '' : value as Package['type'] | '')}
+        onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         projects={projects}
@@ -296,7 +281,7 @@ export default function PackagesPage() {
 
       {/* 包列表 */}
       <PackageList 
-        displayPackages={filteredPackages}
+        displayPackages={packages}
         viewMode={viewMode}
         isFiltering={isFiltering}
         getVersionCount={getVersionCount}
@@ -308,7 +293,7 @@ export default function PackagesPage() {
       />
 
       {/* 空状态 */}
-      {filteredPackages.length === 0 && !isLoading && (
+      {packages.length === 0 && !isLoading && (
         <PackageEmptyView searchTerm={debouncedSearchTerm} />
       )}
 
@@ -346,6 +331,58 @@ export default function PackagesPage() {
           onDelete={handleDeleteVersion}
         />
       )}
+
+      {/* 分页控件 - shadcn ui，始终在页脚 */}
+      <div className="flex justify-center mt-8 mb-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => page > 1 && setPage(page - 1)}
+                aria-disabled={page <= 1}
+                tabIndex={page <= 1 ? -1 : 0}
+              />
+            </PaginationItem>
+            {/* 页码数字 */}
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              if (
+                idx + 1 === 1 ||
+                idx + 1 === totalPages ||
+                Math.abs(idx + 1 - page) <= 2
+              ) {
+                return (
+                  <PaginationItem key={idx}>
+                    <PaginationLink
+                      isActive={page === idx + 1}
+                      onClick={() => setPage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              }
+              if (
+                (idx + 1 === page - 3 && page - 3 > 1) ||
+                (idx + 1 === page + 3 && page + 3 < totalPages)
+              ) {
+                return (
+                  <PaginationItem key={idx}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+              return null;
+            })}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => page < totalPages && setPage(page + 1)}
+                aria-disabled={page >= totalPages}
+                tabIndex={page >= totalPages ? -1 : 0}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

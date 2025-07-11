@@ -28,3 +28,31 @@ func RespError(msg interface{}) Response {
 func RespSuccess(data interface{}) Response {
 	return Response{Code: SuccessCode, Msg: "OK", Data: data}
 }
+
+type PageResponse struct {
+	Code       int         `json:"code"`
+	Msg        string      `json:"msg"`
+	Data       interface{} `json:"data"`
+	Total      int         `json:"total"`
+	Page       int         `json:"page"`
+	PageSize   int         `json:"pageSize"`
+	TotalPages int         `json:"totalPages"`
+}
+
+// RespPageSuccess 构造分页成功响应
+
+func RespPageSuccess(data interface{}, total, page, pageSize int) PageResponse {
+	totalPages := 0
+	if pageSize > 0 {
+		totalPages = (total + pageSize - 1) / pageSize
+	}
+	return PageResponse{
+		Code:       SuccessCode,
+		Msg:        "OK",
+		Data:       data,
+		Total:      total,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}
+}

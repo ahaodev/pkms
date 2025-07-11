@@ -77,6 +77,8 @@ export interface PackageFilters {
   type?: Package['type'];
   isLatest?: boolean;
   search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface VersionInfo {

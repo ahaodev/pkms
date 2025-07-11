@@ -49,13 +49,25 @@ func (pr *entPackageRepository) Create(c context.Context, p *domain.Package) err
 	return nil
 }
 
-func (pr *entPackageRepository) Fetch(c context.Context) ([]domain.Package, error) {
+// 支持分页的 Fetch
+func (pr *entPackageRepository) Fetch(c context.Context, page, pageSize int) ([]domain.Package, int, error) {
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	total, err := pr.client.Pkg.Query().Count(c)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	packages, err := pr.client.Pkg.
 		Query().
+		Limit(pageSize).
+		Offset(offset).
 		All(c)
-
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var result []domain.Package
@@ -83,7 +95,7 @@ func (pr *entPackageRepository) Fetch(c context.Context) ([]domain.Package, erro
 		})
 	}
 
-	return result, nil
+	return result, total, nil
 }
 
 func (pr *entPackageRepository) GetByID(c context.Context, id string) (domain.Package, error) {

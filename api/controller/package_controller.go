@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"pkms/bootstrap"
@@ -16,12 +17,22 @@ type PackageController struct {
 
 // GetPackages 获取所有包
 func (pc *PackageController) GetPackages(c *gin.Context) {
-	packages, err := pc.PackageUsecase.Fetch(c)
+	// 解析分页参数
+	page := 1
+	pageSize := 20
+	if p := c.Query("page"); p != "" {
+		fmt.Sscanf(p, "%d", &page)
+	}
+	if ps := c.Query("pageSize"); ps != "" {
+		fmt.Sscanf(ps, "%d", &pageSize)
+	}
+
+	packages, total, err := pc.PackageUsecase.Fetch(c, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(packages))
+	c.JSON(http.StatusOK, domain.RespPageSuccess(packages, total, page, pageSize))
 }
 
 // CreatePackage 创建包

@@ -62,7 +62,7 @@ type PackageUploadResult struct {
 
 type PackageRepository interface {
 	Create(c context.Context, pkg *Package) error
-	Fetch(c context.Context) ([]Package, error)
+	Fetch(c context.Context, page, pageSize int) ([]Package, int, error)
 	GetByID(c context.Context, id string) (Package, error)
 	Update(c context.Context, pkg *Package) error
 	Delete(c context.Context, id string) error
@@ -72,7 +72,7 @@ type PackageRepository interface {
 
 type PackageUsecase interface {
 	Create(c context.Context, pkg *Package) error
-	Fetch(c context.Context) ([]Package, error)
+	Fetch(c context.Context, page, pageSize int) ([]Package, int, error)
 	GetByID(c context.Context, id string) (Package, error)
 	Update(c context.Context, pkg *Package) error
 	Delete(c context.Context, id string) error
