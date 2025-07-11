@@ -3,7 +3,7 @@ import {ApiResponse} from "@/types/api-response";
 import { Package, PackageFilters, PaginatedResponse, PackageUpload, UploadProgress } from "@/types/simplified";
 
 // 获取所有包（支持过滤）
-export async function getPackages(filters?: PackageFilters): Promise<ApiResponse<PaginatedResponse<Package>>> {
+export async function getPackages(filters?: PackageFilters): Promise<ApiResponse<Package[]>> {
     const params = new URLSearchParams();
     if (filters?.projectId) params.append('project_id', filters.projectId);
     if (filters?.type) params.append('type', filters.type);

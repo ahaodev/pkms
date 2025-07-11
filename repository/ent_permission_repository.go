@@ -20,14 +20,8 @@ func NewPermissionRepository(client *ent.Client) domain.PermissionRepository {
 }
 
 func (pr *entPermissionRepository) CreateUserPermission(c context.Context, permission *domain.Permission) error {
-	// Generate a unique ID if not provided
-	if permission.ID == "" {
-		permission.ID = generateUniqueID()
-	}
-
 	_, err := pr.client.ProjectPermission.
 		Create().
-		SetID(permission.ID).
 		SetUserID(permission.UserID).
 		SetProjectID(permission.ProjectID).
 		SetCanView(permission.CanView).
@@ -38,14 +32,8 @@ func (pr *entPermissionRepository) CreateUserPermission(c context.Context, permi
 }
 
 func (pr *entPermissionRepository) CreateGroupPermission(c context.Context, permission *domain.GroupPermission) error {
-	// Generate a unique ID if not provided
-	if permission.ID == "" {
-		permission.ID = generateUniqueID()
-	}
-
 	_, err := pr.client.GroupPermission.
 		Create().
-		SetID(permission.ID).
 		SetGroupID(permission.GroupID).
 		SetProjectID(permission.ProjectID).
 		SetCanView(permission.CanView).

@@ -63,13 +63,14 @@ export default function PackagesPage() {
 
   // 数据获取
   const { data: projects } = useProjects();
-  const { data: packagesResponse, isLoading } = usePackages({});
+  const { data: packages, isLoading } = usePackages({});
   const uploadPackage = useUploadPackage((progress) => setUploadProgress(progress));
   const deletePackage = useDeletePackage();
   const generateShareLink = useGenerateShareLink();
 
-  // 获取包数据
-  const packages = useMemo(() => packagesResponse || [], [packagesResponse]);
+  // 调试信息
+  console.log('PackagesPage - packages:', packages);
+  console.log('PackagesPage - isLoading:', isLoading);
 
   // 搜索防抖处理
   useEffect(() => {
@@ -88,7 +89,8 @@ export default function PackagesPage() {
   // 包分组：按名称和类型组合作为 key
   const groupedPackages = useMemo(() => {
     const grouped: Record<string, Package[]> = {};
-    packages.forEach((pkg) => {
+    const packagesArray = packages || [];
+    packagesArray.forEach((pkg) => {
       const key = getPackageKey(pkg);
       if (!grouped[key]) {
         grouped[key] = [];
@@ -106,7 +108,8 @@ export default function PackagesPage() {
 
   // 过滤包数据
   const filteredPackages = useMemo(() => {
-    let filtered = packages.filter(pkg => {
+    const packagesArray = packages || [];
+    let filtered = packagesArray.filter((pkg: Package) => {
       const matchesSearch = pkg.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
                           pkg.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesProject = !selectedProjectId || pkg.projectId === selectedProjectId;
@@ -119,7 +122,7 @@ export default function PackagesPage() {
     const result: Package[] = [];
     const seen = new Set<string>();
     
-    filtered.forEach(pkg => {
+    filtered.forEach((pkg: Package) => {
       const key = getPackageKey(pkg);
       if (!seen.has(key)) {
         const allVersions = groupedPackages[key] || [];
@@ -147,12 +150,13 @@ export default function PackagesPage() {
 
     // 基于去重后的包进行统计
     const uniquePackages = new Set<string>();
-    packages.forEach(pkg => {
+    const packagesArray = packages || [];
+    packagesArray.forEach((pkg: Package) => {
       const key = getPackageKey(pkg);
       if (!uniquePackages.has(key)) {
         uniquePackages.add(key);
         counts.total++;
-        counts[pkg.type]++;
+        counts[pkg.type as keyof typeof counts]++;
       }
     });
 

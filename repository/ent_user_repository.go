@@ -21,14 +21,8 @@ func NewUserRepository(client *ent.Client) domain.UserRepository {
 }
 
 func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
-	// Generate a unique ID if not provided
-	if u.ID == "" {
-		u.ID = generateUniqueID()
-	}
-
 	created, err := ur.client.User.
 		Create().
-		SetID(u.ID).
 		SetUsername(u.Name).
 		SetPasswordHash(u.Password).
 		SetRole(user.Role(u.Role)).

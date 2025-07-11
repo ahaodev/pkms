@@ -19,14 +19,8 @@ func NewPackageRepository(client *ent.Client) domain.PackageRepository {
 }
 
 func (pr *entPackageRepository) Create(c context.Context, p *domain.Package) error {
-	// Generate a unique ID if not provided
-	if p.ID == "" {
-		p.ID = generateUniqueID()
-	}
-
 	created, err := pr.client.Pkg.
 		Create().
-		SetID(p.ID).
 		SetProjectID(p.ProjectID).
 		SetName(p.Name).
 		SetDescription(p.Description).

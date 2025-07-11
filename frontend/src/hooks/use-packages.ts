@@ -9,25 +9,37 @@ export const usePackages = (filters?: PackageFilters) => {
     return useQuery({
         queryKey: ['packages', filters, user?.id],
         queryFn: async () => {
+            console.log('usePackages queryFn called');
             const response = await PackagesAPI.getPackages(filters);
-            return response.data;
+            console.log('Raw API response:', response);
+            // 直接转换数组中的每个包
+            const transformedPackages = (response.data || []).map(PackagesAPI.transformPackageFromBackend);
+            console.log('Transformed packages:', transformedPackages);
+            return transformedPackages;
         },
-        enabled: !!user && !!localStorage.getItem('pkms_access_token'), // 只有用户存在且有token时才执行
-        select: (data) => {
-            if (!user || !data) return [];
+        // 暂时去掉 enabled 条件进行调试
+        // enabled: !!user && !!localStorage.getItem('pkms_access_token'),
+        select: (packages: Package[]) => {
+            if (!user || !packages) {
+                console.log('No user or packages:', { user, packages });
+                return [];
+            }
             
-            const packages = data.items || [];
+            console.log('Before filtering - packages:', packages);
             
             // 管理员可以看到所有包
             if (isAdmin()) {
+                console.log('User is admin, returning all packages');
                 return packages;
             }
             
             // 普通用户只能看到有权限访问的项目的包
-            return packages.filter((pkg: Package) => 
+            const filteredPackages = packages.filter((pkg: Package) => 
                 canAccessProject(pkg.projectId) || 
                 pkg.isPublic
             );
+            console.log('Filtered packages for user:', filteredPackages);
+            return filteredPackages;
         },
     });
 };
