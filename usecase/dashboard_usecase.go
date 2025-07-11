@@ -41,10 +41,13 @@ func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, 
 		return domain.DashboardStats{}, err
 	}
 
-	// 统计用，取全部包总数，取第一页最大页数
-	_, totalPackages, err := du.packageRepository.Fetch(ctx, 1, 1)
-	if err != nil {
-		return domain.DashboardStats{}, err
+	// Get package count (we'll get all projects and sum their packages)
+	totalPackages := 0
+	for _, project := range projects {
+		packages, _, err := du.packageRepository.FetchByProject(ctx, project.ID, 1, 1000) // Get all packages for counting
+		if err == nil {
+			totalPackages += len(packages)
+		}
 	}
 
 	users, err := du.userRepository.Fetch(ctx)
@@ -88,18 +91,26 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, limit int) ([
 		}
 	}
 
-	// 只取最近的包（分页第一页，limit/3 条）
-	recentPackages, _, err := du.packageRepository.Fetch(ctx, 1, limit/3)
-	if err == nil {
-		for _, pkg := range recentPackages {
-			activities = append(activities, domain.RecentActivity{
-				ID:          pkg.ID,
-				Type:        "package_uploaded",
-				Description: "Package " + pkg.Name + " version " + pkg.Version + " was uploaded",
-				UserID:      "", // Package doesn't have a direct user relation
-				CreatedAt:   pkg.CreatedAt,
-			})
+	// Get recent packages from all projects
+	var recentPackages []*domain.Package
+	for _, project := range projects {
+		packages, _, err := du.packageRepository.FetchByProject(ctx, project.ID, 1, limit/3)
+		if err == nil {
+			recentPackages = append(recentPackages, packages...)
+			if len(recentPackages) >= limit/3 {
+				break
+			}
 		}
+	}
+
+	for _, pkg := range recentPackages {
+		activities = append(activities, domain.RecentActivity{
+			ID:          pkg.ID,
+			Type:        "package_created",
+			Description: "Package " + pkg.Name + " was created",
+			UserID:      pkg.CreatedBy,
+			CreatedAt:   pkg.CreatedAt,
+		})
 	}
 
 	// Get recent users
@@ -118,7 +129,6 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, limit int) ([
 			})
 		}
 	}
-
 	// Sort activities by created_at (newest first)
 	// For simplicity, we'll return as is, but in production you'd want to sort
 	return activities, nil

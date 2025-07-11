@@ -10,22 +10,8 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-/**
-CREATE TABLE projects (
-    id VARCHAR(50) PRIMARY KEY, -- 项目唯一标识
-    name VARCHAR(255) NOT NULL, -- 项目名称
-    description TEXT, -- 项目描述
-    icon VARCHAR(100), -- 项目图标
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 创建时间
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 更新时间
-    package_count INTEGER NOT NULL DEFAULT 0, -- 包数量，自动维护
-    created_by VARCHAR(50) NOT NULL, -- 创建者用户ID
-    is_public BOOLEAN NOT NULL DEFAULT 0, -- 是否公开
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE -- 关联用户表
-);
-*/
-
-// Pkg holds the schema definition for the Pkg entity.
+// Pkg holds the schema definition for the Package entity.
+// 包的基本信息，不包含具体版本
 type Pkg struct {
 	ent.Schema
 }
@@ -38,41 +24,27 @@ func (Pkg) Fields() []ent.Field {
 				return xid.New().String()
 			}),
 		field.String("project_id").
-			MaxLen(20),
+			MaxLen(50),
 		field.String("name").
 			MaxLen(255),
 		field.String("description").
 			Optional(),
 		field.Enum("type").
 			Values("android", "web", "desktop", "linux", "other"),
-		field.String("version").
-			MaxLen(50),
-		field.String("file_url").
-			MaxLen(500),
-		field.String("file_name").
-			MaxLen(255),
-		field.Int64("file_size"),
-		field.String("checksum").
-			MaxLen(255),
-		field.String("changelog").
+		field.String("icon").
+			MaxLen(500).
 			Optional(),
-		field.Bool("is_latest").
+		field.Bool("is_public").
 			Default(false),
-		field.Int("download_count").
-			Default(0),
+		field.JSON("tags", []string{}).
+			Optional(),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int("version_code"),
-		field.String("share_token").
-			MaxLen(255).
-			Unique(),
-		field.Time("share_expiry").
-			Optional(),
-		field.Bool("is_public").
-			Default(false),
+		field.String("created_by").
+			MaxLen(50),
 	}
 }
 
@@ -85,6 +57,14 @@ func (Pkg) Edges() []ent.Edge {
 			Field("project_id").
 			Unique().
 			Required(),
+		// Package has many releases
+		edge.To("releases", Release.Type),
+		// Package has a creator
+		edge.From("creator", User.Type).
+			Ref("created_packages").
+			Field("created_by").
+			Unique().
+			Required(),
 	}
 }
 
@@ -93,8 +73,11 @@ func (Pkg) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("project_id"),
 		index.Fields("type"),
-		index.Fields("is_latest"),
-		index.Fields("share_token"),
+		index.Fields("is_public"),
 		index.Fields("created_at"),
+		index.Fields("created_by"),
+		// 确保项目内包名唯一
+		index.Fields("project_id", "name").
+			Unique(),
 	}
 }

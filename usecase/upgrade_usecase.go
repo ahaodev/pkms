@@ -52,7 +52,7 @@ func (uu *upgradeUsecase) PerformUpgrade(c context.Context, packageID string, us
 	// Create upgrade history record
 	history := &domain.UpgradeHistory{
 		PackageID:     packageID,
-		FromVersion:   pkg.Version,
+		FromVersion:   pkg.ID, //TODO use release version instead of package ID
 		ToVersion:     upgradeInfo.LatestVersion,
 		UpgradeStatus: "pending",
 		UserID:        userID,

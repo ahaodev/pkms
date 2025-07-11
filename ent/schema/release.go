@@ -22,8 +22,8 @@ func (Release) Fields() []ent.Field {
 			DefaultFunc(func() string {
 				return xid.New().String()
 			}),
-		field.String("package_id").
-			field.String("version").
+		field.String("package_id"),
+		field.String("version").
 			MaxLen(100),
 		field.String("tag_name").
 			MaxLen(100).

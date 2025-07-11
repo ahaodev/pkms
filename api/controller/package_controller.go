@@ -20,6 +20,11 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 	// 解析分页参数
 	page := 1
 	pageSize := 20
+	projectID := c.Query("project_id")
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, domain.RespError("project_id is required"))
+		return
+	}
 	if p := c.Query("page"); p != "" {
 		fmt.Sscanf(p, "%d", &page)
 	}
@@ -27,7 +32,7 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 		fmt.Sscanf(ps, "%d", &pageSize)
 	}
 
-	packages, total, err := pc.PackageUsecase.Fetch(c, page, pageSize)
+	packages, total, err := pc.PackageUsecase.GetPackagesByProject(c, projectID, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
@@ -43,7 +48,7 @@ func (pc *PackageController) CreatePackage(c *gin.Context) {
 		return
 	}
 
-	if err := pc.PackageUsecase.Create(c, &pkg); err != nil {
+	if err := pc.PackageUsecase.CreatePackage(c, &pkg); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
@@ -54,7 +59,7 @@ func (pc *PackageController) CreatePackage(c *gin.Context) {
 // GetPackage 获取特定包
 func (pc *PackageController) GetPackage(c *gin.Context) {
 	id := c.Param("id")
-	pkg, err := pc.PackageUsecase.GetByID(c, id)
+	pkg, err := pc.PackageUsecase.GetPackageByID(c, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, domain.RespError("Package not found"))
 		return
@@ -65,7 +70,7 @@ func (pc *PackageController) GetPackage(c *gin.Context) {
 // DeletePackage 删除包
 func (pc *PackageController) DeletePackage(c *gin.Context) {
 	id := c.Param("id")
-	if err := pc.PackageUsecase.Delete(c, id); err != nil {
+	if err := pc.PackageUsecase.DeletePackage(c, id); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
@@ -110,36 +115,57 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 		req.IsPublic = true
 	}
 
-	// 调用usecase进行文件上传和包创建
-	result, err := pc.PackageUsecase.UploadPackage(c, req)
+	// 调用usecase进行发布版本创建
+	// 首先需要确保包存在或创建包
+	release := &domain.Release{
+		PackageID:    req.PackageID,
+		Version:      req.Version,
+		TagName:      req.TagName,
+		Title:        req.Title,
+		Description:  req.Changelog,
+		FileName:     req.FileName,
+		FileSize:     req.FileSize,
+		IsPrerelease: req.IsPrerelease,
+		IsLatest:     req.IsLatest,
+		IsDraft:      req.IsDraft,
+		IsPublic:     req.IsPublic,
+		CreatedBy:    "current_user", // TODO: 从上下文获取当前用户ID
+	}
+
+	err = pc.PackageUsecase.CreateRelease(c, release)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("Upload failed: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, domain.RespError("Create release failed: "+err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, domain.RespSuccess(result))
+	c.JSON(http.StatusOK, domain.RespSuccess(release))
 }
 
-// DownloadPackage 下载包
+// DownloadPackage 下载包的最新版本
 func (pc *PackageController) DownloadPackage(c *gin.Context) {
 	id := c.Param("id")
-	pkg, err := pc.PackageUsecase.GetByID(c, id)
+
+	// 获取包的最新发布版本
+	latestRelease, err := pc.PackageUsecase.GetLatestRelease(c, id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Package not found"))
+		c.JSON(http.StatusNotFound, domain.RespError("Latest release not found"))
 		return
 	}
 
 	// 增加下载计数
-	pkg.DownloadCount++
-	pc.PackageUsecase.Update(c, &pkg)
+	err = pc.PackageUsecase.IncrementDownloadCount(c, latestRelease.ID)
+	if err != nil {
+		// 记录错误但不阻止下载
+		// log.Error("Failed to increment download count:", err)
+	}
 
 	// 提供下载链接（实际实现可能需要根据文件存储方式调整）
 	c.JSON(http.StatusOK, domain.RespSuccess(map[string]interface{}{
-		"download_url": pkg.FileURL,
-		"filename":     pkg.FileName,
-		"size":         pkg.FileSize,
-		"version":      pkg.Version,
-		"checksum":     pkg.Checksum,
+		"download_url": latestRelease.FilePath,
+		"filename":     latestRelease.FileName,
+		"size":         latestRelease.FileSize,
+		"version":      latestRelease.Version,
+		"checksum":     latestRelease.FileHash,
 	}))
 }
 
@@ -178,18 +204,18 @@ func (pc *PackageController) CreateShareLink(c *gin.Context) {
 // GetSharedPackage 通过分享链接获取包
 func (pc *PackageController) GetSharedPackage(c *gin.Context) {
 	token := c.Param("token")
-	pkg, err := pc.PackageUsecase.GetByShareToken(c, token)
+	release, err := pc.PackageUsecase.GetReleaseByShareToken(c, token)
 	if err != nil {
 		c.JSON(http.StatusNotFound, domain.RespError("Shared package not found or expired"))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(pkg))
+	c.JSON(http.StatusOK, domain.RespSuccess(release))
 }
 
 // GetProjectPackages 获取项目的所有包
 func (pc *PackageController) GetProjectPackages(c *gin.Context) {
 	projectID := c.Param("projectId")
-	packages, err := pc.PackageUsecase.GetByProjectID(c, projectID)
+	packages, _, err := pc.PackageUsecase.GetPackagesByProject(c, projectID, 1, 1000) // 获取所有包
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

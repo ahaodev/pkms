@@ -95,7 +95,7 @@ func (ru *releaseUsecase) PublishRelease(c context.Context, releaseID string) er
 	// 设置为已发布状态
 	now := time.Now()
 	release.IsDraft = false
-	release.PublishedAt = &now
+	release.PublishedAt = now
 
 	// 如果是该包的第一个发布版本，自动设置为最新版本
 	releases, err := ru.releaseRepository.GetByPackageID(ctx, release.PackageID)

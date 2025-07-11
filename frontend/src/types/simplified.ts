@@ -183,3 +183,183 @@ export interface ProjectPermission {
   canView: boolean;
   canEdit: boolean;
 }
+
+// 新的包管理结构
+
+export interface PackageInfo {
+  id: string;
+  projectId: string;
+  name: string;
+  type: 'android' | 'web' | 'desktop' | 'linux' | 'other';
+  description?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  latestRelease?: Release;
+  releaseCount: number;
+  totalDownloads: number;
+}
+
+export interface Release {
+  id: string;
+  packageId: string;
+  version: string;
+  tagName?: string;
+  title?: string;
+  description?: string; // 发布说明/变更日志
+  filePath: string;
+  fileName: string;
+  fileSize: number;
+  fileHash?: string;
+  isPrerelease: boolean;
+  isLatest: boolean;
+  isDraft: boolean;
+  downloadCount: number;
+  shareToken?: string;
+  shareExpiry?: Date;
+  isPublic: boolean;
+  createdBy: string;
+  createdAt: Date;
+  publishedAt?: Date;
+}
+
+// 旧的包结构（向后兼容）
+export interface Package {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string;
+  type: 'android' | 'web' | 'desktop' | 'linux' | 'other';
+  version: string;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  checksum: string; // 文件校验和
+  changelog?: string; // 更新日志
+  isLatest: boolean; // 是否为最新版本
+  downloadCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // 版本比较信息
+  versionCode: number; // 用于版本比较的数字
+  minSdkVersion?: number; // 最小SDK版本 (移动端)
+  targetSdkVersion?: number; // 目标SDK版本 (移动端)
+  
+  // 分享信息
+  shareToken: string; // 分享令牌
+  shareExpiry?: Date; // 分享过期时间
+  isPublic: boolean; // 是否公开分享
+}
+
+export interface PackageFilters {
+  projectId?: string;
+  type?: Package['type'];
+  isLatest?: boolean;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface VersionInfo {
+  packageId: string;
+  currentVersion: string;
+  latestVersion: string;
+  hasUpdate: boolean;
+  downloadUrl?: string;
+  changelog?: string;
+}
+
+export interface ShareInfo {
+  shareUrl: string;
+  qrCodeUrl: string;
+  expiresAt?: Date;
+  downloadCount: number;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+  errors?: string[];
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
+export interface PackageUpload {
+  file: File;
+  projectId: string;
+  name: string;
+  description: string;
+  type: Package['type'];
+  version: string;
+  changelog?: string;
+  isPublic?: boolean;
+}
+
+// 用户管理相关类型
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  assignedProjectIds?: string[];
+  groupIds?: string[];
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
+  assignedProjectIds?: string[];
+  groupIds?: string[];
+}
+
+// 组管理相关类型
+export interface CreateGroupRequest {
+  name: string;
+  description: string;
+  color?: string;
+  permissions?: GroupPermission[];
+}
+
+export interface UpdateGroupRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  permissions?: GroupPermission[];
+}
+
+export interface GroupMembership {
+  userId: string;
+  groupId: string;
+  joinedAt: Date;
+  addedBy: string;
+}
+
+export interface UserProjectAssignment {
+  userId: string;
+  projectId: string;
+  assignedAt: Date;
+  assignedBy: string;
+}
+
+export interface ProjectPermission {
+  userId: string;
+  projectId: string;
+  canView: boolean;
+  canEdit: boolean;
+}

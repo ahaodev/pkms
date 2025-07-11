@@ -62,6 +62,10 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		// User creates projects
 		edge.To("created_projects", Project.Type),
+		// User creates packages
+		edge.To("created_packages", Pkg.Type),
+		// User creates releases
+		edge.To("created_releases", Release.Type),
 		// User creates groups
 		edge.To("created_groups", Group.Type),
 		// User project assignments

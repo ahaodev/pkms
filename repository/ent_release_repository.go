@@ -47,11 +47,11 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 	if r.ShareToken != "" {
 		createBuilder = createBuilder.SetShareToken(r.ShareToken)
 	}
-	if r.ShareExpiry != nil {
-		createBuilder = createBuilder.SetShareExpiry(*r.ShareExpiry)
+	if !r.ShareExpiry.IsZero() {
+		createBuilder = createBuilder.SetShareExpiry(r.ShareExpiry)
 	}
-	if r.PublishedAt != nil {
-		createBuilder = createBuilder.SetPublishedAt(*r.PublishedAt)
+	if !r.PublishedAt.IsZero() {
+		createBuilder = createBuilder.SetPublishedAt(r.PublishedAt)
 	}
 
 	created, err := createBuilder.Save(c)
@@ -81,7 +81,6 @@ func (rr *entReleaseRepository) GetByPackageID(c context.Context, packageID stri
 	entReleases, err := rr.client.Release.
 		Query().
 		Where(release.PackageID(packageID)).
-		Order(release.ByCreatedAt(release.OrderDesc)).
 		All(c)
 
 	if err != nil {
@@ -152,11 +151,11 @@ func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) err
 	if r.ShareToken != "" {
 		updateBuilder = updateBuilder.SetShareToken(r.ShareToken)
 	}
-	if r.ShareExpiry != nil {
-		updateBuilder = updateBuilder.SetShareExpiry(*r.ShareExpiry)
+	if !r.ShareExpiry.IsZero() {
+		updateBuilder = updateBuilder.SetShareExpiry(r.ShareExpiry)
 	}
-	if r.PublishedAt != nil {
-		updateBuilder = updateBuilder.SetPublishedAt(*r.PublishedAt)
+	if !r.PublishedAt.IsZero() {
+		updateBuilder = updateBuilder.SetPublishedAt(r.PublishedAt)
 	}
 
 	_, err := updateBuilder.Save(c)

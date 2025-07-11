@@ -273,7 +273,7 @@ export default function PackagesPage() {
   return (
     <div className="space-y-6">
       {/* 页面头部 */}
-      <PackageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
+      <PackageHeader onCreateRelease={() => setIsUploadDialogOpen(true)} />
 
       {/* 工具栏 */}
       <PackageToolbar
