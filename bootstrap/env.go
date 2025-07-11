@@ -9,7 +9,6 @@ import (
 
 type Env struct {
 	AppEnv                 string `mapstructure:"APP_ENV"`
-	ServerAddress          string `mapstructure:"SERVER_ADDRESS"`
 	ContextTimeout         int    `mapstructure:"CONTEXT_TIMEOUT"`
 	DBPath                 string `mapstructure:"DB_PATH"`
 	AccessTokenExpiryHour  int    `mapstructure:"ACCESS_TOKEN_EXPIRY_HOUR"`
@@ -37,7 +36,6 @@ type Env struct {
 
 func setDefaults() {
 	viper.SetDefault("APP_ENV", "development")
-	viper.SetDefault("SERVER_ADDRESS", ":58080")
 	viper.SetDefault("CONTEXT_TIMEOUT", 30)
 	viper.SetDefault("DB_PATH", "./data.db")
 	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 6)

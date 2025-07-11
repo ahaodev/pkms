@@ -22,7 +22,7 @@ func main() {
 
 	apiEngine := gin.Default()
 	route.Setup(env, timeout, db, s3, apiEngine)
-	err := apiEngine.Run(env.ServerAddress)
+	err := apiEngine.Run(":58080")
 	if err != nil {
 		pkg.Log.Error(err)
 	}

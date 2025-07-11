@@ -1,0 +1,9 @@
+services:
+  pkms:
+    image: hao88/pkms:latest
+    container_name: pkms
+    ports:
+      - "55173:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
