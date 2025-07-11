@@ -33,7 +33,9 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			Default(xid.New().String()),
+			DefaultFunc(func() string {
+				return xid.New().String()
+			}),
 		field.String("username").
 			MaxLen(32).
 			Unique(),

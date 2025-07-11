@@ -32,7 +32,9 @@ type GroupPermission struct {
 func (GroupPermission) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			Default(xid.New().String()),
+			DefaultFunc(func() string {
+				return xid.New().String()
+			}),
 		field.String("group_id").
 			MaxLen(20),
 		field.String("project_id").

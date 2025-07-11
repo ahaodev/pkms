@@ -47,6 +47,7 @@ HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q 
 WORKDIR /app
 # Copy compiled binary and config
 COPY --from=compressor /app/runner .
+COPY .env.example .env
 # Run the application
 CMD ["./runner"]
 # Expose required ports

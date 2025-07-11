@@ -34,7 +34,9 @@ type Pkg struct {
 func (Pkg) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			Default(xid.New().String()),
+			DefaultFunc(func() string {
+				return xid.New().String()
+			}),
 		field.String("project_id").
 			MaxLen(20),
 		field.String("name").

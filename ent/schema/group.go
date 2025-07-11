@@ -34,7 +34,9 @@ type Group struct {
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			Default(xid.New().String()),
+			DefaultFunc(func() string {
+				return xid.New().String()
+			}),
 		field.String("name").
 			MaxLen(255),
 		field.String("description").

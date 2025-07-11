@@ -19,7 +19,7 @@ export default defineConfig({
         allowedHosts: ['.ahaodev.com','.ucorg.com' ,'localhost'],
         proxy: {
             '/api': {
-                target: 'http://localhost:80', // 后端服务器地址
+                target: 'http://localhost:58080', // 后端服务器地址
                 changeOrigin: true,           // 修改请求头中的 Host
                 rewrite: (path) => path,      // 保持路径不变（可选）
                 // 如果后端接口没有 /api 前缀，可以移除：

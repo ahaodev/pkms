@@ -124,7 +124,7 @@ func (uc *UserController) UnassignUserFromProject(c *gin.Context) {
 // GetProfile 获取当前用户资料
 func (uc *UserController) GetProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
 		return
@@ -142,7 +142,7 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // UpdateProfile 更新当前用户资料
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
 		return
