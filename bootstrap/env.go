@@ -56,6 +56,7 @@ func setDefaults() {
 	viper.SetDefault("S3_BUCKET", "pkms")
 	viper.SetDefault("S3_TOKEN", "")
 }
+
 func NewEnv() *Env {
 	env := Env{}
 	// 设置默认值
