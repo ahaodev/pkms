@@ -201,17 +201,6 @@ func (pc *PackageController) CreateShareLink(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetSharedPackage 通过分享链接获取包
-func (pc *PackageController) GetSharedPackage(c *gin.Context) {
-	token := c.Param("token")
-	release, err := pc.PackageUsecase.GetReleaseByShareToken(c, token)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Shared package not found or expired"))
-		return
-	}
-	c.JSON(http.StatusOK, domain.RespSuccess(release))
-}
-
 // GetProjectPackages 获取项目的所有包
 func (pc *PackageController) GetProjectPackages(c *gin.Context) {
 	projectID := c.Param("projectId")

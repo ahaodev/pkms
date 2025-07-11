@@ -32,6 +32,5 @@ func NewPackageRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	group.GET("/:id/download", pc.DownloadPackage)          // GET /api/v1/packages/:id/download
 	group.GET("/:id/versions", pc.GetPackageVersions)       // GET /api/v1/packages/:id/versions
 	group.POST("/:id/share", pc.CreateShareLink)            // POST /api/v1/packages/:id/share
-	group.GET("/share/:token", pc.GetSharedPackage)         // GET /api/v1/packages/share/:token
 	group.GET("/project/:projectId", pc.GetProjectPackages) // GET /api/v1/packages/project/:projectId
 }

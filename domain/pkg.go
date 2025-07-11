@@ -74,7 +74,6 @@ type PackageUsecase interface {
 	GetReleaseByID(c context.Context, id string) (*Release, error)
 	GetReleasesByPackage(c context.Context, packageID string) ([]*Release, error)
 	GetLatestRelease(c context.Context, packageID string) (*Release, error)
-	GetReleaseByShareToken(c context.Context, token string) (*Release, error)
 	UpdateRelease(c context.Context, release *Release) error
 	DeleteRelease(c context.Context, id string) error
 	IncrementDownloadCount(c context.Context, releaseID string) error
