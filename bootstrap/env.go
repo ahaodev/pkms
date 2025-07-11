@@ -3,6 +3,8 @@ package bootstrap
 import (
 	"github.com/spf13/viper"
 	"log"
+	"os"
+	"pkms/pkg"
 )
 
 type Env struct {
@@ -33,18 +35,45 @@ type Env struct {
 	S3Token     string `mapstructure:"S3_TOKEN"`
 }
 
+func setDefaults() {
+	viper.SetDefault("APP_ENV", "development")
+	viper.SetDefault("SERVER_ADDRESS", ":58080")
+	viper.SetDefault("CONTEXT_TIMEOUT", 30)
+	viper.SetDefault("DB_PATH", "./data.db")
+	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 6)
+	viper.SetDefault("REFRESH_TOKEN_EXPIRY_HOUR", 168) // 7 days
+	viper.SetDefault("ACCESS_TOKEN_SECRET", "default-access-secret")
+	viper.SetDefault("REFRESH_TOKEN_SECRET", "default-refresh-secret")
+
+	// 管理员默认配置
+	viper.SetDefault("ADMIN_USERNAME", "admin")
+	viper.SetDefault("ADMIN_PASSWORD", "admin")
+
+	// S3 默认配置
+	viper.SetDefault("S3_ADDRESS", "192.168.8.6:9000")
+	viper.SetDefault("S3_ACCESS_KEY", "IjJm2N3ZZTYjt8C9WkJf")
+	viper.SetDefault("S3_SECRET_KEY", "eIuV0i4ChbLqx54g9rhsZDRTC2LE1xEcnIAnAw1C")
+	viper.SetDefault("S3_BUCKET", "pkms")
+	viper.SetDefault("S3_TOKEN", "")
+}
 func NewEnv() *Env {
 	env := Env{}
-	viper.SetConfigFile(".env")
+	// 设置默认值
+	setDefaults()
+	if _, err := os.Stat(".env"); err == nil {
+		viper.SetConfigFile(".env")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal("Can't find the file .env : ", err)
-	}
+		err := viper.ReadInConfig()
+		if err != nil {
+			pkg.Log.Error(err.Error())
+		}
 
-	err = viper.Unmarshal(&env)
-	if err != nil {
-		log.Fatal("Environment can't be loaded: ", err)
+		err = viper.Unmarshal(&env)
+		if err != nil {
+			pkg.Log.Error(err.Error())
+		}
+	} else {
+		pkg.Log.Println("没有找到 .env 文件，使用默认配置")
 	}
 
 	if env.AppEnv == "development" {
