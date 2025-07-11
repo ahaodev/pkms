@@ -59,22 +59,27 @@ func setDefaults() {
 
 func NewEnv() *Env {
 	env := Env{}
+
 	// 设置默认值
 	setDefaults()
+
+	// 从环境变量读取配置
+	viper.AutomaticEnv()
+
 	if _, err := os.Stat(".env"); err == nil {
 		viper.SetConfigFile(".env")
-
 		err := viper.ReadInConfig()
-		if err != nil {
-			pkg.Log.Error(err.Error())
-		}
-
-		err = viper.Unmarshal(&env)
 		if err != nil {
 			pkg.Log.Error(err.Error())
 		}
 	} else {
 		pkg.Log.Println("没有找到 .env 文件，使用默认配置")
+	}
+
+	// 无论是否有 .env 文件，都需要 Unmarshal 来应用配置
+	err := viper.Unmarshal(&env)
+	if err != nil {
+		pkg.Log.Error(err.Error())
 	}
 
 	if env.AppEnv == "development" {
