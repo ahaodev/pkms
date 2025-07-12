@@ -10,14 +10,14 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// Pkg holds the schema definition for the Package entity.
+// Package holds the schema definition for the Package entity.
 // 包的基本信息，不包含具体版本
-type Pkg struct {
+type Packages struct {
 	ent.Schema
 }
 
 // Fields of the Pkg.
-func (Pkg) Fields() []ent.Field {
+func (Packages) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
 			DefaultFunc(func() string {
@@ -45,7 +45,7 @@ func (Pkg) Fields() []ent.Field {
 }
 
 // Edges of the Pkg.
-func (Pkg) Edges() []ent.Edge {
+func (Packages) Edges() []ent.Edge {
 	return []ent.Edge{
 		// Package belongs to a project
 		edge.From("project", Project.Type).
@@ -65,7 +65,7 @@ func (Pkg) Edges() []ent.Edge {
 }
 
 // Indexes of the Pkg.
-func (Pkg) Indexes() []ent.Index {
+func (Packages) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("project_id"),
 		index.Fields("type"),

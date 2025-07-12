@@ -62,7 +62,7 @@ func (Release) Fields() []ent.Field {
 func (Release) Edges() []ent.Edge {
 	return []ent.Edge{
 		// Release belongs to a package
-		edge.From("package", Pkg.Type).
+		edge.From("package", Packages.Type).
 			Ref("releases").
 			Field("package_id").
 			Unique().

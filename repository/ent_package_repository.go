@@ -5,7 +5,7 @@ import (
 
 	"pkms/domain"
 	"pkms/ent"
-	"pkms/ent/pkg"
+	"pkms/ent/packages"
 )
 
 type entPackageRepository struct {
@@ -13,9 +13,9 @@ type entPackageRepository struct {
 }
 
 func (pr *entPackageRepository) GetByID(c context.Context, id string) (*domain.Package, error) {
-	p, err := pr.client.Pkg.
+	p, err := pr.client.Packages.
 		Query().
-		Where(pkg.ID(id)).
+		Where(packages.ID(id)).
 		First(c)
 
 	if err != nil {
@@ -34,9 +34,9 @@ func (pr *entPackageRepository) GetByID(c context.Context, id string) (*domain.P
 }
 
 func (pr *entPackageRepository) GetByProjectID(c context.Context, projectID string) ([]*domain.Package, error) {
-	packages, err := pr.client.Pkg.
+	packages, err := pr.client.Packages.
 		Query().
-		Where(pkg.ProjectID(projectID)).
+		Where(packages.ProjectID(projectID)).
 		All(c)
 
 	if err != nil {
@@ -71,12 +71,12 @@ func NewPackageRepository(client *ent.Client) domain.PackageRepository {
 }
 
 func (pr *entPackageRepository) Create(c context.Context, p *domain.Package) error {
-	created, err := pr.client.Pkg.
+	created, err := pr.client.Packages.
 		Create().
 		SetProjectID(p.ProjectID).
 		SetName(p.Name).
 		SetDescription(p.Description).
-		SetType(pkg.Type(p.Type)).
+		SetType(packages.Type(p.Type)).
 		Save(c)
 
 	if err != nil {
@@ -95,12 +95,12 @@ func (pr *entPackageRepository) Fetch(c context.Context, page, pageSize int) ([]
 		offset = 0
 	}
 
-	total, err := pr.client.Pkg.Query().Count(c)
+	total, err := pr.client.Packages.Query().Count(c)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	packages, err := pr.client.Pkg.
+	packages, err := pr.client.Packages.
 		Query().
 		Limit(pageSize).
 		Offset(offset).
@@ -126,18 +126,18 @@ func (pr *entPackageRepository) Fetch(c context.Context, page, pageSize int) ([]
 }
 
 func (pr *entPackageRepository) Update(c context.Context, p *domain.Package) error {
-	_, err := pr.client.Pkg.
+	_, err := pr.client.Packages.
 		UpdateOneID(p.ID).
 		SetName(p.Name).
 		SetDescription(p.Description).
-		SetType(pkg.Type(p.Type)).
+		SetType(packages.Type(p.Type)).
 		Save(c)
 
 	return err
 }
 
 func (pr *entPackageRepository) Delete(c context.Context, id string) error {
-	return pr.client.Pkg.
+	return pr.client.Packages.
 		DeleteOneID(id).
 		Exec(c)
 }

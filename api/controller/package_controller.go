@@ -21,15 +21,18 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 	page := 1
 	pageSize := 20
 	projectID := c.Query("project_id")
-	if projectID == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("project_id is required"))
-		return
-	}
+
 	if p := c.Query("page"); p != "" {
 		fmt.Sscanf(p, "%d", &page)
 	}
 	if ps := c.Query("pageSize"); ps != "" {
 		fmt.Sscanf(ps, "%d", &pageSize)
+	}
+
+	// 如果没有project_id，返回空列表而不是错误，这样前端至少能显示页面结构
+	if projectID == "" {
+		c.JSON(http.StatusOK, domain.RespPageSuccess([]*domain.Package{}, 0, page, pageSize))
+		return
 	}
 
 	packages, total, err := pc.PackageUsecase.GetPackagesByProject(c, projectID, page, pageSize)

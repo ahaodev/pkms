@@ -68,7 +68,7 @@ func (Project) Edges() []ent.Edge {
 			Unique().
 			Required(),
 		// Project has many packages
-		edge.To("packages", Pkg.Type),
+		edge.To("packages", Packages.Type),
 		// Project has many user assignments
 		edge.To("user_assignments", UserProjectAssignment.Type),
 		// Project has many group permissions
