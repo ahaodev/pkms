@@ -15,7 +15,7 @@ export function RecentPackages({ packages, onViewAllPackages }: RecentPackagesPr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>最近包</CardTitle>
+        <CardTitle>最近发布</CardTitle>
         <CardDescription>最新上传的软件包</CardDescription>
       </CardHeader>
       <CardContent>

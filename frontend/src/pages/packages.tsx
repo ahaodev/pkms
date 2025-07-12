@@ -271,48 +271,53 @@ export default function PackagesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* 页面头部 */}
-      <PackageHeader onCreateRelease={() => setIsUploadDialogOpen(true)} />
+    <div className="flex flex-col h-full min-h-[calc(100vh-200px)]">
+      <div className="space-y-6 flex-1">
+        {/* 页面头部 */}
+        <PackageHeader onCreateRelease={() => setIsUploadDialogOpen(true)} />
 
-      {/* 工具栏 */}
-      <PackageToolbar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedProjectId={selectedProjectId || 'all'}
-        onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
-        selectedType={selectedType || 'all'}
-        onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        projects={projects}
-        packageCounts={packageCounts}
-        isFiltering={isFiltering}
-      />
+        {/* 工具栏 */}
+        <PackageToolbar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedProjectId={selectedProjectId || 'all'}
+          onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
+          selectedType={selectedType || 'all'}
+          onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          projects={projects}
+          packageCounts={packageCounts}
+          isFiltering={isFiltering}
+        />
 
-      <PackageList
-        displayPackages={packages}
-        viewMode={viewMode}
-        isFiltering={isFiltering}
-        getVersionCount={getVersionCount}
-        getTypeIcon={getTypeIcon}
-        formatFileSize={formatFileSize}
-        handleVersionHistory={handleVersionHistory}
-        handleShare={handleShare}
-        handleDelete={handleDelete}
-      />
+        <PackageList
+          displayPackages={packages}
+          viewMode={viewMode}
+          isFiltering={isFiltering}
+          getVersionCount={getVersionCount}
+          getTypeIcon={getTypeIcon}
+          formatFileSize={formatFileSize}
+          handleVersionHistory={handleVersionHistory}
+          handleShare={handleShare}
+          handleDelete={handleDelete}
+        />
 
-      {packages.length === 0 && !isLoading && (
-        <PackageEmptyView searchTerm={debouncedSearchTerm} />
-      )}
+        {packages.length === 0 && !isLoading && (
+          <PackageEmptyView searchTerm={debouncedSearchTerm} />
+        )}
+      </div>
 
-      <PackagePagination
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-      />
+      {/* 分页组件始终在底部 */}
+      <div className="mt-auto">
+        <PackagePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      </div>
 
       <PackageUploadDialog
         open={isUploadDialogOpen}

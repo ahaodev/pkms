@@ -4,7 +4,6 @@ import {
   SettingsHeader,
   StorageSettings,
   NotificationSettings,
-  NotificationChannels,
   SettingsTabs,
   type StorageConfig,
   type NotificationConfig
@@ -33,28 +32,6 @@ export default function Settings() {
     });
   }, []);
 
-  // 通知渠道连接处理
-  const handleConnectWecom = useCallback(() => {
-    toast({
-      title: "企业微信",
-      description: "企业微信连接功能开发中...",
-    });
-  }, []);
-
-  const handleConnectDingTalk = useCallback(() => {
-    toast({
-      title: "钉钉",
-      description: "钉钉连接功能开发中...",
-    });
-  }, []);
-
-  const handleConfigureWebhook = useCallback(() => {
-    toast({
-      title: "Webhook",
-      description: "Webhook 配置功能开发中...",
-    });
-  }, []);
-
   return (
     <div className="space-y-6">
       <SettingsHeader 
@@ -70,11 +47,6 @@ export default function Settings() {
         notificationsContent={
           <div className="space-y-4">
             <NotificationSettings onSave={handleSaveNotifications} />
-            <NotificationChannels
-              onConnectWecom={handleConnectWecom}
-              onConnectDingTalk={handleConnectDingTalk}
-              onConfigureWebhook={handleConfigureWebhook}
-            />
           </div>
         }
       />

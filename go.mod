@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.14.4
 	github.com/gin-contrib/static v1.1.5
 	github.com/gin-gonic/gin v1.10.0
-	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f
 	github.com/mattn/go-sqlite3 v1.14.28

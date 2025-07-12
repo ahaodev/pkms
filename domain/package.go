@@ -67,15 +67,12 @@ type PackageUsecase interface {
 	CreatePackage(c context.Context, pkg *Package) error
 	GetPackageByID(c context.Context, id string) (*Package, error)
 	GetPackagesByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
-	UpdatePackage(c context.Context, pkg *Package) error
 	DeletePackage(c context.Context, id string) error
 
 	CreateRelease(c context.Context, release *Release) error
 	GetReleaseByID(c context.Context, id string) (*Release, error)
 	GetReleasesByPackage(c context.Context, packageID string) ([]*Release, error)
 	GetLatestRelease(c context.Context, packageID string) (*Release, error)
-	UpdateRelease(c context.Context, release *Release) error
-	DeleteRelease(c context.Context, id string) error
 	IncrementDownloadCount(c context.Context, releaseID string) error
 	SetReleaseAsLatest(c context.Context, packageID, releaseID string) error
 }
