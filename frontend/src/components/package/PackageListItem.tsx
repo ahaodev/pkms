@@ -36,7 +36,7 @@ export const PackageListItem = ({
               <div className="flex items-center space-x-2">
                 <h3 className="font-semibold">{pkg.name}</h3>
                 <span className="text-sm text-muted-foreground">
-                  v{pkg.version}
+                  v{(pkg as any).version || '1.0.0'}
                 </span>
                 {hasMultipleVersions && (
                   <Button
@@ -53,14 +53,14 @@ export const PackageListItem = ({
                 )}
                 <div className="flex gap-1">
                   <Badge variant="outline" className="text-xs">{pkg.type}</Badge>
-                  {pkg.isPublic && <Badge variant="outline" className="text-xs">公开</Badge>}
+                  {(pkg as any).isPublic && <Badge variant="outline" className="text-xs">公开</Badge>}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {pkg.description}
               </p>
               <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
-                <span>大小: {formatFileSize(pkg.fileSize)}</span>
+                <span>大小: {formatFileSize((pkg as any).fileSize || 0)}</span>
                 <span>下载: {pkg.downloadCount}</span>
                 <span>创建: {pkg.createdAt.toLocaleDateString()}</span>
                 {hasMultipleVersions && (

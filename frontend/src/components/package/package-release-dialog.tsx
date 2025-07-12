@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Package, PackageUpload, UploadProgress, Project } from '@/types/simplified';
 import { formatFileSize, getProjectIcon } from './package-utils';
 
-interface PackageUploadDialogProps {
+interface PackageReleaseDialogProps {
   open: boolean;
   onClose: () => void;
   onUpload: (data: PackageUpload) => Promise<void>;
@@ -20,7 +20,7 @@ interface PackageUploadDialogProps {
   initialProjectId?: string;
 }
 
-export function PackageUploadDialog({
+export function PackageReleaseDialog({
   open,
   onClose,
   onUpload,
@@ -28,7 +28,7 @@ export function PackageUploadDialog({
   uploadProgress,
   isUploading,
   initialProjectId = ''
-}: PackageUploadDialogProps) {
+}: PackageReleaseDialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<Omit<PackageUpload, 'file'>>({
     projectId: initialProjectId,
@@ -62,6 +62,7 @@ export function PackageUploadDialog({
       });
     } catch (error) {
       // 错误处理由父组件负责
+      console.error(error);
     }
   };
 
@@ -85,7 +86,7 @@ export function PackageUploadDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>上传新包</DialogTitle>
+          <DialogTitle>创建新包</DialogTitle>
           <DialogDescription>
             上传一个新的软件包版本。
           </DialogDescription>

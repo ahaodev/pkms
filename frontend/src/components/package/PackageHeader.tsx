@@ -14,7 +14,7 @@ export function PackageHeader({ onCreateRelease }: PackageHeaderProps) {
       </div>
       <Button onClick={onCreateRelease}>
         <Upload className="mr-2 h-4 w-4" />
-        创建发布
+        创建包
       </Button>
     </div>
   );

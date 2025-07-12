@@ -81,8 +81,8 @@ func (pc *PackageController) DeletePackage(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("Package deleted successfully"))
 }
 
-// UploadPackage 上传包
-func (pc *PackageController) UploadPackage(c *gin.Context) {
+// UploadRelease 上传包
+func (pc *PackageController) UploadRelease(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	// 获取上传的文件
 	file, header, err := c.Request.FormFile("file")

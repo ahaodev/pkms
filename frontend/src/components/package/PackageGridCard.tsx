@@ -35,7 +35,7 @@ export const PackageGridCard = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="text-lg truncate">{pkg.name}</CardTitle>
               <CardDescription className="mt-1 flex items-center gap-2">
-                <span>v{pkg.version}</span>
+                <span>v{(pkg as any).version || '1.0.0'}</span>
                 {hasMultipleVersions && (
                   <Button
                     variant="ghost"
@@ -84,13 +84,13 @@ export const PackageGridCard = ({
         
         <div className="flex flex-wrap gap-1 mb-3">
           <Badge variant="outline">{pkg.type}</Badge>
-          {pkg.isPublic && <Badge variant="outline">公开</Badge>}
+          {(pkg as any).isPublic && <Badge variant="outline">公开</Badge>}
         </div>
 
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>文件大小</span>
-            <span>{formatFileSize(pkg.fileSize)}</span>
+            <span>{formatFileSize((pkg as any).fileSize || 0)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>下载次数</span>
@@ -102,13 +102,13 @@ export const PackageGridCard = ({
           </div>
         </div>
 
-        {pkg.changelog && (
+        {(pkg as any).changelog && (
           <div className="mt-3 p-2 bg-muted rounded text-xs">
             <div className="flex items-center mb-1">
               <FileText className="mr-1 h-3 w-3" />
               <span className="font-medium">更新日志</span>
             </div>
-            <p>{pkg.changelog}</p>
+            <p>{(pkg as any).changelog}</p>
           </div>
         )}
       </CardContent>

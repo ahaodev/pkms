@@ -2,7 +2,7 @@ import { Package as PackageIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package } from '@/types/simplified';
-import { getTypeIcon, formatFileSize } from './dashboard-utils';
+import { getTypeIcon } from './dashboard-utils';
 
 interface RecentPackagesProps {
   packages: Package[];
@@ -28,12 +28,7 @@ export function RecentPackages({ packages, onViewAllPackages }: RecentPackagesPr
               >
                 <div className="flex items-center space-x-3">
                   <span className="text-lg">{getTypeIcon(pkg.type)}</span>
-                  <div>
-                    <p className="font-medium">{pkg.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      v{pkg.version} • {formatFileSize(pkg.fileSize)} • {pkg.downloadCount} 次下载
-                    </p>
-                  </div>
+
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {pkg.createdAt.toLocaleDateString()}

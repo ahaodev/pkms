@@ -207,7 +207,7 @@ export const usePackageVersions = (packageName?: string, packageType?: string) =
             }
             let filtered = result;
             if (!isAdmin()) {
-                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
+                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || (pkg as any).isPublic);
             }
             // 按版本排序（最新版本在前）
             return filtered.sort((a, b) => {

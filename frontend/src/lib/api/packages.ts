@@ -17,25 +17,12 @@ export async function getPackages(filters?: PackageFilters): Promise<PageRespons
 }
 
 // 创建包（基本信息）
-export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt' | 'downloadCount'>): Promise<ApiResponse<Package>> {
+export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt' | 'totalDownloads' | 'releaseCount'>): Promise<ApiResponse<Package>> {
     const resp = await apiClient.post("/api/v1/packages/", {
         project_id: pkg.projectId,
         name: pkg.name,
         description: pkg.description,
         type: pkg.type,
-        version: pkg.version,
-        file_url: pkg.fileUrl,
-        file_name: pkg.fileName,
-        file_size: pkg.fileSize,
-        checksum: pkg.checksum,
-        changelog: pkg.changelog,
-        is_latest: pkg.isLatest,
-        version_code: pkg.versionCode,
-        min_sdk_version: pkg.minSdkVersion,
-        target_sdk_version: pkg.targetSdkVersion,
-        share_token: pkg.shareToken,
-        share_expiry: pkg.shareExpiry,
-        is_public: pkg.isPublic
     });
     return resp.data;
 }
@@ -54,19 +41,6 @@ export async function updatePackage(id: string, update: Partial<Package>): Promi
     if (update.name !== undefined) backendUpdate.name = update.name;
     if (update.description !== undefined) backendUpdate.description = update.description;
     if (update.type !== undefined) backendUpdate.type = update.type;
-    if (update.version !== undefined) backendUpdate.version = update.version;
-    if (update.fileUrl !== undefined) backendUpdate.file_url = update.fileUrl;
-    if (update.fileName !== undefined) backendUpdate.file_name = update.fileName;
-    if (update.fileSize !== undefined) backendUpdate.file_size = update.fileSize;
-    if (update.checksum !== undefined) backendUpdate.checksum = update.checksum;
-    if (update.changelog !== undefined) backendUpdate.changelog = update.changelog;
-    if (update.isLatest !== undefined) backendUpdate.is_latest = update.isLatest;
-    if (update.versionCode !== undefined) backendUpdate.version_code = update.versionCode;
-    if (update.minSdkVersion !== undefined) backendUpdate.min_sdk_version = update.minSdkVersion;
-    if (update.targetSdkVersion !== undefined) backendUpdate.target_sdk_version = update.targetSdkVersion;
-    if (update.shareToken !== undefined) backendUpdate.share_token = update.shareToken;
-    if (update.shareExpiry !== undefined) backendUpdate.share_expiry = update.shareExpiry;
-    if (update.isPublic !== undefined) backendUpdate.is_public = update.isPublic;
 
     const resp = await apiClient.put(`/api/v1/packages/${id}`, backendUpdate);
     return resp.data;
@@ -156,27 +130,62 @@ export async function getPackagesByProject(projectId: string): Promise<ApiRespon
 
 // 数据转换函数：后端数据转前端格式
 export function transformPackageFromBackend(backendPackage: any): Package {
+    const latestRelease = backendPackage.latest_release ? transformReleaseFromBackend(backendPackage.latest_release) : undefined;
+    
     return {
         id: backendPackage.id,
         projectId: backendPackage.project_id,
         name: backendPackage.name,
         description: backendPackage.description,
         type: backendPackage.type as Package['type'],
-        version: backendPackage.version,
-        fileUrl: backendPackage.file_url,
-        fileName: backendPackage.file_name,
-        fileSize: backendPackage.file_size,
-        checksum: backendPackage.checksum,
-        changelog: backendPackage.changelog,
-        isLatest: backendPackage.is_latest,
-        downloadCount: backendPackage.download_count,
         createdAt: new Date(backendPackage.created_at),
         updatedAt: new Date(backendPackage.updated_at),
-        versionCode: backendPackage.version_code,
-        minSdkVersion: backendPackage.min_sdk_version,
-        targetSdkVersion: backendPackage.target_sdk_version,
-        shareToken: backendPackage.share_token,
-        shareExpiry: backendPackage.share_expiry ? new Date(backendPackage.share_expiry) : undefined,
-        isPublic: backendPackage.is_public
+        // icon: backendPackage.icon,
+        // homepage: backendPackage.homepage,
+        // repository: backendPackage.repository,
+        // totalDownloads: backendPackage.total_downloads || backendPackage.download_count || 0,
+        releaseCount: backendPackage.release_count || 0,
+        latestRelease,
+        
+        // 向后兼容字段
+        version: latestRelease?.version,
+        fileSize: latestRelease?.fileSize,
+        fileName: latestRelease?.fileName,
+        changelog: latestRelease?.changelog,
+        checksum: latestRelease?.checksum,
+        downloadCount: backendPackage.total_downloads || backendPackage.download_count || 0,
+        isLatest: latestRelease?.isLatest,
+        
+        isPublic: backendPackage.is_public || false,
+        createdBy: backendPackage.created_by || 'unknown'
+    } as Package;
+}
+
+// 数据转换函数：Release 后端数据转前端格式
+export function transformReleaseFromBackend(backendRelease: any): any {
+    return {
+        id: backendRelease.id,
+        packageId: backendRelease.package_id,
+        version: backendRelease.version,
+        title: backendRelease.title,
+        description: backendRelease.description,
+        changelog: backendRelease.changelog,
+        fileUrl: backendRelease.file_url,
+        fileName: backendRelease.file_name,
+        fileSize: backendRelease.file_size || 0,
+        checksum: backendRelease.checksum,
+        versionCode: backendRelease.version_code || 0,
+        isPrerelease: backendRelease.is_prerelease || false,
+        isDraft: backendRelease.is_draft || false,
+        isLatest: backendRelease.is_latest || false,
+        minSdkVersion: backendRelease.min_sdk_version,
+        targetSdkVersion: backendRelease.target_sdk_version,
+        downloadCount: backendRelease.download_count || 0,
+        createdAt: new Date(backendRelease.created_at),
+        updatedAt: new Date(backendRelease.updated_at),
+        shareToken: backendRelease.share_token,
+        shareExpiry: backendRelease.share_expiry ? new Date(backendRelease.share_expiry) : undefined,
+        isPublic: backendRelease.is_public || false,
+        createdBy: backendRelease.created_by || 'unknown'
     };
 }
