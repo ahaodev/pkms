@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -124,13 +125,8 @@ func (uc *UserController) UnassignUserFromProject(c *gin.Context) {
 // GetProfile 获取当前用户资料
 func (uc *UserController) GetProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
-	userID, exists := c.Get("x-user-id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
-		return
-	}
-
-	user, err := uc.UserUsecase.GetByID(c, userID.(string))
+	userID := c.GetString(constants.UserID)
+	user, err := uc.UserUsecase.GetByID(c, userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, domain.RespError("User not found"))
 		return
@@ -142,12 +138,7 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // UpdateProfile 更新当前用户资料
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
-	userID, exists := c.Get("x-user-id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
-		return
-	}
-
+	userID := c.GetString(constants.UserID)
 	var updateData struct {
 		Name   string `json:"name"`
 		Avatar string `json:"avatar"`

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"pkms/internal/constants"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -82,6 +83,7 @@ func (pc *PackageController) DeletePackage(c *gin.Context) {
 
 // UploadPackage 上传包
 func (pc *PackageController) UploadPackage(c *gin.Context) {
+	userID := c.GetString(constants.UserID)
 	// 获取上传的文件
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
@@ -132,7 +134,7 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 		IsLatest:     req.IsLatest,
 		IsDraft:      req.IsDraft,
 		IsPublic:     req.IsPublic,
-		CreatedBy:    "current_user", // TODO: 从上下文获取当前用户ID
+		CreatedBy:    userID,
 	}
 
 	err = pc.PackageUsecase.CreateRelease(c, release)

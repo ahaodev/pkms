@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -26,12 +27,13 @@ func (pc *ProjectController) GetProjects(c *gin.Context) {
 
 // CreateProject 创建项目
 func (pc *ProjectController) CreateProject(c *gin.Context) {
+	userId := c.GetString(constants.UserID)
 	var project domain.Project
 	if err := c.ShouldBindJSON(&project); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
-
+	project.CreatedBy = userId
 	if err := pc.ProjectUsecase.Create(c, &project); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

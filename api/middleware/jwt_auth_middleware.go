@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,8 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-				c.Set("x-user-id", userID)
+
+				c.Set(constants.UserID, userID)
 				c.Next()
 				return
 			}
