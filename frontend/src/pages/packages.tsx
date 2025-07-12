@@ -15,7 +15,6 @@ import {
   SEARCH_DEBOUNCE_MS,
   VERSIONS_PER_PAGE,
   getPackageKey,
-  formatFileSize,
   getTypeIcon
 } from '@/components/package';
 import { PackageToolbar } from '@/components/package/PackageToolbar';
@@ -259,7 +258,6 @@ export default function PackagesPage() {
           isFiltering={isFiltering}
           getVersionCount={getVersionCount}
           getTypeIcon={getTypeIcon}
-          formatFileSize={formatFileSize}
           handleVersionHistory={handleVersionHistory}
           handleShare={handleShare}
           handleDelete={handleDelete}
@@ -272,6 +270,7 @@ export default function PackagesPage() {
 
       {/* 分页组件始终在底部 */}
       <div className="mt-auto">
+        {/* 强制更新 */}
         <PackagePagination
           page={page}
           pageSize={pageSize}

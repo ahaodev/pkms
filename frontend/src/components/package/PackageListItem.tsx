@@ -2,16 +2,15 @@ import { Download, Share2, Trash2, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package } from '@/types/simplified';
+import { ExtendedPackage } from '@/types/simplified';
 
 interface PackageListItemProps {
-  pkg: Package;
-  getVersionCount: (pkg: Package) => number;
-  getTypeIcon: (type: Package['type']) => React.ReactNode;
-  formatFileSize: (bytes: number) => string;
-  handleVersionHistory: (pkg: Package) => void;
-  handleShare: (pkg: Package) => void;
-  handleDelete: (pkg: Package) => void;
+  pkg: ExtendedPackage;
+  getVersionCount: (pkg: ExtendedPackage) => number;
+  getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
+  handleVersionHistory: (pkg: ExtendedPackage) => void;
+  handleShare: (pkg: ExtendedPackage) => void;
+  handleDelete: (pkg: ExtendedPackage) => void;
 }
 
 export const PackageListItem = ({ 
@@ -35,7 +34,7 @@ export const PackageListItem = ({
               <div className="flex items-center space-x-2">
                 <h3 className="font-semibold">{pkg.name}</h3>
                 <span className="text-sm text-muted-foreground">
-                  v{(pkg as any).version || '1.0.0'}
+                  v{pkg.version || '1.0.0'}
                 </span>
                 {hasMultipleVersions && (
                   <Button
@@ -52,7 +51,7 @@ export const PackageListItem = ({
                 )}
                 <div className="flex gap-1">
                   <Badge variant="outline" className="text-xs">{pkg.type}</Badge>
-                  {(pkg as any).isPublic && <Badge variant="outline" className="text-xs">公开</Badge>}
+                  {pkg.isPublic && <Badge variant="outline" className="text-xs">公开</Badge>}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
