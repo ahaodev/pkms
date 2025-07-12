@@ -1,17 +1,17 @@
-import { Package } from '@/types/simplified';
+import { ExtendedPackage } from '@/types/simplified';
 import { PackageGridCard } from './PackageGridCard';
 import { PackageListItem } from './PackageListItem';
 
 interface PackageListProps {
-  displayPackages: Package[];
+  displayPackages: ExtendedPackage[];
   viewMode: 'grid' | 'list';
   isFiltering: boolean;
-  getVersionCount: (pkg: Package) => number;
-  getTypeIcon: (type: Package['type']) => React.ReactNode;
+  getVersionCount: (pkg: ExtendedPackage) => number;
+  getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
   formatFileSize: (bytes: number) => string;
-  handleVersionHistory: (pkg: Package) => void;
-  handleShare: (pkg: Package) => void;
-  handleDelete: (pkg: Package) => void;
+  handleVersionHistory: (pkg: ExtendedPackage) => void;
+  handleShare: (pkg: ExtendedPackage) => void;
+  handleDelete: (pkg: ExtendedPackage) => void;
 }
 
 export const PackageList = ({ 
@@ -34,7 +34,6 @@ export const PackageList = ({
             pkg={pkg} 
             getVersionCount={getVersionCount}
             getTypeIcon={getTypeIcon}
-            formatFileSize={formatFileSize}
             handleVersionHistory={handleVersionHistory}
             handleShare={handleShare}
             handleDelete={handleDelete}

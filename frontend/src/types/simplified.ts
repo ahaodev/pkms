@@ -41,7 +41,6 @@ export interface Project {
   updatedAt: Date;
   packageCount: number;
   createdBy: string; // 创建者用户ID
-  isPublic: boolean; // 是否公开项目
 }
 
 export interface Package {
@@ -86,8 +85,7 @@ export interface Release {
   // 分享信息
   shareToken?: string; // 分享令牌
   shareExpiry?: Date; // 分享过期时间
-  isPublic: boolean; // 是否公开分享
-  
+
   // 发布者信息
   createdBy: string; // 发布者用户ID
 }
@@ -146,7 +144,6 @@ export interface PackageUpload {
   type: Package['type'];
   version: string;
   changelog?: string;
-  isPublic?: boolean;
 }
 
 // 用户管理相关类型
@@ -216,8 +213,6 @@ export interface PackageInfo {
   createdAt: Date;
   updatedAt: Date;
   latestRelease?: Release;
-  releaseCount: number;
-  totalDownloads: number;
 }
 
 export interface Release {
@@ -237,22 +232,9 @@ export interface Release {
   downloadCount: number;
   shareToken?: string;
   shareExpiry?: Date;
-  isPublic: boolean;
   createdBy: string;
   createdAt: Date;
   publishedAt?: Date;
-}
-
-// 旧的包结构（向后兼容）
-export interface Package {
-  id: string;
-  projectId: string;
-  name: string;
-  description: string;
-  type: 'android' | 'web' | 'desktop' | 'linux' | 'other';
-  downloadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface PackageFilters {
@@ -309,7 +291,6 @@ export interface PackageUpload {
   type: Package['type'];
   version: string;
   changelog?: string;
-  isPublic?: boolean;
 }
 
 // 用户管理相关类型
@@ -365,4 +346,21 @@ export interface ProjectPermission {
   projectId: string;
   canView: boolean;
   canEdit: boolean;
+}
+
+// 扩展的包接口，包含从API返回的额外字段（用于向后兼容）
+export interface ExtendedPackage extends Package {
+  // 从 latestRelease 展平的字段
+  version?: string;
+  changelog?: string;
+  downloadCount?: number;
+  isLatest?: boolean;
+  fileSize?: number;
+  fileName?: string;
+  checksum?: string;
+  
+  // 其他扩展字段
+  isPublic?: boolean;
+  createdBy?: string;
+  latestRelease?: Release;
 }

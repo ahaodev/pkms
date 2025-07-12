@@ -17,7 +17,7 @@ export async function getPackages(filters?: PackageFilters): Promise<PageRespons
 }
 
 // 创建包（基本信息）
-export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt' | 'totalDownloads' | 'releaseCount'>): Promise<ApiResponse<Package>> {
+export async function createPackage(pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Package>> {
     const resp = await apiClient.post("/api/v1/packages/", {
         project_id: pkg.projectId,
         name: pkg.name,
@@ -65,7 +65,6 @@ export async function uploadPackage(
     formData.append('type', upload.type);
     formData.append('version', upload.version);
     if (upload.changelog) formData.append('changelog', upload.changelog);
-    if (upload.isPublic !== undefined) formData.append('is_public', upload.isPublic.toString());
 
     const resp = await apiClient.post("/api/v1/packages/upload", formData, {
         headers: {
@@ -144,7 +143,6 @@ export function transformPackageFromBackend(backendPackage: any): Package {
         // homepage: backendPackage.homepage,
         // repository: backendPackage.repository,
         // totalDownloads: backendPackage.total_downloads || backendPackage.download_count || 0,
-        releaseCount: backendPackage.release_count || 0,
         latestRelease,
         
         // 向后兼容字段
@@ -156,7 +154,6 @@ export function transformPackageFromBackend(backendPackage: any): Package {
         downloadCount: backendPackage.total_downloads || backendPackage.download_count || 0,
         isLatest: latestRelease?.isLatest,
         
-        isPublic: backendPackage.is_public || false,
         createdBy: backendPackage.created_by || 'unknown'
     } as Package;
 }
@@ -185,7 +182,6 @@ export function transformReleaseFromBackend(backendRelease: any): any {
         updatedAt: new Date(backendRelease.updated_at),
         shareToken: backendRelease.share_token,
         shareExpiry: backendRelease.share_expiry ? new Date(backendRelease.share_expiry) : undefined,
-        isPublic: backendRelease.is_public || false,
         createdBy: backendRelease.created_by || 'unknown'
     };
 }

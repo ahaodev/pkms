@@ -53,8 +53,6 @@ func (Project) Fields() []ent.Field {
 			Default(0),
 		field.String("created_by").
 			MaxLen(50),
-		field.Bool("is_public").
-			Default(false),
 	}
 }
 
@@ -82,6 +80,5 @@ func (Project) Edges() []ent.Edge {
 func (Project) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("created_by"),
-		index.Fields("is_public"),
 	}
 }

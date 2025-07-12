@@ -37,7 +37,6 @@ export function PackageReleaseDialog({
     type: 'android',
     version: '',
     changelog: '',
-    isPublic: false
   });
 
   const handleUpload = async () => {
@@ -58,7 +57,6 @@ export function PackageReleaseDialog({
         type: 'android',
         version: '',
         changelog: '',
-        isPublic: false
       });
     } catch (error) {
       // 错误处理由父组件负责
@@ -76,7 +74,6 @@ export function PackageReleaseDialog({
         type: 'android',
         version: '',
         changelog: '',
-        isPublic: false
       });
       onClose();
     }

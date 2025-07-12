@@ -31,7 +31,7 @@ export default function Dashboard() {
       totalProjects: projects?.length || 0,
       totalPackages: packages.length,
       recentUploads: packages.filter((p: Package) => p.createdAt > dayAgo).length,
-      totalDownloads: packages.reduce((sum: number, p: Package) => sum + p.downloadCount, 0),
+      totalDownloads: 0, // TODO: 需要从 Release 统计计算
     };
   }, [projects, packages]);
 

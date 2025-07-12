@@ -51,7 +51,7 @@ func (pc *PackageController) CreatePackage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
-
+	pkg.CreatedBy = c.GetString(constants.UserID)
 	if err := pc.PackageUsecase.CreatePackage(c, &pkg); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

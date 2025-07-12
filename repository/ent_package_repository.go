@@ -60,8 +60,43 @@ func (pr *entPackageRepository) GetByProjectID(c context.Context, projectID stri
 }
 
 func (pr *entPackageRepository) FetchByProject(c context.Context, projectID string, page, pageSize int) ([]*domain.Package, int, error) {
-	//TODO implement me
-	panic("implement me")
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	total, err := pr.client.Packages.
+		Query().
+		Where(packages.ProjectID(projectID)).
+		Count(c)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	pkgs, err := pr.client.Packages.
+		Query().
+		Where(packages.ProjectID(projectID)).
+		Limit(pageSize).
+		Offset(offset).
+		All(c)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var result []*domain.Package
+	for _, p := range pkgs {
+		result = append(result, &domain.Package{
+			ID:          p.ID,
+			ProjectID:   p.ProjectID,
+			Name:        p.Name,
+			Description: p.Description,
+			Type:        string(p.Type),
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+		})
+	}
+
+	return result, total, nil
 }
 
 func NewPackageRepository(client *ent.Client) domain.PackageRepository {
@@ -76,6 +111,7 @@ func (pr *entPackageRepository) Create(c context.Context, p *domain.Package) err
 		SetProjectID(p.ProjectID).
 		SetName(p.Name).
 		SetDescription(p.Description).
+		SetCreatedBy(p.CreatedBy).
 		SetType(packages.Type(p.Type)).
 		Save(c)
 

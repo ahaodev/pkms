@@ -66,7 +66,7 @@ export function PackageVersionCard({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">下载次数</span>
-              <span className="font-medium">{version.downloadCount}</span>
+              <span className="font-medium">{3}</span>
             </div>
           </div>
         </div>

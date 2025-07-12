@@ -18,7 +18,6 @@ export const PackageListItem = ({
   pkg, 
   getVersionCount, 
   getTypeIcon, 
-  formatFileSize,
   handleVersionHistory,
   handleShare,
   handleDelete
@@ -59,14 +58,7 @@ export const PackageListItem = ({
               <p className="text-sm text-muted-foreground mt-1">
                 {pkg.description}
               </p>
-              <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
-                <span>大小: {formatFileSize((pkg as any).fileSize || 0)}</span>
-                <span>下载: {pkg.downloadCount}</span>
-                <span>创建: {pkg.createdAt.toLocaleDateString()}</span>
-                {hasMultipleVersions && (
-                  <span>版本: {versionCount} 个</span>
-                )}
-              </div>
+
             </div>
           </div>
           <div className="flex items-center space-x-2">

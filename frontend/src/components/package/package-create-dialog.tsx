@@ -13,9 +13,10 @@ import {Label} from '@/components/ui/label';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Package, PackageUpload, Project, UploadProgress} from '@/types/simplified';
+import {Package, Project, UploadProgress} from '@/types/simplified';
 import {getProjectIcon} from "@/components/project";
 import {createPackage} from "@/lib/api";
+import {toast} from '@/hooks/use-toast';
 
 interface PackageCreateDialogProps {
     open: boolean;
@@ -31,14 +32,16 @@ export function PackageCreateDialog({
                                         projects,
                                         initialProjectId = ''
                                     }: PackageCreateDialogProps) {
-    const [formData, setFormData] = useState<Omit<PackageUpload, 'file'>>({
+    const [formData, setFormData] = useState<{
+        projectId: string;
+        name: string;
+        description: string;
+        type: Package['type'];
+    }>({
         projectId: initialProjectId,
         name: '',
         description: '',
         type: 'android',
-        version: '',
-        changelog: '',
-        isPublic: false
     });
     const handleClose = () => {
         setFormData({
@@ -46,16 +49,34 @@ export function PackageCreateDialog({
             name: '',
             description: '',
             type: 'android',
-            version: '',
-            changelog: '',
-            isPublic: false
         });
         onClose();
     };
 
     function handleCreate() {
-        createPackage
-
+        createPackage(formData)
+            .then(response => {
+                if (response.code == 0) {
+                    toast({
+                        title: '包创建成功',
+                        description: `包 "${formData.name}" 已成功创建。`,
+                    });
+                    handleClose();
+                } else {
+                    toast({
+                        title: '创建失败',
+                        description: response.msg || '请稍后再试。',
+                        variant: 'destructive'
+                    });
+                }
+            }).catch(error => {
+            console.error('创建包失败:', error);
+            toast({
+                title: '创建失败',
+                description: '包创建失败，请稍后再试。',
+                variant: 'destructive'
+            });
+        })
     }
 
     return (
