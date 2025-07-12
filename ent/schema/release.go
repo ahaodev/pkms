@@ -41,11 +41,7 @@ func (Release) Fields() []ent.Field {
 		field.String("file_hash").
 			MaxLen(64).
 			Optional(),
-		field.Bool("is_prerelease").
-			Default(false),
 		field.Bool("is_latest").
-			Default(false),
-		field.Bool("is_draft").
 			Default(false),
 		field.Int("download_count").
 			Default(0),
@@ -53,10 +49,6 @@ func (Release) Fields() []ent.Field {
 			MaxLen(255).
 			Unique().
 			Optional(),
-		field.Time("share_expiry").
-			Optional(),
-		field.Bool("is_public").
-			Default(false),
 		field.String("created_by").
 			MaxLen(50),
 		field.Time("created_at").
@@ -90,8 +82,6 @@ func (Release) Indexes() []ent.Index {
 		index.Fields("package_id"),
 		index.Fields("version"),
 		index.Fields("is_latest"),
-		index.Fields("is_prerelease"),
-		index.Fields("is_draft"),
 		index.Fields("share_token"),
 		index.Fields("created_at"),
 		index.Fields("published_at"),

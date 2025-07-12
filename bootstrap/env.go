@@ -33,8 +33,8 @@ func setDefaults() {
 	viper.SetDefault("CONTEXT_TIMEOUT", 30)
 	viper.SetDefault("DB_PATH", "./data.db")
 
-	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 6)
-	viper.SetDefault("REFRESH_TOKEN_EXPIRY_HOUR", 168) // 7 days
+	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 3)
+	viper.SetDefault("REFRESH_TOKEN_EXPIRY_HOUR", 24) // 7 days
 	viper.SetDefault("ACCESS_TOKEN_SECRET", "default-access-secret")
 	viper.SetDefault("REFRESH_TOKEN_SECRET", "default-refresh-secret")
 

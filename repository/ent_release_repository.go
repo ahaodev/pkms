@@ -27,11 +27,8 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
 		SetFileSize(r.FileSize).
-		SetIsPrerelease(r.IsPrerelease).
 		SetIsLatest(r.IsLatest).
-		SetIsDraft(r.IsDraft).
 		SetDownloadCount(r.DownloadCount).
-		SetIsPublic(r.IsPublic).
 		SetCreatedBy(r.CreatedBy)
 
 	// 可选字段
@@ -47,9 +44,7 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 	if r.ShareToken != "" {
 		createBuilder = createBuilder.SetShareToken(r.ShareToken)
 	}
-	if !r.ShareExpiry.IsZero() {
-		createBuilder = createBuilder.SetShareExpiry(r.ShareExpiry)
-	}
+
 	if !r.PublishedAt.IsZero() {
 		createBuilder = createBuilder.SetPublishedAt(r.PublishedAt)
 	}
@@ -132,11 +127,8 @@ func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) err
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
 		SetFileSize(r.FileSize).
-		SetIsPrerelease(r.IsPrerelease).
 		SetIsLatest(r.IsLatest).
-		SetIsDraft(r.IsDraft).
-		SetDownloadCount(r.DownloadCount).
-		SetIsPublic(r.IsPublic)
+		SetDownloadCount(r.DownloadCount)
 
 	// 可选字段
 	if r.TagName != "" {
@@ -151,9 +143,7 @@ func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) err
 	if r.ShareToken != "" {
 		updateBuilder = updateBuilder.SetShareToken(r.ShareToken)
 	}
-	if !r.ShareExpiry.IsZero() {
-		updateBuilder = updateBuilder.SetShareExpiry(r.ShareExpiry)
-	}
+
 	if !r.PublishedAt.IsZero() {
 		updateBuilder = updateBuilder.SetPublishedAt(r.PublishedAt)
 	}
@@ -207,13 +197,9 @@ func (rr *entReleaseRepository) convertToDomain(entRelease *ent.Release) *domain
 		FileName:      entRelease.FileName,
 		FileSize:      entRelease.FileSize,
 		FileHash:      entRelease.FileHash,
-		IsPrerelease:  entRelease.IsPrerelease,
 		IsLatest:      entRelease.IsLatest,
-		IsDraft:       entRelease.IsDraft,
 		DownloadCount: entRelease.DownloadCount,
 		ShareToken:    entRelease.ShareToken,
-		ShareExpiry:   entRelease.ShareExpiry,
-		IsPublic:      entRelease.IsPublic,
 		CreatedBy:     entRelease.CreatedBy,
 		CreatedAt:     entRelease.CreatedAt,
 		PublishedAt:   entRelease.PublishedAt,

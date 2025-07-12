@@ -26,6 +26,7 @@ func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) err
 		SetDescription(p.Description).
 		SetIcon(p.Icon).
 		SetCreatedBy(p.CreatedBy).
+		SetUpdatedAt(p.UpdatedAt).
 		SetIsPublic(p.IsPublic).
 		SetPackageCount(p.PackageCount).
 		Save(c)

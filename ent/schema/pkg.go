@@ -34,10 +34,6 @@ func (Pkg) Fields() []ent.Field {
 		field.String("icon").
 			MaxLen(500).
 			Optional(),
-		field.Bool("is_public").
-			Default(false),
-		field.JSON("tags", []string{}).
-			Optional(),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
@@ -73,7 +69,6 @@ func (Pkg) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("project_id"),
 		index.Fields("type"),
-		index.Fields("is_public"),
 		index.Fields("created_at"),
 		index.Fields("created_by"),
 		// 确保项目内包名唯一
