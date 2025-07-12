@@ -30,7 +30,8 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 		fmt.Sscanf(ps, "%d", &pageSize)
 	}
 
-	// 如果没有project_id，返回空列表而不是错误，这样前端至少能显示页面结构
+	// 如果没有project_id，查询所有有权限的包
+
 	if projectID == "" {
 		c.JSON(http.StatusOK, domain.RespPageSuccess([]*domain.Package{}, 0, page, pageSize))
 		return

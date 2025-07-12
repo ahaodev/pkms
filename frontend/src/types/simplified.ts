@@ -115,20 +115,6 @@ export interface ShareInfo {
   downloadCount: number;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  success: boolean;
-  message?: string;
-  errors?: string[];
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
 
 export interface UploadProgress {
   loaded: number;
@@ -152,15 +138,6 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   role: UserRole;
-  assignedProjectIds?: string[];
-  groupIds?: string[];
-}
-
-export interface UpdateUserRequest {
-  username?: string;
-  email?: string;
-  role?: UserRole;
-  isActive?: boolean;
   assignedProjectIds?: string[];
   groupIds?: string[];
 }

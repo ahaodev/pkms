@@ -27,7 +27,6 @@ func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) err
 		SetIcon(p.Icon).
 		SetCreatedBy(p.CreatedBy).
 		SetUpdatedAt(p.UpdatedAt).
-		SetIsPublic(p.IsPublic).
 		SetPackageCount(p.PackageCount).
 		Save(c)
 
@@ -61,7 +60,6 @@ func (pr *entProjectRepository) Fetch(c context.Context) ([]domain.Project, erro
 			UpdatedAt:    p.UpdatedAt,
 			PackageCount: p.PackageCount,
 			CreatedBy:    p.CreatedBy,
-			IsPublic:     p.IsPublic,
 		})
 	}
 
@@ -87,7 +85,6 @@ func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Pr
 		UpdatedAt:    p.UpdatedAt,
 		PackageCount: p.PackageCount,
 		CreatedBy:    p.CreatedBy,
-		IsPublic:     p.IsPublic,
 	}, nil
 }
 
@@ -97,7 +94,6 @@ func (pr *entProjectRepository) Update(c context.Context, p *domain.Project) err
 		SetName(p.Name).
 		SetDescription(p.Description).
 		SetIcon(p.Icon).
-		SetIsPublic(p.IsPublic).
 		SetPackageCount(p.PackageCount).
 		Save(c)
 
@@ -131,7 +127,6 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 			UpdatedAt:    p.UpdatedAt,
 			PackageCount: p.PackageCount,
 			CreatedBy:    p.CreatedBy,
-			IsPublic:     p.IsPublic,
 		})
 	}
 
