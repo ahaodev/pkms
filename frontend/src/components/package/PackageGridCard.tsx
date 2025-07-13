@@ -33,7 +33,6 @@ const PackageGridCard = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="text-lg truncate">{pkg.name}</CardTitle>
               <CardDescription className="mt-1 flex items-center gap-2">
-                <span>v{pkg.version || '1.0.0'}</span>
                 {hasMultipleVersions && (
                   <Button
                     variant="ghost"
@@ -86,9 +85,6 @@ const PackageGridCard = ({
         </div>
 
         <div className="space-y-2 text-xs text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <span>下载次数</span>
-          </div>
           <div className="flex items-center justify-between">
             <span>创建时间</span>
             <span>{pkg.createdAt.toLocaleDateString()}</span>
