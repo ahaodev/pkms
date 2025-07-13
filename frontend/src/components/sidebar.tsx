@@ -13,7 +13,7 @@ import {
     Shield,
 } from "lucide-react";
 import type {SimpleSidebarProps, NavItemProps} from '@/types';
-import {useAuth} from '@/contexts/simple-auth-context';
+import {useAuth} from '@/contexts/auth-context.tsx';
 
 /**
  * NavItem 组件：简化侧边栏导航项

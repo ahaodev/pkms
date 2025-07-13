@@ -1,7 +1,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {Project} from '@/types/simplified';
 import * as ProjectsAPI from '@/lib/api/projects';
-import {useAuth} from '@/contexts/simple-auth-context';
+import {useAuth} from '@/contexts/auth-context.tsx';
 
 export const useProjects = () => {
     const {user} = useAuth();

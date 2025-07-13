@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context.tsx';
 import { Group } from '@/types/simplified';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

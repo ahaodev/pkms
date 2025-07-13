@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context.tsx';
 import { GroupList } from '@/components/group/group-list';
 import { GroupDialog } from '@/components/group/group-dialog';
 import { GroupMemberDialog } from '@/components/group/group-member-dialog';

@@ -12,16 +12,6 @@ export interface HeaderProps {
 }
 
 /**
- * Sidebar 组件 props
- * @param isOpen 是否显示侧边栏
- * @param onClose 关闭侧边栏回调
- */
-export interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-/**
  * NavItem 组件 props
  * @param to 跳转路径
  * @param icon 图标节点
