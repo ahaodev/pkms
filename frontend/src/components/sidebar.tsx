@@ -11,6 +11,7 @@ import {
     Settings as SettingsIcon,
     Users,
     Shield,
+    Lock,
 } from "lucide-react";
 import type {SimpleSidebarProps, NavItemProps} from '@/types';
 import {useAuth} from '@/contexts/simple-auth-context';
@@ -157,6 +158,14 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
                           <NavItem
                             to="/groups"
                             icon={<Shield className="h-5 w-5" />}
+                            label="组管理"
+                            onClick={handleNavClick}
+                          />
+                        )}
+                        {isAdmin() && (
+                          <NavItem
+                            to="/permissions"
+                            icon={<Lock className="h-5 w-5" />}
                             label="权限管理"
                             onClick={handleNavClick}
                           />
