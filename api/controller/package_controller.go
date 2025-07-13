@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"pkms/internal/constants"
+	"strconv"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -24,10 +24,14 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 	projectID := c.Query("project_id")
 
 	if p := c.Query("page"); p != "" {
-		fmt.Sscanf(p, "%d", &page)
+		if v, err := strconv.Atoi(p); err == nil {
+			page = v
+		}
 	}
 	if ps := c.Query("pageSize"); ps != "" {
-		fmt.Sscanf(ps, "%d", &pageSize)
+		if v, err := strconv.Atoi(ps); err == nil {
+			pageSize = v
+		}
 	}
 
 	// 如果没有project_id，查询所有有权限的包

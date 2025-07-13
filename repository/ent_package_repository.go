@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-
 	"pkms/domain"
 	"pkms/ent"
 	"pkms/ent/packages"
+	"pkms/ent/release"
 )
 
 type entPackageRepository struct {
@@ -85,14 +85,20 @@ func (pr *entPackageRepository) FetchByProject(c context.Context, projectID stri
 
 	var result []*domain.Package
 	for _, p := range pkgs {
+		// 统计每个包的发布版本数量和下载量
+		versionCount, _ := pr.client.Release.Query().Where(release.ID(p.ID)).Count(c)
+		downloadCount, _ := pr.client.Release.Query().Where(release.ID(p.ID)).Count(c)
 		result = append(result, &domain.Package{
-			ID:          p.ID,
-			ProjectID:   p.ProjectID,
-			Name:        p.Name,
-			Description: p.Description,
-			Type:        string(p.Type),
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
+			ID:             p.ID,
+			ProjectID:      p.ProjectID,
+			Name:           p.Name,
+			Description:    p.Description,
+			Type:           string(p.Type),
+			CreatedBy:      p.CreatedBy,
+			CreatedAt:      p.CreatedAt,
+			UpdatedAt:      p.UpdatedAt,
+			ReleaseCount:   versionCount,
+			TotalDownloads: downloadCount,
 		})
 	}
 
