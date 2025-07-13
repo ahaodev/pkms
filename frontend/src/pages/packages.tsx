@@ -235,7 +235,7 @@ export default function PackagesPage() {
     <div className="flex flex-col h-full min-h-[calc(100vh-200px)]">
       <div className="space-y-6 flex-1">
         {/* 页面头部 */}
-        <PackageHeader onCreateRelease={() => setIsUploadDialogOpen(true)} />
+        <PackageHeader onCreatePackage={() => setIsUploadDialogOpen(true)} />
 
         {/* 工具栏 */}
         <PackageToolbar
@@ -261,7 +261,6 @@ export default function PackagesPage() {
           handleVersionHistory={handleVersionHistory}
           handleShare={handleShare}
           handleDelete={handleDelete}
-          onItemClick={handleVersionHistory}
         />
 
         {packages.length === 0 && !isLoading && (
