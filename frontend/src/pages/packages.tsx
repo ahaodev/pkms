@@ -261,6 +261,7 @@ export default function PackagesPage() {
           handleVersionHistory={handleVersionHistory}
           handleShare={handleShare}
           handleDelete={handleDelete}
+          onItemClick={handleVersionHistory}
         />
 
         {packages.length === 0 && !isLoading && (

@@ -22,10 +22,9 @@ export const PackageListItem = ({
   handleDelete
 }: PackageListItemProps) => {
   const versionCount = getVersionCount(pkg);
-  const hasMultipleVersions = versionCount > 1;
 
   return (
-    <Card key={pkg.id} className="hover:shadow-md transition-shadow">
+    <Card key={pkg.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVersionHistory(pkg)}>
       <CardContent className="py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -36,19 +35,7 @@ export const PackageListItem = ({
                 <span className="text-sm text-muted-foreground">
                   v{pkg.version || '1.0.0'}
                 </span>
-                {hasMultipleVersions && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleVersionHistory(pkg)}
-                    className="p-1 h-auto"
-                  >
-                    <Badge variant="secondary" className="text-xs">
-                      {versionCount} 版本
-                      <History className="ml-1 h-3 w-3" />
-                    </Badge>
-                  </Button>
-                )}
+                <span className="text-xs text-muted-foreground ml-2">{versionCount} 版本</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {pkg.description}
