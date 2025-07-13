@@ -14,15 +14,14 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Progress} from '@/components/ui/progress';
-import {Package, PackageUpload, UploadProgress} from '@/types/simplified';
+import {Package, ReleaseUpload, UploadProgress} from '@/types/simplified';
 import {formatFileSize} from './package-utils';
-import {uploadRelease} from "@/lib/api";
-import {toast} from "@/hooks/use-toast.ts";
+
 
 interface PackageReleaseDialogProps {
     open: boolean;
     onClose: () => void;
-    onUpload: (data: PackageUpload) => Promise<void>;
+    onUpload: (data: ReleaseUpload) => Promise<void>;
     packageId: string;
     packageName: string;
     uploadProgress?: UploadProgress | null;
@@ -39,40 +38,16 @@ export function PackageReleaseDialog({
                                          isUploading
                                      }: PackageReleaseDialogProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [formData, setFormData] = useState<Omit<PackageUpload, 'file'>>({
-        projectId: packageId,
+    const [formData, setFormData] = useState<Omit<ReleaseUpload, 'file'>>({
+        package_id: packageId,
         name: packageName,
-        description: '',
         type: 'android',
         version: '',
         changelog: '',
     });
 
-    function handleRelease() {
-        uploadRelease(formData)
-            .then(response => {
-                if (response.code == 0) {
-                    toast({
-                        title: '包创建成功',
-                        description: `包 "${formData.name}" 已成功创建。`,
-                    });
-                    handleClose();
-                } else {
-                    toast({
-                        title: '创建失败',
-                        description: response.msg || '请稍后再试。',
-                        variant: 'destructive'
-                    });
-                }
-            }).catch(error => {
-            console.error('创建包失败:', error);
-            toast({
-                title: '创建失败',
-                description: '包创建失败，请稍后再试。',
-                variant: 'destructive'
-            });
-        })
-    }
+    console.log(packageId, packageName, uploadProgress, isUploading);
+
 
     const handleUpload = async () => {
         if (!selectedFile) return;
@@ -86,15 +61,13 @@ export function PackageReleaseDialog({
             // 重置表单
             setSelectedFile(null);
             setFormData({
-                projectId: packageId,
+                package_id: packageId,
                 name: '',
-                description: '',
                 type: 'android',
                 version: '',
                 changelog: '',
             });
         } catch (error) {
-            // 错误处理由父组件负责
             console.error(error);
         }
     };
@@ -103,9 +76,8 @@ export function PackageReleaseDialog({
         if (!isUploading) {
             setSelectedFile(null);
             setFormData({
-                projectId: packageId,
+                package_id: packageId,
                 name: packageName,
-                description: '',
                 type: 'android',
                 version: '',
                 changelog: '',
@@ -234,7 +206,7 @@ export function PackageReleaseDialog({
                         onClick={handleUpload}
                         disabled={!selectedFile || !formData.version || isUploading}
                     >
-                        {isUploading ? '上传中...' : '上传'}
+                        {isUploading ? '上传中...' : '发布'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

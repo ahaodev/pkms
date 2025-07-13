@@ -1,15 +1,16 @@
 import {Download, History, Upload} from 'lucide-react';
-import { useState } from 'react';
-import { PackageReleaseDialog } from './package-release-dialog';
+import {useState} from 'react';
+import {PackageReleaseDialog} from './package-release-dialog';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Package} from '@/types/simplified';
 import {PackageVersionCard} from './package-version-card';
+import {uploadRelease} from "@/lib/api";
 
 interface PackageVersionHistoryDialogProps {
     open: boolean;
     onClose: () => void;
-    package: Package | null;
+    package: Package;
     allVersions: Package[];
     visibleVersionsCount: number;
     isLoadingMore: boolean;
@@ -102,13 +103,15 @@ export function PackageVersionHistoryDialog({
                     </div>
                 </DialogContent>
             </Dialog>
-            {/* 发布新版本弹窗 */}
+
             <PackageReleaseDialog
                 open={isReleaseDialogOpen}
                 onClose={() => setIsReleaseDialogOpen(false)}
                 packageId={packageData.id}
                 packageName={packageData.name}
-                onUpload={async () => {}}
+                onUpload={async (data) => {
+                    await uploadRelease(data);
+                }}
                 isUploading={false}
             />
         </>

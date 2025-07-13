@@ -30,11 +30,9 @@ type CreatePackageRequest struct {
 }
 
 // PackageUploadRequest 上传包文件创建发布版本的请求
-type PackageUploadRequest struct {
-	ProjectID    string `form:"project_id" binding:"required"`
+type ReleaseUploadRequest struct {
 	PackageID    string `form:"package_id"`
 	Name         string `form:"name"`
-	Description  string `form:"description"`
 	Version      string `form:"version" binding:"required"`
 	Type         string `form:"type"`
 	TagName      string `form:"tag_name"`

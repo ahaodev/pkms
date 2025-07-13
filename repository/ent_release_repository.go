@@ -23,7 +23,7 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 		Create().
 		SetPackageID(r.PackageID).
 		SetVersion(r.Version).
-		SetChangelog(r.Description).
+		SetChangelog(r.ChangeLog).
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
 		SetFileSize(r.FileSize).
@@ -192,7 +192,7 @@ func (rr *entReleaseRepository) convertToDomain(entRelease *ent.Release) *domain
 		Version:       entRelease.Version,
 		TagName:       entRelease.TagName,
 		Title:         entRelease.Title,
-		ChangeLog:     entRelease.ChangeLog,
+		ChangeLog:     entRelease.Changelog,
 		FilePath:      entRelease.FilePath,
 		FileName:      entRelease.FileName,
 		FileSize:      entRelease.FileSize,

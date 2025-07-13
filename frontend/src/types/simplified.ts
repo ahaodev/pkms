@@ -106,11 +106,10 @@ export interface UploadProgress {
     percentage: number;
 }
 
-export interface PackageUpload {
+export interface ReleaseUpload {
     file: File;
-    projectId: string;
+    package_id: string;
     name: string;
-    description: string;
     type: Package['type'];
     version: string;
     changelog?: string;

@@ -98,21 +98,20 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 	defer file.Close()
 
 	// 构建上传请求
-	req := &domain.PackageUploadRequest{
-		ProjectID:   c.PostForm("project_id"),
-		Name:        c.PostForm("name"),
-		Description: c.PostForm("description"),
-		Version:     c.PostForm("version"),
-		Type:        c.PostForm("type"),
-		Changelog:   c.PostForm("changelog"),
-		File:        file,
-		FileName:    header.Filename,
-		FileSize:    header.Size,
-		FileHeader:  header.Header.Get("Content-Type"),
+	req := &domain.ReleaseUploadRequest{
+		PackageID:  c.PostForm("package_id"),
+		Name:       c.PostForm("name"),
+		Version:    c.PostForm("version"),
+		Type:       c.PostForm("type"),
+		Changelog:  c.PostForm("changelog"),
+		File:       file,
+		FileName:   header.Filename,
+		FileSize:   header.Size,
+		FileHeader: header.Header.Get("Content-Type"),
 	}
 
 	// 验证必需字段
-	if req.ProjectID == "" || req.Name == "" || req.Version == "" {
+	if req.PackageID == "" || req.Name == "" || req.Version == "" {
 		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: project_id, name, version"))
 		return
 	}
@@ -128,7 +127,7 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 		Version:      req.Version,
 		TagName:      req.TagName,
 		Title:        req.Title,
-		Description:  req.Changelog,
+		ChangeLog:    req.Changelog,
 		FileName:     req.FileName,
 		FileSize:     req.FileSize,
 		IsPrerelease: req.IsPrerelease,

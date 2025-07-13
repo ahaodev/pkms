@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse, PageResponse} from "@/types/api-response";
-import { Package, PackageFilters, PackageUpload, UploadProgress } from "@/types/simplified";
+import {Package, PackageFilters, ReleaseUpload, UploadProgress} from "@/types/simplified";
 
 // 获取所有包（支持过滤和分页）
 export async function getPackages(filters?: PackageFilters): Promise<PageResponse<Package>> {
@@ -54,19 +54,18 @@ export async function deletePackage(id: string): Promise<ApiResponse<void>> {
 
 // 上传包文件和元信息
 export async function uploadRelease(
-    upload: PackageUpload,
+    upload: ReleaseUpload,
     onProgress?: (progress: UploadProgress) => void
 ): Promise<ApiResponse<Package>> {
     const formData = new FormData();
     formData.append('file', upload.file);
-    formData.append('project_id', upload.projectId);
+    formData.append('package_id', upload.package_id);
     formData.append('name', upload.name);
-    formData.append('description', upload.description);
     formData.append('type', upload.type);
     formData.append('version', upload.version);
     if (upload.changelog) formData.append('changelog', upload.changelog);
 
-    const resp = await apiClient.post("/api/v1/packages/upload", formData, {
+    const resp = await apiClient.post("/api/v1/packages/release", formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         },
