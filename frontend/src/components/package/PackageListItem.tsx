@@ -1,7 +1,6 @@
-import { Download, Share2, Trash2, History } from 'lucide-react';
+import { Download, Share2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ExtendedPackage } from '@/types/simplified';
 
 interface PackageListItemProps {
@@ -21,10 +20,18 @@ export const PackageListItem = ({
   handleShare,
   handleDelete
 }: PackageListItemProps) => {
+  
   const versionCount = getVersionCount(pkg);
+  // 只在点击非按钮区域时弹窗
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 如果点击的是按钮或其子元素，则不弹窗
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return;
+    handleVersionHistory(pkg);
+  };
 
   return (
-    <Card key={pkg.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVersionHistory(pkg)}>
+    <Card key={pkg.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick}>
       <CardContent className="py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">

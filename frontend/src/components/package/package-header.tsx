@@ -22,8 +22,8 @@ export function PackageHeader({ onCreateRelease, onCreatePackage }: PackageHeade
         )}
         {onCreateRelease && (
           <Button onClick={onCreateRelease}>
-            <Upload className="mr-2 h-4 w-4" />
-            创建包
+            <Plus className="mr-2 h-4 w-4" />
+            创建新包
           </Button>
         )}
       </div>

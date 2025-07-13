@@ -1,4 +1,4 @@
-import { Upload } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PackageHeaderProps {
@@ -13,7 +13,7 @@ export function PackageHeader({ onCreateRelease }: PackageHeaderProps) {
         <p className="text-muted-foreground">管理您的软件包和发布版本</p>
       </div>
       <Button onClick={onCreateRelease}>
-        <Upload className="mr-2 h-4 w-4" />
+        <Plus className="mr-2 h-4 w-4" />
         创建包
       </Button>
     </div>
