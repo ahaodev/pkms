@@ -78,12 +78,6 @@ const PackageGridCard = ({
         <p className="text-sm text-muted-foreground mb-3">
           {pkg.description}
         </p>
-        
-        <div className="flex flex-wrap gap-1 mb-3">
-          <Badge variant="outline">{pkg.type}</Badge>
-          {pkg.isPublic && <Badge variant="outline">公开</Badge>}
-        </div>
-
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>创建时间</span>

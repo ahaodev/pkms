@@ -16,7 +16,6 @@ type CreateReleaseRequest struct {
 	IsPrerelease bool      `json:"is_prerelease" form:"is_prerelease"`
 	IsLatest     bool      `json:"is_latest" form:"is_latest"`
 	IsDraft      bool      `json:"is_draft" form:"is_draft"`
-	IsPublic     bool      `json:"is_public" form:"is_public"`
 	ShareExpiry  time.Time `json:"share_expiry" form:"share_expiry"`
 
 	// 文件相关字段（不通过JSON传输）
@@ -44,7 +43,6 @@ type Release struct {
 	DownloadCount int       `json:"download_count"`
 	ShareToken    string    `json:"share_token,omitempty"`
 	ShareExpiry   time.Time `json:"share_expiry,omitempty"`
-	IsPublic      bool      `json:"is_public"`
 	CreatedBy     string    `json:"created_by"`
 	CreatedAt     time.Time `json:"created_at"`
 	PublishedAt   time.Time `json:"published_at,omitempty"`

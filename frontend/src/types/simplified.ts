@@ -247,7 +247,6 @@ export interface ExtendedPackage extends Package {
     checksum?: string;
 
     // 其他扩展字段
-    isPublic?: boolean;
     createdBy?: string;
     latestRelease?: Release;
 }

@@ -121,10 +121,6 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
 		req.IsLatest = true
 	}
-	if isPublic := c.PostForm("is_public"); isPublic == "true" {
-		req.IsPublic = true
-	}
-
 	// 调用usecase进行发布版本创建
 	// 首先需要确保包存在或创建包
 	release := &domain.Release{
@@ -138,7 +134,6 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 		IsPrerelease: req.IsPrerelease,
 		IsLatest:     req.IsLatest,
 		IsDraft:      req.IsDraft,
-		IsPublic:     req.IsPublic,
 		CreatedBy:    userID,
 	}
 
@@ -190,8 +185,7 @@ func (pc *PackageController) GetPackageVersions(c *gin.Context) {
 func (pc *PackageController) CreateShareLink(c *gin.Context) {
 	id := c.Param("id")
 	var request struct {
-		ExpiryHours int  `json:"expiry_hours"`
-		IsPublic    bool `json:"is_public"`
+		ExpiryHours int `json:"expiry_hours"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -205,7 +199,6 @@ func (pc *PackageController) CreateShareLink(c *gin.Context) {
 		"share_token":  "generated_token_here",
 		"share_url":    "/api/v1/packages/share/generated_token_here",
 		"expiry_hours": request.ExpiryHours,
-		"is_public":    request.IsPublic,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))

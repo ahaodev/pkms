@@ -38,8 +38,6 @@ export const usePackages = (filters?: PackageFilters) => {
             console.log('usePackages - before filtering:', filtered.length);
             if (!isAdmin()) {
                 const originalCount = filtered.length;
-                // filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
-                // 临时注释权限过滤，显示所有包
                 console.log('usePackages - 权限过滤已临时禁用');
                 console.log('usePackages - filtered packages:', `${originalCount} -> ${filtered.length}`);
             }
@@ -207,7 +205,7 @@ export const usePackageVersions = (packageName?: string, packageType?: string) =
             }
             let filtered = result;
             if (!isAdmin()) {
-                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || (pkg as any).isPublic);
+                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId));
             }
             // 按版本排序（最新版本在前）
             return filtered.sort((a, b) => {

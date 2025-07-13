@@ -49,10 +49,6 @@ export const PackageListItem = ({
                     </Badge>
                   </Button>
                 )}
-                <div className="flex gap-1">
-                  <Badge variant="outline" className="text-xs">{pkg.type}</Badge>
-                  {pkg.isPublic && <Badge variant="outline" className="text-xs">公开</Badge>}
-                </div>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {pkg.description}

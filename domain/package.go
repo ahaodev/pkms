@@ -43,7 +43,6 @@ type PackageUploadRequest struct {
 	IsPrerelease bool   `form:"is_prerelease"`
 	IsLatest     bool   `form:"is_latest"`
 	IsDraft      bool   `form:"is_draft"`
-	IsPublic     bool   `form:"is_public"`
 
 	// 文件相关字段（不通过JSON传输）
 	File       io.Reader `json:"-"`

@@ -32,11 +32,10 @@ export const useCreateProject = () => {
     const {user, isAdmin, assignProjectToUser} = useAuth();
 
     return useMutation({
-        mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy' | 'isPublic'>) => {
+        mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy'>) => {
             const projectData = {
                 ...project,
                 createdBy: user?.id || '',
-                isPublic: false // 新项目默认不公开
             };
 
             const response = await ProjectsAPI.createProject(projectData);
