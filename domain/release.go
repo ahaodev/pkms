@@ -32,7 +32,7 @@ type Release struct {
 	Version       string    `json:"version"`
 	TagName       string    `json:"tag_name,omitempty"`
 	Title         string    `json:"title,omitempty"`
-	Description   string    `json:"description,omitempty"` // Release notes/changelog
+	ChangeLog     string    `json:"changelog,omitempty"` // Release notes/changelog
 	FilePath      string    `json:"file_path"`
 	FileName      string    `json:"file_name"`
 	FileSize      int64     `json:"file_size"`

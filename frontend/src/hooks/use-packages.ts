@@ -51,20 +51,6 @@ export const usePackages = (filters?: PackageFilters) => {
     });
 };
 
-export const useUploadPackage = (onProgress?: (progress: UploadProgress) => void) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (upload: PackageUpload) => {
-            const response = await PackagesAPI.uploadPackage(upload, onProgress);
-            return PackagesAPI.transformPackageFromBackend(response.data);
-        },
-        onSuccess: (_, upload) => {
-            queryClient.invalidateQueries({queryKey: ['packages']});
-            queryClient.invalidateQueries({queryKey: ['packages', 'project', upload.projectId]});
-        },
-    });
-};
 
 export const useDeletePackage = () => {
     const queryClient = useQueryClient();

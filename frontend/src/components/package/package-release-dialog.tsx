@@ -16,6 +16,8 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Progress} from '@/components/ui/progress';
 import {Package, PackageUpload, UploadProgress} from '@/types/simplified';
 import {formatFileSize} from './package-utils';
+import {uploadRelease} from "@/lib/api";
+import {toast} from "@/hooks/use-toast.ts";
 
 interface PackageReleaseDialogProps {
     open: boolean;
@@ -45,6 +47,32 @@ export function PackageReleaseDialog({
         version: '',
         changelog: '',
     });
+
+    function handleRelease() {
+        uploadRelease(formData)
+            .then(response => {
+                if (response.code == 0) {
+                    toast({
+                        title: '包创建成功',
+                        description: `包 "${formData.name}" 已成功创建。`,
+                    });
+                    handleClose();
+                } else {
+                    toast({
+                        title: '创建失败',
+                        description: response.msg || '请稍后再试。',
+                        variant: 'destructive'
+                    });
+                }
+            }).catch(error => {
+            console.error('创建包失败:', error);
+            toast({
+                title: '创建失败',
+                description: '包创建失败，请稍后再试。',
+                variant: 'destructive'
+            });
+        })
+    }
 
     const handleUpload = async () => {
         if (!selectedFile) return;
@@ -155,7 +183,16 @@ export function PackageReleaseDialog({
                             </SelectContent>
                         </Select>
                     </div>
-
+                    <div>
+                        <Label htmlFor="version">版本名称</Label>
+                        <Input
+                            id="version"
+                            value={formData.version}
+                            onChange={(e) => setFormData({...formData, version: e.target.value})}
+                            placeholder="1.0.0-tab-beta.apk"
+                            disabled={isUploading}
+                        />
+                    </div>
                     <div>
                         <Label htmlFor="version">版本号</Label>
                         <Input

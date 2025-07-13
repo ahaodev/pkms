@@ -53,7 +53,7 @@ export async function deletePackage(id: string): Promise<ApiResponse<void>> {
 }
 
 // 上传包文件和元信息
-export async function uploadPackage(
+export async function uploadRelease(
     upload: PackageUpload,
     onProgress?: (progress: UploadProgress) => void
 ): Promise<ApiResponse<Package>> {

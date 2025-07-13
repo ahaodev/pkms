@@ -31,7 +31,7 @@ func (Release) Fields() []ent.Field {
 		field.String("title").
 			MaxLen(255).
 			Optional(),
-		field.String("description").
+		field.String("changelog").
 			Optional(), // Release notes/changelog
 		field.String("file_path").
 			MaxLen(500),
