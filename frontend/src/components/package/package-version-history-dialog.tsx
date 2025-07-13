@@ -106,8 +106,9 @@ export function PackageVersionHistoryDialog({
             <PackageReleaseDialog
                 open={isReleaseDialogOpen}
                 onClose={() => setIsReleaseDialogOpen(false)}
-                package={packageData}
-                onUpload={() => {}}
+                packageId={packageData.id}
+                packageName={packageData.name}
+                onUpload={async () => {}}
                 isUploading={false}
             />
         </>
