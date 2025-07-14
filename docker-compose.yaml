@@ -1,17 +1,9 @@
-version: "3.8"
-
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: app
-    container_name: app
-    restart: unless-stopped
-    env_file: .env
+  pkms:
+    image: hao88/pkms:latest
+    container_name: pkms
     ports:
-      - "$PORT:$PORT"
-    depends_on:
-      - sqlite
-volumes:
-  dbdata:
+      - "55173:8080"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
