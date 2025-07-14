@@ -2,12 +2,11 @@ package casbin
 
 import (
 	"fmt"
-	"log"
-	"sync"
-
 	"github.com/casbin/casbin/v2"
-	gormadapter "github.com/casbin/gorm-adapter/v3"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
+	"pkms/ent"
+	"sync"
 )
 
 var (
@@ -20,15 +19,14 @@ type CasbinManager struct {
 	enforcer *casbin.Enforcer
 }
 
-// NewCasbinManager 创建新的权限管理器
-func NewCasbinManager(databaseDSN string) (*CasbinManager, error) {
+func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 	var err error
 
 	once.Do(func() {
-		// 初始化 Gorm 适配器
-		adapter, adapterErr := gormadapter.NewAdapter("sqlite3", databaseDSN)
+		// 初始化 ent 适配器
+		adapter, adapterErr := NewAdapterWithClient(entClient)
 		if adapterErr != nil {
-			err = fmt.Errorf("failed to initialize casbin adapter: %v", adapterErr)
+			err = fmt.Errorf("failed to initialize casbin ent adapter: %v", adapterErr)
 			return
 		}
 
@@ -39,7 +37,6 @@ func NewCasbinManager(databaseDSN string) (*CasbinManager, error) {
 			return
 		}
 
-		// 启用日志
 		enforcer.EnableLog(true)
 
 		// 加载策略
@@ -51,10 +48,10 @@ func NewCasbinManager(databaseDSN string) (*CasbinManager, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return &CasbinManager{enforcer: enforcer}, nil
+	return &CasbinManager{enforcer: enforcer}
 }
 
 // GetEnforcer 获取 enforcer 实例

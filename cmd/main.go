@@ -19,7 +19,7 @@ func main() {
 	db := app.DB
 	s3 := app.MinioClient
 	timeout := time.Duration(env.ContextTimeout) * time.Second
-
+	//casbin.NewCasbinManager(db)
 	apiEngine := gin.Default()
 	route.Setup(env, timeout, db, s3, apiEngine)
 	err := apiEngine.Run(":8080")

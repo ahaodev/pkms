@@ -2,7 +2,6 @@ package route
 
 import (
 	"fmt"
-	"log"
 	"pkms/frontend"
 	"time"
 
@@ -28,47 +27,28 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	gin.RedirectTrailingSlash = true
 	frontend.Register(gin)
 
-	// 初始化 Casbin 管理器
-	databaseDSN := env.DBPath
-	if databaseDSN == "" {
-		databaseDSN = "casbin.db" // 默认数据库文件
-	}
-
-	casbinManager, err := casbin.NewCasbinManager(databaseDSN)
-	if err != nil {
-		log.Printf("Failed to initialize Casbin manager: %v", err)
-		// 继续运行，但没有权限控制
-	} else {
-		log.Println("Casbin 权限管理器初始化成功")
-	}
-
-	// 创建 Casbin 中间件
-	var casbinMiddleware *middleware.CasbinMiddleware
-	if casbinManager != nil {
-		casbinMiddleware = middleware.NewCasbinMiddleware(casbinManager)
-	}
-
 	publicRouter := gin.Group(ApiUri)
 	// All Public APIs
 	NewLoginRouter(env, timeout, db, publicRouter)
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
 	protectedRouter := gin.Group(ApiUri)
-	// Middleware to verify AccessToken
+	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+	// 再通过casbin中间件进行权限控制
+	casbinManager := casbin.NewCasbinManager(db)
 
 	// Casbin 权限管理路由（需要认证但不需要特定权限）
-	if casbinManager != nil {
-		casbinRouter := protectedRouter.Group("/casbin")
-		NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)
-	}
+	casbinRouter := protectedRouter.Group("/casbin")
+	NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)
 
 	// Protected routes with permission control
 	projectRouter := protectedRouter.Group("/projects")
-	if casbinMiddleware != nil {
-		// 项目路由需要项目查看权限
-		projectRouter.Use(casbinMiddleware.RequirePermission("project", "view"))
-	}
+	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
+
+	// 项目路由需要项目查看权限
+	projectRouter.Use(casbinMiddleware.RequirePermission("project", "view"))
+
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
