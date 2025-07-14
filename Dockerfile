@@ -20,6 +20,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./
 #-------------------压缩二进制文件------------------------
 FROM backplane/upx AS compressor
 WORKDIR /app
+COPY .env.example /app/.env.example
 COPY --from=builder_go /app/runner .
 RUN upx --best --lzma runner
 
@@ -31,7 +32,7 @@ HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q 
 WORKDIR /app
 # Copy compiled binary and config
 COPY --from=compressor /app/runner .
-COPY .env.example .env
+COPY --from=compressor /app/.env.example .env
 # Run the application
 CMD ["./runner"]
 #CMD ["/bin/sh"]
