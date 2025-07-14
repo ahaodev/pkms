@@ -6,6 +6,6 @@ WORKDIR /root/
 # 只需要复制二进制文件，前端已经嵌入其中
 COPY pkms .
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["./pkms"]
