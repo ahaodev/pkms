@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {Menu, LogOut, User as UserIcon} from "lucide-react";
-import {useAuth} from "@/contexts/simple-auth-context";
+import {useAuth} from "@/contexts/auth-context.tsx";
 import type {HeaderProps} from '@/types';
 
 /**

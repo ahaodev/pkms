@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { AuthContextProvider } from '@/contexts/simple-auth-context';
+import { AuthContextProvider } from '@/contexts/auth-context.tsx';
 
 interface AuthProviderProps {
     children: ReactNode;

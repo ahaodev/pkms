@@ -1,9 +1,11 @@
 services:
   pkms:
-    image: hao88/pkms:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: pkms
     ports:
-      - "55173:80"
+      - "65080:8080"
     environment:
       - NODE_ENV=production
     restart: unless-stopped

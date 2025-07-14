@@ -15,7 +15,6 @@ export async function createProject(project: Omit<Project, 'id' | 'createdAt' | 
         description: project.description,
         icon: project.icon || 'package2',
         created_by: project.createdBy,
-        is_public: project.isPublic || false
     });
     return resp.data;
 }
@@ -33,7 +32,6 @@ export async function updateProject(id: string, update: Partial<Project>): Promi
     if (update.name !== undefined) backendUpdate.name = update.name;
     if (update.description !== undefined) backendUpdate.description = update.description;
     if (update.icon !== undefined) backendUpdate.icon = update.icon;
-    if (update.isPublic !== undefined) backendUpdate.is_public = update.isPublic;
 
     const resp = await apiClient.put(`/api/v1/projects/${id}`, backendUpdate);
     return resp.data;
@@ -82,6 +80,5 @@ export function transformProjectFromBackend(backendProject: any): Project {
         updatedAt: new Date(backendProject.updated_at),
         packageCount: backendProject.package_count || 0,
         createdBy: backendProject.created_by,
-        isPublic: backendProject.is_public || false
     };
 }

@@ -29,7 +29,6 @@ type Project struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 	PackageCount int       `json:"package_count"`
 	CreatedBy    string    `json:"created_by"`
-	IsPublic     bool      `json:"is_public"`
 }
 
 type ProjectRepository interface {

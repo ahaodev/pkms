@@ -24,14 +24,16 @@ export function ProjectList({
 }: ProjectListProps) {
   if (projects.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-          {searchTerm ? '未找到匹配的项目' : '暂无项目'}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {searchTerm ? '尝试调整搜索条件' : '开始创建您的第一个项目'}
-        </p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
+            {searchTerm ? '未找到匹配的项目' : '暂无项目'}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {searchTerm ? '尝试调整搜索条件' : '开始创建您的第一个项目'}
+          </p>
+        </div>
       </div>
     );
   }

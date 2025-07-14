@@ -7,22 +7,6 @@ RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
-#------------------build go---------------------------
-## Go build stage (multi-arch capable)
-#FROM --platform=linux/amd64 golang:1.24-alpine3.22 AS builder_go
-#RUN apk add --no-cache gcc musl-dev ca-certificates tzdata
-#WORKDIR /app
-#COPY go.mod .
-#COPY go.sum .
-#RUN go mod download
-#COPY . .
-#RUN go generate ./...
-#COPY --from=build_web /app/frontend/dist /app/frontend/dist
-## Use build arguments to specify target architecture
-#ARG TARGETARCH
-#RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o runner ./cmd/main.go
-
-
 # 使用基于 Debian 的镜像，自带完整的构建环境
 FROM --platform=linux/amd64 golang:1.24-bullseye AS builder_go
 WORKDIR /app
@@ -49,7 +33,7 @@ WORKDIR /app
 COPY --from=compressor /app/runner .
 COPY .env.example .env
 # Run the application
-#CMD ["./runner"]
-CMD ["/bin/sh"]
+CMD ["./runner"]
+#CMD ["/bin/sh"]
 # Expose required ports
 EXPOSE 8080/tcp

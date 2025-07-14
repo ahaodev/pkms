@@ -1,22 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { usePackages, useUploadPackage, useDeletePackage, useGenerateShareLink } from '@/hooks/use-packages';
+import {useDeletePackage, useGenerateShareLink, usePackages} from '@/hooks/use-packages';
 import { useProjects } from '@/hooks/use-projects';
-import { Package, PackageUpload, UploadProgress } from '@/types/simplified';
+import { Package } from '@/types/simplified';
 import { ShareDialog } from '@/components/share-dialog';
 import {
   PackageLoadingView,
   PackageList,
   PackageEmptyView,
-  PackageUploadDialog,
+  PackageCreateDialog,
   PackageVersionHistoryDialog,
   PackageHeader,
   SEARCH_DEBOUNCE_MS,
   VERSIONS_PER_PAGE,
-  compareVersions,
   getPackageKey,
-  formatFileSize,
   getTypeIcon
 } from '@/components/package';
 import { PackageToolbar } from '@/components/package/PackageToolbar';
@@ -43,8 +41,7 @@ export default function PackagesPage() {
   
   // 上传相关状态
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
-  
+
   // 分享相关状态
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -77,7 +74,6 @@ export default function PackagesPage() {
   });
   const packages = useMemo(() => pageData?.data || [], [pageData?.data]);
   const totalPages = pageData?.totalPages || 1;
-  const uploadPackage = useUploadPackage((progress) => setUploadProgress(progress));
   const deletePackage = useDeletePackage();
   const generateShareLink = useGenerateShareLink();
 
@@ -106,12 +102,6 @@ export default function PackagesPage() {
       }
       grouped[key].push(pkg);
     });
-
-    // 对每个组内的版本进行排序
-    Object.keys(grouped).forEach((key) => {
-      grouped[key].sort((a, b) => compareVersions(a.version, b.version));
-    });
-
     return grouped;
   }, [packages]);
 
@@ -145,27 +135,6 @@ export default function PackagesPage() {
   const getVersionCount = (pkg: Package) => {
     const key = getPackageKey(pkg);
     return groupedPackages[key]?.length || 1;
-  };
-
-  // 上传处理
-  const handleUpload = async (data: PackageUpload) => {
-    try {
-      await uploadPackage.mutateAsync(data);
-      
-      toast({
-        title: '上传成功',
-        description: `包 "${data.name}" 已成功上传。`,
-      });
-      
-      setIsUploadDialogOpen(false);
-      setUploadProgress(null);
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: '上传失败',
-        description: '包上传失败，请重试。',
-      });
-    }
   };
 
   // 删除处理
@@ -220,17 +189,9 @@ export default function PackagesPage() {
 
   // 版本删除处理
   const handleDeleteVersion = async (pkg: Package) => {
-    if (!confirm(`确定要删除版本 "${pkg.version}" 吗？`)) {
-      return;
-    }
 
     try {
       await deletePackage.mutateAsync(pkg.id);
-      toast({
-        title: '版本删除成功',
-        description: `版本 "${pkg.version}" 已成功删除。`,
-      });
-      
       // 删除版本后，检查是否需要关闭对话框
       if (versionHistoryPackage && getPackageKey(pkg) === getPackageKey(versionHistoryPackage)) {
         const key = getPackageKey(pkg);
@@ -271,56 +232,58 @@ export default function PackagesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* 页面头部 */}
-      <PackageHeader onCreateRelease={() => setIsUploadDialogOpen(true)} />
+    <div className="flex flex-col h-full min-h-[calc(100vh-200px)]">
+      <div className="space-y-6 flex-1">
+        {/* 页面头部 */}
+        <PackageHeader onCreatePackage={() => setIsUploadDialogOpen(true)} />
 
-      {/* 工具栏 */}
-      <PackageToolbar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedProjectId={selectedProjectId || 'all'}
-        onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
-        selectedType={selectedType || 'all'}
-        onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        projects={projects}
-        packageCounts={packageCounts}
-        isFiltering={isFiltering}
-      />
+        {/* 工具栏 */}
+        <PackageToolbar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedProjectId={selectedProjectId || 'all'}
+          onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
+          selectedType={selectedType || 'all'}
+          onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          projects={projects}
+          packageCounts={packageCounts}
+          isFiltering={isFiltering}
+        />
 
-      <PackageList
-        displayPackages={packages}
-        viewMode={viewMode}
-        isFiltering={isFiltering}
-        getVersionCount={getVersionCount}
-        getTypeIcon={getTypeIcon}
-        formatFileSize={formatFileSize}
-        handleVersionHistory={handleVersionHistory}
-        handleShare={handleShare}
-        handleDelete={handleDelete}
-      />
+        <PackageList
+          displayPackages={packages}
+          viewMode={viewMode}
+          isFiltering={isFiltering}
+          getVersionCount={getVersionCount}
+          getTypeIcon={getTypeIcon}
+          handleVersionHistory={handleVersionHistory}
+          handleShare={handleShare}
+          handleDelete={handleDelete}
+        />
 
-      {packages.length === 0 && !isLoading && (
-        <PackageEmptyView searchTerm={debouncedSearchTerm} />
-      )}
+        {packages.length === 0 && !isLoading && (
+          <PackageEmptyView searchTerm={debouncedSearchTerm} />
+        )}
+      </div>
 
-      <PackagePagination
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-      />
+      {/* 分页组件始终在底部 */}
+      <div className="mt-auto">
+        {/* 强制更新 */}
+        <PackagePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      </div>
 
-      <PackageUploadDialog
+      <PackageCreateDialog
         open={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
-        onUpload={handleUpload}
         projects={projects}
-        uploadProgress={uploadProgress}
-        isUploading={uploadPackage.isPending}
         initialProjectId={selectedProjectId}
       />
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context.tsx';
 import { Group, GroupPermission } from '@/types/simplified';
 import {
   Dialog,

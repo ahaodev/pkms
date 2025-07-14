@@ -27,7 +27,7 @@ dockers:
   - image_templates:
       - "docker.io/hao88/pkms:{{ .Tag }}"
       - "docker.io/hao88/pkms:latest"
-    dockerfile: DockerfileGoReleaser
+    dockerfile: Dockerfile
     use: buildx
     skip_push: false
     build_flag_templates:

@@ -1,7 +1,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {Package, PackageFilters, PackageUpload, UploadProgress} from '@/types/simplified';
+import {Package, PackageFilters} from '@/types/simplified';
 import * as PackagesAPI from '@/lib/api/packages';
-import {useAuth} from '@/contexts/simple-auth-context';
+import {useAuth} from '@/contexts/auth-context.tsx';
 
 export const usePackages = (filters?: PackageFilters) => {
     const {user, isAdmin} = useAuth();
@@ -38,8 +38,6 @@ export const usePackages = (filters?: PackageFilters) => {
             console.log('usePackages - before filtering:', filtered.length);
             if (!isAdmin()) {
                 const originalCount = filtered.length;
-                // filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
-                // 临时注释权限过滤，显示所有包
                 console.log('usePackages - 权限过滤已临时禁用');
                 console.log('usePackages - filtered packages:', `${originalCount} -> ${filtered.length}`);
             }
@@ -53,20 +51,6 @@ export const usePackages = (filters?: PackageFilters) => {
     });
 };
 
-export const useUploadPackage = (onProgress?: (progress: UploadProgress) => void) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (upload: PackageUpload) => {
-            const response = await PackagesAPI.uploadPackage(upload, onProgress);
-            return PackagesAPI.transformPackageFromBackend(response.data);
-        },
-        onSuccess: (_, upload) => {
-            queryClient.invalidateQueries({queryKey: ['packages']});
-            queryClient.invalidateQueries({queryKey: ['packages', 'project', upload.projectId]});
-        },
-    });
-};
 
 export const useDeletePackage = () => {
     const queryClient = useQueryClient();
@@ -207,7 +191,7 @@ export const usePackageVersions = (packageName?: string, packageType?: string) =
             }
             let filtered = result;
             if (!isAdmin()) {
-                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId) || pkg.isPublic);
+                filtered = filtered.filter((pkg: Package) => canAccessProject(pkg.projectId));
             }
             // 按版本排序（最新版本在前）
             return filtered.sort((a, b) => {

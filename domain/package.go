@@ -30,11 +30,9 @@ type CreatePackageRequest struct {
 }
 
 // PackageUploadRequest 上传包文件创建发布版本的请求
-type PackageUploadRequest struct {
-	ProjectID    string `form:"project_id" binding:"required"`
+type ReleaseUploadRequest struct {
 	PackageID    string `form:"package_id"`
 	Name         string `form:"name"`
-	Description  string `form:"description"`
 	Version      string `form:"version" binding:"required"`
 	Type         string `form:"type"`
 	TagName      string `form:"tag_name"`
@@ -43,7 +41,6 @@ type PackageUploadRequest struct {
 	IsPrerelease bool   `form:"is_prerelease"`
 	IsLatest     bool   `form:"is_latest"`
 	IsDraft      bool   `form:"is_draft"`
-	IsPublic     bool   `form:"is_public"`
 
 	// 文件相关字段（不通过JSON传输）
 	File       io.Reader `json:"-"`
@@ -67,15 +64,12 @@ type PackageUsecase interface {
 	CreatePackage(c context.Context, pkg *Package) error
 	GetPackageByID(c context.Context, id string) (*Package, error)
 	GetPackagesByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
-	UpdatePackage(c context.Context, pkg *Package) error
 	DeletePackage(c context.Context, id string) error
 
 	CreateRelease(c context.Context, release *Release) error
 	GetReleaseByID(c context.Context, id string) (*Release, error)
 	GetReleasesByPackage(c context.Context, packageID string) ([]*Release, error)
 	GetLatestRelease(c context.Context, packageID string) (*Release, error)
-	UpdateRelease(c context.Context, release *Release) error
-	DeleteRelease(c context.Context, id string) error
 	IncrementDownloadCount(c context.Context, releaseID string) error
 	SetReleaseAsLatest(c context.Context, packageID, releaseID string) error
 }

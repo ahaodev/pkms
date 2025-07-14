@@ -1,7 +1,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {Project} from '@/types/simplified';
 import * as ProjectsAPI from '@/lib/api/projects';
-import {useAuth} from '@/contexts/simple-auth-context';
+import {useAuth} from '@/contexts/auth-context.tsx';
 
 export const useProjects = () => {
     const {user} = useAuth();
@@ -32,11 +32,10 @@ export const useCreateProject = () => {
     const {user, isAdmin, assignProjectToUser} = useAuth();
 
     return useMutation({
-        mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy' | 'isPublic'>) => {
+        mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy'>) => {
             const projectData = {
                 ...project,
                 createdBy: user?.id || '',
-                isPublic: false // 新项目默认不公开
             };
 
             const response = await ProjectsAPI.createProject(projectData);

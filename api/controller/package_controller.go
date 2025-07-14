@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"pkms/internal/constants"
+	"strconv"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -24,13 +24,18 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 	projectID := c.Query("project_id")
 
 	if p := c.Query("page"); p != "" {
-		fmt.Sscanf(p, "%d", &page)
+		if v, err := strconv.Atoi(p); err == nil {
+			page = v
+		}
 	}
 	if ps := c.Query("pageSize"); ps != "" {
-		fmt.Sscanf(ps, "%d", &pageSize)
+		if v, err := strconv.Atoi(ps); err == nil {
+			pageSize = v
+		}
 	}
 
-	// 如果没有project_id，返回空列表而不是错误，这样前端至少能显示页面结构
+	// 如果没有project_id，查询所有有权限的包
+
 	if projectID == "" {
 		c.JSON(http.StatusOK, domain.RespPageSuccess([]*domain.Package{}, 0, page, pageSize))
 		return
@@ -51,7 +56,7 @@ func (pc *PackageController) CreatePackage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
-
+	pkg.CreatedBy = c.GetString(constants.UserID)
 	if err := pc.PackageUsecase.CreatePackage(c, &pkg); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
@@ -81,8 +86,8 @@ func (pc *PackageController) DeletePackage(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("Package deleted successfully"))
 }
 
-// UploadPackage 上传包
-func (pc *PackageController) UploadPackage(c *gin.Context) {
+// UploadRelease 上传包
+func (pc *PackageController) UploadRelease(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	// 获取上传的文件
 	file, header, err := c.Request.FormFile("file")
@@ -93,21 +98,20 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 	defer file.Close()
 
 	// 构建上传请求
-	req := &domain.PackageUploadRequest{
-		ProjectID:   c.PostForm("project_id"),
-		Name:        c.PostForm("name"),
-		Description: c.PostForm("description"),
-		Version:     c.PostForm("version"),
-		Type:        c.PostForm("type"),
-		Changelog:   c.PostForm("changelog"),
-		File:        file,
-		FileName:    header.Filename,
-		FileSize:    header.Size,
-		FileHeader:  header.Header.Get("Content-Type"),
+	req := &domain.ReleaseUploadRequest{
+		PackageID:  c.PostForm("package_id"),
+		Name:       c.PostForm("name"),
+		Version:    c.PostForm("version"),
+		Type:       c.PostForm("type"),
+		Changelog:  c.PostForm("changelog"),
+		File:       file,
+		FileName:   header.Filename,
+		FileSize:   header.Size,
+		FileHeader: header.Header.Get("Content-Type"),
 	}
 
 	// 验证必需字段
-	if req.ProjectID == "" || req.Name == "" || req.Version == "" {
+	if req.PackageID == "" || req.Name == "" || req.Version == "" {
 		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: project_id, name, version"))
 		return
 	}
@@ -116,10 +120,6 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
 		req.IsLatest = true
 	}
-	if isPublic := c.PostForm("is_public"); isPublic == "true" {
-		req.IsPublic = true
-	}
-
 	// 调用usecase进行发布版本创建
 	// 首先需要确保包存在或创建包
 	release := &domain.Release{
@@ -127,13 +127,12 @@ func (pc *PackageController) UploadPackage(c *gin.Context) {
 		Version:      req.Version,
 		TagName:      req.TagName,
 		Title:        req.Title,
-		Description:  req.Changelog,
+		ChangeLog:    req.Changelog,
 		FileName:     req.FileName,
 		FileSize:     req.FileSize,
 		IsPrerelease: req.IsPrerelease,
 		IsLatest:     req.IsLatest,
 		IsDraft:      req.IsDraft,
-		IsPublic:     req.IsPublic,
 		CreatedBy:    userID,
 	}
 
@@ -185,8 +184,7 @@ func (pc *PackageController) GetPackageVersions(c *gin.Context) {
 func (pc *PackageController) CreateShareLink(c *gin.Context) {
 	id := c.Param("id")
 	var request struct {
-		ExpiryHours int  `json:"expiry_hours"`
-		IsPublic    bool `json:"is_public"`
+		ExpiryHours int `json:"expiry_hours"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -200,7 +198,6 @@ func (pc *PackageController) CreateShareLink(c *gin.Context) {
 		"share_token":  "generated_token_here",
 		"share_url":    "/api/v1/packages/share/generated_token_here",
 		"expiry_hours": request.ExpiryHours,
-		"is_public":    request.IsPublic,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))

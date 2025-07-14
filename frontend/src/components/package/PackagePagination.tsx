@@ -19,7 +19,7 @@ interface PackagePaginationProps {
 
 export function PackagePagination({ page, pageSize, totalPages, onPageChange, onPageSizeChange }: PackagePaginationProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-8 mb-4 gap-2">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-end py-2 gap-3 border-t bg-background">
       <Select value={pageSize.toString()} onValueChange={v => onPageSizeChange(Number(v))}>
         <SelectTrigger className="w-24">
           <SelectValue />
@@ -30,6 +30,7 @@ export function PackagePagination({ page, pageSize, totalPages, onPageChange, on
           ))}
         </SelectContent>
       </Select>
+      
       <Pagination>
         <PaginationContent>
           <PaginationItem>
@@ -39,6 +40,7 @@ export function PackagePagination({ page, pageSize, totalPages, onPageChange, on
               tabIndex={page <= 1 ? -1 : 0}
             />
           </PaginationItem>
+          
           {Array.from({ length: totalPages }).map((_, idx) => {
             if (
               idx + 1 === 1 ||
@@ -68,6 +70,7 @@ export function PackagePagination({ page, pageSize, totalPages, onPageChange, on
             }
             return null;
           })}
+          
           <PaginationItem>
             <PaginationNext
               onClick={() => page < totalPages && onPageChange(page + 1)}

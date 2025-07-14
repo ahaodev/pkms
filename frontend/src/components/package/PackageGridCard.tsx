@@ -1,33 +1,37 @@
-import { Download, Share2, Trash2, FileText, History } from 'lucide-react';
+import { Download, Share2, Trash2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Package } from '@/types/simplified';
+import { ExtendedPackage } from '@/types/simplified';
 
 interface PackageGridCardProps {
-  pkg: Package;
-  getVersionCount: (pkg: Package) => number;
-  getTypeIcon: (type: Package['type']) => React.ReactNode;
-  formatFileSize: (bytes: number) => string;
-  handleVersionHistory: (pkg: Package) => void;
-  handleShare: (pkg: Package) => void;
-  handleDelete: (pkg: Package) => void;
+  pkg: ExtendedPackage;
+  getVersionCount: (pkg: ExtendedPackage) => number;
+  getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
+  handleVersionHistory: (pkg: ExtendedPackage) => void;
+  handleShare: (pkg: ExtendedPackage) => void;
+  handleDelete: (pkg: ExtendedPackage) => void;
 }
 
-export const PackageGridCard = ({ 
+const PackageGridCard = ({ 
   pkg, 
   getVersionCount, 
   getTypeIcon, 
-  formatFileSize,
   handleVersionHistory,
   handleShare,
   handleDelete
 }: PackageGridCardProps) => {
   const versionCount = getVersionCount(pkg);
-  const hasMultipleVersions = versionCount > 1;
+
+  // 只在点击非按钮区域时弹窗
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 如果点击的是按钮或其子元素，则不弹窗
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return;
+    handleVersionHistory(pkg);
+  };
 
   return (
-    <Card key={pkg.id} className="hover:shadow-lg transition-shadow">
+    <Card key={pkg.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCardClick}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-2 min-w-0 flex-1">
@@ -35,20 +39,9 @@ export const PackageGridCard = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="text-lg truncate">{pkg.name}</CardTitle>
               <CardDescription className="mt-1 flex items-center gap-2">
-                <span>v{pkg.version}</span>
-                {hasMultipleVersions && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleVersionHistory(pkg)}
-                    className="p-0 h-auto"
-                  >
-                    <Badge variant="secondary" className="text-xs">
-                      {versionCount} 版本
-                      <History className="ml-1 h-3 w-3" />
-                    </Badge>
-                  </Button>
-                )}
+                <span className="text-xs text-muted-foreground">
+                  {versionCount} 版本
+                </span>
               </CardDescription>
             </div>
           </div>
@@ -56,21 +49,21 @@ export const PackageGridCard = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open(`/api/packages/${pkg.id}/download`, '_blank')}
+              onClick={e => { e.stopPropagation(); window.open(`/api/packages/${pkg.id}/download`, '_blank'); }}
             >
               <Download className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleShare(pkg)}
+              onClick={e => { e.stopPropagation(); handleShare(pkg); }}
             >
               <Share2 className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(pkg)}
+              onClick={e => { e.stopPropagation(); handleDelete(pkg); }}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -81,21 +74,7 @@ export const PackageGridCard = ({
         <p className="text-sm text-muted-foreground mb-3">
           {pkg.description}
         </p>
-        
-        <div className="flex flex-wrap gap-1 mb-3">
-          <Badge variant="outline">{pkg.type}</Badge>
-          {pkg.isPublic && <Badge variant="outline">公开</Badge>}
-        </div>
-
         <div className="space-y-2 text-xs text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <span>文件大小</span>
-            <span>{formatFileSize(pkg.fileSize)}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span>下载次数</span>
-            <span>{pkg.downloadCount}</span>
-          </div>
           <div className="flex items-center justify-between">
             <span>创建时间</span>
             <span>{pkg.createdAt.toLocaleDateString()}</span>
@@ -115,3 +94,5 @@ export const PackageGridCard = ({
     </Card>
   );
 };
+
+export { PackageGridCard };

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context.tsx';
 import { useProjects } from '@/hooks/use-projects';
 import { User, UserRole } from '@/types/simplified';
 import { UserHeader, UserFilters, UserList, UserDialog } from '@/components/user';

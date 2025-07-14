@@ -3,9 +3,9 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
-# 只需要复制二进制文件，前端已经嵌入其中
+# 只需要复制二进制文件，前后都已经在releaser中处理了
 COPY pkms .
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["./pkms"]
