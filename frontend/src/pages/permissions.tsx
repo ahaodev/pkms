@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Trash2, Plus, Shield, Users, Settings, Eye, Edit, Trash } from 'lucide-react';
+import { Trash2, Plus, Shield, Users, Settings, Eye} from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
 
@@ -66,6 +66,7 @@ const PermissionsPage: React.FC = () => {
   }, []);
 
   const fetchData = async () => {
+    console.log(loading);
     setLoading(true);
     try {
       await Promise.all([
