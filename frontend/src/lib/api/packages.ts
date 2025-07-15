@@ -106,7 +106,7 @@ export async function getPackageVersionsByNameAndType(packageName: string, packa
 }
 
 // 创建分享链接
-export async function createShareLink(id: string, options: { expiryHours?: number;}): Promise<ApiResponse<{ package_id: string; share_token: string; share_url: string; expiry_hours: number; is_public: boolean }>> {
+export async function createShareLink(id: string, options: { expiryHours?: number;}): Promise<ApiResponse<{ package_id: string; share_token: string; share_url: string; expiry_hours: number }>> {
     const resp = await apiClient.post(`/api/v1/packages/${id}/share`, {
         expiry_hours: options.expiryHours || 24,
     });
