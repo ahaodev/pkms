@@ -26,25 +26,14 @@ func NewCasbinMiddleware(casbinManager *casbin.CasbinManager) *CasbinMiddleware 
 func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		//userID := c.GetString(constants.UserID)
+		userRole := c.GetString(constants.UserRole)
 
 		// 获取域（可以从路径参数、查询参数或默认值中获取）
 		domainStr := m.extractDomain(c)
 
 		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userIDStr, domainStr, object, action)
+		hasPermission, err := m.casbinManager.CheckPermission(userRole, domainStr, object, action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -65,19 +54,7 @@ func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerF
 func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		userID := c.GetString(constants.UserID)
 
 		// 获取域
 		domainStr := m.extractDomain(c)
@@ -89,7 +66,7 @@ func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.Hand
 				object := permission[0]
 				action := permission[1]
 
-				hasPermission, err := m.casbinManager.CheckPermission(userIDStr, domainStr, object, action)
+				hasPermission, err := m.casbinManager.CheckPermission(userID, domainStr, object, action)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 					c.Abort()
@@ -117,25 +94,12 @@ func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.Hand
 func (m *CasbinMiddleware) RequireRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
-
+		userID := c.GetString(constants.UserID)
 		// 获取域
 		domainStr := m.extractDomain(c)
 
 		// 获取用户角色
-		userRoles := m.casbinManager.GetRolesForUser(userIDStr, domainStr)
+		userRoles := m.casbinManager.GetRolesForUser(userID, domainStr)
 
 		// 检查是否有所需角色
 		hasRole := false
@@ -160,25 +124,13 @@ func (m *CasbinMiddleware) RequireRole(role string) gin.HandlerFunc {
 func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		userID := c.GetString(constants.UserID)
 
 		// 获取域
 		domainStr := m.extractDomain(c)
 
 		// 获取用户角色
-		userRoles := m.casbinManager.GetRolesForUser(userIDStr, domainStr)
+		userRoles := m.casbinManager.GetRolesForUser(userID, domainStr)
 
 		// 检查是否有任一所需角色
 		hasAnyRole := false

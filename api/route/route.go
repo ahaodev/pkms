@@ -24,9 +24,9 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 		fmt.Printf("server: %s", err)
 	}
 	gin.MaxMultipartMemory = 1000 << 20 // 1000 MB
-	gin.RedirectTrailingSlash = true
-	frontend.Register(gin)
 
+	frontend.Register(gin)
+	gin.RedirectTrailingSlash = true
 	publicRouter := gin.Group(ApiUri)
 	// All Public APIs
 	NewLoginRouter(env, timeout, db, publicRouter)
@@ -37,7 +37,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	// 再通过casbin中间件进行权限控制
 	casbinManager := casbin.NewCasbinManager(db)
-
+	casbinManager.InitializeDefaultPolicies()
 	// Casbin 权限管理路由（需要认证但不需要特定权限）
 	casbinRouter := protectedRouter.Group("/casbin")
 	NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)

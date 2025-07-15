@@ -18,7 +18,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			authToken := t[1]
 			authorized, err := tokenutil.IsAuthorized(authToken, secret)
 			if authorized {
-				userID, err := tokenutil.ExtractIDFromToken(authToken, secret)
+				userID, userRole, err := tokenutil.ExtractIDRoleFromToken(authToken, secret)
 				if err != nil {
 					c.JSON(http.StatusUnauthorized, domain.RespError(err.Error()))
 					c.Abort()
@@ -26,6 +26,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 				}
 
 				c.Set(constants.UserID, userID)
+				c.Set(constants.UserRole, userRole)
 				c.Next()
 				return
 			}

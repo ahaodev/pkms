@@ -119,21 +119,21 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"admin", "*", "*", "*"},
 
 		// 项目管理员权限
-		{"project_admin", "*", "project", "*"},
-		{"project_admin", "*", "package", "*"},
-		{"project_admin", "*", "file", "*"},
-		{"project_admin", "*", "user", "view"},
-		{"project_admin", "*", "group", "*"},
-		{"project_admin", "*", "permission", "*"},
+		{"pm", "*", "project", "*"},
+		{"pm", "*", "package", "*"},
+		{"pm", "*", "file", "*"},
+		{"pm", "*", "user", "view"},
+		{"pm", "*", "group", "*"},
+		{"pm", "*", "permission", "*"},
 
 		// 开发者权限
-		{"developer", "*", "project", "view"},
-		{"developer", "*", "package", "view"},
-		{"developer", "*", "package", "create"},
-		{"developer", "*", "package", "edit"},
-		{"developer", "*", "file", "view"},
-		{"developer", "*", "file", "create"},
-		{"developer", "*", "file", "edit"},
+		{"dev", "*", "project", "view"},
+		{"dev", "*", "package", "view"},
+		{"dev", "*", "package", "create"},
+		{"dev", "*", "package", "edit"},
+		{"dev", "*", "file", "view"},
+		{"dev", "*", "file", "create"},
+		{"dev", "*", "file", "edit"},
 
 		// 查看者权限
 		{"viewer", "*", "project", "view"},
