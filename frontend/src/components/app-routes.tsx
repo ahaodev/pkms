@@ -81,22 +81,12 @@ function PublicRoutes() {
 export function AppRoutes() {
     const { user, isLoading } = useAuth();
 
-    // Debug logging
-    console.log('AppRoutes render:', { 
-        user: user?.username, 
-        userId: user?.id,
-        isLoading,
-        hasStoredUser: !!localStorage.getItem('pkms_user'),
-        hasStoredToken: !!localStorage.getItem('pkms_access_token'),
-        timestamp: new Date().toISOString()
-    });
-
     // Show loading screen while checking authentication
     if (isLoading) {
         console.log('AppRoutes: showing loading screen');
         return <AppLoader />;
     }
-
+    console.log(user)
     // Render appropriate routes based on authentication status
     if (user) {
         console.log('AppRoutes: user authenticated, showing protected routes');

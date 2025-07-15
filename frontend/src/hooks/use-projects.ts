@@ -2,6 +2,7 @@ import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {Project} from '@/types/simplified';
 import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/contexts/auth-context.tsx';
+import {ACCESS_TOKEN} from "@/types/constants.ts";
 
 export const useProjects = () => {
     const {user} = useAuth();
@@ -12,7 +13,7 @@ export const useProjects = () => {
             const response = await ProjectsAPI.getProjects();
             return response.data.map(ProjectsAPI.transformProjectFromBackend);
         },
-        enabled: !!user && !!localStorage.getItem('pkms_access_token'), // 只有用户存在且有token时才执行
+        enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN), // 只有用户存在且有token时才执行
     });
 };
 

@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useState} from 'react';
 import {CreateGroupRequest, Group, UpdateGroupRequest, User} from '@/types/simplified';
 import * as authAPI from '@/lib/api/auth';
-import {ACCESS_TOKEN, REFRESH_TOKEN, USER} from "@/types/constants.ts";
+import {ACCESS_TOKEN, REFRESH_TOKEN} from "@/types/constants.ts";
 import {jwtDecode} from "jwt-decode";
 
 interface AuthContextType {
@@ -26,6 +26,7 @@ interface AuthContextType {
     getUserGroups: (userId: string) => Group[];
     getGroupMembers: (groupId: string) => User[];
 }
+
 function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -107,10 +108,10 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                             .then(response => {
                                 if (response.code === 0 && response.data) {
                                     setUser(response.data);
-                                    localStorage.setItem(USER, JSON.stringify(response.data));
                                 }
                             })
-                            .catch(() => {
+                            .catch((e) => {
+                                console.log(e)
                             })
                             .finally(() => setIsValidatingToken(false));
                     }, 500);
@@ -131,7 +132,6 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
                 const userResponse = await authAPI.validateToken();
                 if (userResponse.code === 0 && userResponse.data) {
                     setUser(userResponse.data);
-                    localStorage.setItem(USER, JSON.stringify(userResponse.data));
                 }
                 setIsLoading(false);
                 return true;
@@ -146,7 +146,6 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem(USER);
         localStorage.removeItem(ACCESS_TOKEN);
         localStorage.removeItem(REFRESH_TOKEN);
     };
@@ -191,7 +190,6 @@ export function AuthContextProvider({children}: { children: React.ReactNode }) {
         });
         if (user && user.id === userId && updatedUser) {
             setUser(updatedUser);
-            localStorage.setItem(USER, JSON.stringify(updatedUser));
         }
         return updatedUser!;
     };

@@ -1,4 +1,5 @@
 import axios from "axios";
+import {ACCESS_TOKEN} from "@/types/constants.ts";
 
 
 const getApiBaseURL = () => {
@@ -18,7 +19,7 @@ apiClient.interceptors.request.use((config: any) => {
     console.log('API Request:', config.method?.toUpperCase(), config.url);
    
     // 从localStorage获取token
-    const token = localStorage.getItem('pkms_access_token');
+    const token = localStorage.getItem(ACCESS_TOKEN);
     if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;
@@ -49,9 +50,8 @@ apiClient.interceptors.response.use(
             // 只有在非登录接口且非 profile 验证接口时才清除令牌和重定向
             if (!requestUrl.includes('/login') && !requestUrl.includes('/users/profile')) {
                 console.log('Clearing tokens and redirecting to login due to 401 on:', requestUrl);
-                localStorage.removeItem('pkms_access_token');
-                localStorage.removeItem('pkms_refresh_token');
-                localStorage.removeItem('pkms_user');
+                localStorage.removeItem(ACCESS_TOKEN);
+                localStorage.removeItem(ACCESS_TOKEN);
                 // 避免无限重定向，检查当前是否已经在登录页
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = '/login';
@@ -59,7 +59,7 @@ apiClient.interceptors.response.use(
             } else if (requestUrl.includes('/users/profile')) {
                 console.log('Profile validation failed with 401, clearing only access token but keeping user logged in');
                 // profile 验证失败时只清除访问 token，保留用户状态
-                localStorage.removeItem('pkms_access_token');
+                localStorage.removeItem(ACCESS_TOKEN);
                 // 不清除 refresh token，因为可能需要用它来获取新的 access token
                 // 不清除 user 数据，保持用户登录状态
             } else if (requestUrl.includes('/login')) {
