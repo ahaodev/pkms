@@ -34,7 +34,7 @@ function RouteGuard({ children, requiresAdmin = false }: RouteGuardProps) {
 // Protected routes for authenticated users
 function ProtectedRoutes() {
     const protectedRoutes = routes.filter(route => route.requiresAuth);
-    
+    console.log(protectedRoutes)
     return (
         <Layout>
             <Routes>
