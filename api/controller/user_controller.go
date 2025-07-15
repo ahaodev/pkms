@@ -124,7 +124,6 @@ func (uc *UserController) UnassignUserFromProject(c *gin.Context) {
 
 // GetProfile 获取当前用户资料
 func (uc *UserController) GetProfile(c *gin.Context) {
-	// 从 JWT token 中获取用户ID
 	userID := c.GetString(constants.UserID)
 	user, err := uc.UserUsecase.GetByID(c, userID)
 	if err != nil {

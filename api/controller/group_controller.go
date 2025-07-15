@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -103,16 +104,12 @@ func (gc *GroupController) AddGroupMember(c *gin.Context) {
 	}
 
 	// 获取当前用户ID作为添加者
-	adderID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
-		return
-	}
+	adderID := c.GetString(constants.UserID)
 
 	membership := &domain.GroupMembership{
 		UserID:  request.UserID,
 		GroupID: groupID,
-		AddedBy: adderID.(string),
+		AddedBy: adderID,
 	}
 
 	if err := gc.GroupUsecase.AddMember(c, membership); err != nil {
