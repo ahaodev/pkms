@@ -164,19 +164,7 @@ func (m *CasbinMiddleware) HasPermission(userID, object, action string) bool {
 func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		userID := c.GetString(constants.UserID)
 
 		// 获取项目ID（可选）
 		projectID := c.Param("project_id")
@@ -185,7 +173,7 @@ func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFu
 		}
 
 		// 检查项目权限
-		hasPermission, err := m.casbinManager.CheckPermission(userIDStr, "project", action)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, "project", action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -206,19 +194,7 @@ func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFu
 func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		userID := c.GetString(constants.UserID)
 
 		// 获取包名（可选）
 		packageName := c.Param("package_name")
@@ -227,7 +203,7 @@ func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFu
 		}
 
 		// 检查包权限
-		hasPermission, err := m.casbinManager.CheckPermission(userIDStr, "package", action)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, "package", action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -248,22 +224,10 @@ func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFu
 func (m *CasbinMiddleware) RequireSidebarPermission(item string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID, exists := c.Get(constants.UserID)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-			c.Abort()
-			return
-		}
-
-		userIDStr, ok := userID.(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-			c.Abort()
-			return
-		}
+		userID := c.GetString(constants.UserID)
 
 		// 检查侧边栏权限
-		hasPermission, err := m.casbinManager.CheckPermission(userIDStr, "sidebar", item)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, "sidebar", item)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()

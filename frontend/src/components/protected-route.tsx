@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({children, requiredRoles = []}: ProtectedRouteProps) {
-    const {isAuthenticated, loading, user} = useAuth();
+    const {isLoading, user} = useAuth()
     const location = useLocation();
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="flex flex-col items-center space-y-4">
@@ -22,13 +22,13 @@ export function ProtectedRoute({children, requiredRoles = []}: ProtectedRoutePro
         );
     }
 
-    if (!isAuthenticated) {
+    if (!user) {
         return <Navigate to="/login" state={{from: location}} replace/>;
     }
 
     // Check for required roles
     if (requiredRoles.length > 0) {
-        const userRoles = user?.roles || [];
+        const userRoles = user?.role || [];
         const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
 
         if (!hasRequiredRole) {

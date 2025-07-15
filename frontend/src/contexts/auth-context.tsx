@@ -4,6 +4,28 @@ import * as authAPI from '@/lib/api/auth';
 import {ACCESS_TOKEN, REFRESH_TOKEN, USER} from "@/types/constants.ts";
 import {jwtDecode} from "jwt-decode";
 
+interface AuthContextType {
+    user: User | null;
+    login: (username: string, password: string) => Promise<boolean>;
+    logout: () => void;
+    isLoading: boolean;
+    isAdmin: () => boolean;
+    canAccessProject: (projectId: string) => boolean;
+    getAllUsers: () => User[];
+    createUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<User>;
+    updateUser: (userId: string, userData: Partial<User>) => Promise<User>;
+    deleteUser: (userId: string) => Promise<void>;
+    assignProjectToUser: (userId: string, projectId: string) => Promise<void>;
+    // 组管理方法
+    getAllGroups: () => Group[];
+    createGroup: (groupData: CreateGroupRequest) => Promise<Group>;
+    updateGroup: (groupId: string, groupData: UpdateGroupRequest) => Promise<Group>;
+    deleteGroup: (groupId: string) => Promise<void>;
+    addUserToGroup: (userId: string, groupId: string) => Promise<void>;
+    removeUserFromGroup: (userId: string, groupId: string) => Promise<void>;
+    getUserGroups: (userId: string) => Group[];
+    getGroupMembers: (groupId: string) => User[];
+}
 function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

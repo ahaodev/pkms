@@ -37,7 +37,6 @@ export function PackageUploadDialog({
     type: 'android',
     version: '',
     changelog: '',
-    isPublic: false
   });
 
   const handleUpload = async () => {
@@ -58,10 +57,10 @@ export function PackageUploadDialog({
         type: 'android',
         version: '',
         changelog: '',
-        isPublic: false
       });
     } catch (error) {
       // 错误处理由父组件负责
+      console.log(error)
     }
   };
 
@@ -75,7 +74,6 @@ export function PackageUploadDialog({
         type: 'android',
         version: '',
         changelog: '',
-        isPublic: false
       });
       onClose();
     }

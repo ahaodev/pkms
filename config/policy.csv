@@ -1,0 +1,3 @@
+sub,obj,act,eft
+*,users/profile,GET,allow
+
