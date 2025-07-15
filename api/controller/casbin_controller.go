@@ -5,7 +5,6 @@ import (
 	"pkms/domain"
 	"pkms/internal/casbin"
 	"pkms/internal/constants"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +24,6 @@ func NewCasbinController(casbinManager *casbin.CasbinManager) *CasbinController 
 // AddPolicyRequest 添加策略请求
 type AddPolicyRequest struct {
 	UserID string `json:"user_id" binding:"required"`
-	Domain string `json:"domain" binding:"required"`
 	Object string `json:"object" binding:"required"`
 	Action string `json:"action" binding:"required"`
 }
@@ -33,7 +31,6 @@ type AddPolicyRequest struct {
 // RemovePolicyRequest 移除策略请求
 type RemovePolicyRequest struct {
 	UserID string `json:"user_id" binding:"required"`
-	Domain string `json:"domain" binding:"required"`
 	Object string `json:"object" binding:"required"`
 	Action string `json:"action" binding:"required"`
 }
@@ -42,20 +39,31 @@ type RemovePolicyRequest struct {
 type AddRoleRequest struct {
 	UserID string `json:"user_id" binding:"required"`
 	Role   string `json:"role" binding:"required"`
-	Domain string `json:"domain" binding:"required"`
 }
 
 // RemoveRoleRequest 移除角色请求
 type RemoveRoleRequest struct {
 	UserID string `json:"user_id" binding:"required"`
 	Role   string `json:"role" binding:"required"`
-	Domain string `json:"domain" binding:"required"`
 }
 
 // CheckPermissionRequest 检查权限请求
 type CheckPermissionRequest struct {
 	UserID string `json:"user_id" binding:"required"`
-	Domain string `json:"domain" binding:"required"`
+	Object string `json:"object" binding:"required"`
+	Action string `json:"action" binding:"required"`
+}
+
+// AddRolePolicyRequest 添加角色权限请求
+type AddRolePolicyRequest struct {
+	Role   string `json:"role" binding:"required"`
+	Object string `json:"object" binding:"required"`
+	Action string `json:"action" binding:"required"`
+}
+
+// RemoveRolePolicyRequest 移除角色权限请求
+type RemoveRolePolicyRequest struct {
+	Role   string `json:"role" binding:"required"`
 	Object string `json:"object" binding:"required"`
 	Action string `json:"action" binding:"required"`
 }
@@ -63,9 +71,14 @@ type CheckPermissionRequest struct {
 // UserPermissionsResponse 用户权限响应
 type UserPermissionsResponse struct {
 	UserID      string     `json:"user_id"`
-	Domain      string     `json:"domain"`
 	Permissions [][]string `json:"permissions"`
 	Roles       []string   `json:"roles"`
+}
+
+// RolePermissionsResponse 角色权限响应
+type RolePermissionsResponse struct {
+	Role        string     `json:"role"`
+	Permissions [][]string `json:"permissions"`
 }
 
 // AddPolicy 添加权限策略
@@ -76,7 +89,7 @@ func (cc *CasbinController) AddPolicy(c *gin.Context) {
 		return
 	}
 
-	added, err := cc.casbinManager.AddPolicy(req.UserID, req.Domain, req.Object, req.Action)
+	added, err := cc.casbinManager.AddPolicy(req.UserID, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("添加策略失败: "+err.Error()))
 		return
@@ -98,7 +111,7 @@ func (cc *CasbinController) RemovePolicy(c *gin.Context) {
 		return
 	}
 
-	removed, err := cc.casbinManager.RemovePolicy(req.UserID, req.Domain, req.Object, req.Action)
+	removed, err := cc.casbinManager.RemovePolicy(req.UserID, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("移除策略失败: "+err.Error()))
 		return
@@ -120,7 +133,7 @@ func (cc *CasbinController) AddRole(c *gin.Context) {
 		return
 	}
 
-	added, err := cc.casbinManager.AddRoleForUser(req.UserID, req.Role, req.Domain)
+	added, err := cc.casbinManager.AddRoleForUser(req.UserID, req.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("添加角色失败: "+err.Error()))
 		return
@@ -142,7 +155,7 @@ func (cc *CasbinController) RemoveRole(c *gin.Context) {
 		return
 	}
 
-	removed, err := cc.casbinManager.DeleteRoleForUser(req.UserID, req.Role, req.Domain)
+	removed, err := cc.casbinManager.DeleteRoleForUser(req.UserID, req.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("移除角色失败: "+err.Error()))
 		return
@@ -164,7 +177,7 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 		return
 	}
 
-	hasPermission, err := cc.casbinManager.CheckPermission(req.UserID, req.Domain, req.Object, req.Action)
+	hasPermission, err := cc.casbinManager.CheckPermission(req.UserID, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 		return
@@ -173,7 +186,6 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 	response := gin.H{
 		"has_permission": hasPermission,
 		"user_id":        req.UserID,
-		"domain":         req.Domain,
 		"object":         req.Object,
 		"action":         req.Action,
 	}
@@ -189,17 +201,11 @@ func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 		return
 	}
 
-	domainParam := c.Query("domain")
-	if domainParam == "" {
-		domainParam = "*"
-	}
-
-	permissions := cc.casbinManager.GetPermissionsForUser(userID, domainParam)
-	roles := cc.casbinManager.GetRolesForUser(userID, domainParam)
+	permissions := cc.casbinManager.GetPermissionsForUser(userID)
+	roles := cc.casbinManager.GetRolesForUser(userID)
 
 	response := UserPermissionsResponse{
 		UserID:      userID,
-		Domain:      domainParam,
 		Permissions: permissions,
 		Roles:       roles,
 	}
@@ -215,16 +221,10 @@ func (cc *CasbinController) GetUserRoles(c *gin.Context) {
 		return
 	}
 
-	domainParam := c.Query("domain")
-	if domainParam == "" {
-		domainParam = "*"
-	}
-
-	roles := cc.casbinManager.GetRolesForUser(userID, domainParam)
+	roles := cc.casbinManager.GetRolesForUser(userID)
 
 	response := gin.H{
 		"user_id": userID,
-		"domain":  domainParam,
 		"roles":   roles,
 	}
 
@@ -235,21 +235,15 @@ func (cc *CasbinController) GetUserRoles(c *gin.Context) {
 func (cc *CasbinController) GetRoleUsers(c *gin.Context) {
 	role := c.Param("role")
 	if role == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("角色不能为空"))
+		c.JSON(http.StatusBadRequest, domain.RespError("角色名不能为空"))
 		return
 	}
 
-	domainParam := c.Query("domain")
-	if domainParam == "" {
-		domainParam = "*"
-	}
-
-	users := cc.casbinManager.GetUsersForRole(role, domainParam)
+	users := cc.casbinManager.GetUsersForRole(role)
 
 	response := gin.H{
-		"role":   role,
-		"domain": domainParam,
-		"users":  users,
+		"role":  role,
+		"users": users,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
@@ -257,69 +251,208 @@ func (cc *CasbinController) GetRoleUsers(c *gin.Context) {
 
 // GetAllPolicies 获取所有策略
 func (cc *CasbinController) GetAllPolicies(c *gin.Context) {
-	// 分页参数
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
-
-	allPolicies := cc.casbinManager.GetAllPolicies()
-
-	// 简单的分页实现
-	total := len(allPolicies)
-	start := (page - 1) * limit
-	end := start + limit
-
-	if start >= total {
-		start = total
-	}
-	if end > total {
-		end = total
-	}
-
-	policies := allPolicies[start:end]
+	policies := cc.casbinManager.GetAllPolicies()
 
 	response := gin.H{
 		"policies": policies,
-		"total":    total,
-		"page":     page,
-		"limit":    limit,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllRoles 获取所有角色映射
+// GetAllRoles 获取所有角色
 func (cc *CasbinController) GetAllRoles(c *gin.Context) {
-	// 分页参数
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
-
-	allRoles := cc.casbinManager.GetAllRoles()
-
-	// 简单的分页实现
-	total := len(allRoles)
-	start := (page - 1) * limit
-	end := start + limit
-
-	if start >= total {
-		start = total
-	}
-	if end > total {
-		end = total
-	}
-
-	roles := allRoles[start:end]
+	roles := cc.casbinManager.GetAllRoles()
 
 	response := gin.H{
 		"roles": roles,
-		"total": total,
-		"page":  page,
-		"limit": limit,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// InitializePolicies 初始化默认策略
+// GetAllRoleNames 获取所有角色名称
+func (cc *CasbinController) GetAllRoleNames(c *gin.Context) {
+	roleNames := cc.casbinManager.GetAllRoleNames()
+
+	response := gin.H{
+		"role_names": roleNames,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetAllObjects 获取所有对象名称
+func (cc *CasbinController) GetAllObjects(c *gin.Context) {
+	objects := cc.casbinManager.GetAllObjects()
+
+	response := gin.H{
+		"objects": objects,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetAllActions 获取所有操作名称
+func (cc *CasbinController) GetAllActions(c *gin.Context) {
+	actions := cc.casbinManager.GetAllActions()
+
+	response := gin.H{
+		"actions": actions,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// AddRolePolicy 为角色添加权限策略
+func (cc *CasbinController) AddRolePolicy(c *gin.Context) {
+	var req AddRolePolicyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("请求参数错误: "+err.Error()))
+		return
+	}
+
+	added, err := cc.casbinManager.AddPolicyForRole(req.Role, req.Object, req.Action)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("添加角色权限失败: "+err.Error()))
+		return
+	}
+
+	if !added {
+		c.JSON(http.StatusConflict, domain.RespError("角色权限已存在"))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("角色权限添加成功"))
+}
+
+// RemoveRolePolicy 移除角色权限策略
+func (cc *CasbinController) RemoveRolePolicy(c *gin.Context) {
+	var req RemoveRolePolicyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("请求参数错误: "+err.Error()))
+		return
+	}
+
+	removed, err := cc.casbinManager.RemovePolicyForRole(req.Role, req.Object, req.Action)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("移除角色权限失败: "+err.Error()))
+		return
+	}
+
+	if !removed {
+		c.JSON(http.StatusNotFound, domain.RespError("角色权限不存在"))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("角色权限移除成功"))
+}
+
+// GetRolePermissions 获取角色权限
+func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
+	role := c.Param("role")
+	if role == "" {
+		c.JSON(http.StatusBadRequest, domain.RespError("角色名不能为空"))
+		return
+	}
+
+	permissions := cc.casbinManager.GetPermissionsForRole(role)
+
+	response := RolePermissionsResponse{
+		Role:        role,
+		Permissions: permissions,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetSidebarPermissions 获取侧边栏权限
+func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
+	// 获取当前用户ID
+	userID, exists := c.Get(constants.UserID)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
+		return
+	}
+
+	// 获取侧边栏权限
+	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userIDStr)
+
+	response := gin.H{
+		"user_id": userIDStr,
+		"sidebar": sidebarPermissions,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetProjectPermissions 获取项目权限
+func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
+	// 获取当前用户ID
+	userID, exists := c.Get(constants.UserID)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
+		return
+	}
+
+	// 获取项目ID（可选）
+	projectID := c.Query("project_id")
+
+	// 获取项目权限
+	projectPermissions := cc.casbinManager.GetProjectPermissions(userIDStr, projectID)
+
+	response := gin.H{
+		"user_id":     userIDStr,
+		"project_id":  projectID,
+		"permissions": projectPermissions,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetPackagePermissions 获取包权限
+func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
+	// 获取当前用户ID
+	userID, exists := c.Get(constants.UserID)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
+		return
+	}
+
+	// 获取包名（可选）
+	packageName := c.Query("package_name")
+
+	// 获取包权限
+	packagePermissions := cc.casbinManager.GetPackagePermissions(userIDStr, packageName)
+
+	response := gin.H{
+		"user_id":      userIDStr,
+		"package_name": packageName,
+		"permissions":  packagePermissions,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// InitializePolicies 初始化策略
 func (cc *CasbinController) InitializePolicies(c *gin.Context) {
 	// 检查是否是管理员
 	userID, exists := c.Get(constants.UserID)
@@ -331,7 +464,7 @@ func (cc *CasbinController) InitializePolicies(c *gin.Context) {
 	userIDStr := userID.(string)
 
 	// 检查是否有管理员权限
-	hasPermission, err := cc.casbinManager.CheckPermission(userIDStr, "*", "system", "admin")
+	hasPermission, err := cc.casbinManager.CheckPermission(userIDStr, "system", "manage")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 		return
@@ -361,4 +494,70 @@ func (cc *CasbinController) ReloadPolicies(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess("策略重新加载成功"))
+}
+
+// ClearAllPolicies 清空所有策略
+func (cc *CasbinController) ClearAllPolicies(c *gin.Context) {
+	// 检查是否是管理员
+	userID, exists := c.Get(constants.UserID)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	// 检查是否有管理员权限
+	hasPermission, err := cc.casbinManager.CheckPermission(userIDStr, "system", "manage")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
+		return
+	}
+
+	if !hasPermission {
+		c.JSON(http.StatusForbidden, domain.RespError("权限不足，需要管理员权限"))
+		return
+	}
+
+	// 清空所有策略
+	err = cc.casbinManager.ClearAllPolicies()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("清空策略失败: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("策略清空成功"))
+}
+
+// ClearAllRoles 清空所有角色
+func (cc *CasbinController) ClearAllRoles(c *gin.Context) {
+	// 检查是否是管理员
+	userID, exists := c.Get(constants.UserID)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	// 检查是否有管理员权限
+	hasPermission, err := cc.casbinManager.CheckPermission(userIDStr, "system", "manage")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
+		return
+	}
+
+	if !hasPermission {
+		c.JSON(http.StatusForbidden, domain.RespError("权限不足，需要管理员权限"))
+		return
+	}
+
+	// 清空所有角色
+	err = cc.casbinManager.ClearAllRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("清空角色失败: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("角色清空成功"))
 }

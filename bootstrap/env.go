@@ -1,10 +1,11 @@
 package bootstrap
 
 import (
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"pkms/pkg"
+
+	"github.com/spf13/viper"
 )
 
 type Env struct {
@@ -40,7 +41,7 @@ func setDefaults() {
 
 	// 管理员默认配置
 	viper.SetDefault("ADMIN_USERNAME", "admin")
-	viper.SetDefault("ADMIN_PASSWORD", "admin")
+	viper.SetDefault("ADMIN_PASSWORD", "123")
 
 	// S3 默认配置
 	viper.SetDefault("S3_ADDRESS", "192.168.8.6:9000")

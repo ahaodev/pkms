@@ -83,6 +83,7 @@ func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (
 		Name:      u.Username,
 		Role:      u.Role.String(),
 		Password:  u.PasswordHash,
+		Role:      string(u.Role),
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}, nil
@@ -103,6 +104,7 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 		Name:      u.Username,
 		Role:      u.Role.String(),
 		Password:  u.PasswordHash,
+		Role:      string(u.Role),
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}, nil

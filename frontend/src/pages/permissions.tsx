@@ -8,14 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Trash2, Plus, Shield, Users, Settings, Eye} from 'lucide-react';
+import { Trash2, Plus, Shield, Users, Eye, UserPlus, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
+import { Separator } from '@/components/ui/separator';
 
 interface Policy {
   sub: string;
-  dom: string;
   obj: string;
   act: string;
 }
@@ -23,74 +22,81 @@ interface Policy {
 interface Role {
   user: string;
   role: string;
-  domain: string;
 }
 
 interface UserPermission {
   user_id: string;
-  domain: string;
   permissions: string[][];
   roles: string[];
 }
 
+
+
 const PermissionsPage: React.FC = () => {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [roleNames, setRoleNames] = useState<string[]>([]);
+  const [objects, setObjects] = useState<string[]>([]);
+  const [actions, setActions] = useState<string[]>([]);
   const [userPermissions, setUserPermissions] = useState<UserPermission[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showAddPolicyDialog, setShowAddPolicyDialog] = useState(false);
-  const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState('role-permissions');
+
+  // 对话框状态
+  const [showAddRolePolicyDialog, setShowAddRolePolicyDialog] = useState(false);
+  const [showAddUserRoleDialog, setShowAddUserRoleDialog] = useState(false);
+  const [showAddUserPolicyDialog, setShowAddUserPolicyDialog] = useState(false);
+  const [showUserPermissionsDialog, setShowUserPermissionsDialog] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
 
   // 表单状态
-  const [newPolicy, setNewPolicy] = useState({
-    user_id: '',
-    domain: '*',
+  const [newRolePolicy, setNewRolePolicy] = useState({
+    role: '',
     object: '',
     action: ''
   });
 
-  const [newRole, setNewRole] = useState({
+  const [newUserRole, setNewUserRole] = useState({
     user_id: '',
-    role: '',
-    domain: '*'
+    role: ''
   });
 
-  // 预定义的选项
-  const objects = ['project', 'package', 'file', 'user', 'group', 'permission', 'system'];
-  const actions = ['view', 'create', 'edit', 'delete', 'manage', 'admin'];
-  const roleTypes = ['admin', 'project_admin', 'developer', 'viewer'];
+  const [newUserPolicy, setNewUserPolicy] = useState({
+    user_id: '',
+    object: '',
+    action: ''
+  });
+
+  // 预定义的角色类型
+  const predefinedRoles = ['admin', 'project_admin', 'developer', 'viewer', 'tester', 'package_admin'];
 
   useEffect(() => {
-    console.log(loading);
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       await Promise.all([
         fetchPolicies(),
         fetchRoles(),
+        fetchRoleNames(),
+        fetchObjects(),
+        fetchActions(),
       ]);
     } catch (error) {
       console.error('获取数据失败:', error);
       toast.error('获取数据失败');
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchPolicies = async () => {
     try {
-      const response = await apiClient.get('/casbin/policies');
+      const response = await apiClient.get('/api/v1/casbin/policies');
       if (response.data && response.data.code === 0) {
         const policiesData = response.data.data.policies || [];
         setPolicies(policiesData.map((p: string[]) => ({
           sub: p[0],
-          dom: p[1],
-          obj: p[2],
-          act: p[3]
+          obj: p[1],
+          act: p[2]
         })));
       }
     } catch (error) {
@@ -100,13 +106,12 @@ const PermissionsPage: React.FC = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await apiClient.get('/casbin/roles');
+      const response = await apiClient.get('/api/v1/casbin/roles');
       if (response.data && response.data.code === 0) {
         const rolesData = response.data.data.roles || [];
         setRoles(rolesData.map((r: string[]) => ({
           user: r[0],
-          role: r[1],
-          domain: r[2]
+          role: r[1]
         })));
       }
     } catch (error) {
@@ -114,9 +119,42 @@ const PermissionsPage: React.FC = () => {
     }
   };
 
+  const fetchRoleNames = async () => {
+    try {
+      const response = await apiClient.get('/api/v1/casbin/roles/names');
+      if (response.data && response.data.code === 0) {
+        setRoleNames(response.data.data.role_names || []);
+      }
+    } catch (error) {
+      console.error('获取角色名称失败:', error);
+    }
+  };
+
+  const fetchObjects = async () => {
+    try {
+      const response = await apiClient.get('/api/v1/casbin/objects');
+      if (response.data && response.data.code === 0) {
+        setObjects(response.data.data.objects || []);
+      }
+    } catch (error) {
+      console.error('获取对象失败:', error);
+    }
+  };
+
+  const fetchActions = async () => {
+    try {
+      const response = await apiClient.get('/api/v1/casbin/actions');
+      if (response.data && response.data.code === 0) {
+        setActions(response.data.data.actions || []);
+      }
+    } catch (error) {
+      console.error('获取操作失败:', error);
+    }
+  };
+
   const fetchUserPermissions = async (userId: string) => {
     try {
-      const response = await apiClient.get(`/casbin/users/${userId}/permissions`);
+      const response = await apiClient.get(`/api/v1/casbin/users/${userId}/permissions`);
       if (response.data && response.data.code === 0) {
         return response.data.data;
       }
@@ -126,96 +164,128 @@ const PermissionsPage: React.FC = () => {
     return null;
   };
 
-  const addPolicy = async () => {
-    if (!newPolicy.user_id || !newPolicy.object || !newPolicy.action) {
+
+
+  const addRolePolicy = async () => {
+    if (!newRolePolicy.role || !newRolePolicy.object || !newRolePolicy.action) {
       toast.error('请填写所有必填字段');
       return;
     }
 
     try {
-      const response = await apiClient.post('/casbin/policies', newPolicy);
+      const response = await apiClient.post('/api/v1/casbin/role-policies', newRolePolicy);
       if (response.data && response.data.code === 0) {
-        toast.success('策略添加成功');
-        setShowAddPolicyDialog(false);
-        setNewPolicy({ user_id: '', domain: '*', object: '', action: '' });
+        toast.success('角色权限添加成功');
+        setShowAddRolePolicyDialog(false);
+        setNewRolePolicy({ role: '', object: '', action: '' });
         fetchPolicies();
       } else {
-        toast.error(response.data.msg || '添加策略失败');
+        toast.error(response.data.msg || '添加角色权限失败');
       }
     } catch (error) {
-      console.error('添加策略失败:', error);
-      toast.error('添加策略失败');
+      console.error('添加角色权限失败:', error);
+      toast.error('添加角色权限失败');
     }
   };
 
-  const removePolicy = async (policy: Policy) => {
+  const removeRolePolicy = async (role: string, object: string, action: string) => {
     try {
-      const response = await apiClient.delete('/casbin/policies', {
-        data: {
-          user_id: policy.sub,
-          domain: policy.dom,
-          object: policy.obj,
-          action: policy.act
-        }
+      const response = await apiClient.delete('/api/v1/casbin/role-policies', {
+        data: { role, object, action }
       });
       if (response.data && response.data.code === 0) {
-        toast.success('策略删除成功');
+        toast.success('角色权限删除成功');
         fetchPolicies();
       } else {
-        toast.error(response.data.msg || '删除策略失败');
+        toast.error(response.data.msg || '删除角色权限失败');
       }
     } catch (error) {
-      console.error('删除策略失败:', error);
-      toast.error('删除策略失败');
+      console.error('删除角色权限失败:', error);
+      toast.error('删除角色权限失败');
     }
   };
 
-  const addRole = async () => {
-    if (!newRole.user_id || !newRole.role) {
+  const addUserRole = async () => {
+    if (!newUserRole.user_id || !newUserRole.role) {
       toast.error('请填写所有必填字段');
       return;
     }
 
     try {
-      const response = await apiClient.post('/casbin/roles', newRole);
+      const response = await apiClient.post('/api/v1/casbin/roles', newUserRole);
       if (response.data && response.data.code === 0) {
-        toast.success('角色添加成功');
-        setShowAddRoleDialog(false);
-        setNewRole({ user_id: '', role: '', domain: '*' });
+        toast.success('用户角色添加成功');
+        setShowAddUserRoleDialog(false);
+        setNewUserRole({ user_id: '', role: '' });
         fetchRoles();
       } else {
-        toast.error(response.data.msg || '添加角色失败');
+        toast.error(response.data.msg || '添加用户角色失败');
       }
     } catch (error) {
-      console.error('添加角色失败:', error);
-      toast.error('添加角色失败');
+      console.error('添加用户角色失败:', error);
+      toast.error('添加用户角色失败');
     }
   };
 
-  const removeRole = async (role: Role) => {
+  const removeUserRole = async (userId: string, role: string) => {
     try {
-      const response = await apiClient.delete('/casbin/roles', {
-        data: {
-          user_id: role.user,
-          role: role.role,
-          domain: role.domain
-        }
+      const response = await apiClient.delete('/api/v1/casbin/roles', {
+        data: { user_id: userId, role }
       });
       if (response.data && response.data.code === 0) {
-        toast.success('角色删除成功');
+        toast.success('用户角色删除成功');
         fetchRoles();
       } else {
-        toast.error(response.data.msg || '删除角色失败');
+        toast.error(response.data.msg || '删除用户角色失败');
       }
     } catch (error) {
-      console.error('删除角色失败:', error);
-      toast.error('删除角色失败');
+      console.error('删除用户角色失败:', error);
+      toast.error('删除用户角色失败');
+    }
+  };
+
+  const addUserPolicy = async () => {
+    if (!newUserPolicy.user_id || !newUserPolicy.object || !newUserPolicy.action) {
+      toast.error('请填写所有必填字段');
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/casbin/policies', newUserPolicy);
+      if (response.data && response.data.code === 0) {
+        toast.success('用户权限添加成功');
+        setShowAddUserPolicyDialog(false);
+        setNewUserPolicy({ user_id: '', object: '', action: '' });
+        fetchPolicies();
+      } else {
+        toast.error(response.data.msg || '添加用户权限失败');
+      }
+    } catch (error) {
+      console.error('添加用户权限失败:', error);
+      toast.error('添加用户权限失败');
+    }
+  };
+
+  const removeUserPolicy = async (userId: string, object: string, action: string) => {
+    try {
+      const response = await apiClient.delete('/api/v1/casbin/policies', {
+        data: { user_id: userId, object, action }
+      });
+      if (response.data && response.data.code === 0) {
+        toast.success('用户权限删除成功');
+        fetchPolicies();
+      } else {
+        toast.error(response.data.msg || '删除用户权限失败');
+      }
+    } catch (error) {
+      console.error('删除用户权限失败:', error);
+      toast.error('删除用户权限失败');
     }
   };
 
   const initializePolicies = async () => {
     try {
-      const response = await apiClient.post('/casbin/initialize');
+      const response = await apiClient.post('/api/v1/casbin/initialize');
       if (response.data && response.data.code === 0) {
         toast.success('默认策略初始化成功');
         fetchData();
@@ -228,86 +298,84 @@ const PermissionsPage: React.FC = () => {
     }
   };
 
-  const checkUserPermissions = async () => {
-    if (!selectedUserId) {
-      toast.error('请输入用户ID');
-      return;
+  const showUserPermissions = async (userId: string) => {
+    const permissions = await fetchUserPermissions(userId);
+    if (permissions) {
+      setUserPermissions([permissions]);
+      setSelectedUserId(userId);
+      setShowUserPermissionsDialog(true);
     }
+  };
 
-    const userPerm = await fetchUserPermissions(selectedUserId);
-    if (userPerm) {
-      setUserPermissions([userPerm]);
-    }
+  // 获取角色的策略
+  const getRolePolicies = () => {
+    return policies.filter(policy => roleNames.includes(policy.sub));
+  };
+
+  // 获取用户的策略
+  const getUserPolicies = () => {
+    return policies.filter(policy => !roleNames.includes(policy.sub));
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">权限管理</h1>
+        <h1 className="text-3xl font-bold">权限管理</h1>
         <div className="flex gap-2">
           <Button onClick={initializePolicies} variant="outline">
-            <Settings className="w-4 h-4 mr-2" />
+            <Shield className="w-4 h-4 mr-2" />
             初始化默认策略
+          </Button>
+          <Button onClick={() => fetchData()} variant="outline">
+            刷新数据
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="policies" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="policies">策略管理</TabsTrigger>
-          <TabsTrigger value="roles">角色管理</TabsTrigger>
-          <TabsTrigger value="users">用户权限</TabsTrigger>
+          <TabsTrigger value="role-permissions">角色权限配置</TabsTrigger>
+          <TabsTrigger value="user-roles">用户角色分配</TabsTrigger>
+          <TabsTrigger value="user-permissions">用户权限配置</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="policies" className="space-y-4">
+        {/* 角色权限配置 */}
+        <TabsContent value="role-permissions">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                权限策略
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-sm text-gray-600">
-                  总共 {policies.length} 条策略
-                </div>
-                <Dialog open={showAddPolicyDialog} onOpenChange={setShowAddPolicyDialog}>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="w-5 h-5" />
+                  角色权限配置
+                </CardTitle>
+                <Dialog open={showAddRolePolicyDialog} onOpenChange={setShowAddRolePolicyDialog}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
-                      添加策略
+                      添加角色权限
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>添加权限策略</DialogTitle>
+                      <DialogTitle>添加角色权限</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="user_id">用户ID</Label>
-                        <Input
-                          id="user_id"
-                          value={newPolicy.user_id}
-                          onChange={(e) => setNewPolicy({ ...newPolicy, user_id: e.target.value })}
-                          placeholder="输入用户ID"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="domain">域</Label>
-                        <Input
-                          id="domain"
-                          value={newPolicy.domain}
-                          onChange={(e) => setNewPolicy({ ...newPolicy, domain: e.target.value })}
-                          placeholder="域（如项目ID或*）"
-                        />
+                        <Label htmlFor="role">角色</Label>
+                        <Select value={newRolePolicy.role} onValueChange={(value) => setNewRolePolicy({...newRolePolicy, role: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择角色" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {predefinedRoles.map(role => (
+                              <SelectItem key={role} value={role}>{role}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="object">对象</Label>
-                        <Select
-                          value={newPolicy.object}
-                          onValueChange={(value) => setNewPolicy({ ...newPolicy, object: value })}
-                        >
+                        <Select value={newRolePolicy.object} onValueChange={(value) => setNewRolePolicy({...newRolePolicy, object: value})}>
                           <SelectTrigger>
                             <SelectValue placeholder="选择对象" />
                           </SelectTrigger>
@@ -319,13 +387,10 @@ const PermissionsPage: React.FC = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="action">动作</Label>
-                        <Select
-                          value={newPolicy.action}
-                          onValueChange={(value) => setNewPolicy({ ...newPolicy, action: value })}
-                        >
+                        <Label htmlFor="action">操作</Label>
+                        <Select value={newRolePolicy.action} onValueChange={(value) => setNewRolePolicy({...newRolePolicy, action: value})}>
                           <SelectTrigger>
-                            <SelectValue placeholder="选择动作" />
+                            <SelectValue placeholder="选择操作" />
                           </SelectTrigger>
                           <SelectContent>
                             {actions.map(action => (
@@ -334,30 +399,30 @@ const PermissionsPage: React.FC = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button onClick={addPolicy} className="w-full">
-                        添加策略
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button onClick={addRolePolicy} className="flex-1">添加</Button>
+                        <Button variant="outline" onClick={() => setShowAddRolePolicyDialog(false)} className="flex-1">取消</Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
-
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>用户</TableHead>
-                    <TableHead>域</TableHead>
+                    <TableHead>角色</TableHead>
                     <TableHead>对象</TableHead>
-                    <TableHead>动作</TableHead>
+                    <TableHead>操作</TableHead>
                     <TableHead>操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {policies.map((policy, index) => (
+                  {getRolePolicies().map((policy, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{policy.sub}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{policy.dom}</Badge>
+                        <Badge variant="secondary">{policy.sub}</Badge>
                       </TableCell>
                       <TableCell>{policy.obj}</TableCell>
                       <TableCell>
@@ -367,7 +432,7 @@ const PermissionsPage: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removePolicy(policy)}
+                          onClick={() => removeRolePolicy(policy.sub, policy.obj, policy.act)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -380,24 +445,20 @@ const PermissionsPage: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="roles" className="space-y-4">
+        {/* 用户角色分配 */}
+        <TabsContent value="user-roles">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                角色管理
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-sm text-gray-600">
-                  总共 {roles.length} 个角色分配
-                </div>
-                <Dialog open={showAddRoleDialog} onOpenChange={setShowAddRoleDialog}>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  用户角色分配
+                </CardTitle>
+                <Dialog open={showAddUserRoleDialog} onOpenChange={setShowAddUserRoleDialog}>
                   <DialogTrigger asChild>
                     <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      添加角色
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      添加用户角色
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -406,74 +467,69 @@ const PermissionsPage: React.FC = () => {
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="role_user_id">用户ID</Label>
+                        <Label htmlFor="user_id">用户ID</Label>
                         <Input
-                          id="role_user_id"
-                          value={newRole.user_id}
-                          onChange={(e) => setNewRole({ ...newRole, user_id: e.target.value })}
-                          placeholder="输入用户ID"
+                          id="user_id"
+                          value={newUserRole.user_id}
+                          onChange={(e) => setNewUserRole({...newUserRole, user_id: e.target.value})}
+                          placeholder="请输入用户ID"
                         />
                       </div>
                       <div>
                         <Label htmlFor="role">角色</Label>
-                        <Select
-                          value={newRole.role}
-                          onValueChange={(value) => setNewRole({ ...newRole, role: value })}
-                        >
+                        <Select value={newUserRole.role} onValueChange={(value) => setNewUserRole({...newUserRole, role: value})}>
                           <SelectTrigger>
                             <SelectValue placeholder="选择角色" />
                           </SelectTrigger>
                           <SelectContent>
-                            {roleTypes.map(role => (
+                            {predefinedRoles.map(role => (
                               <SelectItem key={role} value={role}>{role}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <Label htmlFor="role_domain">域</Label>
-                        <Input
-                          id="role_domain"
-                          value={newRole.domain}
-                          onChange={(e) => setNewRole({ ...newRole, domain: e.target.value })}
-                          placeholder="域（如项目ID或*）"
-                        />
+                      <div className="flex gap-2">
+                        <Button onClick={addUserRole} className="flex-1">添加</Button>
+                        <Button variant="outline" onClick={() => setShowAddUserRoleDialog(false)} className="flex-1">取消</Button>
                       </div>
-                      <Button onClick={addRole} className="w-full">
-                        添加角色
-                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
-
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>用户</TableHead>
+                    <TableHead>用户ID</TableHead>
                     <TableHead>角色</TableHead>
-                    <TableHead>域</TableHead>
                     <TableHead>操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {roles.map((role, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{role.user}</TableCell>
+                      <TableCell>{role.user}</TableCell>
                       <TableCell>
-                        <Badge variant="default">{role.role}</Badge>
+                        <Badge variant="secondary">{role.role}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{role.domain}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeRole(role)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => showUserPermissions(role.user)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeUserRole(role.user, role.role)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -483,70 +539,166 @@ const PermissionsPage: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-4">
+        {/* 用户权限配置 */}
+        <TabsContent value="user-permissions">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                用户权限查看
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  用户权限配置
+                </CardTitle>
+                <Dialog open={showAddUserPolicyDialog} onOpenChange={setShowAddUserPolicyDialog}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      添加用户权限
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>添加用户权限</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="user_id">用户ID</Label>
+                        <Input
+                          id="user_id"
+                          value={newUserPolicy.user_id}
+                          onChange={(e) => setNewUserPolicy({...newUserPolicy, user_id: e.target.value})}
+                          placeholder="请输入用户ID"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="object">对象</Label>
+                        <Select value={newUserPolicy.object} onValueChange={(value) => setNewUserPolicy({...newUserPolicy, object: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择对象" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {objects.map(obj => (
+                              <SelectItem key={obj} value={obj}>{obj}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="action">操作</Label>
+                        <Select value={newUserPolicy.action} onValueChange={(value) => setNewUserPolicy({...newUserPolicy, action: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择操作" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {actions.map(action => (
+                              <SelectItem key={action} value={action}>{action}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={addUserPolicy} className="flex-1">添加</Button>
+                        <Button variant="outline" onClick={() => setShowAddUserPolicyDialog(false)} className="flex-1">取消</Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2 mb-4">
-                <Input
-                  placeholder="输入用户ID"
-                  value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
-                />
-                <Button onClick={checkUserPermissions}>
-                  查看权限
-                </Button>
-              </div>
-
-              {userPermissions.map((userPerm, index) => (
-                <div key={index} className="space-y-4">
-                  <Alert>
-                    <AlertDescription>
-                      用户 {userPerm.user_id} 在域 {userPerm.domain} 的权限信息
-                    </AlertDescription>
-                  </Alert>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm">角色</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {userPerm.roles.map((role, roleIndex) => (
-                            <Badge key={roleIndex} variant="default">{role}</Badge>
-                          ))}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>用户ID</TableHead>
+                    <TableHead>对象</TableHead>
+                    <TableHead>操作</TableHead>
+                    <TableHead>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getUserPolicies().map((policy, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{policy.sub}</TableCell>
+                      <TableCell>{policy.obj}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{policy.act}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => showUserPermissions(policy.sub)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeUserPolicy(policy.sub, policy.obj, policy.act)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm">权限</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {userPerm.permissions.map((perm, permIndex) => (
-                            <div key={permIndex} className="flex gap-2">
-                              <Badge variant="outline">{perm[2]}</Badge>
-                              <Badge variant="secondary">{perm[3]}</Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              ))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* 用户权限查看对话框 */}
+      <Dialog open={showUserPermissionsDialog} onOpenChange={setShowUserPermissionsDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>用户权限详情 - {selectedUserId}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {userPermissions.map((permission, index) => (
+              <div key={index} className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">用户角色</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {permission.roles.map((role, roleIndex) => (
+                      <Badge key={roleIndex} variant="secondary">{role}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold mb-2">权限列表</h4>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>主体</TableHead>
+                        <TableHead>对象</TableHead>
+                        <TableHead>操作</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {permission.permissions.map((perm, permIndex) => (
+                        <TableRow key={permIndex}>
+                          <TableCell>
+                            <Badge variant={perm[0] === permission.user_id ? "default" : "secondary"}>
+                              {perm[0]}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{perm[1]}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{perm[2]}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
