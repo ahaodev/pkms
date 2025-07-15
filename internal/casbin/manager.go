@@ -2,11 +2,12 @@ package casbin
 
 import (
 	"fmt"
-	"github.com/casbin/casbin/v2"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"pkms/ent"
 	"sync"
+
+	"github.com/casbin/casbin/v2"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -38,6 +39,7 @@ func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 		}
 
 		enforcer.EnableLog(true)
+		enforcer.EnableAutoSave(true)
 
 		// 加载策略
 		err = enforcer.LoadPolicy()
@@ -60,53 +62,52 @@ func (m *CasbinManager) GetEnforcer() *casbin.Enforcer {
 }
 
 // CheckPermission 检查权限
-func (m *CasbinManager) CheckPermission(userID, domain, object, action string) (bool, error) {
-	return m.enforcer.Enforce(userID, domain, object, action)
+func (m *CasbinManager) CheckPermission(userID, object, action string) (bool, error) {
+	return m.enforcer.Enforce(userID, object, action)
 }
 
 // AddPolicy 添加权限策略
-func (m *CasbinManager) AddPolicy(userID, domain, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(userID, domain, object, action)
+func (m *CasbinManager) AddPolicy(userID, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(userID, object, action)
 }
 
 // RemovePolicy 移除权限策略
-func (m *CasbinManager) RemovePolicy(userID, domain, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(userID, domain, object, action)
+func (m *CasbinManager) RemovePolicy(userID, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(userID, object, action)
 }
 
 // AddRoleForUser 为用户添加角色
-func (m *CasbinManager) AddRoleForUser(userID, role, domain string) (bool, error) {
-	return m.enforcer.AddRoleForUserInDomain(userID, role, domain)
+func (m *CasbinManager) AddRoleForUser(userID, role string) (bool, error) {
+	return m.enforcer.AddRoleForUser(userID, role)
 }
 
 // DeleteRoleForUser 删除用户角色
-func (m *CasbinManager) DeleteRoleForUser(userID, role, domain string) (bool, error) {
-	return m.enforcer.DeleteRoleForUserInDomain(userID, role, domain)
+func (m *CasbinManager) DeleteRoleForUser(userID, role string) (bool, error) {
+	return m.enforcer.DeleteRoleForUser(userID, role)
 }
 
 // GetRolesForUser 获取用户角色
-func (m *CasbinManager) GetRolesForUser(userID, domain string) []string {
-	return m.enforcer.GetRolesForUserInDomain(userID, domain)
+func (m *CasbinManager) GetRolesForUser(userID string) []string {
+	roles, _ := m.enforcer.GetRolesForUser(userID)
+	return roles
 }
 
 // GetUsersForRole 获取角色下的用户
-func (m *CasbinManager) GetUsersForRole(role, domain string) []string {
-	return m.enforcer.GetUsersForRoleInDomain(role, domain)
+func (m *CasbinManager) GetUsersForRole(role string) []string {
+	users, _ := m.enforcer.GetUsersForRole(role)
+	return users
 }
 
-// GetPermissionsForUser 获取用户权限 - 使用自定义实现
-func (m *CasbinManager) GetPermissionsForUser(userID, domain string) [][]string {
-	// 获取用户的所有策略
-	policies, _ := m.enforcer.GetFilteredPolicy(0, userID, domain)
+// GetPermissionsForUser 获取用户权限
+func (m *CasbinManager) GetPermissionsForUser(userID string) [][]string {
+	permissions, _ := m.enforcer.GetPermissionsForUser(userID)
+	return permissions
+}
 
-	// 获取用户角色的策略
-	roles := m.enforcer.GetRolesForUserInDomain(userID, domain)
-	for _, role := range roles {
-		rolePolicies, _ := m.enforcer.GetFilteredPolicy(0, role, domain)
-		policies = append(policies, rolePolicies...)
-	}
-
-	return policies
+// GetPermissionsForRole 获取角色权限
+func (m *CasbinManager) GetPermissionsForRole(role string) [][]string {
+	permissions, _ := m.enforcer.GetPermissionsForUser(role)
+	return permissions
 }
 
 // InitializeDefaultPolicies 初始化默认权限策略
@@ -116,29 +117,83 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 	// 定义默认角色和权限
 	defaultPolicies := [][]string{
 		// 管理员角色权限
-		{"admin", "*", "*", "*"},
+		{"admin", "*", "*"},
+		{"admin", "system", "manage"},
+		{"admin", "user", "manage"},
+		{"admin", "role", "manage"},
+		{"admin", "permission", "manage"},
 
 		// 项目管理员权限
-		{"project_admin", "*", "project", "*"},
-		{"project_admin", "*", "package", "*"},
-		{"project_admin", "*", "file", "*"},
-		{"project_admin", "*", "user", "view"},
-		{"project_admin", "*", "group", "*"},
-		{"project_admin", "*", "permission", "*"},
+		{"project_admin", "project", "*"},
+		{"project_admin", "package", "*"},
+		{"project_admin", "file", "*"},
+		{"project_admin", "user", "view"},
+		{"project_admin", "group", "manage"},
+		{"project_admin", "permission", "view"},
 
 		// 开发者权限
-		{"developer", "*", "project", "view"},
-		{"developer", "*", "package", "view"},
-		{"developer", "*", "package", "create"},
-		{"developer", "*", "package", "edit"},
-		{"developer", "*", "file", "view"},
-		{"developer", "*", "file", "create"},
-		{"developer", "*", "file", "edit"},
+		{"developer", "project", "view"},
+		{"developer", "package", "view"},
+		{"developer", "package", "create"},
+		{"developer", "package", "edit"},
+		{"developer", "package", "delete"},
+		{"developer", "file", "view"},
+		{"developer", "file", "create"},
+		{"developer", "file", "edit"},
+		{"developer", "file", "delete"},
 
 		// 查看者权限
-		{"viewer", "*", "project", "view"},
-		{"viewer", "*", "package", "view"},
-		{"viewer", "*", "file", "view"},
+		{"viewer", "project", "view"},
+		{"viewer", "package", "view"},
+		{"viewer", "file", "view"},
+		{"viewer", "dashboard", "view"},
+
+		// 测试者权限
+		{"tester", "project", "view"},
+		{"tester", "package", "view"},
+		{"tester", "file", "view"},
+		{"tester", "package", "test"},
+		{"tester", "file", "test"},
+
+		// 项目相关权限
+		{"project_admin", "project", "create"},
+		{"project_admin", "project", "edit"},
+		{"project_admin", "project", "delete"},
+		{"project_admin", "project", "manage"},
+
+		// 包相关权限
+		{"package_admin", "package", "*"},
+		{"package_admin", "file", "*"},
+		{"package_admin", "project", "view"},
+
+		// 侧边栏权限
+		{"admin", "sidebar", "dashboard"},
+		{"admin", "sidebar", "projects"},
+		{"admin", "sidebar", "packages"},
+		{"admin", "sidebar", "users"},
+		{"admin", "sidebar", "groups"},
+		{"admin", "sidebar", "permissions"},
+		{"admin", "sidebar", "settings"},
+		{"admin", "sidebar", "upgrade"},
+
+		{"project_admin", "sidebar", "dashboard"},
+		{"project_admin", "sidebar", "projects"},
+		{"project_admin", "sidebar", "packages"},
+		{"project_admin", "sidebar", "users"},
+		{"project_admin", "sidebar", "groups"},
+		{"project_admin", "sidebar", "permissions"},
+
+		{"developer", "sidebar", "dashboard"},
+		{"developer", "sidebar", "projects"},
+		{"developer", "sidebar", "packages"},
+
+		{"viewer", "sidebar", "dashboard"},
+		{"viewer", "sidebar", "projects"},
+		{"viewer", "sidebar", "packages"},
+
+		{"tester", "sidebar", "dashboard"},
+		{"tester", "sidebar", "projects"},
+		{"tester", "sidebar", "packages"},
 	}
 
 	// 添加策略
@@ -163,17 +218,12 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 
 // AddDefaultRolesForUser 为用户添加默认角色
 func (m *CasbinManager) AddDefaultRolesForUser(userID, role string) error {
-	// 为所有域添加角色
-	domains := []string{"*", "default"}
-
-	for _, domain := range domains {
-		added, err := m.enforcer.AddRoleForUserInDomain(userID, role, domain)
-		if err != nil {
-			return fmt.Errorf("failed to add role %s for user %s in domain %s: %v", role, userID, domain, err)
-		}
-		if added {
-			log.Printf("为用户 %s 在域 %s 添加角色 %s", userID, domain, role)
-		}
+	added, err := m.enforcer.AddRoleForUser(userID, role)
+	if err != nil {
+		return fmt.Errorf("failed to add role %s for user %s: %v", role, userID, err)
+	}
+	if added {
+		log.Printf("为用户 %s 添加角色 %s", userID, role)
 	}
 
 	return m.enforcer.SavePolicy()
@@ -199,4 +249,133 @@ func (m *CasbinManager) SavePolicy() error {
 // LoadPolicy 从数据库加载策略
 func (m *CasbinManager) LoadPolicy() error {
 	return m.enforcer.LoadPolicy()
+}
+
+// GetAllRoleNames 获取所有角色名称
+func (m *CasbinManager) GetAllRoleNames() []string {
+	allRoles := m.GetAllRoles()
+	roleMap := make(map[string]bool)
+	var roles []string
+
+	for _, role := range allRoles {
+		if len(role) >= 2 {
+			roleName := role[1]
+			if !roleMap[roleName] {
+				roleMap[roleName] = true
+				roles = append(roles, roleName)
+			}
+		}
+	}
+
+	return roles
+}
+
+// GetAllObjects 获取所有对象名称
+func (m *CasbinManager) GetAllObjects() []string {
+	allPolicies := m.GetAllPolicies()
+	objectMap := make(map[string]bool)
+	var objects []string
+
+	for _, policy := range allPolicies {
+		if len(policy) >= 2 {
+			objectName := policy[1]
+			if !objectMap[objectName] {
+				objectMap[objectName] = true
+				objects = append(objects, objectName)
+			}
+		}
+	}
+
+	return objects
+}
+
+// GetAllActions 获取所有操作名称
+func (m *CasbinManager) GetAllActions() []string {
+	allPolicies := m.GetAllPolicies()
+	actionMap := make(map[string]bool)
+	var actions []string
+
+	for _, policy := range allPolicies {
+		if len(policy) >= 3 {
+			actionName := policy[2]
+			if !actionMap[actionName] {
+				actionMap[actionName] = true
+				actions = append(actions, actionName)
+			}
+		}
+	}
+
+	return actions
+}
+
+// AddPolicyForRole 为角色添加权限策略
+func (m *CasbinManager) AddPolicyForRole(role, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(role, object, action)
+}
+
+// RemovePolicyForRole 移除角色权限策略
+func (m *CasbinManager) RemovePolicyForRole(role, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(role, object, action)
+}
+
+// ClearAllPolicies 清空所有策略
+func (m *CasbinManager) ClearAllPolicies() error {
+	m.enforcer.ClearPolicy()
+	return m.enforcer.SavePolicy()
+}
+
+// ClearAllRoles 清空所有角色
+func (m *CasbinManager) ClearAllRoles() error {
+	allRoles := m.GetAllRoles()
+	for _, role := range allRoles {
+		if len(role) >= 2 {
+			m.enforcer.DeleteRoleForUser(role[0], role[1])
+		}
+	}
+	return m.enforcer.SavePolicy()
+}
+
+// GetProjectPermissions 获取项目相关权限
+func (m *CasbinManager) GetProjectPermissions(userID, projectID string) []string {
+	var permissions []string
+
+	// 检查具体的项目权限
+	actions := []string{"view", "create", "edit", "delete", "manage"}
+	for _, action := range actions {
+		if hasPermission, _ := m.CheckPermission(userID, "project", action); hasPermission {
+			permissions = append(permissions, action)
+		}
+	}
+
+	return permissions
+}
+
+// GetPackagePermissions 获取包相关权限
+func (m *CasbinManager) GetPackagePermissions(userID, packageName string) []string {
+	var permissions []string
+
+	// 检查具体的包权限
+	actions := []string{"view", "create", "edit", "delete", "manage", "upload", "download"}
+	for _, action := range actions {
+		if hasPermission, _ := m.CheckPermission(userID, "package", action); hasPermission {
+			permissions = append(permissions, action)
+		}
+	}
+
+	return permissions
+}
+
+// GetSidebarPermissions 获取侧边栏权限
+func (m *CasbinManager) GetSidebarPermissions(userID string) []string {
+	var permissions []string
+
+	// 检查侧边栏权限
+	sidebarItems := []string{"dashboard", "projects", "packages", "users", "groups", "permissions", "settings", "upgrade"}
+	for _, item := range sidebarItems {
+		if hasPermission, _ := m.CheckPermission(userID, "sidebar", item); hasPermission {
+			permissions = append(permissions, item)
+		}
+	}
+
+	return permissions
 }

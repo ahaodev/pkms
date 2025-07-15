@@ -8,10 +8,11 @@ import (
 	"path/filepath"
 	"pkms/ent/migrate"
 
-	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/crypto/bcrypt"
 	"pkms/ent"
 	"pkms/ent/user"
+
+	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func NewEntDatabase(env *Env) *ent.Client {
@@ -75,8 +76,10 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 	}
 
 	// 从环境变量获取管理员信息，或使用默认值
-	adminPassword := getEnvOrDefault(env.AdminPassword, "admin")
+	adminPassword := getEnvOrDefault(env.AdminPassword, "123")
 	adminUsername := getEnvOrDefault(env.AdminUsername, "admin")
+
+	log.Printf("📝 Creating admin user with password: %s", adminPassword)
 
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
