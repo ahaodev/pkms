@@ -25,11 +25,11 @@ func NewCasbinMiddleware(casbinManager *casbin.CasbinManager) *CasbinMiddleware 
 func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		//userRole := c.GetString(constants.UserRole)
+		//userID := c.GetString(constants.UserID)
+		userRole := c.GetString(constants.UserRole)
 
 		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, object, action)
+		hasPermission, err := m.casbinManager.CheckPermission(userRole, object, action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()

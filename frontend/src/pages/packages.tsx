@@ -10,7 +10,7 @@ import {
   PackageList,
   PackageEmptyView,
   PackageCreateDialog,
-  PackageVersionHistoryDialog,
+  PackageReleaseHistoryDialog,
   PackageHeader,
   SEARCH_DEBOUNCE_MS,
   VERSIONS_PER_PAGE,
@@ -295,7 +295,7 @@ export default function PackagesPage() {
       />
 
       {versionHistoryPackage && (
-        <PackageVersionHistoryDialog
+        <PackageReleaseHistoryDialog
           open={isVersionHistoryDialogOpen}
           onClose={() => setIsVersionHistoryDialogOpen(false)}
           package={versionHistoryPackage}

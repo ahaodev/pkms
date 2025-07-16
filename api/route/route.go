@@ -44,18 +44,18 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 
 	// Protected routes with permission control
 	projectRouter := protectedRouter.Group("/projects")
-	//casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
-	//projectRouter.Use(casbinMiddleware.RequirePermission("project", "view"))
+	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
+	projectRouter.Use(casbinMiddleware.RequirePermission("project", "view"))
 
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	//packageRouter.Use(casbinMiddleware.RequirePermission("package", "view"))
+	packageRouter.Use(casbinMiddleware.RequirePermission("package", "view"))
 
 	NewPackageRouter(env, timeout, db, minioClient, packageRouter)
 
 	userRouter := protectedRouter.Group("/users")
-	//userRouter.Use(casbinMiddleware.RequirePermission("user", "view"))
+	userRouter.Use(casbinMiddleware.RequirePermission("user", "view"))
 
 	NewUserRouter(env, timeout, db, userRouter)
 
@@ -64,23 +64,23 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
 	groupRouter := protectedRouter.Group("/group")
-	//groupRouter.Use(casbinMiddleware.RequirePermission("group", "view"))
+	groupRouter.Use(casbinMiddleware.RequirePermission("group", "view"))
 
 	NewGroupRouter(env, timeout, db, groupRouter)
 
 	permissionRouter := protectedRouter.Group("/permission")
-	//permissionRouter.Use(casbinMiddleware.RequirePermission("permission", "manage"))
+	permissionRouter.Use(casbinMiddleware.RequirePermission("permission", "manage"))
 
 	NewPermissionRouter(env, timeout, db, permissionRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrade")
-	//upgradeRouter.Use(casbinMiddleware.RequireRole("admin"))
+	upgradeRouter.Use(casbinMiddleware.RequireRole("admin"))
 
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
 	// File management routes
 	fileRouter := protectedRouter.Group("/file")
-	//fileRouter.Use(casbinMiddleware.RequirePermission("file", "view"))
+	fileRouter.Use(casbinMiddleware.RequirePermission("file", "view"))
 
 	NewFileRouter(env, timeout, db, minioClient, fileRouter)
 }

@@ -124,12 +124,12 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"admin", "permission", "manage"},
 
 		// 项目管理员权限
-		{"project_admin", "project", "*"},
-		{"project_admin", "package", "*"},
-		{"project_admin", "file", "*"},
-		{"project_admin", "user", "view"},
-		{"project_admin", "group", "manage"},
-		{"project_admin", "permission", "view"},
+		{"pm", "project", "*"},
+		{"pm", "package", "*"},
+		{"pm", "file", "*"},
+		{"pm", "user", "view"},
+		{"pm", "group", "manage"},
+		{"pm", "permission", "view"},
 
 		// 开发者权限
 		{"developer", "project", "view"},
@@ -156,15 +156,15 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"tester", "file", "test"},
 
 		// 项目相关权限
-		{"project_admin", "project", "create"},
-		{"project_admin", "project", "edit"},
-		{"project_admin", "project", "delete"},
-		{"project_admin", "project", "manage"},
+		{"pm", "project", "create"},
+		{"pm", "project", "edit"},
+		{"pm", "project", "delete"},
+		{"pm", "project", "manage"},
 
 		// 包相关权限
-		{"package_admin", "package", "*"},
-		{"package_admin", "file", "*"},
-		{"package_admin", "project", "view"},
+		{"pm", "package", "*"},
+		{"pm", "file", "*"},
+		{"pm", "project", "view"},
 
 		// 侧边栏权限
 		{"admin", "sidebar", "dashboard"},
@@ -176,12 +176,12 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"admin", "sidebar", "settings"},
 		{"admin", "sidebar", "upgrade"},
 
-		{"project_admin", "sidebar", "dashboard"},
-		{"project_admin", "sidebar", "projects"},
-		{"project_admin", "sidebar", "packages"},
-		{"project_admin", "sidebar", "users"},
-		{"project_admin", "sidebar", "groups"},
-		{"project_admin", "sidebar", "permissions"},
+		{"pm", "sidebar", "dashboard"},
+		{"pm", "sidebar", "projects"},
+		{"pm", "sidebar", "packages"},
+		{"pm", "sidebar", "users"},
+		{"pm", "sidebar", "groups"},
+		{"pm", "sidebar", "permissions"},
 
 		{"developer", "sidebar", "dashboard"},
 		{"developer", "sidebar", "projects"},

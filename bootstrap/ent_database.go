@@ -76,8 +76,8 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 	}
 
 	// 从环境变量获取管理员信息，或使用默认值
-	adminPassword := getEnvOrDefault(env.AdminPassword, "123")
 	adminUsername := getEnvOrDefault(env.AdminUsername, "admin")
+	adminPassword := getEnvOrDefault(env.AdminPassword, "123")
 
 	log.Printf("📝 Creating admin user with password: %s", adminPassword)
 

@@ -7,7 +7,7 @@ import {Package} from '@/types/simplified';
 import {PackageVersionCard} from './package-version-card';
 import {uploadRelease} from "@/lib/api";
 
-interface PackageVersionHistoryDialogProps {
+interface PackageReleaseHistoryDialogProps {
     open: boolean;
     onClose: () => void;
     package: Package;
@@ -20,7 +20,7 @@ interface PackageVersionHistoryDialogProps {
     onDelete: (version: Package) => void;
 }
 
-export function PackageVersionHistoryDialog({
+export function PackageReleaseHistoryDialog({
                                                 open,
                                                 onClose,
                                                 package: packageData,
@@ -31,7 +31,7 @@ export function PackageVersionHistoryDialog({
                                                 onDownload,
                                                 onShare,
                                                 onDelete
-                                            }: PackageVersionHistoryDialogProps) {
+                                            }: PackageReleaseHistoryDialogProps) {
     if (!packageData) return null;
 
     const visibleVersions = allVersions.slice(0, visibleVersionsCount);
