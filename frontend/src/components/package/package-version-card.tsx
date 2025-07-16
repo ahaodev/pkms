@@ -1,17 +1,17 @@
-import { Clock, Download, Share2, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Package } from '@/types/simplified';
+import {Clock, Download, Share2, Trash2} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardHeader} from '@/components/ui/card';
+import {Release} from '@/types/simplified';
 
 interface PackageVersionCardProps {
-  version: Package;
-  onDownload: (version: Package) => void;
-  onShare: (version: Package) => void;
-  onDelete: (version: Package) => void;
+  release: Release;
+  onDownload: (release: Release) => void;
+  onShare: (version: Release) => void;
+  onDelete: (version: Release) => void;
 }
 
 export function PackageVersionCard({
-  version,
+  release,
   onDownload,
   onShare,
   onDelete
@@ -23,7 +23,7 @@ export function PackageVersionCard({
           <div className="flex items-center space-x-3">
             <div className="text-sm text-muted-foreground">
               <Clock className="inline h-4 w-4 mr-1" />
-              {version.createdAt.toLocaleDateString('zh-CN', { 
+              {release.createdAt.toLocaleDateString('zh-CN', {
                 year: 'numeric', 
                 month: 'short', 
                 day: 'numeric',
@@ -36,7 +36,7 @@ export function PackageVersionCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDownload(version)}
+              onClick={() => onDownload(release)}
             >
               <Download className="h-4 w-4 mr-1" />
               下载
@@ -44,7 +44,7 @@ export function PackageVersionCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onShare(version)}
+              onClick={() => onShare(release)}
             >
               <Share2 className="h-4 w-4 mr-1" />
               分享
@@ -52,7 +52,7 @@ export function PackageVersionCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDelete(version)}
+              onClick={() => onDelete(release)}
               className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
             >
               <Trash2 className="h-4 w-4 mr-1" />

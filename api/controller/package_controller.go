@@ -85,6 +85,17 @@ func (pc *PackageController) DeletePackage(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, domain.RespSuccess("Package deleted successfully"))
 }
+func (pc *PackageController) GetRelease(c *gin.Context) {
+	id := c.Param("project_id")
+	// 获取包的最新发布版本
+	release, err := pc.PackageUsecase.GetReleasesByPackage(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, domain.RespError("Release not found"))
+		return
+	}
+	c.JSON(http.StatusOK, domain.RespPageSuccess(release, 0, 0, 0))
+
+}
 
 // UploadRelease 上传包
 func (pc *PackageController) UploadRelease(c *gin.Context) {

@@ -3,19 +3,19 @@ import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import {useDeletePackage, useGenerateShareLink, usePackages} from '@/hooks/use-packages';
 import { useProjects } from '@/hooks/use-projects';
-import { Package } from '@/types/simplified';
+import {Package, Release} from '@/types/simplified';
 import { ShareDialog } from '@/components/share-dialog';
 import {
   PackageLoadingView,
   PackageList,
   PackageEmptyView,
   PackageCreateDialog,
-  PackageReleaseHistoryDialog,
   PackageHeader,
   SEARCH_DEBOUNCE_MS,
   VERSIONS_PER_PAGE,
   getPackageKey,
-  getTypeIcon
+  getTypeIcon,
+  PackageReleaseHistoryDialog
 } from '@/components/package';
 import { PackageToolbar } from '@/components/package/PackageToolbar';
 import { PackagePagination } from '@/components/package/PackagePagination';
@@ -45,7 +45,7 @@ export default function PackagesPage() {
   // 分享相关状态
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
-  const [sharingPackage, setSharingPackage] = useState<Package | null>(null);
+  const [sharingPackage, setSharingPackage] = useState<Release | null>(null);
 
   // 版本历史相关状态
   const [isVersionHistoryDialogOpen, setIsVersionHistoryDialogOpen] = useState(false);
@@ -159,11 +159,11 @@ export default function PackagesPage() {
   };
 
   // 分享处理
-  const handleShare = async (pkg: Package) => {
+  const handleShare = async (release: Release) => {
     try {
-      const response = await generateShareLink.mutateAsync({ packageId: pkg.id });
+      const response = await generateShareLink.mutateAsync({ packageId: release.id });
       setShareUrl(response.share_url);
-      setSharingPackage(pkg);
+      setSharingPackage(release);
       setIsShareDialogOpen(true);
     } catch {
       toast({
@@ -188,30 +188,13 @@ export default function PackagesPage() {
   };
 
   // 版本删除处理
-  const handleDeleteVersion = async (pkg: Package) => {
-
-    try {
-      await deletePackage.mutateAsync(pkg.id);
-      // 删除版本后，检查是否需要关闭对话框
-      if (versionHistoryPackage && getPackageKey(pkg) === getPackageKey(versionHistoryPackage)) {
-        const key = getPackageKey(pkg);
-        const remainingVersions = groupedPackages[key]?.filter(v => v.id !== pkg.id) || [];
-        if (remainingVersions.length === 0) {
-          setIsVersionHistoryDialogOpen(false);
-        }
-      }
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: '删除失败',
-        description: '版本删除失败，请重试。',
-      });
-    }
+  const handleDeleteVersion = async (release: Release) => {
+    console.log('handleDeleteVersion called with package:', release);
   };
 
   // 下载处理
-  const handleDownload = (pkg: Package) => {
-    window.open(`/api/packages/${pkg.id}/download`, '_blank');
+  const handleDownload = (release: Release) => {
+    window.open(`/api/packages/${release.id}/download`, '_blank');
   };
 
   if (isLoading) {
@@ -291,7 +274,7 @@ export default function PackagesPage() {
         isOpen={isShareDialogOpen}
         onClose={() => setIsShareDialogOpen(false)}
         shareUrl={shareUrl}
-        packageName={sharingPackage?.name || ''}
+        packageName={sharingPackage?.id || ''}
       />
 
       {versionHistoryPackage && (
@@ -299,7 +282,6 @@ export default function PackagesPage() {
           open={isVersionHistoryDialogOpen}
           onClose={() => setIsVersionHistoryDialogOpen(false)}
           package={versionHistoryPackage}
-          allVersions={groupedPackages[getPackageKey(versionHistoryPackage)] || []}
           visibleVersionsCount={versionHistoryPage * VERSIONS_PER_PAGE}
           isLoadingMore={isLoadingMoreVersions}
           onLoadMore={loadMoreVersions}

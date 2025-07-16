@@ -53,43 +53,6 @@ export interface Package {
     updatedAt: Date;
 }
 
-export interface Release {
-    id: string;
-    packageId: string; // 所属包的ID
-    version: string; // 版本号，如 1.0.0
-    title?: string; // 版本标题
-    description?: string; // 版本描述
-    changelog?: string; // 更新日志
-
-    // 文件信息
-    fileUrl: string;
-    fileName: string;
-    fileSize: number;
-    checksum: string; // 文件校验和
-
-    // 版本信息
-    versionCode: number; // 用于版本比较的数字
-    isPrerelease: boolean; // 是否为预发布版本
-    isDraft: boolean; // 是否为草稿
-    isLatest: boolean; // 是否为最新版本
-
-    // 平台特定信息
-    minSdkVersion?: number; // 最小SDK版本 (移动端)
-    targetSdkVersion?: number; // 目标SDK版本 (移动端)
-
-    // 统计信息
-    downloadCount: number;
-    createdAt: Date;
-    updatedAt: Date;
-
-    // 分享信息
-    shareToken?: string; // 分享令牌
-    shareExpiry?: Date; // 分享过期时间
-
-    // 发布者信息
-    createdBy: string; // 发布者用户ID
-}
-
 export interface PackageFilters {
     projectId?: string;
     type?: Package['type'];

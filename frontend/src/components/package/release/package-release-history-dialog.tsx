@@ -1,30 +1,28 @@
 import {Download, History, Upload} from 'lucide-react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {PackageReleaseDialog} from './package-release-dialog';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Package} from '@/types/simplified';
-import {PackageVersionCard} from '../package-version-card';
-import {uploadRelease} from "@/lib/api";
+import {Package, Release} from '@/types/simplified';
+import {PackageVersionCard} from '@/components/package';
+import {getRelease, uploadRelease} from "@/lib/api";
 
 interface PackageReleaseHistoryDialogProps {
     open: boolean;
     onClose: () => void;
     package: Package;
-    allVersions: Package[];
     visibleVersionsCount: number;
     isLoadingMore: boolean;
     onLoadMore: () => void;
-    onDownload: (version: Package) => void;
-    onShare: (version: Package) => void;
-    onDelete: (version: Package) => void;
+    onDownload: (release: Release) => void;
+    onShare: (release: Release) => void;
+    onDelete: (release: Release) => void;
 }
 
 export function PackageReleaseHistoryDialog({
                                                 open,
                                                 onClose,
-                                                package: packageData,
-                                                allVersions,
+                                                package: pkg,
                                                 visibleVersionsCount,
                                                 isLoadingMore,
                                                 onLoadMore,
@@ -32,12 +30,31 @@ export function PackageReleaseHistoryDialog({
                                                 onShare,
                                                 onDelete
                                             }: PackageReleaseHistoryDialogProps) {
-    if (!packageData) return null;
-
-    const visibleVersions = allVersions.slice(0, visibleVersionsCount);
-    const hasMore = visibleVersionsCount < allVersions.length;
-
+    const [releases, setReleases] = useState<Release[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false);
+
+    useEffect(() => {
+        if (!pkg?.id) return;
+        setLoading(true);
+        setError(null);
+        getRelease(pkg.id)
+            .then((resp) => {
+                setReleases(resp.data);
+                setError(null);
+            })
+            .catch(() => {
+                setError('获取版本失败');
+            })
+            .finally(() => setLoading(false));
+
+    }, [pkg?.id]);
+
+    if (!pkg) return null;
+
+    const visibleVersions = releases.slice(0, visibleVersionsCount);
+    const hasMore = visibleVersionsCount < releases.length;
 
     return (
         <>
@@ -47,10 +64,10 @@ export function PackageReleaseHistoryDialog({
                         <div>
                             <DialogTitle className="flex items-center">
                                 <History className="mr-2 h-5 w-5"/>
-                                {packageData.name}
+                                {pkg.name}
                             </DialogTitle>
                             <DialogDescription className='m-4'>
-                                {packageData.name} 的历史版本
+                                {pkg.name} 的发布版本
                             </DialogDescription>
                         </div>
                         <Button
@@ -66,17 +83,19 @@ export function PackageReleaseHistoryDialog({
 
                     <div className="flex-1 overflow-y-auto scrollbar-thin">
                         <div className="space-y-4 pr-2">
-                            {visibleVersions.map((version) => (
+                            {loading && <div className="text-center py-4">加载中...</div>}
+                            {error && <div className="text-center text-red-500 py-4">{error}</div>}
+                            {!loading && !error && visibleVersions.map((release) => (
                                 <PackageVersionCard
-                                    key={version.id}
-                                    version={version}
+                                    key={release.id}
+                                    release={release}
                                     onDownload={onDownload}
                                     onShare={onShare}
                                     onDelete={onDelete}
                                 />
                             ))}
 
-                            {hasMore && (
+                            {hasMore && !loading && !error && (
                                 <div className="flex justify-center pt-4">
                                     <Button
                                         variant="outline"
@@ -93,7 +112,7 @@ export function PackageReleaseHistoryDialog({
                                         ) : (
                                             <>
                                                 <Download className="mr-2 h-4 w-4"/>
-                                                加载更多版本 (还有 {allVersions.length - visibleVersionsCount} 个)
+                                                加载更多版本 (还有 {releases.length - visibleVersionsCount} 个)
                                             </>
                                         )}
                                     </Button>
@@ -107,8 +126,8 @@ export function PackageReleaseHistoryDialog({
             <PackageReleaseDialog
                 open={isReleaseDialogOpen}
                 onClose={() => setIsReleaseDialogOpen(false)}
-                packageId={packageData.id}
-                packageName={packageData.name}
+                packageId={pkg.id}
+                packageName={pkg.name}
                 onUpload={async (data: any) => {
                     await uploadRelease(data);
                 }}
