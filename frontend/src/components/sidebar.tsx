@@ -1,49 +1,39 @@
-import {useEffect, useRef, useCallback, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {NavLink, useLocation} from "react-router-dom";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {
-    BarChart3,
-    Package,
-    FolderOpen,
-    X,
-    Settings as SettingsIcon,
-    Users,
-    // Shield,
-    Lock,
-    Wrench,
-} from "lucide-react";
-import type {SimpleSidebarProps, NavItemProps} from '@/types';
+import {BarChart3, FolderOpen, Lock, Package, Settings as SettingsIcon, Users, Wrench, X,} from "lucide-react";
+import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/contexts/auth-context.tsx';
 import {apiClient} from '@/lib/api/api';
 
 /**
  * NavItem 组件：简化侧边栏导航项
  */
-function NavItem({ to, icon, label, end, onClick }: NavItemProps & { onClick?: () => void }) {
-  return (
-    <Button
-      asChild
-      variant="ghost"
-      className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md"
-    >
-      <NavLink
-        to={to}
-        end={end}
-        onClick={onClick}
-        className={({ isActive }) =>
-          cn(
-            "flex items-center space-x-3 w-full transition-all",
-            isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-          )
-        }
-      >
-        {icon}
-        <span>{label}</span>
-      </NavLink>
-    </Button>
-  );
+function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () => void }) {
+    return (
+        <Button
+            asChild
+            variant="ghost"
+            className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md"
+        >
+            <NavLink
+                to={to}
+                end={end}
+                onClick={onClick}
+                className={({isActive}) =>
+                    cn(
+                        "flex items-center space-x-3 w-full transition-all",
+                        isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                    )
+                }
+            >
+                {icon}
+                <span>{label}</span>
+            </NavLink>
+        </Button>
+    );
 }
 
 /**
@@ -65,7 +55,7 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
     // 获取侧边栏权限
     const fetchSidebarPermissions = useCallback(async () => {
         if (!user) return;
-        
+
         try {
             const response = await apiClient.get('/api/v1/casbin/sidebar/permissions');
             if (response.data && response.data.code === 0) {
@@ -116,7 +106,7 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
     return (
         <>
             {/* Overlay for mobile */}
-            <div 
+            <div
                 className={cn(
                     "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden",
                     isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -153,41 +143,41 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
 
                     {/* Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                      <div className="space-y-1">
-                        {hasPermission("dashboard") && (
-                          <NavItem
-                            to="/"
-                            icon={<BarChart3 className="h-5 w-5" />}
-                            label="仪表板"
-                            end
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {hasPermission("projects") && (
-                          <NavItem
-                            to="/projects"
-                            icon={<FolderOpen className="h-5 w-5" />}
-                            label="项目管理"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {hasPermission("packages") && (
-                          <NavItem
-                            to="/packages"
-                            icon={<Package className="h-5 w-5" />}
-                            label="包管理"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {hasPermission("users") && (
-                          <NavItem
-                            to="/users"
-                            icon={<Users className="h-5 w-5" />}
-                            label="用户管理"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {/* {hasPermission("groups") && (
+                        <div className="space-y-1">
+                            {hasPermission("dashboard") && (
+                                <NavItem
+                                    to="/"
+                                    icon={<BarChart3 className="h-5 w-5"/>}
+                                    label="仪表板"
+                                    end
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {hasPermission("projects") && (
+                                <NavItem
+                                    to="/projects"
+                                    icon={<FolderOpen className="h-5 w-5"/>}
+                                    label="项目管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {hasPermission("packages") && (
+                                <NavItem
+                                    to="/packages"
+                                    icon={<Package className="h-5 w-5"/>}
+                                    label="包管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {hasPermission("users") && (
+                                <NavItem
+                                    to="/users"
+                                    icon={<Users className="h-5 w-5"/>}
+                                    label="用户管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {/* {hasPermission("groups") && (
                           <NavItem
                             to="/groups"
                             icon={<Shield className="h-5 w-5" />}
@@ -195,31 +185,31 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
                             onClick={handleNavClick}
                           />
                         )} */}
-                        {hasPermission("permissions") && (
-                          <NavItem
-                            to="/permissions"
-                            icon={<Lock className="h-5 w-5" />}
-                            label="权限管理"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {hasPermission("settings") && (
-                          <NavItem
-                            to="/settings"
-                            icon={<SettingsIcon className="h-5 w-5" />}
-                            label="设置"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                        {hasPermission("upgrade") && (
-                          <NavItem
-                            to="/upgrade"
-                            icon={<Wrench className="h-5 w-5" />}
-                            label="系统升级"
-                            onClick={handleNavClick}
-                          />
-                        )}
-                      </div>
+                            {hasPermission("permissions") && (
+                                <NavItem
+                                    to="/permissions"
+                                    icon={<Lock className="h-5 w-5"/>}
+                                    label="权限管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {hasPermission("settings") && (
+                                <NavItem
+                                    to="/settings"
+                                    icon={<SettingsIcon className="h-5 w-5"/>}
+                                    label="设置"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                            {hasPermission("upgrade") && (
+                                <NavItem
+                                    to="/upgrade"
+                                    icon={<Wrench className="h-5 w-5"/>}
+                                    label="系统升级"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+                        </div>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">

@@ -1,3 +1,5 @@
-sub,obj,act,eft
-*,users/profile,GET,allow
-
+p, admin, *, *
+p, user, data, read
+p, user, data, write
+g, alice, admin
+g, bob, user

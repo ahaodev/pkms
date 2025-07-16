@@ -195,12 +195,7 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 
 // GetUserPermissions 获取用户权限
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
-	userID := c.Param("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("用户ID不能为空"))
-		return
-	}
-
+	userID := c.GetString(constants.UserID)
 	permissions := cc.casbinManager.GetPermissionsForUser(userID)
 	roles := cc.casbinManager.GetRolesForUser(userID)
 
@@ -369,23 +364,12 @@ func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
 // GetSidebarPermissions 获取侧边栏权限
 func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
-	userID, exists := c.Get(constants.UserID)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-		return
-	}
-
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-		return
-	}
+	userRole := c.GetString(constants.UserRole)
 
 	// 获取侧边栏权限
-	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userIDStr)
+	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userRole)
 
 	response := gin.H{
-		"user_id": userIDStr,
 		"sidebar": sidebarPermissions,
 	}
 
@@ -395,26 +379,16 @@ func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 // GetProjectPermissions 获取项目权限
 func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
 	// 获取当前用户ID
-	userID, exists := c.Get(constants.UserID)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-		return
-	}
-
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-		return
-	}
+	userID := c.GetString(constants.UserID)
 
 	// 获取项目ID（可选）
 	projectID := c.Query("project_id")
 
 	// 获取项目权限
-	projectPermissions := cc.casbinManager.GetProjectPermissions(userIDStr, projectID)
+	projectPermissions := cc.casbinManager.GetProjectPermissions(userID, projectID)
 
 	response := gin.H{
-		"user_id":     userIDStr,
+		"user_id":     userID,
 		"project_id":  projectID,
 		"permissions": projectPermissions,
 	}
@@ -425,26 +399,15 @@ func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
 // GetPackagePermissions 获取包权限
 func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
 	// 获取当前用户ID
-	userID, exists := c.Get(constants.UserID)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户未认证"))
-		return
-	}
-
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, domain.RespError("用户ID格式错误"))
-		return
-	}
-
+	userID := c.GetString(constants.UserID)
 	// 获取包名（可选）
 	packageName := c.Query("package_name")
 
 	// 获取包权限
-	packagePermissions := cc.casbinManager.GetPackagePermissions(userIDStr, packageName)
+	packagePermissions := cc.casbinManager.GetPackagePermissions(userID, packageName)
 
 	response := gin.H{
-		"user_id":      userIDStr,
+		"user_id":      userID,
 		"package_name": packageName,
 		"permissions":  packagePermissions,
 	}

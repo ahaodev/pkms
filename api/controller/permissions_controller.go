@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -16,7 +17,7 @@ type PermissionsController struct {
 
 // GetUserPermissions 获取用户权限
 func (pc *PermissionsController) GetUserPermissions(c *gin.Context) {
-	userID := c.Param("userId")
+	userID := c.GetString(constants.UserID)
 	permissions, err := pc.PermissionUsecase.GetUserPermissions(c, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
