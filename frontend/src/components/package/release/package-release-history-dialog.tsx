@@ -4,7 +4,7 @@ import {PackageReleaseDialog} from './package-release-dialog';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Package} from '@/types/simplified';
-import {PackageVersionCard} from './package-version-card';
+import {PackageVersionCard} from '../package-version-card';
 import {uploadRelease} from "@/lib/api";
 
 interface PackageReleaseHistoryDialogProps {
@@ -109,7 +109,7 @@ export function PackageReleaseHistoryDialog({
                 onClose={() => setIsReleaseDialogOpen(false)}
                 packageId={packageData.id}
                 packageName={packageData.name}
-                onUpload={async (data) => {
+                onUpload={async (data: any) => {
                     await uploadRelease(data);
                 }}
                 isUploading={false}

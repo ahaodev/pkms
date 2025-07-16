@@ -15,8 +15,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Progress} from '@/components/ui/progress';
 import {Package, ReleaseUpload, UploadProgress} from '@/types/simplified';
-import {formatFileSize} from './package-utils';
-
+import {formatFileSize} from '../package-utils';
 
 interface PackageReleaseDialogProps {
     open: boolean;
@@ -47,7 +46,6 @@ export function PackageReleaseDialog({
     });
 
     console.log(packageId, packageName, uploadProgress, isUploading);
-
 
     const handleUpload = async () => {
         if (!selectedFile) return;
