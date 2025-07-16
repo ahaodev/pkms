@@ -67,7 +67,7 @@ const PermissionsPage: React.FC = () => {
   });
 
   // 预定义的角色类型
-  const predefinedRoles = ['admin', 'project_admin', 'developer', 'viewer', 'tester', 'package_admin'];
+  const predefinedRoles = ['admin', 'pm', 'developer', 'viewer', 'tester'];
 
   useEffect(() => {
     fetchData();
