@@ -118,10 +118,6 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 	defaultPolicies := [][]string{
 		// 管理员角色权限
 		{"admin", "*", "*"},
-		{"admin", "system", "manage"},
-		{"admin", "user", "manage"},
-		{"admin", "role", "manage"},
-		{"admin", "permission", "manage"},
 
 		// 项目管理员权限
 		{"pm", "project", "*"},
@@ -147,13 +143,6 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"viewer", "package", "view"},
 		{"viewer", "file", "view"},
 		{"viewer", "dashboard", "view"},
-
-		// 测试者权限
-		{"tester", "project", "view"},
-		{"tester", "package", "view"},
-		{"tester", "file", "view"},
-		{"tester", "package", "test"},
-		{"tester", "file", "test"},
 
 		// 项目相关权限
 		{"pm", "project", "create"},
@@ -190,10 +179,6 @@ func (m *CasbinManager) InitializeDefaultPolicies() error {
 		{"viewer", "sidebar", "dashboard"},
 		{"viewer", "sidebar", "projects"},
 		{"viewer", "sidebar", "packages"},
-
-		{"tester", "sidebar", "dashboard"},
-		{"tester", "sidebar", "projects"},
-		{"tester", "sidebar", "packages"},
 	}
 
 	// 添加策略
