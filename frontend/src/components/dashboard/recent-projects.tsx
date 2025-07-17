@@ -1,5 +1,5 @@
 import { FolderOpen } from 'lucide-react';
-import { getProjectIcon } from '../package/package-utils';
+import { getProjectIcon } from '@/components/package';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Project } from '@/types/simplified';
