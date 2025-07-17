@@ -141,16 +141,6 @@ export interface UploadProgress {
     percentage: number;
 }
 
-export interface PackageUpload {
-    file: File;
-    projectId: string;
-    name: string;
-    description: string;
-    type: Package['type'];
-    version: string;
-    changelog?: string;
-}
-
 // 用户管理相关类型
 export interface CreateUserRequest {
     username: string;
@@ -174,27 +164,6 @@ export interface UpdateGroupRequest {
     description?: string;
     color?: string;
     permissions?: GroupPermission[];
-}
-
-export interface GroupMembership {
-    userId: string;
-    groupId: string;
-    joinedAt: Date;
-    addedBy: string;
-}
-
-export interface UserProjectAssignment {
-    userId: string;
-    projectId: string;
-    assignedAt: Date;
-    assignedBy: string;
-}
-
-export interface ProjectPermission {
-    userId: string;
-    projectId: string;
-    canView: boolean;
-    canEdit: boolean;
 }
 
 // 扩展的包接口，包含从API返回的额外字段（用于向后兼容）

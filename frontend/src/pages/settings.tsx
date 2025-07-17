@@ -9,10 +9,6 @@ import {
   type NotificationConfig
 } from "@/components/settings";
 
-/**
- * 设置页：支持存储、认证、通知、部署、进阶等多标签配置，所有设置均本地管理
- */
-
 export default function Settings() {
   // 存储设置保存处理
   const handleSaveStorage = useCallback((config: StorageConfig) => {
