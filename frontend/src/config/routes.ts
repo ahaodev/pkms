@@ -5,7 +5,6 @@ import PackagesPage from "@/pages/packages";
 import LoginPage from "@/pages/login";
 import Settings from "@/pages/settings";
 import UsersPage from "@/pages/users";
-import GroupsPage from "@/pages/groups";
 import PermissionsPage from "@/pages/permissions";
 
 export interface RouteConfig {
@@ -49,12 +48,6 @@ export const routes: RouteConfig[] = [
     {
         path: "/users",
         element: UsersPage,
-        requiresAuth: true,
-        requiresAdmin: true,
-    },
-    {
-        path: "/groups",
-        element: GroupsPage,
         requiresAuth: true,
         requiresAdmin: true,
     },
