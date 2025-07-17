@@ -1,7 +1,7 @@
 import {Clock, Download, Share2, Trash2} from 'lucide-react';
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardHeader} from '@/components/ui/card';
-import {Release} from '@/types/simplified';
+import {Button} from '@/components/ui/button.tsx';
+import {Card, CardContent, CardHeader} from '@/components/ui/card.tsx';
+import {Release} from '@/types/simplified.ts';
 
 interface PackageVersionCardProps {
   release: Release;
@@ -10,7 +10,7 @@ interface PackageVersionCardProps {
   onDelete: (version: Release) => void;
 }
 
-export function PackageVersionCard({
+export function PackageReleaseCard({
   release,
   onDownload,
   onShare,
@@ -23,13 +23,18 @@ export function PackageVersionCard({
           <div className="flex items-center space-x-3">
             <div className="text-sm text-muted-foreground">
               <Clock className="inline h-4 w-4 mr-1" />
-              {release.createdAt.toLocaleDateString('zh-CN', {
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
+              {release.createdAt
+                ? (typeof release.createdAt === 'string' || typeof release.createdAt === 'number'
+                    ? new Date(release.createdAt)
+                    : release.createdAt
+                  ).toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : '未知时间'}
             </div>
           </div>
           <div className="flex space-x-2">

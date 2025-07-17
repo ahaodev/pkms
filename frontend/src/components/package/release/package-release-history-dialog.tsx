@@ -4,7 +4,7 @@ import {PackageReleaseDialog} from './package-release-dialog';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Package, Release} from '@/types/simplified';
-import {PackageVersionCard} from '@/components/package';
+import {PackageReleaseCard} from '@/components/package';
 import {getRelease, uploadRelease} from "@/lib/api";
 
 interface PackageReleaseHistoryDialogProps {
@@ -34,8 +34,9 @@ export function PackageReleaseHistoryDialog({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
-    useEffect(() => {
+    const fetchReleases = () => {
         if (!pkg?.id) return;
         setLoading(true);
         setError(null);
@@ -48,7 +49,10 @@ export function PackageReleaseHistoryDialog({
                 setError('获取版本失败');
             })
             .finally(() => setLoading(false));
+    };
 
+    useEffect(() => {
+        fetchReleases();
     }, [pkg?.id]);
 
     if (!pkg) return null;
@@ -86,7 +90,7 @@ export function PackageReleaseHistoryDialog({
                             {loading && <div className="text-center py-4">加载中...</div>}
                             {error && <div className="text-center text-red-500 py-4">{error}</div>}
                             {!loading && !error && visibleVersions.map((release) => (
-                                <PackageVersionCard
+                                <PackageReleaseCard
                                     key={release.id}
                                     release={release}
                                     onDownload={onDownload}
@@ -128,10 +132,19 @@ export function PackageReleaseHistoryDialog({
                 onClose={() => setIsReleaseDialogOpen(false)}
                 packageId={pkg.id}
                 packageName={pkg.name}
+                isUploading={isUploading}
                 onUpload={async (data: any) => {
-                    await uploadRelease(data);
+                    setIsUploading(true);
+                    try {
+                        await uploadRelease(data);
+                        setIsReleaseDialogOpen(false);
+                        fetchReleases(); // 刷新版本列表
+                    } catch (e) {
+                        // 可选：toast 错误提示
+                    } finally {
+                        setIsUploading(false);
+                    }
                 }}
-                isUploading={false}
             />
         </>
     );

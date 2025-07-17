@@ -30,7 +30,7 @@ func NewPackageRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	group.DELETE("/:id", pc.DeletePackage) // DELETE /api/v1/packages/:id
 
 	// Package specific operations
-	group.GET("/release/:projectId", pc.GetRelease)         // POST /api/v1/packages/upload
+	group.GET("/release/:package_id", pc.GetRelease)        // POST /api/v1/packages/upload
 	group.POST("/release", pc.UploadRelease)                // POST /api/v1/packages/upload
 	group.GET("/:id/download", pc.DownloadPackage)          // GET /api/v1/packages/:id/download
 	group.GET("/:id/versions", pc.GetPackageVersions)       // GET /api/v1/packages/:id/versions

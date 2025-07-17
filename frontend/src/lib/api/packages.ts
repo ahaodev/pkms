@@ -53,6 +53,7 @@ export async function deletePackage(id: string): Promise<ApiResponse<void>> {
 }
 
 export async function getRelease(packageID: string): Promise<ApiResponse<Release[]>> {
+    console.log("Fetching releases for package ID:", packageID);
     const resp = await apiClient.get(`/api/v1/packages/release/${packageID}`);
     return resp.data
 }
