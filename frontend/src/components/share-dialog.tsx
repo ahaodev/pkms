@@ -1,5 +1,5 @@
-import {useState, useEffect} from 'react';
-import {Copy, Check, Download, ExternalLink} from 'lucide-react';
+import {useEffect, useState} from 'react';
+import {Check, Copy, Download, ExternalLink} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';

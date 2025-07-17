@@ -177,14 +177,6 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
                                     onClick={handleNavClick}
                                 />
                             )}
-                            {/* {hasPermission("groups") && (
-                          <NavItem
-                            to="/groups"
-                            icon={<Shield className="h-5 w-5" />}
-                            label="组管理"
-                            onClick={handleNavClick}
-                          />
-                        )} */}
                             {hasPermission("permissions") && (
                                 <NavItem
                                     to="/permissions"
