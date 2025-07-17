@@ -27,7 +27,6 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
 		SetFileSize(r.FileSize).
-		SetIsLatest(r.IsLatest).
 		SetDownloadCount(r.DownloadCount).
 		SetCreatedBy(r.CreatedBy)
 
@@ -40,13 +39,6 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 	}
 	if r.FileHash != "" {
 		createBuilder = createBuilder.SetFileHash(r.FileHash)
-	}
-	if r.ShareToken != "" {
-		createBuilder = createBuilder.SetShareToken(r.ShareToken)
-	}
-
-	if !r.PublishedAt.IsZero() {
-		createBuilder = createBuilder.SetPublishedAt(r.PublishedAt)
 	}
 
 	created, err := createBuilder.Save(c)
@@ -95,7 +87,6 @@ func (rr *entReleaseRepository) GetLatestByPackageID(c context.Context, packageI
 		Query().
 		Where(
 			release.PackageID(packageID),
-			release.IsLatest(true),
 		).
 		Only(c)
 
@@ -109,7 +100,6 @@ func (rr *entReleaseRepository) GetLatestByPackageID(c context.Context, packageI
 func (rr *entReleaseRepository) GetByShareToken(c context.Context, token string) (*domain.Release, error) {
 	entRelease, err := rr.client.Release.
 		Query().
-		Where(release.ShareToken(token)).
 		Only(c)
 
 	if err != nil {
@@ -127,7 +117,6 @@ func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) err
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
 		SetFileSize(r.FileSize).
-		SetIsLatest(r.IsLatest).
 		SetDownloadCount(r.DownloadCount)
 
 	// 可选字段
@@ -139,13 +128,6 @@ func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) err
 	}
 	if r.FileHash != "" {
 		updateBuilder = updateBuilder.SetFileHash(r.FileHash)
-	}
-	if r.ShareToken != "" {
-		updateBuilder = updateBuilder.SetShareToken(r.ShareToken)
-	}
-
-	if !r.PublishedAt.IsZero() {
-		updateBuilder = updateBuilder.SetPublishedAt(r.PublishedAt)
 	}
 
 	_, err := updateBuilder.Save(c)
@@ -169,7 +151,6 @@ func (rr *entReleaseRepository) SetAsLatest(c context.Context, packageID, releas
 	_, err := rr.client.Release.
 		Update().
 		Where(release.PackageID(packageID)).
-		SetIsLatest(false).
 		Save(c)
 
 	if err != nil {
@@ -179,7 +160,6 @@ func (rr *entReleaseRepository) SetAsLatest(c context.Context, packageID, releas
 	// 再将指定版本设置为最新
 	_, err = rr.client.Release.
 		UpdateOneID(releaseID).
-		SetIsLatest(true).
 		Save(c)
 
 	return err
@@ -197,11 +177,8 @@ func (rr *entReleaseRepository) convertToDomain(entRelease *ent.Release) *domain
 		FileName:      entRelease.FileName,
 		FileSize:      entRelease.FileSize,
 		FileHash:      entRelease.FileHash,
-		IsLatest:      entRelease.IsLatest,
 		DownloadCount: entRelease.DownloadCount,
-		ShareToken:    entRelease.ShareToken,
 		CreatedBy:     entRelease.CreatedBy,
 		CreatedAt:     entRelease.CreatedAt,
-		PublishedAt:   entRelease.PublishedAt,
 	}
 }

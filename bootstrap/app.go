@@ -1,10 +1,9 @@
 package bootstrap
 
 import (
-	"pkms/ent"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"pkms/ent"
 )
 
 type Application struct {
@@ -27,7 +26,6 @@ func App() Application {
 		panic("Failed to connect to MinIO: " + err.Error())
 	}
 	app.MinioClient = minioClient
-
 	return *app
 }
 

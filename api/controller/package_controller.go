@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"pkms/internal/constants"
+	"pkms/pkg"
 	"strconv"
 
 	"pkms/bootstrap"
@@ -13,6 +14,7 @@ import (
 
 type PackageController struct {
 	PackageUsecase domain.PackageUsecase
+	FileUsecase    domain.FileUsecase
 	Env            *bootstrap.Env
 }
 
@@ -120,7 +122,20 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 		FileSize:   header.Size,
 		FileHeader: header.Header.Get("Content-Type"),
 	}
-
+	uploadRequest := &domain.UploadRequest{
+		Bucket:      pc.Env.S3Bucket,
+		ObjectName:  header.Filename,
+		Prefix:      req.PackageID,
+		Reader:      file,
+		Size:        header.Size,
+		ContentType: header.Header.Get("Content-Type"),
+	}
+	uploadResp, err := pc.FileUsecase.Upload(c, uploadRequest)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("File upload failed: "+err.Error()))
+		return
+	}
+	pkg.Log.Println(uploadResp)
 	// 验证必需字段
 	if req.PackageID == "" || req.Name == "" || req.Version == "" {
 		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: project_id, name, version"))
@@ -131,7 +146,6 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
 		req.IsLatest = true
 	}
-	// 调用usecase进行发布版本创建
 	// 首先需要确保包存在或创建包
 	release := &domain.Release{
 		PackageID:    req.PackageID,
@@ -141,6 +155,7 @@ func (pc *PackageController) UploadRelease(c *gin.Context) {
 		ChangeLog:    req.Changelog,
 		FileName:     req.FileName,
 		FileSize:     req.FileSize,
+		FilePath:     uploadResp.ObjectName,
 		IsPrerelease: req.IsPrerelease,
 		IsLatest:     req.IsLatest,
 		IsDraft:      req.IsDraft,

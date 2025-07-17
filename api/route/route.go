@@ -63,16 +63,6 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
-	groupRouter := protectedRouter.Group("/group")
-	groupRouter.Use(casbinMiddleware.RequirePermission("group", "view"))
-
-	NewGroupRouter(env, timeout, db, groupRouter)
-
-	permissionRouter := protectedRouter.Group("/permission")
-	permissionRouter.Use(casbinMiddleware.RequirePermission("permission", "manage"))
-
-	NewPermissionRouter(env, timeout, db, permissionRouter)
-
 	upgradeRouter := protectedRouter.Group("/upgrade")
 	upgradeRouter.Use(casbinMiddleware.RequireRole("admin"))
 

@@ -41,20 +41,12 @@ func (Release) Fields() []ent.Field {
 		field.String("file_hash").
 			MaxLen(64).
 			Optional(),
-		field.Bool("is_latest").
-			Default(false),
 		field.Int("download_count").
 			Default(0),
-		field.String("share_token").
-			MaxLen(255).
-			Unique().
-			Optional(),
 		field.String("created_by").
 			MaxLen(50),
 		field.Time("created_at").
 			Default(time.Now),
-		field.Time("published_at").
-			Optional(),
 	}
 }
 
@@ -73,6 +65,7 @@ func (Release) Edges() []ent.Edge {
 			Field("created_by").
 			Unique().
 			Required(),
+		edge.To("shares", Share.Type),
 	}
 }
 
@@ -81,10 +74,7 @@ func (Release) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("package_id"),
 		index.Fields("version"),
-		index.Fields("is_latest"),
-		index.Fields("share_token"),
 		index.Fields("created_at"),
-		index.Fields("published_at"),
 		// Unique constraint: one version per package
 		index.Fields("package_id", "version").Unique(),
 		// Unique constraint: one tag per package (if provided)

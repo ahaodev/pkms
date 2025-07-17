@@ -66,18 +66,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("created_packages", Packages.Type),
 		// User creates releases
 		edge.To("created_releases", Release.Type),
-		// User creates groups
-		edge.To("created_groups", Group.Type),
-		// User project assignments
-		edge.To("project_assignments", UserProjectAssignment.Type),
-		// User group memberships
-		edge.To("group_memberships", GroupMembership.Type),
-		// User project permissions
-		edge.To("project_permissions", ProjectPermission.Type),
-		// User assignments (as assigner)
-		edge.To("assigned_project_assignments", UserProjectAssignment.Type),
-		// User group memberships (as adder)
-		edge.To("added_group_memberships", GroupMembership.Type),
 	}
 }
 

@@ -27,7 +27,6 @@ func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) err
 		SetIcon(p.Icon).
 		SetCreatedBy(p.CreatedBy).
 		SetUpdatedAt(p.UpdatedAt).
-		SetPackageCount(p.PackageCount).
 		Save(c)
 
 	if err != nil {
@@ -52,14 +51,13 @@ func (pr *entProjectRepository) Fetch(c context.Context) ([]domain.Project, erro
 	var result []domain.Project
 	for _, p := range projects {
 		result = append(result, domain.Project{
-			ID:           p.ID,
-			Name:         p.Name,
-			Description:  p.Description,
-			Icon:         p.Icon,
-			CreatedAt:    p.CreatedAt,
-			UpdatedAt:    p.UpdatedAt,
-			PackageCount: p.PackageCount,
-			CreatedBy:    p.CreatedBy,
+			ID:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Icon:        p.Icon,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+			CreatedBy:   p.CreatedBy,
 		})
 	}
 
@@ -77,14 +75,13 @@ func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Pr
 	}
 
 	return domain.Project{
-		ID:           p.ID,
-		Name:         p.Name,
-		Description:  p.Description,
-		Icon:         p.Icon,
-		CreatedAt:    p.CreatedAt,
-		UpdatedAt:    p.UpdatedAt,
-		PackageCount: p.PackageCount,
-		CreatedBy:    p.CreatedBy,
+		ID:          p.ID,
+		Name:        p.Name,
+		Description: p.Description,
+		Icon:        p.Icon,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+		CreatedBy:   p.CreatedBy,
 	}, nil
 }
 
@@ -94,7 +91,6 @@ func (pr *entProjectRepository) Update(c context.Context, p *domain.Project) err
 		SetName(p.Name).
 		SetDescription(p.Description).
 		SetIcon(p.Icon).
-		SetPackageCount(p.PackageCount).
 		Save(c)
 
 	return err
@@ -119,14 +115,13 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 	var result []domain.Project
 	for _, p := range projects {
 		result = append(result, domain.Project{
-			ID:           p.ID,
-			Name:         p.Name,
-			Description:  p.Description,
-			Icon:         p.Icon,
-			CreatedAt:    p.CreatedAt,
-			UpdatedAt:    p.UpdatedAt,
-			PackageCount: p.PackageCount,
-			CreatedBy:    p.CreatedBy,
+			ID:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Icon:        p.Icon,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+			CreatedBy:   p.CreatedBy,
 		})
 	}
 

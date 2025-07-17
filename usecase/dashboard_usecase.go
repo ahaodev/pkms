@@ -11,7 +11,6 @@ type dashboardUsecase struct {
 	projectRepository domain.ProjectRepository
 	packageRepository domain.PackageRepository
 	userRepository    domain.UserRepository
-	groupRepository   domain.GroupRepository
 	contextTimeout    time.Duration
 }
 
@@ -19,14 +18,12 @@ func NewDashboardUsecase(
 	projectRepository domain.ProjectRepository,
 	packageRepository domain.PackageRepository,
 	userRepository domain.UserRepository,
-	groupRepository domain.GroupRepository,
 	timeout time.Duration,
 ) domain.DashboardUsecase {
 	return &dashboardUsecase{
 		projectRepository: projectRepository,
 		packageRepository: packageRepository,
 		userRepository:    userRepository,
-		groupRepository:   groupRepository,
 		contextTimeout:    timeout,
 	}
 }
@@ -55,16 +52,10 @@ func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, 
 		return domain.DashboardStats{}, err
 	}
 
-	groups, err := du.groupRepository.Fetch(ctx)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-
 	return domain.DashboardStats{
 		TotalProjects: len(projects),
 		TotalPackages: totalPackages,
 		TotalUsers:    len(users),
-		TotalGroups:   len(groups),
 	}, nil
 }
 

@@ -16,8 +16,10 @@ import (
 func NewPackageRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClient *minio.Client, group *gin.RouterGroup) {
 	pkgRepo := repository.NewPackageRepository(db)
 	releaseRepo := repository.NewReleaseRepository(db)
+	fileRepository := repository.NewFileRepository(minioClient)
 	pc := &controller.PackageController{
 		PackageUsecase: usecase.NewPackageUsecase(pkgRepo, releaseRepo, timeout),
+		FileUsecase:    usecase.NewFileUsecase(fileRepository, timeout),
 		Env:            env,
 	}
 

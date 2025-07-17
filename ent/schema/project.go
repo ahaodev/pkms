@@ -49,8 +49,6 @@ func (Project) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int("package_count").
-			Default(0),
 		field.String("created_by").
 			MaxLen(50),
 	}
@@ -67,12 +65,6 @@ func (Project) Edges() []ent.Edge {
 			Required(),
 		// Project has many packages
 		edge.To("packages", Packages.Type),
-		// Project has many user assignments
-		edge.To("user_assignments", UserProjectAssignment.Type),
-		// Project has many group permissions
-		edge.To("group_permissions", GroupPermission.Type),
-		// Project has many user permissions
-		edge.To("user_permissions", ProjectPermission.Type),
 	}
 }
 

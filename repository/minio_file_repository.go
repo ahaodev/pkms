@@ -28,7 +28,17 @@ func (fr *minioFileRepository) Upload(c context.Context, req *domain.UploadReque
 	if req.Prefix != "" {
 		objectName = req.Prefix + "/" + req.ObjectName
 	}
-
+	// 检查存储桶是否存在,如果不存在创建桶
+	bucketExists, err := fr.client.BucketExists(c, req.Bucket)
+	if err != nil {
+		return nil, err
+	}
+	if !bucketExists {
+		err = fr.client.MakeBucket(c, req.Bucket, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
 	// 上传对象到 MinIO
 	info, err := fr.client.PutObject(c, req.Bucket, objectName, req.Reader, req.Size, minio.PutObjectOptions{
 		ContentType: req.ContentType,
