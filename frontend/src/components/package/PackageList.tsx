@@ -9,7 +9,7 @@ interface PackageListProps {
   getVersionCount: (pkg: ExtendedPackage) => number;
   getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
   handleVersionHistory: (pkg: ExtendedPackage) => void;
-  handleShare: (pkg: ExtendedPackage) => void;
+  handleShare: (pkg: any) => void | Promise<void>;
   handleDelete: (pkg: ExtendedPackage) => void;
 }
 
