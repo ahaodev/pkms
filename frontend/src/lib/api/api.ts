@@ -48,7 +48,7 @@ apiClient.interceptors.response.use(
             console.log('Unauthorized error:', requestUrl);
             
             // 只有在非登录接口且非 profile 验证接口时才清除令牌和重定向
-            if (!requestUrl.includes('/login') && !requestUrl.includes('/users/profile')) {
+            if (!requestUrl.includes('/login') && !requestUrl.includes('/profile')) {
                 console.log('Clearing tokens and redirecting to login due to 401 on:', requestUrl);
                 localStorage.removeItem(ACCESS_TOKEN);
                 localStorage.removeItem(ACCESS_TOKEN);
@@ -56,7 +56,7 @@ apiClient.interceptors.response.use(
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = '/login';
                 }
-            } else if (requestUrl.includes('/users/profile')) {
+            } else if (requestUrl.includes('/profile')) {
                 console.log('Profile validation failed with 401, clearing only access token but keeping user logged in');
                 // profile 验证失败时只清除访问 token，保留用户状态
                 localStorage.removeItem(ACCESS_TOKEN);

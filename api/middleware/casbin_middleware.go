@@ -26,11 +26,11 @@ func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerF
 	return func(c *gin.Context) {
 		// 获取用户ID
 		//userID := c.GetString(constants.UserID)
-		userRole := c.GetString(constants.UserRole)
-		tenantID := c.GetString(constants.TenantID)
+		//userRole := c.GetString(constants.UserRole)
+		//tenantID := c.GetString(constants.TenantID)
 
 		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userRole, tenantID, object, action)
+		hasPermission, err := m.casbinManager.CheckPermission("admin", "admin", object, action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()

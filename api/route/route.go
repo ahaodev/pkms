@@ -35,6 +35,11 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+
+	// 个人资料路由，允许所有认证用户访问
+	profileRouter := protectedRouter.Group("/profile")
+	NewProfileRouter(env, timeout, db, profileRouter)
+
 	// 再通过casbin中间件进行权限控制
 	// Casbin 权限管理路由（需要认证但不需要特定权限）
 	casbinRouter := protectedRouter.Group("/casbin")
