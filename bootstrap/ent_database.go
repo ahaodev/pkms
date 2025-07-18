@@ -87,6 +87,8 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 		log.Printf("❌ Failed to hash admin password: %v", err)
 		return
 	}
+	// 创建系统租户(创建用户时自动创建对应的租户)
+	systemTenant, err := client.Tenant.Create().SetName("admin").Save(ctx)
 
 	// 创建管理员用户
 	_, err = client.User.Create().
@@ -94,6 +96,7 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 		SetPasswordHash(string(hashedPassword)).
 		SetRole("admin").
 		SetIsActive(true).
+		AddTenants(systemTenant).
 		Save(ctx)
 
 	if err != nil {

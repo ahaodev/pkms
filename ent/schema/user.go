@@ -66,6 +66,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("created_packages", Packages.Type),
 		// User creates releases
 		edge.To("created_releases", Release.Type),
+		edge.From("tenants", Tenant.Type).
+			Ref("users"),
 	}
 }
 

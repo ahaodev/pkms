@@ -97,11 +97,18 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 	if err != nil {
 		return domain.User{}, err
 	}
-
+	t, err := u.QueryTenants().All(c)
+	if err != nil {
+		return domain.User{}, err
+	}
+	tenant := make([]*domain.Tenant, len(t))
+	for i := range t {
+		tenant[i] = &domain.Tenant{ID: t[i].ID, Name: t[i].Name}
+	}
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
-		Role:      u.Role.String(),
+		Tenants:   tenant,
 		Password:  u.PasswordHash,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,

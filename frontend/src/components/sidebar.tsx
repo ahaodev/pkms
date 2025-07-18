@@ -197,7 +197,7 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
                                 <NavItem
                                     to="/upgrade"
                                     icon={<Wrench className="h-5 w-5"/>}
-                                    label="系统升级"
+                                    label="升级管理"
                                     onClick={handleNavClick}
                                 />
                             )}

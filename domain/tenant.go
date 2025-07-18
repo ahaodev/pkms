@@ -1,29 +1,19 @@
 package domain
 
-import (
-	"context"
-	"time"
-)
+import "context"
 
-// User 结构体定义了用户的基本信息
-type User struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Password  string    `json:"-"`
-	Role      string    `json:"role"`
-	Tenants   []*Tenant `json:"tenants"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+type Tenant struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
-
-type UserRepository interface {
+type TenantRepository interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]User, error)
 	GetByUserName(c context.Context, userName string) (User, error)
 	GetByID(c context.Context, id string) (User, error)
 }
 
-type UserUseCase interface {
+type TenantUseCase interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]User, error)
 	GetByUserName(c context.Context, userName string) (User, error)

@@ -27,9 +27,10 @@ func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerF
 		// 获取用户ID
 		//userID := c.GetString(constants.UserID)
 		userRole := c.GetString(constants.UserRole)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userRole, object, action)
+		hasPermission, err := m.casbinManager.CheckPermission(userRole, tenantID, object, action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -51,6 +52,7 @@ func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.Hand
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 检查是否有任一权限
 		hasAnyPermission := false
@@ -59,7 +61,7 @@ func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.Hand
 				object := permission[0]
 				action := permission[1]
 
-				hasPermission, err := m.casbinManager.CheckPermission(userID, object, action)
+				hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 					c.Abort()
@@ -88,9 +90,10 @@ func (m *CasbinMiddleware) RequireRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 获取用户角色
-		userRoles := m.casbinManager.GetRolesForUser(userID)
+		userRoles := m.casbinManager.GetRolesForUser(userID, tenantID)
 
 		// 检查是否有所需角色
 		hasRole := false
@@ -116,9 +119,10 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 获取用户角色
-		userRoles := m.casbinManager.GetRolesForUser(userID)
+		userRoles := m.casbinManager.GetRolesForUser(userID, tenantID)
 
 		// 检查是否有任一所需角色
 		hasAnyRole := false
@@ -145,15 +149,15 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 }
 
 // GetUserPermissions 获取用户权限信息的辅助函数
-func (m *CasbinMiddleware) GetUserPermissions(userID string) ([][]string, []string) {
-	permissions := m.casbinManager.GetPermissionsForUser(userID)
-	roles := m.casbinManager.GetRolesForUser(userID)
+func (m *CasbinMiddleware) GetUserPermissions(userID, tenantID string) ([][]string, []string) {
+	permissions := m.casbinManager.GetPermissionsForUser(userID, tenantID)
+	roles := m.casbinManager.GetRolesForUser(userID, tenantID)
 	return permissions, roles
 }
 
 // HasPermission 检查用户是否有特定权限的辅助函数
-func (m *CasbinMiddleware) HasPermission(userID, object, action string) bool {
-	hasPermission, err := m.casbinManager.CheckPermission(userID, object, action)
+func (m *CasbinMiddleware) HasPermission(userID, tenantID, object, action string) bool {
+	hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
 	if err != nil {
 		return false
 	}
@@ -165,6 +169,7 @@ func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFu
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 获取项目ID（可选）
 		projectID := c.Param("project_id")
@@ -173,7 +178,7 @@ func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFu
 		}
 
 		// 检查项目权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, "project", action)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "project", action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -195,6 +200,7 @@ func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFu
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 获取包名（可选）
 		packageName := c.Param("package_name")
@@ -203,7 +209,7 @@ func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFu
 		}
 
 		// 检查包权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, "package", action)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "package", action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -225,9 +231,10 @@ func (m *CasbinMiddleware) RequireSidebarPermission(item string) gin.HandlerFunc
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
 
 		// 检查侧边栏权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, "sidebar", item)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "sidebar", item)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
