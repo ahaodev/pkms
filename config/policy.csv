@@ -1,5 +1,76 @@
-p, admin, *, *
-p, user, data, read
-p, user, data, write
-g, alice, admin
-g, bob, user
+# --------- 团队租户策略 ---------
+# 玉皇大帝租户
+p, tenant-admin, yuhuangdadi_tenant, dashboard, view
+p, tenant-admin, yuhuangdadi_tenant, project, view
+p, tenant-admin, yuhuangdadi_tenant, project, edit
+p, tenant-admin, yuhuangdadi_tenant, package, view
+p, tenant-admin, yuhuangdadi_tenant, package, edit
+p, tenant-admin, yuhuangdadi_tenant, release, view
+p, tenant-admin, yuhuangdadi_tenant, release, edit
+p, tenant-admin, yuhuangdadi_tenant, user_manager, manage
+
+p, tenant-member, yuhuangdadi_tenant, dashboard, view
+p, tenant-member, yuhuangdadi_tenant, project, view
+p, tenant-member, yuhuangdadi_tenant, project, edit
+p, tenant-member, yuhuangdadi_tenant, package, view
+p, tenant-member, yuhuangdadi_tenant, package, edit
+p, tenant-member, yuhuangdadi_tenant, release, view
+p, tenant-member, yuhuangdadi_tenant, release, edit
+
+p, tenant-reader, yuhuangdadi_tenant, dashboard, view
+p, tenant-reader, yuhuangdadi_tenant, project, view
+p, tenant-reader, yuhuangdadi_tenant, package, view
+p, tenant-reader, yuhuangdadi_tenant, release, view
+
+# 王母娘娘租户
+p, tenant-admin, wangmuniangniang_tenant, dashboard, view
+p, tenant-admin, wangmuniangniang_tenant, project, view
+p, tenant-admin, wangmuniangniang_tenant, project, edit
+p, tenant-admin, wangmuniangniang_tenant, package, view
+p, tenant-admin, wangmuniangniang_tenant, package, edit
+p, tenant-admin, wangmuniangniang_tenant, release, view
+p, tenant-admin, wangmuniangniang_tenant, release, edit
+p, tenant-admin, wangmuniangniang_tenant, user_manager, manage
+
+p, tenant-member, wangmuniangniang_tenant, dashboard, view
+p, tenant-member, wangmuniangniang_tenant, project, view
+p, tenant-member, wangmuniangniang_tenant, project, edit
+p, tenant-member, wangmuniangniang_tenant, package, view
+p, tenant-member, wangmuniangniang_tenant, package, edit
+p, tenant-member, wangmuniangniang_tenant, release, view
+p, tenant-member, wangmuniangniang_tenant, release, edit
+
+p, tenant-reader, wangmuniangniang_tenant, dashboard, view
+p, tenant-reader, wangmuniangniang_tenant, project, view
+p, tenant-reader, wangmuniangniang_tenant, package, view
+p, tenant-reader, wangmuniangniang_tenant, release, view
+
+# --------- 个人用户租户策略 ---------
+p, tenant-admin, user_ahaodev, dashboard, view
+p, tenant-admin, user_ahaodev, project, view
+p, tenant-admin, user_ahaodev, project, edit
+p, tenant-admin, user_ahaodev, package, view
+p, tenant-admin, user_ahaodev, package, edit
+p, tenant-admin, user_ahaodev, release, view
+p, tenant-admin, user_ahaodev, release, edit
+p, tenant-admin, user_ahaodev, user_manager, manage
+
+# --------- 系统管理员策略 ---------
+p, sys-admin, system, setting, manage
+
+# --------- 用户-角色-租户绑定 ---------
+# 玉皇大帝租户
+g, yuhuangdadi, tenant-admin, yuhuangdadi_tenant
+g, kongzi, tenant-member, yuhuangdadi_tenant
+g, mengzi, tenant-reader, yuhuangdadi_tenant
+
+# 王母娘娘租户
+g, wangmuniangniang, tenant-admin, wangmuniangniang_tenant
+g, laoz, tenant-member, wangmuniangniang_tenant
+g, moz, tenant-reader, wangmuniangniang_tenant
+
+# 个人用户
+g, ahaodev, tenant-admin, user_ahaodev
+
+# 系统管理员
+g, admin, sys-admin, system

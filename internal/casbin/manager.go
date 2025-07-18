@@ -62,51 +62,51 @@ func (m *CasbinManager) GetEnforcer() *casbin.Enforcer {
 }
 
 // CheckPermission 检查权限
-func (m *CasbinManager) CheckPermission(userID, object, action string) (bool, error) {
-	return m.enforcer.Enforce(userID, object, action)
+func (m *CasbinManager) CheckPermission(userID, tenantID, object, action string) (bool, error) {
+	return m.enforcer.Enforce(userID, tenantID, object, action)
 }
 
 // AddPolicy 添加权限策略
-func (m *CasbinManager) AddPolicy(userID, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(userID, object, action)
+func (m *CasbinManager) AddPolicy(userID, tenantID, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(userID, tenantID, object, action)
 }
 
 // RemovePolicy 移除权限策略
-func (m *CasbinManager) RemovePolicy(userID, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(userID, object, action)
+func (m *CasbinManager) RemovePolicy(userID, tenantID, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(userID, tenantID, object, action)
 }
 
 // AddRoleForUser 为用户添加角色
-func (m *CasbinManager) AddRoleForUser(userID, role string) (bool, error) {
-	return m.enforcer.AddRoleForUser(userID, role)
+func (m *CasbinManager) AddRoleForUser(userID, role, tenantID string) (bool, error) {
+	return m.enforcer.AddRoleForUser(userID, role, tenantID)
 }
 
 // DeleteRoleForUser 删除用户角色
-func (m *CasbinManager) DeleteRoleForUser(userID, role string) (bool, error) {
-	return m.enforcer.DeleteRoleForUser(userID, role)
+func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, error) {
+	return m.enforcer.DeleteRoleForUser(userID, role, tenantID)
 }
 
 // GetRolesForUser 获取用户角色
-func (m *CasbinManager) GetRolesForUser(userID string) []string {
-	roles, _ := m.enforcer.GetRolesForUser(userID)
+func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
+	roles, _ := m.enforcer.GetRolesForUser(userID, tenantID)
 	return roles
 }
 
 // GetUsersForRole 获取角色下的用户
-func (m *CasbinManager) GetUsersForRole(role string) []string {
-	users, _ := m.enforcer.GetUsersForRole(role)
+func (m *CasbinManager) GetUsersForRole(role, tenantID string) []string {
+	users, _ := m.enforcer.GetUsersForRole(role, tenantID)
 	return users
 }
 
 // GetPermissionsForUser 获取用户权限
-func (m *CasbinManager) GetPermissionsForUser(userID string) [][]string {
-	permissions, _ := m.enforcer.GetPermissionsForUser(userID)
+func (m *CasbinManager) GetPermissionsForUser(userID, tenantID string) [][]string {
+	permissions, _ := m.enforcer.GetPermissionsForUser(userID, tenantID)
 	return permissions
 }
 
 // GetPermissionsForRole 获取角色权限
-func (m *CasbinManager) GetPermissionsForRole(role string) [][]string {
-	permissions, _ := m.enforcer.GetPermissionsForUser(role)
+func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string {
+	permissions, _ := m.enforcer.GetPermissionsForUser(role, tenantID)
 	return permissions
 }
 
@@ -321,13 +321,13 @@ func (m *CasbinManager) ClearAllRoles() error {
 }
 
 // GetProjectPermissions 获取项目相关权限
-func (m *CasbinManager) GetProjectPermissions(userID, projectID string) []string {
+func (m *CasbinManager) GetProjectPermissions(userID, tenantID, projectID string) []string {
 	var permissions []string
 
 	// 检查具体的项目权限
 	actions := []string{"view", "create", "edit", "delete", "manage"}
 	for _, action := range actions {
-		if hasPermission, _ := m.CheckPermission(userID, "project", action); hasPermission {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, "project", action); hasPermission {
 			permissions = append(permissions, action)
 		}
 	}
@@ -336,13 +336,13 @@ func (m *CasbinManager) GetProjectPermissions(userID, projectID string) []string
 }
 
 // GetPackagePermissions 获取包相关权限
-func (m *CasbinManager) GetPackagePermissions(userID, packageName string) []string {
+func (m *CasbinManager) GetPackagePermissions(userID, tenantID, packageName string) []string {
 	var permissions []string
 
 	// 检查具体的包权限
 	actions := []string{"view", "create", "edit", "delete", "manage", "upload", "download"}
 	for _, action := range actions {
-		if hasPermission, _ := m.CheckPermission(userID, "package", action); hasPermission {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, "package", action); hasPermission {
 			permissions = append(permissions, action)
 		}
 	}
@@ -351,13 +351,13 @@ func (m *CasbinManager) GetPackagePermissions(userID, packageName string) []stri
 }
 
 // GetSidebarPermissions 获取侧边栏权限
-func (m *CasbinManager) GetSidebarPermissions(userID string) []string {
+func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
 	var permissions []string
 
 	// 检查侧边栏权限
 	sidebarItems := []string{"dashboard", "projects", "packages", "users", "groups", "permissions", "settings", "upgrade"}
 	for _, item := range sidebarItems {
-		if hasPermission, _ := m.CheckPermission(userID, "sidebar", item); hasPermission {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, "sidebar", item); hasPermission {
 			permissions = append(permissions, item)
 		}
 	}
