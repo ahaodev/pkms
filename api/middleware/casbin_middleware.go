@@ -164,89 +164,48 @@ func (m *CasbinMiddleware) HasPermission(userID, tenantID, object, action string
 	return hasPermission
 }
 
-// RequireProjectPermission 要求项目权限的中间件
+// 通用资源权限校验中间件
+func (m *CasbinMiddleware) RequireResourcePermission(resourceType, action string, paramKey ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetString(constants.UserID)
+		tenantID := c.GetString(constants.TenantID)
+
+		// 可选参数（如 project_id、package_name）
+		var resourceID string
+		if len(paramKey) > 0 {
+			resourceID = c.Param(paramKey[0])
+			if resourceID == "" {
+				resourceID = c.Query(paramKey[0])
+			}
+		}
+
+		// 权限校验
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, resourceType, action)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
+			c.Abort()
+			return
+		}
+		if !hasPermission {
+			c.JSON(http.StatusForbidden, domain.RespError(resourceType+"权限不足"))
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// 用通用方法替换原有项目权限校验
 func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
-
-		// 获取项目ID（可选）
-		projectID := c.Param("project_id")
-		if projectID == "" {
-			projectID = c.Query("project_id")
-		}
-
-		// 检查项目权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "project", action)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("项目权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
+	return m.RequireResourcePermission("project", action, "project_id")
 }
 
-// RequirePackagePermission 要求包权限的中间件
+// 用通用方法替换原有包权限校验
 func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
-
-		// 获取包名（可选）
-		packageName := c.Param("package_name")
-		if packageName == "" {
-			packageName = c.Query("package_name")
-		}
-
-		// 检查包权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "package", action)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("包权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
+	return m.RequireResourcePermission("package", action, "package_name")
 }
 
-// RequireSidebarPermission 要求侧边栏权限的中间件
+// 用通用方法替换原有侧边栏权限校验
 func (m *CasbinMiddleware) RequireSidebarPermission(item string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
-
-		// 检查侧边栏权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, "sidebar", item)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("侧边栏权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
+	return m.RequireResourcePermission("sidebar", item)
 }

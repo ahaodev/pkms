@@ -25,7 +25,6 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 		Create().
 		SetUsername(u.Name).
 		SetPasswordHash(u.Password).
-		SetRole(user.Role(u.Role)).
 		Save(c)
 
 	if err != nil {
@@ -81,7 +80,6 @@ func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
-		Role:      u.Role.String(),
 		Password:  u.PasswordHash,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,

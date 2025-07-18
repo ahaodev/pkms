@@ -45,8 +45,6 @@ func (User) Fields() []ent.Field {
 		field.String("avatar").
 			MaxLen(255).
 			Optional(),
-		field.Enum("role").
-			Values("admin", "user"),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
@@ -75,7 +73,6 @@ func (User) Edges() []ent.Edge {
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("username"),
-		index.Fields("role"),
 		index.Fields("is_active"),
 	}
 }

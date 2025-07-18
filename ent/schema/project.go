@@ -50,20 +50,21 @@ func (Project) Fields() []ent.Field {
 			Default(time.Now).
 			UpdateDefault(time.Now),
 		field.String("created_by").
-			MaxLen(50),
+			MaxLen(20),
+		field.String("tenant_id").MaxLen(20),
 	}
 }
 
 // Edges of the Project.
 func (Project) Edges() []ent.Edge {
 	return []ent.Edge{
-		// Project belongs to a user (creator)
 		edge.From("creator", User.Type).
 			Ref("created_projects").
 			Field("created_by").
 			Unique().
 			Required(),
-		// Project has many packages
+		edge.From("tenant", Tenant.Type).
+			Ref("projects").Field("tenant_id").Required().Unique(),
 		edge.To("packages", Packages.Type),
 	}
 }
@@ -71,6 +72,7 @@ func (Project) Edges() []ent.Edge {
 // Indexes of the Project.
 func (Project) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("tenant_id"),
 		index.Fields("created_by"),
 	}
 }

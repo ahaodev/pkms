@@ -6,9 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"pkms/ent/migrate"
-
 	"pkms/ent"
+	"pkms/ent/migrate"
 	"pkms/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,9 +20,6 @@ func NewEntDatabase(env *Env) *ent.Client {
 	if dbPath == "" {
 		dbPath = "./data.db"
 	}
-
-	// 检查数据库是否已存在
-	isNewDB := !fileExists(dbPath)
 
 	// Ensure the directory exists
 	dir := filepath.Dir(dbPath)
@@ -50,19 +46,16 @@ func NewEntDatabase(env *Env) *ent.Client {
 		log.Fatal("❌ Failed to create schema resources:", err)
 	}
 
-	// 如果是新数据库，创建默认管理员用户
-	if isNewDB {
-		createDefaultAdmin(ctx, client, env)
-	}
-
 	log.Println("✅ Connected to SQLite database successfully with Ent")
 	return client
 }
 
-func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
+// InitDefaultAdmin 初始化数据（如管理员用户、Casbin策略等）由外部调用以下函数
+func InitDefaultAdmin(client *ent.Client, env *Env) {
+	ctx := context.Background()
 	// 检查是否已存在管理员用户
 	adminCount, err := client.User.Query().
-		Where(user.RoleEQ("admin")).
+		Where(user.UsernameEQ("admin")).
 		Count(ctx)
 
 	if err != nil {
@@ -94,7 +87,6 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 	_, err = client.User.Create().
 		SetUsername(adminUsername).
 		SetPasswordHash(string(hashedPassword)).
-		SetRole("admin").
 		SetIsActive(true).
 		AddTenants(systemTenant).
 		Save(ctx)
@@ -106,11 +98,6 @@ func createDefaultAdmin(ctx context.Context, client *ent.Client, env *Env) {
 
 	log.Printf("✅ Default admin user created: %s", adminUsername)
 	log.Println("⚠️ Please change the default password after first login!")
-}
-
-func fileExists(filename string) bool {
-	_, err := os.Stat(filename)
-	return !os.IsNotExist(err)
 }
 
 func getEnvOrDefault(value, defaultValue string) string {

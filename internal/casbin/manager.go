@@ -1,9 +1,12 @@
 package casbin
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"pkms/ent"
+	"strings"
 	"sync"
 
 	"github.com/casbin/casbin/v2"
@@ -110,91 +113,63 @@ func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string 
 	return permissions
 }
 
-// InitializeDefaultPolicies 初始化默认权限策略
+// InitializeDefaultPolicies 初始化默认权限策略（从 policy.csv 导入）
 func (m *CasbinManager) InitializeDefaultPolicies() error {
 	log.Println("正在初始化默认权限策略...")
 
-	// 定义默认角色和权限
-	defaultPolicies := [][]string{
-		// 管理员角色权限
-		{"admin", "*", "*"},
-
-		// 项目管理员权限
-		{"pm", "project", "*"},
-		{"pm", "package", "*"},
-		{"pm", "file", "*"},
-		{"pm", "user", "view"},
-		{"pm", "group", "manage"},
-		{"pm", "permission", "view"},
-
-		// 开发者权限
-		{"developer", "project", "view"},
-		{"developer", "package", "view"},
-		{"developer", "package", "create"},
-		{"developer", "package", "edit"},
-		{"developer", "package", "delete"},
-		{"developer", "file", "view"},
-		{"developer", "file", "create"},
-		{"developer", "file", "edit"},
-		{"developer", "file", "delete"},
-
-		// 查看者权限
-		{"viewer", "project", "view"},
-		{"viewer", "package", "view"},
-		{"viewer", "file", "view"},
-		{"viewer", "dashboard", "view"},
-
-		// 项目相关权限
-		{"pm", "project", "create"},
-		{"pm", "project", "edit"},
-		{"pm", "project", "delete"},
-		{"pm", "project", "manage"},
-
-		// 包相关权限
-		{"pm", "package", "*"},
-		{"pm", "file", "*"},
-		{"pm", "project", "view"},
-
-		// 侧边栏权限
-		{"admin", "sidebar", "dashboard"},
-		{"admin", "sidebar", "projects"},
-		{"admin", "sidebar", "packages"},
-		{"admin", "sidebar", "users"},
-		{"admin", "sidebar", "groups"},
-		{"admin", "sidebar", "permissions"},
-		{"admin", "sidebar", "settings"},
-		{"admin", "sidebar", "upgrade"},
-
-		{"pm", "sidebar", "dashboard"},
-		{"pm", "sidebar", "projects"},
-		{"pm", "sidebar", "packages"},
-		{"pm", "sidebar", "users"},
-		{"pm", "sidebar", "groups"},
-		{"pm", "sidebar", "permissions"},
-
-		{"developer", "sidebar", "dashboard"},
-		{"developer", "sidebar", "projects"},
-		{"developer", "sidebar", "packages"},
-
-		{"viewer", "sidebar", "dashboard"},
-		{"viewer", "sidebar", "projects"},
-		{"viewer", "sidebar", "packages"},
+	file, err := os.Open("config/policy.csv")
+	if err != nil {
+		return fmt.Errorf("无法打开 policy.csv: %v", err)
 	}
+	defer file.Close()
 
-	// 添加策略
-	for _, policy := range defaultPolicies {
-		added, err := m.enforcer.AddPolicy(policy)
-		if err != nil {
-			return fmt.Errorf("failed to add policy %v: %v", policy, err)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
 		}
-		if added {
-			log.Printf("添加策略: %v", policy)
+		fields := strings.Split(line, ",")
+		for i := range fields {
+			fields[i] = strings.TrimSpace(fields[i])
+		}
+		if len(fields) < 2 {
+			continue
+		}
+
+		switch fields[0] {
+		case "p":
+			if len(fields) < 5 {
+				log.Printf("策略格式错误: %v", fields)
+				continue
+			}
+			added, err := m.enforcer.AddPolicy(fields[1], fields[2], fields[3], fields[4])
+			if err != nil {
+				return fmt.Errorf("添加策略失败 %v: %v", fields, err)
+			}
+			if added {
+				log.Printf("添加策略: %v", fields)
+			}
+		case "g":
+			if len(fields) < 4 {
+				log.Printf("分组格式错误: %v", fields)
+				continue
+			}
+			added, err := m.enforcer.AddGroupingPolicy(fields[1], fields[2], fields[3])
+			if err != nil {
+				return fmt.Errorf("添加分组失败 %v: %v", fields, err)
+			}
+			if added {
+				log.Printf("添加分组: %v", fields)
+			}
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("读取 policy.csv 失败: %v", err)
+	}
 
-	// 保存策略
 	if err := m.enforcer.SavePolicy(); err != nil {
-		return fmt.Errorf("failed to save policies: %v", err)
+		return fmt.Errorf("保存策略失败: %v", err)
 	}
 
 	log.Println("默认权限策略初始化完成")

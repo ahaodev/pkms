@@ -16,7 +16,7 @@ import (
 
 const ApiUri = "/api/v1"
 
-func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClient *minio.Client, gin *gin.Engine) {
+func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, minioClient *minio.Client, gin *gin.Engine) {
 	trustedProxies := []string{
 		"127.0.0.1",
 	}
@@ -36,8 +36,6 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClien
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	// 再通过casbin中间件进行权限控制
-	casbinManager := casbin.NewCasbinManager(db)
-	casbinManager.InitializeDefaultPolicies()
 	// Casbin 权限管理路由（需要认证但不需要特定权限）
 	casbinRouter := protectedRouter.Group("/casbin")
 	NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)

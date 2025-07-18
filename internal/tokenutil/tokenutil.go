@@ -13,7 +13,6 @@ func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToke
 	claims := &domain.JwtCustomClaims{
 		Name: user.Name,
 		ID:   user.ID,
-		Role: user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: exp,
 		},
