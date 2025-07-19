@@ -3,7 +3,7 @@ import {NavLink, useLocation} from "react-router-dom";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {BarChart3, FolderOpen, Lock, Package, Settings as SettingsIcon, Users, Wrench, X,} from "lucide-react";
+import {BarChart3, FolderOpen, Lock, Package, Settings as SettingsIcon, Users, Wrench, X, ChevronDown} from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/contexts/auth-context.tsx';
 import {apiClient} from '@/lib/api/api';
@@ -39,11 +39,27 @@ function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () 
 /**
  * SimpleSidebar 组件：简化版侧边栏，适用于简洁页面布局
  */
-export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
+export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantChange}: SimpleSidebarProps & { tenantList?: {id: string, name: string}[], currentTenant?: {id: string, name: string} | null, onTenantChange?: (tenant: {id: string, name: string}) => void }) {
     const location = useLocation();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const {user} = useAuth();
     const [sidebarPermissions, setSidebarPermissions] = useState<string[]>([]);
+    const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
+
+    // 模拟数据逻辑
+    const defaultTenants = [
+        { id: 'tenant1', name: '上海幺幺科技有限公司' },
+        { id: 'tenant2', name: '北京么么科技有限公司' },
+        { id: 'tenant3', name: '深圳陌陌科技有限公司' },
+    ];
+    const [mockTenants] = useState(tenantList && tenantList.length > 0 ? tenantList : defaultTenants);
+    const [mockCurrentTenant, setMockCurrentTenant] = useState(currentTenant && currentTenant !== null ? currentTenant : defaultTenants[0]);
+
+    // 切换租户逻辑
+    const handleTenantChange = (tenant: {id: string, name: string}) => {
+        setMockCurrentTenant(tenant);
+        if (onTenantChange) onTenantChange(tenant);
+    };
 
     // 处理移动端点击导航项关闭菜单
     const handleNavClick = useCallback(() => {
@@ -124,12 +140,45 @@ export function Sidebar({isOpen, onClose}: SimpleSidebarProps) {
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between border-b px-4">
-                        <div className="flex items-center space-x-2">
-                            <div
-                                className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-                                <Package className="h-4 w-4"/>
+                        <div className="flex flex-row items-center relative w-full h-16">
+                            <div className="flex items-center justify-center rounded bg-primary text-primary-foreground mr-2 self-center" style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}>
+                                <Package className="h-4 w-4" />
                             </div>
-                            <span className="text-lg font-semibold">PKMS</span>
+                            <div className="flex flex-col justify-center h-full w-full">
+                                <span className="text-lg font-semibold leading-tight">PKMS</span>
+                                {mockCurrentTenant && (
+                                    <span
+                                        className="text-base font-normal cursor-pointer flex items-center select-none w-full text-left mt-1"
+                                        onClick={() => setTenantDropdownOpen((v) => !v)}
+                                    >
+                                        {mockCurrentTenant.name}
+                                        <ChevronDown className="ml-1 h-4 w-4"/>
+                                    </span>
+                                )}
+                                {/* 租户下拉列表 */}
+                                {tenantDropdownOpen && mockTenants.length > 0 && (
+                                    <div
+                                        className="absolute left-12 top-14 z-50 bg-white border rounded shadow-lg min-w-[180px]"
+                                        onMouseLeave={() => setTenantDropdownOpen(false)}
+                                    >
+                                        {mockTenants.map((tenant) => (
+                                            <div
+                                                key={tenant.id}
+                                                className={cn(
+                                                    "px-4 py-2 cursor-pointer hover:bg-accent",
+                                                    tenant.id === mockCurrentTenant.id ? "bg-accent text-primary" : ""
+                                                )}
+                                                onClick={() => {
+                                                    setTenantDropdownOpen(false);
+                                                    handleTenantChange(tenant);
+                                                }}
+                                            >
+                                                {tenant.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <Button
                             variant="ghost"
