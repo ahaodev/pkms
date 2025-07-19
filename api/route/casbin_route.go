@@ -49,7 +49,5 @@ func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	group.GET("/objects", casbinController.GetAllObjects)
 	group.GET("/actions", casbinController.GetAllActions)
 
-	// 系统管理路由
-	group.POST("/initialize", casbinController.InitializePolicies)
 	group.POST("/reload", casbinController.ReloadPolicies)
 }

@@ -1,12 +1,9 @@
 package casbin
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"pkms/ent"
-	"strings"
 	"sync"
 
 	"github.com/casbin/casbin/v2"
@@ -111,69 +108,6 @@ func (m *CasbinManager) GetPermissionsForUser(userID, tenantID string) [][]strin
 func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string {
 	permissions, _ := m.enforcer.GetPermissionsForUser(role, tenantID)
 	return permissions
-}
-
-// InitializeDefaultPolicies 初始化默认权限策略（从 policy.csv 导入）
-func (m *CasbinManager) InitializeDefaultPolicies() error {
-	log.Println("正在初始化默认权限策略...")
-
-	file, err := os.Open("config/policy.csv")
-	if err != nil {
-		return fmt.Errorf("无法打开 policy.csv: %v", err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		fields := strings.Split(line, ",")
-		for i := range fields {
-			fields[i] = strings.TrimSpace(fields[i])
-		}
-		if len(fields) < 2 {
-			continue
-		}
-
-		switch fields[0] {
-		case "p":
-			if len(fields) < 5 {
-				log.Printf("策略格式错误: %v", fields)
-				continue
-			}
-			added, err := m.enforcer.AddPolicy(fields[1], fields[2], fields[3], fields[4])
-			if err != nil {
-				return fmt.Errorf("添加策略失败 %v: %v", fields, err)
-			}
-			if added {
-				log.Printf("添加策略: %v", fields)
-			}
-		case "g":
-			if len(fields) < 4 {
-				log.Printf("分组格式错误: %v", fields)
-				continue
-			}
-			added, err := m.enforcer.AddGroupingPolicy(fields[1], fields[2], fields[3])
-			if err != nil {
-				return fmt.Errorf("添加分组失败 %v: %v", fields, err)
-			}
-			if added {
-				log.Printf("添加分组: %v", fields)
-			}
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("读取 policy.csv 失败: %v", err)
-	}
-
-	if err := m.enforcer.SavePolicy(); err != nil {
-		return fmt.Errorf("保存策略失败: %v", err)
-	}
-
-	log.Println("默认权限策略初始化完成")
-	return nil
 }
 
 // AddDefaultRolesForUser 为用户添加默认角色

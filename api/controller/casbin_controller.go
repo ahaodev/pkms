@@ -308,10 +308,10 @@ func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
 // GetSidebarPermissions 获取侧边栏权限
 func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
-	userRole := c.GetString(constants.UserRole)
-	tenantID := c.GetString("tenant_id")
+	userID := c.GetString(constants.UserID)
+	tenantID := "admin"
 	// 获取侧边栏权限
-	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userRole, tenantID)
+	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
 
 	response := gin.H{
 		"sidebar": sidebarPermissions,
@@ -359,33 +359,6 @@ func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
-}
-
-// InitializePolicies 初始化策略
-func (cc *CasbinController) InitializePolicies(c *gin.Context) {
-	// 检查是否是管理员
-	userID := c.GetString(constants.UserID)
-	tenantID := c.GetString(constants.TenantID)
-	// 检查是否有管理员权限
-	hasPermission, err := cc.casbinManager.CheckPermission(userID, tenantID, "system", "manage")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-		return
-	}
-
-	if !hasPermission {
-		c.JSON(http.StatusForbidden, domain.RespError("权限不足，需要管理员权限"))
-		return
-	}
-
-	// 初始化默认策略
-	err = cc.casbinManager.InitializeDefaultPolicies()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("初始化策略失败: "+err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess("策略初始化成功"))
 }
 
 // ReloadPolicies 重新加载策略
