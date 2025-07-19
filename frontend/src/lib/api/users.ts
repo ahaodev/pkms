@@ -33,11 +33,7 @@ export async function updateUser(id: string, update: Partial<User>): Promise<Api
     const backendUpdate: any = {};
     if (update.username !== undefined) backendUpdate.username = update.username;
     if (update.email !== undefined) backendUpdate.email = update.email;
-    if (update.avatar !== undefined) backendUpdate.avatar = update.avatar;
-    if (update.role !== undefined) backendUpdate.role = update.role;
     if (update.isActive !== undefined) backendUpdate.is_active = update.isActive;
-    if (update.assignedProjectIds !== undefined) backendUpdate.assigned_project_ids = update.assignedProjectIds;
-    if (update.groupIds !== undefined) backendUpdate.group_ids = update.groupIds;
 
     const resp = await apiClient.put(`/api/v1/user/${id}`, backendUpdate);
     return resp.data;
@@ -86,23 +82,7 @@ export async function updateUserProfile(update: Partial<User>): Promise<ApiRespo
     const backendUpdate: any = {};
     if (update.username !== undefined) backendUpdate.username = update.username;
     if (update.email !== undefined) backendUpdate.email = update.email;
-    if (update.avatar !== undefined) backendUpdate.avatar = update.avatar;
 
     const resp = await apiClient.put("/api/v1/user/profile", backendUpdate);
     return resp.data;
-}
-
-// 数据转换函数：后端数据转前端格式
-export function transformUserFromBackend(backendUser: any): User {
-    return {
-        id: backendUser.id,
-        username: backendUser.username,
-        email: backendUser.email,
-        avatar: backendUser.avatar,
-        role: backendUser.role,
-        createdAt: new Date(backendUser.created_at),
-        isActive: backendUser.is_active,
-        assignedProjectIds: backendUser.assigned_project_ids,
-        groupIds: backendUser.group_ids
-    };
 }

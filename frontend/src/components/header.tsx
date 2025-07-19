@@ -40,7 +40,7 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
                         <Button variant="ghost"
                                 className="relative flex items-center space-x-2 h-8 hover:bg-accent focus:bg-accent rounded-full pr-2 pl-1">
                             <Avatar className="h-7 w-7">
-                                <AvatarFallback>{user?.avatar || '👤'}</AvatarFallback>
+                                <AvatarFallback>{user?.username || '👤'}</AvatarFallback>
                             </Avatar>
                             {!isMobile && <span className="max-w-[100px] truncate">{user?.username || '用户'}</span>}
                         </Button>

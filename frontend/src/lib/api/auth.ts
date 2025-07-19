@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import { User } from "@/types/simplified";
+import {Profile, User} from "@/types/simplified";
 
 // 登录请求类型
 export interface LoginRequest {
@@ -55,26 +55,7 @@ export async function logout(): Promise<ApiResponse<void>> {
 }
 
 // 验证当前令牌是否有效
-export async function validateToken(): Promise<ApiResponse<User>> {
+export async function validateToken(): Promise<ApiResponse<Profile>> {
     const resp = await apiClient.get("/api/v1/profile");
     return resp.data;
-}
-
-// 数据转换函数：后端数据转前端格式
-export function transformLoginResponseFromBackend(backendResponse: any): LoginResponse {
-    return {
-        user: {
-            id: backendResponse.user.id,
-            username: backendResponse.user.username,
-            email: backendResponse.user.email,
-            avatar: backendResponse.user.avatar,
-            role: backendResponse.user.role,
-            createdAt: new Date(backendResponse.user.created_at),
-            isActive: backendResponse.user.is_active,
-            assignedProjectIds: backendResponse.user.assigned_project_ids,
-            groupIds: backendResponse.user.group_ids
-        },
-        accessToken: backendResponse.access_token,
-        refreshToken: backendResponse.refresh_token
-    };
 }

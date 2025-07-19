@@ -1,7 +1,7 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth-context.tsx";
-import { Layout } from "@/components/layout";
-import { routes } from "@/config/routes";
+import {Routes, Route, Navigate} from "react-router-dom";
+import {useAuth} from "@/contexts/auth-context.tsx";
+import {Layout} from "@/components/layout";
+import {routes} from "@/config/routes";
 
 // Loading component for app initialization
 function AppLoader() {
@@ -21,13 +21,13 @@ interface RouteGuardProps {
     requiresAdmin?: boolean;
 }
 
-function RouteGuard({ children, requiresAdmin = false }: RouteGuardProps) {
-    const { isAdmin } = useAuth();
-    
+function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
+    const {isAdmin} = useAuth();
+
     if (requiresAdmin && !isAdmin()) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/" replace/>;
     }
-    
+
     return <>{children}</>;
 }
 
@@ -38,20 +38,20 @@ function ProtectedRoutes() {
     return (
         <Layout>
             <Routes>
-                {protectedRoutes.map(({ path, element: Component, requiresAdmin }) => (
+                {protectedRoutes.map(({path, element: Component, requiresAdmin}) => (
                     <Route
                         key={path}
                         path={path}
                         element={
                             <RouteGuard requiresAdmin={requiresAdmin}>
-                                <Component />
+                                <Component/>
                             </RouteGuard>
                         }
                     />
                 ))}
-                
+
                 {/* Catch all - redirect to dashboard */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/" replace/>}/>
             </Routes>
         </Layout>
     );
@@ -60,39 +60,39 @@ function ProtectedRoutes() {
 // Public routes for unauthenticated users
 function PublicRoutes() {
     const publicRoutes = routes.filter(route => !route.requiresAuth);
-    
+
     return (
         <Routes>
-            {publicRoutes.map(({ path, element: Component }) => (
+            {publicRoutes.map(({path, element: Component}) => (
                 <Route
                     key={path}
                     path={path}
-                    element={<Component />}
+                    element={<Component/>}
                 />
             ))}
-            
+
             {/* Catch all - redirect to login */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace/>}/>
         </Routes>
     );
 }
 
 // Main app routes component
 export function AppRoutes() {
-    const { user, isLoading } = useAuth();
+    const {user, isLoading} = useAuth();
 
     // Show loading screen while checking authentication
     if (isLoading) {
         console.log('AppRoutes: showing loading screen');
-        return <AppLoader />;
+        return <AppLoader/>;
     }
     console.log(user)
     // Render appropriate routes based on authentication status
     if (user) {
         console.log('AppRoutes: user authenticated, showing protected routes');
-        return <ProtectedRoutes />;
+        return <ProtectedRoutes/>;
     } else {
         console.log('AppRoutes: user not authenticated, showing public routes');
-        return <PublicRoutes />;
+        return <PublicRoutes/>;
     }
 }

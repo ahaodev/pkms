@@ -2,11 +2,11 @@ import {Sidebar} from "@/components/sidebar";
 import {Header} from "@/components/header";
 import {useResponsiveMenu} from "@/hooks/useResponsiveMenu";
 
-interface SimpleLayoutProps {
+interface LayoutProps {
     children: React.ReactNode;
 }
 
-export function Layout({children}: SimpleLayoutProps) {
+export function Layout({children}: LayoutProps) {
     const {isMobile, isMobileMenuOpen, setIsMobileMenuOpen} = useResponsiveMenu();
 
     return (

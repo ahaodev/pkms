@@ -20,16 +20,27 @@ export interface GroupPermission {
     canEdit: boolean;
 }
 
+export interface JwtUser {
+    id: string;
+    name: string;
+}
+
 export interface User {
     id: string;
     username: string;
     email: string;
-    avatar?: string;
-    role: UserRole;
-    createdAt: Date;
     isActive: boolean;
-    assignedProjectIds?: string[]; // 普通用户被分配的项目ID列表
-    groupIds?: string[]; // 用户所属的组ID列表
+    createdAt: Date;
+}
+
+export interface Profile {
+    User: User;
+    Tenants: Tenant[];
+}
+
+export interface Tenant {
+    id: string;
+    name: string;
 }
 
 export interface Project {

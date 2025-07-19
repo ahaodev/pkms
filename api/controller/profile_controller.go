@@ -23,7 +23,6 @@ func (uc *ProfileController) GetProfile(c *gin.Context) {
 		c.JSON(http.StatusNotFound, domain.RespError("User not found"))
 		return
 	}
-
 	c.JSON(http.StatusOK, domain.RespSuccess(user))
 }
 

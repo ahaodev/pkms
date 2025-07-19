@@ -6,7 +6,7 @@ import {ACCESS_TOKEN} from "@/types/constants.ts";
 
 export const useProjects = () => {
     const {user} = useAuth();
-    
+
     return useQuery({
         queryKey: ['projects', user?.id],
         queryFn: async () => {
@@ -30,7 +30,11 @@ export const useProject = (id: string) => {
 
 export const useCreateProject = () => {
     const queryClient = useQueryClient();
-    const {user, isAdmin, assignProjectToUser} = useAuth();
+    const {user, isAdmin} = useAuth();
+
+    function assignProjectToUser(userId: string, projectId: string) {
+        console.log(userId, projectId);
+    }
 
     return useMutation({
         mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy'>) => {

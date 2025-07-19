@@ -3,7 +3,17 @@ import {NavLink, useLocation} from "react-router-dom";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {BarChart3, FolderOpen, Lock, Package, Settings as SettingsIcon, Users, Wrench, X, ChevronDown} from "lucide-react";
+import {
+    BarChart3,
+    FolderOpen,
+    Lock,
+    Package,
+    Settings as SettingsIcon,
+    Users,
+    Wrench,
+    X,
+    ChevronDown
+} from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/contexts/auth-context.tsx';
 import {apiClient} from '@/lib/api/api';
@@ -39,7 +49,11 @@ function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () 
 /**
  * SimpleSidebar 组件：简化版侧边栏，适用于简洁页面布局
  */
-export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantChange}: SimpleSidebarProps & { tenantList?: {id: string, name: string}[], currentTenant?: {id: string, name: string} | null, onTenantChange?: (tenant: {id: string, name: string}) => void }) {
+export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantChange}: SimpleSidebarProps & {
+    tenantList?: { id: string, name: string }[],
+    currentTenant?: { id: string, name: string } | null,
+    onTenantChange?: (tenant: { id: string, name: string }) => void
+}) {
     const location = useLocation();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const {user} = useAuth();
@@ -48,15 +62,15 @@ export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantCha
 
     // 模拟数据逻辑
     const defaultTenants = [
-        { id: 'tenant1', name: '上海幺幺科技有限公司' },
-        { id: 'tenant2', name: '北京么么科技有限公司' },
-        { id: 'tenant3', name: '深圳陌陌科技有限公司' },
+        {id: 'tenant1', name: 'Tenant A'},
+        {id: 'tenant2', name: 'Tenant B'},
+        {id: 'tenant3', name: 'Tenant C'},
     ];
     const [mockTenants] = useState(tenantList && tenantList.length > 0 ? tenantList : defaultTenants);
     const [mockCurrentTenant, setMockCurrentTenant] = useState(currentTenant && currentTenant !== null ? currentTenant : defaultTenants[0]);
 
     // 切换租户逻辑
-    const handleTenantChange = (tenant: {id: string, name: string}) => {
+    const handleTenantChange = (tenant: { id: string, name: string }) => {
         setMockCurrentTenant(tenant);
         if (onTenantChange) onTenantChange(tenant);
     };
@@ -141,8 +155,10 @@ export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantCha
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between border-b px-4">
                         <div className="flex flex-row items-center relative w-full h-16">
-                            <div className="flex items-center justify-center rounded bg-primary text-primary-foreground mr-2 self-center" style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}>
-                                <Package className="h-4 w-4" />
+                            <div
+                                className="flex items-center justify-center rounded bg-primary text-primary-foreground mr-2 self-center"
+                                style={{width: '32px', height: '32px', minWidth: '32px', minHeight: '32px'}}>
+                                <Package className="h-4 w-4"/>
                             </div>
                             <div className="flex flex-col justify-center h-full w-full">
                                 <span className="text-lg font-semibold leading-tight">PKMS</span>
