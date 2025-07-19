@@ -34,8 +34,9 @@ export interface User {
 }
 
 export interface Profile {
-    User: User;
-    Tenants: Tenant[];
+    id: string;
+    name:string;
+    tenants: Tenant[];
 }
 
 export interface Tenant {

@@ -15,8 +15,9 @@ import {
     ChevronDown
 } from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
-import {useAuth} from '@/contexts/auth-context.tsx';
+import {useAuth} from '@/providers/auth-provider.tsx';
 import {apiClient} from '@/lib/api/api';
+import {Tenant} from "@/types/simplified.ts";
 
 /**
  * NavItem 组件：简化侧边栏导航项
@@ -49,7 +50,7 @@ function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () 
 /**
  * SimpleSidebar 组件：简化版侧边栏，适用于简洁页面布局
  */
-export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantChange}: SimpleSidebarProps & {
+export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & {
     tenantList?: { id: string, name: string }[],
     currentTenant?: { id: string, name: string } | null,
     onTenantChange?: (tenant: { id: string, name: string }) => void
@@ -60,18 +61,12 @@ export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantCha
     const [sidebarPermissions, setSidebarPermissions] = useState<string[]>([]);
     const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
 
-    // 模拟数据逻辑
-    const defaultTenants = [
-        {id: 'tenant1', name: 'Tenant A'},
-        {id: 'tenant2', name: 'Tenant B'},
-        {id: 'tenant3', name: 'Tenant C'},
-    ];
-    const [mockTenants] = useState(tenantList && tenantList.length > 0 ? tenantList : defaultTenants);
-    const [mockCurrentTenant, setMockCurrentTenant] = useState(currentTenant && currentTenant !== null ? currentTenant : defaultTenants[0]);
+
+    const {currentTenant, tenants, selectTenant} = useAuth()
 
     // 切换租户逻辑
     const handleTenantChange = (tenant: { id: string, name: string }) => {
-        setMockCurrentTenant(tenant);
+        selectTenant(tenant);
         if (onTenantChange) onTenantChange(tenant);
     };
 
@@ -162,27 +157,27 @@ export function Sidebar({isOpen, onClose, tenantList, currentTenant, onTenantCha
                             </div>
                             <div className="flex flex-col justify-center h-full w-full">
                                 <span className="text-lg font-semibold leading-tight">PKMS</span>
-                                {mockCurrentTenant && (
+                                {tenants && (
                                     <span
                                         className="text-base font-normal cursor-pointer flex items-center select-none w-full text-left mt-1"
                                         onClick={() => setTenantDropdownOpen((v) => !v)}
                                     >
-                                        {mockCurrentTenant.name}
+                                        {currentTenant.name}
                                         <ChevronDown className="ml-1 h-4 w-4"/>
                                     </span>
                                 )}
                                 {/* 租户下拉列表 */}
-                                {tenantDropdownOpen && mockTenants.length > 0 && (
+                                {tenantDropdownOpen && tenants.length > 0 && (
                                     <div
                                         className="absolute left-12 top-14 z-50 bg-white border rounded shadow-lg min-w-[180px]"
                                         onMouseLeave={() => setTenantDropdownOpen(false)}
                                     >
-                                        {mockTenants.map((tenant) => (
+                                        {tenants.map((tenant:Tenant) => (
                                             <div
                                                 key={tenant.id}
                                                 className={cn(
                                                     "px-4 py-2 cursor-pointer hover:bg-accent",
-                                                    tenant.id === mockCurrentTenant.id ? "bg-accent text-primary" : ""
+                                                    tenant.id === currentTenant.id ? "bg-accent text-primary" : ""
                                                 )}
                                                 onClick={() => {
                                                     setTenantDropdownOpen(false);

@@ -16,14 +16,11 @@ export const apiClient = axios.create({
 
 // 动态设置 Authorization 头部
 apiClient.interceptors.request.use((config: any) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url);
-   
     // 从localStorage获取token
     const token = localStorage.getItem(ACCESS_TOKEN);
     if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;
-        console.log('API Request: Authorization header set');
     } else {
         console.log('API Request: No token found, request will be unauthenticated');
     }

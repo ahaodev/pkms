@@ -1,7 +1,7 @@
 import {useState, useCallback, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useToast} from '@/hooks/use-toast';
-import {useAuth} from '@/contexts/auth-context.tsx';
+import {useAuth} from '@/providers/auth-provider.tsx';
 
 export interface UseLoginOptions {
     redirectTo?: string;

@@ -1,7 +1,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {PackageFilters} from '@/types/simplified';
 import * as PackagesAPI from '@/lib/api/packages';
-import {useAuth} from '@/contexts/auth-context.tsx';
+import {useAuth} from '@/providers/auth-provider.tsx';
 
 export const usePackages = (filters?: PackageFilters) => {
     const {user, isAdmin} = useAuth();

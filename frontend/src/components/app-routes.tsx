@@ -1,5 +1,5 @@
 import {Routes, Route, Navigate} from "react-router-dom";
-import {useAuth} from "@/contexts/auth-context.tsx";
+import {useAuth} from "@/providers/auth-provider.tsx";
 import {Layout} from "@/components/layout";
 import {routes} from "@/config/routes";
 
