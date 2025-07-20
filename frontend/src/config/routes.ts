@@ -25,13 +25,15 @@ export const routes: RouteConfig[] = [
         element: LoginPage,
         requiresAuth: false,
     },
-    
-    // Protected routes
+
+    // Main dashboard
     {
         path: "/",
         element: Dashboard,
         requiresAuth: true,
     },
+
+    // Core business routes (统一风格)
     {
         path: "/projects",
         element: ProjectsPage,
@@ -43,13 +45,15 @@ export const routes: RouteConfig[] = [
         requiresAuth: true,
     },
     {
-        path: "/hierarchy",
-        element: HierarchyPage,
-        requiresAuth: true,
-    },
-    {
         path: "/releases",
         element: ReleasesPage,
+        requiresAuth: true,
+    },
+
+    // Hierarchy and settings
+    {
+        path: "/hierarchy",
+        element: HierarchyPage,
         requiresAuth: true,
     },
     {
@@ -57,7 +61,7 @@ export const routes: RouteConfig[] = [
         element: Settings,
         requiresAuth: true,
     },
-    
+
     // Admin-only routes
     {
         path: "/users",

@@ -7,19 +7,13 @@ import { Release } from '@/types/simplified';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Download, 
-  Calendar, 
-  FileText, 
-  Package as PackageIcon,
-  ArrowLeft,
-  Plus
-} from 'lucide-react';
+import { Download, Calendar, FileText, Package as PackageIcon, Plus, ArrowLeft } from 'lucide-react';
 import { formatFileSize, formatDate } from '@/lib/utils';
 
 export default function ReleasesPage() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  // ...existing code...
   
   const projectId = searchParams.get('projectId');
   const packageId = searchParams.get('packageId');
