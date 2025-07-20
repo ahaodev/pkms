@@ -309,7 +309,7 @@ func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
 func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
-	tenantID := "d1u4ekp2eqj2f93hg0k0"
+	tenantID := c.GetHeader(constants.TenantID)
 	// 获取侧边栏权限
 	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
 
