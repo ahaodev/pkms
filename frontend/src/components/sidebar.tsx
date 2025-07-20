@@ -6,13 +6,13 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {
     BarChart3,
     ChevronDown,
-    FolderOpen,
+    Boxes,
     Globe,
     Lock,
     Package,
     Settings as SettingsIcon,
     Users,
-    Wrench,
+    Rocket,
     X
 } from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
@@ -222,7 +222,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                             {(hasPermission("projects") || hasPermission("packages")) && (
                                 <NavItem
                                     to="/hierarchy"
-                                    icon={<FolderOpen className="h-5 w-5"/>}
+                                    icon={<Boxes className="h-5 w-5"/>}
                                     label="项目包管理"
                                     onClick={handleNavClick}
                                 />
@@ -231,7 +231,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                             {hasPermission("upgrade") && (
                                 <NavItem
                                     to="/upgrade"
-                                    icon={<Wrench className="h-5 w-5"/>}
+                                    icon={<Rocket className="h-5 w-5"/>}
                                     label="升级管理"
                                     onClick={handleNavClick}
                                 />
