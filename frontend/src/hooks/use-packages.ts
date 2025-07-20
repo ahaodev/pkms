@@ -6,18 +6,11 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 export const usePackages = (filters?: PackageFilters) => {
     const {user, isAdmin} = useAuth();
     
-    console.log('usePackages - filters:', filters);
-    console.log('usePackages - user:', user);
-    console.log('usePackages - isAdmin:', isAdmin());
-    
     return useQuery({
         queryKey: ['packages', filters, user?.id],
         queryFn: async () => {
-            console.log('usePackages - queryFn called with filters:', filters);
             const response = await PackagesAPI.getPackages(filters);
-            console.log('usePackages - API response:', response);
             const transformedPackages = (response.data || []).map(PackagesAPI.transformPackageFromBackend);
-            console.log('usePackages - transformed packages:', transformedPackages);
             return {
                 data: transformedPackages,
                 total: response.total,
@@ -27,26 +20,23 @@ export const usePackages = (filters?: PackageFilters) => {
             };
         },
         select: (result) => {
-            console.log('usePackages - select called with result:', result);
             if (!user || !result) {
-                console.log('usePackages - no user or result, returning empty');
                 return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };
             }
-            const filtered = result.data;
             
-            // 临时禁用权限过滤进行调试
-            console.log('usePackages - before filtering:', filtered.length);
+            let filtered = result.data;
+            
+            // Apply permission filtering for non-admin users
             if (!isAdmin()) {
-                const originalCount = filtered.length;
-                console.log('usePackages - 权限过滤已临时禁用');
-                console.log('usePackages - filtered packages:', `${originalCount} -> ${filtered.length}`);
+                // Filter packages based on user's tenant/permissions
+                // Backend should handle this, but frontend can provide additional filtering if needed
+                filtered = result.data; // Trust backend permissions for now
             }
-            const finalResult = {
+            
+            return {
                 ...result,
                 data: filtered,
             };
-            console.log('usePackages - final result:', finalResult);
-            return finalResult;
         },
     });
 };

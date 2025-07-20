@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"pkms/internal/constants"
 	"strconv"
 
 	"pkms/bootstrap"
@@ -17,7 +18,8 @@ type DashboardController struct {
 
 // GetStats 获取统计信息
 func (dc *DashboardController) GetStats(c *gin.Context) {
-	stats, err := dc.DashboardUsecase.GetStats(c)
+	tenantID := c.GetHeader(constants.TenantID)
+	stats, err := dc.DashboardUsecase.GetStats(c, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
@@ -27,13 +29,14 @@ func (dc *DashboardController) GetStats(c *gin.Context) {
 
 // GetRecentActivities 获取最近活动
 func (dc *DashboardController) GetRecentActivities(c *gin.Context) {
+	tenantID := c.GetHeader(constants.TenantID)
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		limit = 10
 	}
 
-	activities, err := dc.DashboardUsecase.GetRecentActivities(c, limit)
+	activities, err := dc.DashboardUsecase.GetRecentActivities(c, tenantID, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
@@ -43,6 +46,7 @@ func (dc *DashboardController) GetRecentActivities(c *gin.Context) {
 
 // GetPackageChartData 获取包统计图表数据
 func (dc *DashboardController) GetPackageChartData(c *gin.Context) {
+
 	// 这里需要实现包统计图表数据的逻辑
 	chartData := []map[string]interface{}{
 		{"name": "Android", "value": 15},

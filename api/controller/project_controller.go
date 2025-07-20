@@ -17,7 +17,8 @@ type ProjectController struct {
 
 // GetProjects 获取所有项目
 func (pc *ProjectController) GetProjects(c *gin.Context) {
-	projects, err := pc.ProjectUsecase.Fetch(c)
+	tenantID := c.GetHeader(constants.TenantID)
+	projects, err := pc.ProjectUsecase.Fetch(c, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

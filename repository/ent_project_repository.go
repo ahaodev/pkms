@@ -40,9 +40,10 @@ func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) err
 	return nil
 }
 
-func (pr *entProjectRepository) Fetch(c context.Context) ([]domain.Project, error) {
+func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]domain.Project, error) {
 	projects, err := pr.client.Project.
 		Query().
+		Where(project.TenantID(tenantID)).
 		All(c)
 
 	if err != nil {

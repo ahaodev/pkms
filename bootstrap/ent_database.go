@@ -147,8 +147,14 @@ func InitDefaultUser(client *ent.Client, userName string, password string, casbi
 		return
 	}
 	casbinManager.AddRoleForUser(user.ID, "pm", userTenant.ID)
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "*", "*")
+	//casbinManager.AddPolicy(user.ID, userTenant.ID, "*", "*")
 	casbinManager.AddPolicy(user.ID, userTenant.ID, "project", "*")
+	casbinManager.AddPolicy(user.ID, userTenant.ID, "package", "*")
+	casbinManager.AddPolicy(user.ID, userTenant.ID, "release", "*")
+	// Add sidebar permissions
+	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", "dashboard")
+	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", "projects")
+	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", "packages")
 	log.Printf("✅ Default user created: %s", userName)
 	log.Println("⚠️ Please change the default password after first login!")
 }

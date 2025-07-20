@@ -34,7 +34,7 @@ type Project struct {
 
 type ProjectRepository interface {
 	Create(c context.Context, project *Project) error
-	Fetch(c context.Context) ([]Project, error)
+	Fetch(c context.Context, tenantID string) ([]Project, error)
 	GetByID(c context.Context, id string) (Project, error)
 	Update(c context.Context, project *Project) error
 	Delete(c context.Context, id string) error
@@ -43,7 +43,7 @@ type ProjectRepository interface {
 
 type ProjectUsecase interface {
 	Create(c context.Context, project *Project) error
-	Fetch(c context.Context) ([]Project, error)
+	Fetch(c context.Context, tenantID string) ([]Project, error)
 	GetByID(c context.Context, id string) (Project, error)
 	Update(c context.Context, project *Project) error
 	Delete(c context.Context, id string) error

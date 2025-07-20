@@ -25,10 +25,10 @@ func (pu *projectUsecase) Create(c context.Context, project *domain.Project) err
 	return pu.projectRepository.Create(ctx, project)
 }
 
-func (pu *projectUsecase) Fetch(c context.Context) ([]domain.Project, error) {
+func (pu *projectUsecase) Fetch(c context.Context, tenantID string) ([]domain.Project, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
-	return pu.projectRepository.Fetch(ctx)
+	return pu.projectRepository.Fetch(ctx, tenantID)
 }
 
 func (pu *projectUsecase) GetByID(c context.Context, id string) (domain.Project, error) {

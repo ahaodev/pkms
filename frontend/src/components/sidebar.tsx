@@ -5,14 +5,14 @@ import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {
     BarChart3,
+    ChevronDown,
     FolderOpen,
     Lock,
     Package,
     Settings as SettingsIcon,
     Users,
     Wrench,
-    X,
-    ChevronDown
+    X
 } from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
@@ -79,18 +79,21 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
 
     // 获取侧边栏权限
     const fetchSidebarPermissions = useCallback(async () => {
-        if (!user) return;
+        if (!user || !currentTenant) return;
 
         try {
             const response = await apiClient.get('/api/v1/casbin/sidebar/permissions');
             if (response.data && response.data.code === 0) {
                 setSidebarPermissions(response.data.data.sidebar || []);
+            } else {
+                setSidebarPermissions([]);
             }
         } catch (error) {
-            console.error('获取侧边栏权限失败:', error);
+            // Silently handle permission fetch failures - just hide all sidebar items
+            console.error(error)
             setSidebarPermissions([]);
         }
-    }, [user]);
+    }, [user, currentTenant]);
 
     useEffect(() => {
         fetchSidebarPermissions();
@@ -172,7 +175,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                         className="absolute left-12 top-14 z-50 bg-white border rounded shadow-lg min-w-[180px]"
                                         onMouseLeave={() => setTenantDropdownOpen(false)}
                                     >
-                                        {tenants?.map((tenant:Tenant) => (
+                                        {tenants?.map((tenant: Tenant) => (
                                             <div
                                                 key={tenant.id}
                                                 className={cn(

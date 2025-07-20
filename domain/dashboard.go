@@ -21,6 +21,6 @@ type RecentActivity struct {
 }
 
 type DashboardUsecase interface {
-	GetStats(c context.Context) (DashboardStats, error)
-	GetRecentActivities(c context.Context, limit int) ([]RecentActivity, error)
+	GetStats(c context.Context, tenantID string) (DashboardStats, error)
+	GetRecentActivities(c context.Context, tenantID string, limit int) ([]RecentActivity, error)
 }

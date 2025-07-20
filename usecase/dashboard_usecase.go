@@ -28,12 +28,12 @@ func NewDashboardUsecase(
 	}
 }
 
-func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, error) {
+func (du *dashboardUsecase) GetStats(c context.Context, tenantID string) (domain.DashboardStats, error) {
 	ctx, cancel := context.WithTimeout(c, du.contextTimeout)
 	defer cancel()
 
 	// Get all entities to count them
-	projects, err := du.projectRepository.Fetch(ctx)
+	projects, err := du.projectRepository.Fetch(ctx, tenantID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -59,14 +59,14 @@ func (du *dashboardUsecase) GetStats(c context.Context) (domain.DashboardStats, 
 	}, nil
 }
 
-func (du *dashboardUsecase) GetRecentActivities(c context.Context, limit int) ([]domain.RecentActivity, error) {
+func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID string, limit int) ([]domain.RecentActivity, error) {
 	ctx, cancel := context.WithTimeout(c, du.contextTimeout)
 	defer cancel()
 
 	var activities []domain.RecentActivity
 
 	// Get recent projects
-	projects, err := du.projectRepository.Fetch(ctx)
+	projects, err := du.projectRepository.Fetch(ctx, tenantID)
 	if err == nil {
 		for i, project := range projects {
 			if i >= limit/3 { // Limit to 1/3 of total limit
