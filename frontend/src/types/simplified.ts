@@ -164,21 +164,6 @@ export interface CreateUserRequest {
     groupIds?: string[];
 }
 
-// 组管理相关类型
-export interface CreateGroupRequest {
-    name: string;
-    description: string;
-    color?: string;
-    permissions?: GroupPermission[];
-}
-
-export interface UpdateGroupRequest {
-    name?: string;
-    description?: string;
-    color?: string;
-    permissions?: GroupPermission[];
-}
-
 // 扩展的包接口，包含从API返回的额外字段（用于向后兼容）
 export interface ExtendedPackage extends Package {
     // 从 latestRelease 展平的字段

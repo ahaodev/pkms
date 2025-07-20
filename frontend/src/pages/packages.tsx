@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import {useDeletePackage, useGenerateShareLink, usePackages} from '@/hooks/use-packages';
 import { useProjects } from '@/hooks/use-projects';
@@ -12,10 +11,8 @@ import {
   PackageCreateDialog,
   PackageHeader,
   SEARCH_DEBOUNCE_MS,
-  VERSIONS_PER_PAGE,
   getPackageKey,
-  getTypeIcon,
-  PackageReleaseHistoryDialog
+  getTypeIcon
 } from '@/components/package';
 import { PackageToolbar } from '@/components/package/PackageToolbar';
 import { PackagePagination } from '@/components/package/PackagePagination';
@@ -25,11 +22,9 @@ import { PackagePagination } from '@/components/package/PackagePagination';
  */
 
 export default function PackagesPage() {
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
   // 基础状态
-  const [selectedProjectId, setSelectedProjectId] = useState(searchParams.get('projectId') || '');
   const [selectedType, setSelectedType] = useState<Package['type'] | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -47,20 +42,6 @@ export default function PackagesPage() {
   const [shareUrl, setShareUrl] = useState('');
   const [sharingPackage, setSharingPackage] = useState<Release | null>(null);
 
-  // 版本历史相关状态
-  const [isVersionHistoryDialogOpen, setIsVersionHistoryDialogOpen] = useState(false);
-  const [versionHistoryPackage, setVersionHistoryPackage] = useState<Package | null>(null);
-  const [versionHistoryPage, setVersionHistoryPage] = useState(1);
-  const [isLoadingMoreVersions, setIsLoadingMoreVersions] = useState(false);
-
-  // 加载更多版本
-  const loadMoreVersions = () => {
-    setIsLoadingMoreVersions(true);
-    setTimeout(() => {
-      setVersionHistoryPage(prev => prev + 1);
-      setIsLoadingMoreVersions(false);
-    }, 500);
-  };
 
   // 数据获取
   const { data: projects } = useProjects();
@@ -68,7 +49,6 @@ export default function PackagesPage() {
   const { data: pageData, isLoading, error } = usePackages({ 
     page, 
     pageSize, 
-    projectId: selectedProjectId === '' ? undefined : selectedProjectId, 
     type: selectedType, 
     search: debouncedSearchTerm || undefined 
   });
@@ -174,28 +154,7 @@ export default function PackagesPage() {
     }
   };
 
-  // 版本历史处理
-  const handleVersionHistory = (pkg: Package) => {
-    console.log('handleVersionHistory called with package:', pkg);
-    console.log('Current groupedPackages:', groupedPackages);
-    const key = getPackageKey(pkg);
-    console.log('Package key:', key);
-    console.log('Versions for this package:', groupedPackages[key]);
-    
-    setVersionHistoryPackage(pkg);
-    setVersionHistoryPage(1);
-    setIsVersionHistoryDialogOpen(true);
-  };
 
-  // 版本删除处理
-  const handleDeleteVersion = async (release: Release) => {
-    console.log('handleDeleteVersion called with package:', release);
-  };
-
-  // 下载处理
-  const handleDownload = (release: Release) => {
-    window.open(`/api/packages/${release.id}/download`, '_blank');
-  };
 
   if (isLoading) {
     return <PackageLoadingView />;
@@ -224,13 +183,10 @@ export default function PackagesPage() {
         <PackageToolbar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          selectedProjectId={selectedProjectId || 'all'}
-          onProjectChange={(value: string) => setSelectedProjectId(value === 'all' ? '' : value)}
           selectedType={selectedType || 'all'}
           onTypeChange={(value: string) => setSelectedType(value === 'all' ? undefined : value as Package['type'])}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          projects={projects}
           packageCounts={packageCounts}
           isFiltering={isFiltering}
         />
@@ -241,7 +197,6 @@ export default function PackagesPage() {
           isFiltering={isFiltering}
           getVersionCount={getVersionCount}
           getTypeIcon={getTypeIcon}
-          handleVersionHistory={handleVersionHistory}
           handleShare={handleShare}
           handleDelete={handleDelete}
         />
@@ -267,7 +222,6 @@ export default function PackagesPage() {
         open={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
         projects={projects}
-        initialProjectId={selectedProjectId}
       />
 
       <ShareDialog
@@ -277,19 +231,6 @@ export default function PackagesPage() {
         packageName={sharingPackage?.id || ''}
       />
 
-      {versionHistoryPackage && (
-        <PackageReleaseHistoryDialog
-          open={isVersionHistoryDialogOpen}
-          onClose={() => setIsVersionHistoryDialogOpen(false)}
-          package={versionHistoryPackage}
-          visibleVersionsCount={versionHistoryPage * VERSIONS_PER_PAGE}
-          isLoadingMore={isLoadingMoreVersions}
-          onLoadMore={loadMoreVersions}
-          onDownload={handleDownload}
-          onShare={handleShare}
-          onDelete={handleDeleteVersion}
-        />
-      )}
     </div>
   );
 }

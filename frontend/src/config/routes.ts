@@ -2,11 +2,14 @@
 import Dashboard from "@/pages/dashboard";
 import ProjectsPage from "@/pages/projects";
 import PackagesPage from "@/pages/packages";
+import HierarchyPage from "@/pages/hierarchy";
+import ReleasesPage from "@/pages/releases";
 import LoginPage from "@/pages/login";
 import Settings from "@/pages/settings";
 import UsersPage from "@/pages/users";
 import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
+import TenantsPage from "@/pages/tenants";
 
 export interface RouteConfig {
     path: string;
@@ -40,6 +43,16 @@ export const routes: RouteConfig[] = [
         requiresAuth: true,
     },
     {
+        path: "/hierarchy",
+        element: HierarchyPage,
+        requiresAuth: true,
+    },
+    {
+        path: "/releases",
+        element: ReleasesPage,
+        requiresAuth: true,
+    },
+    {
         path: "/settings",
         element: Settings,
         requiresAuth: true,
@@ -61,6 +74,12 @@ export const routes: RouteConfig[] = [
     {
         path: "/upgrade",
         element: UpgradePage,
+        requiresAuth: true,
+        requiresAdmin: true,
+    },
+    {
+        path: "/tenants",
+        element: TenantsPage,
         requiresAuth: true,
         requiresAdmin: true,
     },

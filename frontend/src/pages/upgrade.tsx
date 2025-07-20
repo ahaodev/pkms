@@ -3,7 +3,6 @@ import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -54,7 +53,7 @@ import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {Package, Project} from '@/types/simplified';
+import {ExtendedPackage, Project} from '@/types/simplified';
 
 interface UpgradeVersion {
     id: string;
@@ -541,7 +540,7 @@ interface PackageSelectionDialogProps {
     setFormData: React.Dispatch<React.SetStateAction<CreateUpgradeVersionRequest>>;
     title: string;
     projects: Project[];
-    packages: Package[];
+    packages: ExtendedPackage[];
     isLoading: boolean;
 }
 

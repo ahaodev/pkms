@@ -7,7 +7,6 @@ interface PackageGridCardProps {
     pkg: ExtendedPackage;
     getVersionCount: (pkg: ExtendedPackage) => number;
     getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
-    handleVersionHistory: (pkg: ExtendedPackage) => void;
     handleShare: (pkg: ExtendedPackage) => void;
     handleDelete: (pkg: ExtendedPackage) => void;
 }
@@ -16,22 +15,13 @@ const PackageGridCard = ({
                              pkg,
                              getVersionCount,
                              getTypeIcon,
-                             handleVersionHistory,
                              handleShare,
                              handleDelete
                          }: PackageGridCardProps) => {
     const versionCount = getVersionCount(pkg);
 
-    // 只在点击非按钮区域时弹窗
-    const handleCardClick = (e: React.MouseEvent) => {
-        // 如果点击的是按钮或其子元素，则不弹窗
-        const target = e.target as HTMLElement;
-        if (target.closest('button')) return;
-        handleVersionHistory(pkg);
-    };
-
     return (
-        <Card key={pkg.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCardClick}>
+        <Card key={pkg.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-2 min-w-0 flex-1">

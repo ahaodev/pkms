@@ -3,19 +3,15 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Badge} from '@/components/ui/badge';
-import {Project} from '@/types/simplified';
-import {getProjectIcon, getTypeIcon} from './package-utils';
+import {getTypeIcon} from './package-utils';
 
 interface PackageFilterControlsProps {
     searchTerm: string;
     onSearchChange: (value: string) => void;
-    selectedProjectId: string;
-    onProjectChange: (value: string) => void;
     selectedType: string;
     onTypeChange: (value: string) => void;
     viewMode: 'grid' | 'list';
     onViewModeChange: (mode: 'grid' | 'list') => void;
-    projects?: Project[];
     packageCounts: {
         total: number;
         android: number;
@@ -30,13 +26,10 @@ interface PackageFilterControlsProps {
 export function PackageFilterControls({
                                           searchTerm,
                                           onSearchChange,
-                                          selectedProjectId,
-                                          onProjectChange,
                                           selectedType,
                                           onTypeChange,
                                           viewMode,
                                           onViewModeChange,
-                                          projects,
                                           packageCounts,
                                           isFiltering
                                       }: PackageFilterControlsProps) {
@@ -48,27 +41,6 @@ export function PackageFilterControls({
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="max-w-sm"
             />
-
-            <Select value={selectedProjectId} onValueChange={onProjectChange}>
-                <SelectTrigger className="w-48">
-                    <SelectValue placeholder="所有项目"/>
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">
-                        <div className="flex items-center">
-                            <span>所有项目</span>
-                        </div>
-                    </SelectItem>
-                    {projects?.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                            <div className="flex items-center">
-                                {getProjectIcon(project.icon || 'package2')}
-                                <span className="ml-2">{project.name}</span>
-                            </div>
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
 
             <Select value={selectedType} onValueChange={onTypeChange}>
                 <SelectTrigger className="w-40">

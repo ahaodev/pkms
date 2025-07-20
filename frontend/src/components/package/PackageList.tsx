@@ -8,7 +8,6 @@ interface PackageListProps {
     isFiltering: boolean;
     getVersionCount: (pkg: ExtendedPackage) => number;
     getTypeIcon: (type: ExtendedPackage['type']) => React.ReactNode;
-    handleVersionHistory: (pkg: ExtendedPackage) => void;
     handleShare: (pkg: any) => void | Promise<void>;
     handleDelete: (pkg: ExtendedPackage) => void;
 }
@@ -19,7 +18,6 @@ export const PackageList = ({
                                 isFiltering,
                                 getVersionCount,
                                 getTypeIcon,
-                                handleVersionHistory,
                                 handleShare,
                                 handleDelete
                             }: PackageListProps) => (
@@ -32,7 +30,6 @@ export const PackageList = ({
                         pkg={pkg}
                         getVersionCount={getVersionCount}
                         getTypeIcon={getTypeIcon}
-                        handleVersionHistory={handleVersionHistory}
                         handleShare={handleShare}
                         handleDelete={handleDelete}
                     />
@@ -46,7 +43,6 @@ export const PackageList = ({
                         pkg={pkg}
                         getVersionCount={getVersionCount}
                         getTypeIcon={getTypeIcon}
-                        handleVersionHistory={handleVersionHistory}
                         handleShare={handleShare}
                         handleDelete={handleDelete}
                     />

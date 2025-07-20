@@ -7,6 +7,7 @@ import {
     BarChart3,
     ChevronDown,
     FolderOpen,
+    Globe,
     Lock,
     Package,
     Settings as SettingsIcon,
@@ -46,6 +47,7 @@ function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () 
         </Button>
     );
 }
+
 
 /**
  * SimpleSidebar 组件：简化版侧边栏，适用于简洁页面布局
@@ -216,22 +218,34 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     onClick={handleNavClick}
                                 />
                             )}
-                            {hasPermission("projects") && (
+                            
+                            {(hasPermission("projects") || hasPermission("packages")) && (
                                 <NavItem
-                                    to="/projects"
+                                    to="/hierarchy"
                                     icon={<FolderOpen className="h-5 w-5"/>}
-                                    label="项目管理"
+                                    label="项目包管理"
                                     onClick={handleNavClick}
                                 />
                             )}
-                            {hasPermission("packages") && (
+
+                            {hasPermission("upgrade") && (
                                 <NavItem
-                                    to="/packages"
-                                    icon={<Package className="h-5 w-5"/>}
-                                    label="包管理"
+                                    to="/upgrade"
+                                    icon={<Wrench className="h-5 w-5"/>}
+                                    label="升级管理"
                                     onClick={handleNavClick}
                                 />
                             )}
+
+                            {hasPermission("tenants") && (
+                                <NavItem
+                                    to="/tenants"
+                                    icon={<Globe className="h-5 w-5"/>}
+                                    label="租户管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+
                             {hasPermission("users") && (
                                 <NavItem
                                     to="/users"
@@ -240,6 +254,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     onClick={handleNavClick}
                                 />
                             )}
+
                             {hasPermission("permissions") && (
                                 <NavItem
                                     to="/permissions"
@@ -248,19 +263,12 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     onClick={handleNavClick}
                                 />
                             )}
+
                             {hasPermission("settings") && (
                                 <NavItem
                                     to="/settings"
                                     icon={<SettingsIcon className="h-5 w-5"/>}
                                     label="设置"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-                            {hasPermission("upgrade") && (
-                                <NavItem
-                                    to="/upgrade"
-                                    icon={<Wrench className="h-5 w-5"/>}
-                                    label="升级管理"
                                     onClick={handleNavClick}
                                 />
                             )}
