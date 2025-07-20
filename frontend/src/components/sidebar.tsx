@@ -162,22 +162,22 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                         className="text-base font-normal cursor-pointer flex items-center select-none w-full text-left mt-1"
                                         onClick={() => setTenantDropdownOpen((v) => !v)}
                                     >
-                                        {currentTenant.name}
+                                        {currentTenant?.name}
                                         <ChevronDown className="ml-1 h-4 w-4"/>
                                     </span>
                                 )}
                                 {/* 租户下拉列表 */}
-                                {tenantDropdownOpen && tenants.length > 0 && (
+                                {tenantDropdownOpen && Array.isArray(tenants) && tenants.length > 0 && (
                                     <div
                                         className="absolute left-12 top-14 z-50 bg-white border rounded shadow-lg min-w-[180px]"
                                         onMouseLeave={() => setTenantDropdownOpen(false)}
                                     >
-                                        {tenants.map((tenant:Tenant) => (
+                                        {tenants?.map((tenant:Tenant) => (
                                             <div
                                                 key={tenant.id}
                                                 className={cn(
                                                     "px-4 py-2 cursor-pointer hover:bg-accent",
-                                                    tenant.id === currentTenant.id ? "bg-accent text-primary" : ""
+                                                    tenant.id === currentTenant?.id ? "bg-accent text-primary" : ""
                                                 )}
                                                 onClick={() => {
                                                     setTenantDropdownOpen(false);
@@ -208,7 +208,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                 <NavItem
                                     to="/"
                                     icon={<BarChart3 className="h-5 w-5"/>}
-                                    label="仪表板"
+                                    label="概览"
                                     end
                                     onClick={handleNavClick}
                                 />

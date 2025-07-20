@@ -11,6 +11,7 @@ type User struct {
 	Name      string    `json:"name"`
 	Password  string    `json:"-"`
 	Tenants   []*Tenant `json:"tenants"`
+	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

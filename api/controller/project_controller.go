@@ -28,12 +28,14 @@ func (pc *ProjectController) GetProjects(c *gin.Context) {
 // CreateProject 创建项目
 func (pc *ProjectController) CreateProject(c *gin.Context) {
 	userId := c.GetString(constants.UserID)
+	tenantID := c.GetHeader(constants.TenantID)
 	var project domain.Project
 	if err := c.ShouldBindJSON(&project); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 	project.CreatedBy = userId
+	project.TenantID = tenantID
 	if err := pc.ProjectUsecase.Create(c, &project); err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

@@ -28,6 +28,7 @@ type Project struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	PackageCount int       `json:"package_count"`
+	TenantID     string    `json:"tenant_id"`
 	CreatedBy    string    `json:"created_by"`
 }
 

@@ -48,17 +48,17 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	// Protected routes with permission control
 	projectRouter := protectedRouter.Group("/projects")
 	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
-	projectRouter.Use(casbinMiddleware.RequirePermission("project", "view"))
+	projectRouter.Use(casbinMiddleware.RequirePermission("project", "read"))
 
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	packageRouter.Use(casbinMiddleware.RequirePermission("package", "view"))
+	packageRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
 
 	NewPackageRouter(env, timeout, db, minioClient, packageRouter)
 
 	userRouter := protectedRouter.Group("/users")
-	userRouter.Use(casbinMiddleware.RequirePermission("user", "view"))
+	userRouter.Use(casbinMiddleware.RequirePermission("user", "read"))
 
 	NewUserRouter(env, timeout, db, userRouter)
 
@@ -73,7 +73,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 
 	// File management routes
 	fileRouter := protectedRouter.Group("/file")
-	fileRouter.Use(casbinMiddleware.RequirePermission("file", "view"))
+	fileRouter.Use(casbinMiddleware.RequirePermission("file", "read"))
 
 	NewFileRouter(env, timeout, db, minioClient, fileRouter)
 }

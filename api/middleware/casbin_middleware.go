@@ -26,11 +26,10 @@ func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerF
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
-		//userRole := c.GetString(constants.UserRole)
-		//tenantID := c.GetString(constants.TenantID)
+		tenantID := c.GetHeader(constants.TenantID)
 
 		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, userID, object, action)
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
 			c.Abort()
@@ -52,7 +51,7 @@ func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.Hand
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
+		tenantID := c.GetHeader(constants.TenantID)
 
 		// 检查是否有任一权限
 		hasAnyPermission := false
@@ -90,7 +89,7 @@ func (m *CasbinMiddleware) RequireRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
+		tenantID := c.GetHeader(constants.TenantID)
 
 		// 获取用户角色
 		userRoles := m.casbinManager.GetRolesForUser(userID, tenantID)
@@ -119,7 +118,7 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID
 		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
+		tenantID := c.GetHeader(constants.TenantID)
 
 		// 获取用户角色
 		userRoles := m.casbinManager.GetRolesForUser(userID, tenantID)
@@ -168,7 +167,7 @@ func (m *CasbinMiddleware) HasPermission(userID, tenantID, object, action string
 func (m *CasbinMiddleware) RequireResourcePermission(resourceType, action string, paramKey ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.GetString(constants.UserID)
-		tenantID := c.GetString(constants.TenantID)
+		tenantID := c.GetHeader(constants.TenantID)
 
 		// 可选参数（如 project_id、package_name）
 		var resourceID string

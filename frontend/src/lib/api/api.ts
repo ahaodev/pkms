@@ -1,5 +1,6 @@
 import axios from "axios";
-import {ACCESS_TOKEN} from "@/types/constants.ts";
+import {ACCESS_TOKEN, CURRENT_TENANT} from "@/types/constants.ts";
+import {useAuth} from "@/providers/auth-provider.tsx";
 
 
 const getApiBaseURL = () => {
@@ -18,13 +19,17 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config: any) => {
     // 从localStorage获取token
     const token = localStorage.getItem(ACCESS_TOKEN);
+    const currentTenant = localStorage.getItem(CURRENT_TENANT);
     if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;
+        if(currentTenant){
+            console.log('API Request: Using tenant ID:', currentTenant);
+            config.headers['x-tenant-id'] = currentTenant || ''; // 添加租户ID头部
+        }
     } else {
         console.log('API Request: No token found, request will be unauthenticated');
     }
-    
     return config;
 }, (error: any) => {
     console.error('Request interceptor error:', error);
@@ -38,12 +43,12 @@ apiClient.interceptors.response.use(
     },
     (error: any) => {
         console.error('API Error:', error.response?.status, error.config?.url, error.message);
-        
+
         // 处理401未授权错误
         if (error.response && error.response.status === 401) {
             const requestUrl = error.config?.url || '';
             console.log('Unauthorized error:', requestUrl);
-            
+
             // 只有在非登录接口且非 profile 验证接口时才清除令牌和重定向
             if (!requestUrl.includes('/login') && !requestUrl.includes('/profile')) {
                 console.log('Clearing tokens and redirecting to login due to 401 on:', requestUrl);
@@ -63,7 +68,7 @@ apiClient.interceptors.response.use(
                 console.log('Login request failed with 401, this is expected for invalid credentials');
             }
         }
-        
+
         return Promise.reject(error);
     }
 );

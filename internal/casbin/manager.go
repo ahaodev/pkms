@@ -234,9 +234,8 @@ func (m *CasbinManager) GetProjectPermissions(userID, tenantID, projectID string
 	var permissions []string
 
 	// 检查具体的项目权限
-	actions := []string{"view", "create", "edit", "delete", "manage"}
-	for _, action := range actions {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, "project", action); hasPermission {
+	for _, action := range Actions {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, projectID, action); hasPermission {
 			permissions = append(permissions, action)
 		}
 	}
@@ -245,13 +244,11 @@ func (m *CasbinManager) GetProjectPermissions(userID, tenantID, projectID string
 }
 
 // GetPackagePermissions 获取包相关权限
-func (m *CasbinManager) GetPackagePermissions(userID, tenantID, packageName string) []string {
+func (m *CasbinManager) GetPackagePermissions(userID, tenantID, packageID string) []string {
 	var permissions []string
-
 	// 检查具体的包权限
-	actions := []string{"view", "create", "edit", "delete", "manage", "upload", "download"}
-	for _, action := range actions {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, "package", action); hasPermission {
+	for _, action := range Actions {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, packageID, action); hasPermission {
 			permissions = append(permissions, action)
 		}
 	}
@@ -262,11 +259,9 @@ func (m *CasbinManager) GetPackagePermissions(userID, tenantID, packageName stri
 // GetSidebarPermissions 获取侧边栏权限
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
 	var permissions []string
-
-	// 检查侧边栏权限
-	sidebarItems := []string{"dashboard", "projects", "packages", "users", "groups", "permissions", "settings", "upgrade"}
-	for _, item := range sidebarItems {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, "sidebar", item); hasPermission {
+	// 检查侧边栏
+	for _, item := range SidebarItems {
+		if hasPermission, _ := m.CheckPermission(userID, tenantID, Sidebar, item); hasPermission {
 			permissions = append(permissions, item)
 		}
 	}

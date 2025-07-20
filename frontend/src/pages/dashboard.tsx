@@ -64,7 +64,7 @@ export default function Dashboard() {
         <div className="space-y-6">
             {/* 页面头部 */}
             <DashboardHeader
-                title="仪表板"
+                title="概览"
                 description="包管理系统概览"
             />
 

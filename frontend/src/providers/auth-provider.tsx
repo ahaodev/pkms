@@ -1,6 +1,6 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import * as authAPI from '@/lib/api/auth.ts';
-import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/types/constants.ts';
+import {ACCESS_TOKEN, CURRENT_TENANT, REFRESH_TOKEN} from '@/types/constants.ts';
 import {Tenant, User} from '@/types/simplified.ts';
 
 interface AuthContextType {
@@ -63,17 +63,17 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     setUser(user);
                     const tenantsArr = Array.isArray(resp.data.tenants) ? resp.data.tenants : null;
                     setTenants(tenantsArr);
-                    setCurrentTenant(tenantsArr && tenantsArr.length > 0 ? tenantsArr[0] : null);
+                    selectTenant(tenantsArr && tenantsArr.length > 0 ? tenantsArr[0] : null);
                 } else {
                     setUser(null);
                     setTenants(null);
-                    setCurrentTenant(null);
+                    selectTenant(null);
                 }
             } catch (e) {
                 console.log('validateToken error:', e);
                 setUser(null);
                 setTenants(null);
-                setCurrentTenant(null);
+                selectTenant(null);
             }
             setIsLoading(false);
         };
@@ -100,7 +100,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     }
                     setUser(user);
                     setTenants(profileResp.data.tenants || null);
-                    setCurrentTenant(profileResp.data.tenants[0] || null);
+                    selectTenant(profileResp.data.tenants[0] || null);
                 }
 
                 return true;
@@ -121,9 +121,11 @@ export function AuthProvider({children}: { children: ReactNode }) {
         setCurrentTenant(null);
         localStorage.removeItem(ACCESS_TOKEN);
         localStorage.removeItem(REFRESH_TOKEN);
+        localStorage.removeItem(CURRENT_TENANT);
     };
     const selectTenant = (tenant: Tenant | null) => {
         setCurrentTenant(tenant);
+        localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
     }
     const isAdmin = (): boolean => user?.username === 'admin';
     const contextValue = {
