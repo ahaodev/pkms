@@ -106,39 +106,32 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 }
 
 // InitDefaultUser 初始化数据（如管理员用户、Casbin策略等）由外部调用以下函数
-func InitDefaultUser(client *ent.Client, env *Env, casbinManager *casbin.CasbinManager) {
+func InitDefaultUser(client *ent.Client, userName string, password string, casbinManager *casbin.CasbinManager) {
 	ctx := context.Background()
 	// 检查是否已存在管理员用户
 	userCount, err := client.User.Query().
-		Where(user.UsernameEQ("ahao")).
+		Where(user.UsernameEQ(userName)).
 		Count(ctx)
 
 	if err != nil {
-		log.Printf("⚠️ Failed to check admin users: %v", err)
+		log.Printf("⚠️ Failed to check %s users: %v", userName, err)
 		return
 	}
 
 	if userCount > 0 {
-		log.Println("✅ ahao user already exists")
+		log.Printf("✅ %s user already exists", userName)
 		return
 	}
-
-	// 从环境变量获取管理员信息，或使用默认值
-	userName := "ahao"
-	password := "123"
-
-	log.Printf("📝 Creating admin user with password: %s", userName)
-
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("❌ Failed to hash admin password: %v", err)
+		log.Printf("❌ Failed to hash %s password: %v", userName, err)
 		return
 	}
 	// 创建系统租户(创建用户时自动创建对应的租户)
 	userTenant, err := client.Tenant.Create().SetName(userName).Save(ctx)
 	if err != nil {
-		log.Printf("❌ Failed to create system tenant: %v", err)
+		log.Printf("❌ Failed to create user tenant: %v", err)
 		return
 	}
 	// 创建管理员用户
@@ -150,13 +143,13 @@ func InitDefaultUser(client *ent.Client, env *Env, casbinManager *casbin.CasbinM
 		Save(ctx)
 
 	if err != nil {
-		log.Printf("❌ Failed to create admin user: %v", err)
+		log.Printf("❌ Failed to create user: %v", err)
 		return
 	}
 	casbinManager.AddRoleForUser(user.ID, "pm", userTenant.ID)
 	casbinManager.AddPolicy(user.ID, userTenant.ID, "*", "*")
 	casbinManager.AddPolicy(user.ID, userTenant.ID, "project", "*")
-	log.Printf("✅ Default admin user created: %s", userName)
+	log.Printf("✅ Default user created: %s", userName)
 	log.Println("⚠️ Please change the default password after first login!")
 }
 func getEnvOrDefault(value, defaultValue string) string {

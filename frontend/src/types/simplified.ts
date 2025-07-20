@@ -36,6 +36,7 @@ export interface User {
 export interface Profile {
     id: string;
     name:string;
+    is_active: boolean;
     tenants: Tenant[];
 }
 
