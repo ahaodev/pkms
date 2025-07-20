@@ -5,14 +5,23 @@ import {Package, PackageFilters, Release, ReleaseUpload, UploadProgress} from "@
 // 获取所有包（支持过滤和分页）
 export async function getPackages(filters?: PackageFilters): Promise<PageResponse<Package>> {
     const params = new URLSearchParams();
-    if (filters?.projectId) params.append('project_id', filters.projectId);
+    
+    // Only add project_id if it's explicitly provided and not empty
+    if (filters?.projectId && filters.projectId.trim() !== '') {
+        params.append('project_id', filters.projectId);
+    }
+    
     if (filters?.type) params.append('type', filters.type);
     if (filters?.isLatest !== undefined) params.append('is_latest', filters.isLatest.toString());
     if (filters?.search) params.append('search', filters.search);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.pageSize) params.append('pageSize', filters.pageSize.toString());
 
-    const resp = await apiClient.get(`/api/v1/packages/?${params.toString()}`);
+    const url = `/api/v1/packages/?${params.toString()}`;
+    console.log('Fetching packages with URL:', url);
+    console.log('Filters:', filters);
+    
+    const resp = await apiClient.get(url);
     return resp.data;
 }
 

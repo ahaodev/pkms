@@ -6,11 +6,16 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 export const usePackages = (filters?: PackageFilters) => {
     const {user, isAdmin} = useAuth();
     
+    console.log('usePackages called with filters:', filters);
+    
     return useQuery({
         queryKey: ['packages', filters, user?.id],
         queryFn: async () => {
+            console.log('usePackages queryFn called with filters:', filters);
             const response = await PackagesAPI.getPackages(filters);
+            console.log('usePackages API response:', response);
             const transformedPackages = (response.data || []).map(PackagesAPI.transformPackageFromBackend);
+            console.log('usePackages transformed packages:', transformedPackages);
             return {
                 data: transformedPackages,
                 total: response.total,
@@ -19,6 +24,10 @@ export const usePackages = (filters?: PackageFilters) => {
                 totalPages: response.totalPages,
             };
         },
+        staleTime: 0,
+        gcTime: 0,
+        refetchOnMount: "always",
+        refetchOnWindowFocus: false,
         select: (result) => {
             if (!user || !result) {
                 return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };
@@ -63,16 +72,5 @@ export const useGenerateShareLink = () => {
             const response = await PackagesAPI.createShareLink(packageId, { expiryHours: expiresIn });
             return response.data;
         },
-    });
-};
-
-export const usePackage = (id: string) => {
-    return useQuery({
-        queryKey: ['package', id],
-        queryFn: async () => {
-            const response = await PackagesAPI.getPackage(id);
-            return PackagesAPI.transformPackageFromBackend(response.data);
-        },
-        enabled: !!id,
     });
 };

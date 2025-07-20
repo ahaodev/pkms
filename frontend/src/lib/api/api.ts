@@ -1,7 +1,5 @@
 import axios from "axios";
 import {ACCESS_TOKEN, CURRENT_TENANT} from "@/types/constants.ts";
-import {useAuth} from "@/providers/auth-provider.tsx";
-
 
 const getApiBaseURL = () => {
     return `${window.location.protocol}//${window.location.host}`;

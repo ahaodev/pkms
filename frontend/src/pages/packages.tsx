@@ -68,7 +68,7 @@ export default function PackagesPage() {
   const { data: pageData, isLoading, error } = usePackages({ 
     page, 
     pageSize, 
-    projectId: selectedProjectId || undefined, 
+    projectId: selectedProjectId === '' ? undefined : selectedProjectId, 
     type: selectedType, 
     search: debouncedSearchTerm || undefined 
   });

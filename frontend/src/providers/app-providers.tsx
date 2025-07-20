@@ -7,7 +7,11 @@ const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             retry: 1,
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 0, // No caching - always fresh
+            gcTime: 0, // No garbage collection time - immediate cleanup
+            refetchOnWindowFocus: false, // Disable to prevent excessive refetching
+            refetchOnMount: "always", // Always refetch on mount
+            refetchOnReconnect: false, // Disable to prevent excessive refetching
         },
     },
 });

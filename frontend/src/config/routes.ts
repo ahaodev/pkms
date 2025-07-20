@@ -6,6 +6,7 @@ import LoginPage from "@/pages/login";
 import Settings from "@/pages/settings";
 import UsersPage from "@/pages/users";
 import PermissionsPage from "@/pages/permissions";
+import UpgradePage from "@/pages/upgrade";
 
 export interface RouteConfig {
     path: string;
@@ -54,6 +55,12 @@ export const routes: RouteConfig[] = [
     {
         path: "/permissions",
         element: PermissionsPage,
+        requiresAuth: true,
+        requiresAdmin: true,
+    },
+    {
+        path: "/upgrade",
+        element: UpgradePage,
         requiresAuth: true,
         requiresAdmin: true,
     },

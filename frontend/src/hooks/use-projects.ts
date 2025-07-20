@@ -14,17 +14,10 @@ export const useProjects = () => {
             return response.data.map(ProjectsAPI.transformProjectFromBackend);
         },
         enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN), // 只有用户存在且有token时才执行
-    });
-};
-
-export const useProject = (id: string) => {
-    return useQuery({
-        queryKey: ['project', id],
-        queryFn: async () => {
-            const response = await ProjectsAPI.getProject(id);
-            return ProjectsAPI.transformProjectFromBackend(response.data);
-        },
-        enabled: !!id,
+        staleTime: 0,
+        gcTime: 0,
+        refetchOnMount: "always",
+        refetchOnWindowFocus: false,
     });
 };
 
