@@ -1,5 +1,3 @@
-请帮我完善租户管理
-
 # 租户管理功能完善指南
 - 仅admin系统管理员可以访问租户管理功能
 - 租户管理功能可以创建、编辑、删除租户
@@ -12,8 +10,9 @@
 
 ## 目录结构
 - config/rabc_models.go 定义了RBAC-domains模型(domain 代表租户)
+- [jwt_auth_middleware.go](../api/middleware/jwt_auth_middleware.go) 定义了casbin权限校验得中间件
 - ent/schema/tenant.go定义了数据库表结构
-- /api/controller/user_controller.go 定义了接入点(也可以单独定义tenant_controller.go)
+- api/controller/user_controller.go 定义了接入点(也可以单独定义tenant_controller.go)
 - usecase/tenant_usecase.go 定义了业务逻辑
 - repository/tenant_repository.go 定义了数据访问接口
 - api/user_route.go 定义了路由(group是之前的概念,现在是tenant)
@@ -22,5 +21,6 @@
 - frontend/src/pages/tenant.tsx 定义了前端页面
 
 
-
-  请根据当前go-backend-clean-architecture,完善租户管理功能
+## 要求
+请根据当前go-backend-clean-architecture,
+1.完善租户管理功能

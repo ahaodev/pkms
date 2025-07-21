@@ -14,8 +14,9 @@ import (
 
 func NewUserRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db)
+	tr := repository.NewTenantRepository(db)
 	uc := &controller.UserController{
-		UserUsecase: usecase.NewUserUsecase(ur, timeout),
+		UserUsecase: usecase.NewUserUsecase(ur, tr, timeout),
 		Env:         env,
 	}
 

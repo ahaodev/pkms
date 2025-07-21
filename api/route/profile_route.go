@@ -14,8 +14,9 @@ import (
 
 func NewProfileRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db)
+	tr := repository.NewTenantRepository(db)
 	uc := &controller.ProfileController{
-		UserUsecase: usecase.NewUserUsecase(ur, timeout),
+		UserUsecase: usecase.NewUserUsecase(ur, tr, timeout),
 		Env:         env,
 	}
 	group.GET("/", uc.GetProfile)    // GET /api/v1/users/profile

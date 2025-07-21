@@ -8,21 +8,46 @@ import (
 )
 
 type userUsecase struct {
-	userRepository domain.UserRepository
-	contextTimeout time.Duration
+	userRepository   domain.UserRepository
+	tenantRepository domain.TenantRepository
+	contextTimeout   time.Duration
 }
 
-func NewUserUsecase(userRepository domain.UserRepository, timeout time.Duration) domain.UserUseCase {
+func NewUserUsecase(userRepository domain.UserRepository, tenantRepository domain.TenantRepository, timeout time.Duration) domain.UserUseCase {
 	return &userUsecase{
-		userRepository: userRepository,
-		contextTimeout: timeout,
+		userRepository:   userRepository,
+		tenantRepository: tenantRepository,
+		contextTimeout:   timeout,
 	}
 }
 
 func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
-	return uu.userRepository.Create(ctx, user)
+	
+	// Create the user first
+	if err := uu.userRepository.Create(ctx, user); err != nil {
+		return err
+	}
+
+	// Auto-create a default tenant with the same name as the user
+	tenant := &domain.Tenant{
+		Name: user.Name,
+	}
+	
+	if err := uu.tenantRepository.Create(ctx, tenant); err != nil {
+		// If tenant creation fails, we should log it but not fail the user creation
+		// since the user has already been created
+		// In a production system, you might want to use a transaction here
+		return err
+	}
+
+	// Add the user to the newly created tenant with PM permissions
+	if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, tenant.ID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (uu *userUsecase) Fetch(c context.Context) ([]domain.User, error) {

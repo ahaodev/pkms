@@ -1,0 +1,171 @@
+package repository
+
+import (
+	"context"
+	"pkms/domain"
+	"pkms/ent"
+	"pkms/ent/tenant"
+	"pkms/ent/user"
+)
+
+type entTenantRepository struct {
+	client *ent.Client
+}
+
+func NewTenantRepository(client *ent.Client) domain.TenantRepository {
+	return &entTenantRepository{
+		client: client,
+	}
+}
+
+func (tr *entTenantRepository) Create(c context.Context, t *domain.Tenant) error {
+	created, err := tr.client.Tenant.
+		Create().
+		SetName(t.Name).
+		Save(c)
+
+	if err != nil {
+		return err
+	}
+
+	t.ID = created.ID
+	t.CreatedAt = created.CreatedAt
+	t.UpdatedAt = created.UpdatedAt
+	return nil
+}
+
+func (tr *entTenantRepository) Fetch(c context.Context) ([]domain.Tenant, error) {
+	tenants, err := tr.client.Tenant.
+		Query().
+		Select(tenant.FieldID, tenant.FieldName, tenant.FieldCreatedAt, tenant.FieldUpdatedAt).
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.Tenant
+	for _, t := range tenants {
+		result = append(result, domain.Tenant{
+			ID:        t.ID,
+			Name:      t.Name,
+			CreatedAt: t.CreatedAt,
+			UpdatedAt: t.UpdatedAt,
+		})
+	}
+
+	return result, nil
+}
+
+func (tr *entTenantRepository) GetByID(c context.Context, id string) (domain.Tenant, error) {
+	t, err := tr.client.Tenant.
+		Query().
+		Where(tenant.ID(id)).
+		First(c)
+
+	if err != nil {
+		return domain.Tenant{}, err
+	}
+
+	return domain.Tenant{
+		ID:        t.ID,
+		Name:      t.Name,
+		CreatedAt: t.CreatedAt,
+		UpdatedAt: t.UpdatedAt,
+	}, nil
+}
+
+func (tr *entTenantRepository) Update(c context.Context, t *domain.Tenant) error {
+	updated, err := tr.client.Tenant.
+		UpdateOneID(t.ID).
+		SetName(t.Name).
+		Save(c)
+
+	if err != nil {
+		return err
+	}
+
+	t.UpdatedAt = updated.UpdatedAt
+	return nil
+}
+
+func (tr *entTenantRepository) Delete(c context.Context, id string) error {
+	return tr.client.Tenant.
+		DeleteOneID(id).
+		Exec(c)
+}
+
+func (tr *entTenantRepository) GetTenantsByUserID(c context.Context, userID string) ([]domain.Tenant, error) {
+	userEntity, err := tr.client.User.
+		Query().
+		Where(user.ID(userID)).
+		WithTenants().
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.Tenant
+	for _, t := range userEntity.Edges.Tenants {
+		result = append(result, domain.Tenant{
+			ID:        t.ID,
+			Name:      t.Name,
+			CreatedAt: t.CreatedAt,
+			UpdatedAt: t.UpdatedAt,
+		})
+	}
+
+	return result, nil
+}
+
+func (tr *entTenantRepository) GetTenantUsers(c context.Context, tenantID string) ([]domain.User, error) {
+	tenantEntity, err := tr.client.Tenant.
+		Query().
+		Where(tenant.ID(tenantID)).
+		WithUsers().
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.User
+	for _, u := range tenantEntity.Edges.Users {
+		// Get user tenants
+		userTenants, _ := tr.GetTenantsByUserID(c, u.ID)
+		var tenants []*domain.Tenant
+		for i := range userTenants {
+			tenants = append(tenants, &userTenants[i])
+		}
+
+		result = append(result, domain.User{
+			ID:        u.ID,
+			Name:      u.Username,
+			Tenants:   tenants,
+			IsActive:  u.IsActive,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+		})
+	}
+
+	return result, nil
+}
+
+func (tr *entTenantRepository) AddUserToTenant(c context.Context, userID, tenantID string) error {
+	_, err := tr.client.User.
+		UpdateOneID(userID).
+		AddTenantIDs(tenantID).
+		Save(c)
+
+	return err
+}
+
+func (tr *entTenantRepository) RemoveUserFromTenant(c context.Context, userID, tenantID string) error {
+	_, err := tr.client.User.
+		UpdateOneID(userID).
+		RemoveTenantIDs(tenantID).
+		Save(c)
+
+	return err
+}
