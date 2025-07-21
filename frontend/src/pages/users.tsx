@@ -3,7 +3,8 @@ import {Shield} from 'lucide-react';
 import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
-import {User, UserRole, Group} from '@/types/simplified';
+import {User, UserRole} from '@/types/user';
+import {Group} from '@/types/group';
 import {UserDialog, UserFilters, UserHeader, UserList} from '@/components/user';
 
 /**

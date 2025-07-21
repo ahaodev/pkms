@@ -3,17 +3,24 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {FolderOpen, ChevronRight, Plus} from 'lucide-react';
 
-export function ProjectsView({
-    filteredProjects,
-    searchTerm,
-    handleProjectSelect,
-    onCreateProject
-}: {
-    filteredProjects: any[];
+interface ProjectsViewProps {
+    projects: any[];
     searchTerm: string;
     handleProjectSelect: (projectId: string) => void;
     onCreateProject: () => void;
-}) {
+}
+
+export function ProjectsView({
+    projects,
+    searchTerm,
+    handleProjectSelect,
+    onCreateProject
+}: ProjectsViewProps) {
+    // Filter projects based on search term
+    const filteredProjects = projects?.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
     return (
         <div className="space-y-4">
             <div className="flex items-center space-x-2">

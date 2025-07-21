@@ -14,7 +14,8 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Progress} from '@/components/ui/progress';
-import {Package, ReleaseUpload, UploadProgress} from '@/types/simplified';
+import {Package} from '@/types/package';
+import {ReleaseUpload, UploadProgress} from '@/types/release';
 import {formatFileSize} from '../package-utils';
 
 interface PackageReleaseDialogProps {

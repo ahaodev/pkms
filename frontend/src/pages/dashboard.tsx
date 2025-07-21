@@ -2,7 +2,7 @@ import {useMemo, useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {Package} from '@/types/simplified';
+import {Package} from '@/types/package.ts';
 import {
     DashboardHeader,
     DashboardLoadingView,

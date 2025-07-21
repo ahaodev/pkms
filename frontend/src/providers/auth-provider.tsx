@@ -1,7 +1,7 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import * as authAPI from '@/lib/api/auth.ts';
 import {ACCESS_TOKEN, CURRENT_TENANT, REFRESH_TOKEN} from '@/types/constants.ts';
-import {Tenant, User} from '@/types/simplified.ts';
+import {Tenant, User} from '@/types/user';
 
 interface AuthContextType {
     user: User | null;

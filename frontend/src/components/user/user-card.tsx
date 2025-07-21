@@ -2,7 +2,9 @@ import {Eye, EyeOff, Pencil, Trash2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
-import {Group, Project, User} from '@/types/simplified';
+import {Group} from '@/types/group';
+import {Project} from '@/types/project';
+import {User} from '@/types/user';
 
 interface UserCardProps {
     user: User;

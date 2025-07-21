@@ -1,7 +1,7 @@
 import { Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserRole } from '@/types/simplified';
+import { UserRole } from '@/types/user';
 
 interface UserFiltersProps {
   searchTerm: string;

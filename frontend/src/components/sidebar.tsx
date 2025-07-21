@@ -18,7 +18,7 @@ import {
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {apiClient} from '@/lib/api/api';
-import {Tenant} from "@/types/simplified.ts";
+import {Tenant} from '@/types/user';
 
 /**
  * NavItem 组件：简化侧边栏导航项

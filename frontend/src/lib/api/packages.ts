@@ -1,6 +1,7 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse, PageResponse} from "@/types/api-response";
-import {Package, PackageFilters, Release, ReleaseUpload, UploadProgress} from "@/types/simplified";
+import {Package, PackageFilters} from '@/types/package';
+import {Release, ReleaseUpload, UploadProgress} from '@/types/release';
 
 // 获取所有包（支持过滤和分页）
 export async function getPackages(filters?: PackageFilters): Promise<PageResponse<Package>> {

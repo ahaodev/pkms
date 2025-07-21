@@ -12,7 +12,9 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Switch} from '@/components/ui/switch';
 import {Button} from '@/components/ui/button';
-import {UserRole, Project, Group} from '@/types/simplified';
+import {UserRole} from '@/types/user';
+import {Project} from '@/types/project';
+import {Group} from '@/types/group';
 
 interface UserFormData {
     username: string;

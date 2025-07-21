@@ -1,5 +1,7 @@
 import { Users } from 'lucide-react';
-import { User, Project, Group } from '@/types/simplified';
+import { User } from '@/types/user';
+import { Project } from '@/types/project';
+import { Group } from '@/types/group';
 import { UserCard } from './user-card';
 
 interface UserListProps {

@@ -1,5 +1,5 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {PackageFilters} from '@/types/simplified';
+import {PackageFilters} from '@/types/package';
 import * as PackagesAPI from '@/lib/api/packages';
 import {useAuth} from '@/providers/auth-provider.tsx';
 

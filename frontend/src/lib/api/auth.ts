@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import {Profile, User} from "@/types/simplified";
+import {Profile, User} from '@/types/user';
 
 // 登录请求类型
 export interface LoginRequest {

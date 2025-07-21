@@ -1,5 +1,5 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {Project} from '@/types/simplified';
+import {Project} from '@/types/project';
 import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {ACCESS_TOKEN} from "@/types/constants.ts";

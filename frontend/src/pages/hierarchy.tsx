@@ -1,7 +1,8 @@
 import {useEffect, useMemo, useState} from 'react';
 import {useCreateProject, useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {ExtendedPackage, Release} from '@/types/simplified';
+import {ExtendedPackage} from '@/types/package';
+import {Release} from '@/types/release';
 import {useToast} from '@/hooks/use-toast';
 import {Input} from '@/components/ui/input';
 import {
@@ -53,15 +54,6 @@ export default function HierarchyPage() {
     const selectedProject = projects?.find(p => p.id === selectedProjectId);
     const selectedPackage = packages.find(p => p.id === selectedPackageId);
 
-    const filteredProjects = projects?.filter(project =>
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
-
-    const filteredPackages = packages.filter(pkg =>
-        pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pkg.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     // Mock releases data - in real app this would come from an API
     const releases: Release[] = useMemo(() => {
@@ -297,7 +289,7 @@ export default function HierarchyPage() {
             <div className="grid gap-6">
                 {!selectedProjectId ? (
                     <ProjectsView
-                        filteredProjects={filteredProjects}
+                        projects={projects || []}
                         searchTerm={searchTerm}
                         handleProjectSelect={handleProjectSelect}
                         onCreateProject={() => setIsCreateProjectDialogOpen(true)}
@@ -305,7 +297,7 @@ export default function HierarchyPage() {
                 ) : selectedProjectId && !selectedPackageId ? (
                     <PackagesView
                         selectedProject={selectedProject}
-                        filteredPackages={filteredPackages}
+                        packages={packages}
                         searchTerm={searchTerm}
                         handlePackageSelect={handlePackageSelect}
                         onCreatePackage={() => setIsCreatePackageDialogOpen(true)}
@@ -314,6 +306,7 @@ export default function HierarchyPage() {
                     <ReleasesView
                         selectedPackage={selectedPackage}
                         releases={releases}
+                        searchTerm={searchTerm}
                         handleCreateRelease={handleCreateRelease}
                         handleDownload={handleDownload}
                     />

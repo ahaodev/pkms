@@ -1,8 +1,8 @@
 import {FolderOpen} from 'lucide-react';
-import {getProjectIcon} from '@/components/package';
+import {getProjectIcon} from '../package';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
-import {Project} from '@/types/simplified';
+import {Project} from '../../types/project';
 
 interface RecentProjectsProps {
     projects?: Project[];
@@ -30,7 +30,7 @@ export function RecentProjects({
                                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                             >
                                 <div className="flex items-center space-x-3">
-                                    <span className="text-lg">{getProjectIcon(project.icon || 'other')}</span>
+                                    <span className="text-lg">{getProjectIcon(project.icon ?? 'other')}</span>
                                     <div>
                                         <p className="font-medium">{project.name}</p>
                                         <p className="text-sm text-muted-foreground">

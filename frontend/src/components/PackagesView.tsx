@@ -3,19 +3,26 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Package as PackageIcon, ChevronRight, Plus} from 'lucide-react';
 
-export function PackagesView({
-    selectedProject,
-    filteredPackages,
-    searchTerm,
-    handlePackageSelect,
-    onCreatePackage
-}: {
+interface PackagesViewProps {
     selectedProject: any;
-    filteredPackages: any[];
+    packages: any[];
     searchTerm: string;
     handlePackageSelect: (packageId: string) => void;
     onCreatePackage: () => void;
-}) {
+}
+
+export function PackagesView({
+    selectedProject,
+    packages,
+    searchTerm,
+    handlePackageSelect,
+    onCreatePackage
+}: PackagesViewProps) {
+    // Filter packages based on search term
+    const filteredPackages = packages.filter(pkg =>
+        pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pkg.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">

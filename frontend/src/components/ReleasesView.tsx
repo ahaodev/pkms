@@ -3,19 +3,30 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Package as PackageIcon, Plus, Download} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
-import {Release} from '@/types/simplified';
+import {Release} from '@/types/release.ts';
+
+interface ReleasesViewProps {
+    selectedPackage: any;
+    releases: Release[];
+    searchTerm: string;
+    handleCreateRelease: () => void;
+    handleDownload: (release: Release) => void;
+}
 
 export function ReleasesView({
     selectedPackage,
     releases,
+    searchTerm,
     handleCreateRelease,
     handleDownload
-}: {
-    selectedPackage: any;
-    releases: Release[];
-    handleCreateRelease: () => void;
-    handleDownload: (release: Release) => void;
-}) {
+}: ReleasesViewProps) {
+    // Filter releases based on search term
+    const filteredReleases = releases.filter(release =>
+        release.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (release.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        (release.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        release.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -28,7 +39,7 @@ export function ReleasesView({
                 </Button>
             </div>
             <div className="space-y-4">
-                {releases.map((release) => (
+                {filteredReleases.map((release) => (
                     <Card key={release.id}>
                         <CardHeader>
                             <div className="flex items-center justify-between">
@@ -84,16 +95,20 @@ export function ReleasesView({
                     </Card>
                 ))}
             </div>
-            {releases.length === 0 && (
+            {filteredReleases.length === 0 && (
                 <Card>
                     <CardContent className="flex items-center justify-center py-8">
                         <div className="text-center space-y-2">
                             <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
-                            <div className="text-muted-foreground">该包暂无版本发布</div>
-                            <Button onClick={handleCreateRelease}>
-                                <Plus className="mr-2 h-4 w-4"/>
-                                创建首个发布
-                            </Button>
+                            <div className="text-muted-foreground">
+                                {searchTerm ? '未找到匹配的发布版本' : '该包暂无版本发布'}
+                            </div>
+                            {!searchTerm && (
+                                <Button onClick={handleCreateRelease}>
+                                    <Plus className="mr-2 h-4 w-4"/>
+                                    创建首个发布
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

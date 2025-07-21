@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import { Project } from "@/types/simplified";
+import { Project } from '@/types/project';
 
 // 获取所有项目
 export async function getProjects(): Promise<ApiResponse<Project[]>> {

@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import { User, CreateUserRequest } from "@/types/simplified";
+import { User, CreateUserRequest } from '@/types/user';
 
 // 获取所有用户
 export async function getUsers(): Promise<ApiResponse<User[]>> {

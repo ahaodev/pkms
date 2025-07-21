@@ -53,7 +53,8 @@ import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {ExtendedPackage, Project} from '@/types/simplified';
+import {ExtendedPackage} from '@/types/package';
+import {Project} from '@/types/project';
 
 interface UpgradeVersion {
     id: string;
