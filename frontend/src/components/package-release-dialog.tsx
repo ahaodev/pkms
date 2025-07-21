@@ -1,6 +1,6 @@
 import {useState} from 'react';
-import {Globe, Monitor, Package2, Server, Smartphone} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {Globe, Monitor, Smartphone} from 'lucide-react';
+import {Button} from '@/components/ui/button.tsx';
 import {
     Dialog,
     DialogContent,
@@ -8,15 +8,14 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle
-} from '@/components/ui/dialog';
-import {Label} from '@/components/ui/label';
-import {Input} from '@/components/ui/input';
-import {Textarea} from '@/components/ui/textarea';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Progress} from '@/components/ui/progress';
-import {Package} from '@/types/package';
-import {ReleaseUpload, UploadProgress} from '@/types/release';
-import {formatFileSize} from '../package-utils';
+} from '@/components/ui/dialog.tsx';
+import {Label} from '@/components/ui/label.tsx';
+import {Input} from '@/components/ui/input.tsx';
+import {Textarea} from '@/components/ui/textarea.tsx';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
+import {Progress} from '@/components/ui/progress.tsx';
+import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
+import {formatFileSize} from '../lib/package-utils.tsx';
 
 interface PackageReleaseDialogProps {
     open: boolean;
@@ -42,7 +41,8 @@ export function PackageReleaseDialog({
         package_id: packageId,
         name: packageName,
         type: 'android',
-        version: '',
+        versionName: '',
+        versionCode: '',
         changelog: '',
     });
 
@@ -63,7 +63,8 @@ export function PackageReleaseDialog({
                 package_id: packageId,
                 name: '',
                 type: 'android',
-                version: '',
+                versionName: '',
+                versionCode: '',
                 changelog: '',
             });
         } catch (error) {
@@ -78,7 +79,8 @@ export function PackageReleaseDialog({
                 package_id: packageId,
                 name: packageName,
                 type: 'android',
-                version: '',
+                versionCode: '',
+                versionName: '',
                 changelog: '',
             });
             onClose();
@@ -110,12 +112,12 @@ export function PackageReleaseDialog({
                         )}
                     </div>
 
+                    {/* 类型选择禁止选择 */}
                     <div>
                         <Label htmlFor="type">类型</Label>
                         <Select
                             value={formData.type}
-                            onValueChange={(value: Package['type']) => setFormData({...formData, type: value})}
-                            disabled={isUploading}
+                            disabled
                         >
                             <SelectTrigger>
                                 <SelectValue/>
@@ -139,37 +141,25 @@ export function PackageReleaseDialog({
                                         Desktop
                                     </div>
                                 </SelectItem>
-                                <SelectItem value="linux">
-                                    <div className="flex items-center">
-                                        <Server className="mr-2 h-4 w-4"/>
-                                        Linux
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="other">
-                                    <div className="flex items-center">
-                                        <Package2 className="mr-2 h-4 w-4"/>
-                                        Other
-                                    </div>
-                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                     <div>
-                        <Label htmlFor="version">版本名称</Label>
+                        <Label htmlFor="versionName">版本名称</Label>
                         <Input
-                            id="version"
-                            value={formData.version}
-                            onChange={(e) => setFormData({...formData, version: e.target.value})}
+                            id="versionName"
+                            value={formData.versionName}
+                            onChange={(e) => setFormData({...formData, versionName: e.target.value})}
                             placeholder="1.0.0-tab-beta.apk"
                             disabled={isUploading}
                         />
                     </div>
                     <div>
-                        <Label htmlFor="version">版本号</Label>
+                        <Label htmlFor="versionCode">版本号</Label>
                         <Input
-                            id="version"
-                            value={formData.version}
-                            onChange={(e) => setFormData({...formData, version: e.target.value})}
+                            id="versionCode"
+                            value={formData.versionCode}
+                            onChange={(e) => setFormData({...formData, versionCode: e.target.value})}
                             placeholder="1.0.0"
                             disabled={isUploading}
                         />
@@ -203,7 +193,7 @@ export function PackageReleaseDialog({
                     </Button>
                     <Button
                         onClick={handleUpload}
-                        disabled={!selectedFile || !formData.version || isUploading}
+                        disabled={!selectedFile || !formData.versionCode || !formData.versionName || isUploading}
                     >
                         {isUploading ? '上传中...' : '发布'}
                     </Button>

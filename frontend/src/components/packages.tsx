@@ -11,7 +11,7 @@ interface PackagesViewProps {
     onCreatePackage: () => void;
 }
 
-export function PackagesView({
+export function Packages({
                                  selectedProject,
                                  packages,
                                  searchTerm,
@@ -27,7 +27,7 @@ export function PackagesView({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
-                    {selectedProject?.name} - 选择包
+                    {selectedProject?.name} - 包列表
                 </h2>
                 <div className="flex items-center space-x-2">
                     <Badge variant="secondary">{filteredPackages.length} 个包</Badge>

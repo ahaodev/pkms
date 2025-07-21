@@ -28,6 +28,9 @@ interface ProjectDialogProps {
     iconOptions: Array<{ value: string; label: string }>;
     getProjectIcon: (iconType: string) => JSX.Element;
     isLoading?: boolean;
+    project?: any;
+    onDelete?: () => void;
+    isDeleting?: boolean;
 }
 
 export function ProjectDialog({
@@ -40,8 +43,12 @@ export function ProjectDialog({
                                   setFormData,
                                   iconOptions,
                                   getProjectIcon,
-                                  isLoading = false
+                                  isLoading = false,
+                                  project,
+                                  onDelete,
+                                  isDeleting = false
                               }: ProjectDialogProps) {
+    const canDelete = isEdit && project && (project.packageCount === 0 || project.packageCount === undefined);
     return (
         <Dialog open={open} onOpenChange={(isOpen) => {
             if (!isOpen) {
@@ -92,16 +99,29 @@ export function ProjectDialog({
                         </div>
                     </div>
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
-                        取消
-                    </Button>
-                    <Button
-                        onClick={onSubmit}
-                        disabled={!formData.name || isLoading}
-                    >
-                        {isLoading ? (isEdit ? '更新中...' : '创建中...') : (isEdit ? '更新项目' : '创建项目')}
-                    </Button>
+                <DialogFooter className="flex justify-between">
+                    <div>
+                        {canDelete && onDelete && (
+                            <Button
+                                variant="destructive"
+                                onClick={onDelete}
+                                disabled={isDeleting || isLoading}
+                            >
+                                {isDeleting ? '删除中...' : '删除项目'}
+                            </Button>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={onClose}>
+                            取消
+                        </Button>
+                        <Button
+                            onClick={onSubmit}
+                            disabled={!formData.name || isLoading}
+                        >
+                            {isLoading ? (isEdit ? '更新中...' : '创建中...') : (isEdit ? '更新项目' : '创建项目')}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

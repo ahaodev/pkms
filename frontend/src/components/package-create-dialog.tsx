@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {Globe, Monitor, Package2, Server, Smartphone} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/ui/button.tsx';
 import {
     Dialog,
     DialogContent,
@@ -8,31 +8,25 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle
-} from '@/components/ui/dialog';
-import {Label} from '@/components/ui/label';
-import {Input} from '@/components/ui/input';
-import {Textarea} from '@/components/ui/textarea';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+} from '@/components/ui/dialog.tsx';
+import {Label} from '@/components/ui/label.tsx';
+import {Input} from '@/components/ui/input.tsx';
+import {Textarea} from '@/components/ui/textarea.tsx';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
 import {Package} from '@/types/package.ts';
-import {Project} from '@/types/project.ts';
-import {UploadProgress} from '@/types/release.ts';
-import {getProjectIcon} from "@/components/project";
 import {createPackage} from "@/lib/api";
-import {toast} from '@/hooks/use-toast';
+import {toast} from '@/hooks/use-toast.ts';
 
 interface PackageCreateDialogProps {
     open: boolean;
     onClose: () => void;
-    projects: Project[] | undefined;
-    uploadProgress?: UploadProgress | null;
-    initialProjectId?: string;
+    projectID: string;
 }
 
 export function PackageCreateDialog({
                                         open,
                                         onClose,
-                                        projects,
-                                        initialProjectId = ''
+                                        projectID,
                                     }: PackageCreateDialogProps) {
     const [formData, setFormData] = useState<{
         projectId: string;
@@ -40,14 +34,14 @@ export function PackageCreateDialog({
         description: string;
         type: Package['type'];
     }>({
-        projectId: initialProjectId,
+        projectId: projectID,
         name: '',
         description: '',
         type: 'android',
     });
     const handleClose = () => {
         setFormData({
-            projectId: initialProjectId,
+            projectId: projectID,
             name: '',
             description: '',
             type: 'android',
@@ -56,6 +50,7 @@ export function PackageCreateDialog({
     };
 
     function handleCreate() {
+
         createPackage(formData)
             .then(response => {
                 if (response.code == 0) {
@@ -92,28 +87,6 @@ export function PackageCreateDialog({
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label htmlFor="project">项目</Label>
-                        <Select
-                            value={formData.projectId}
-                            onValueChange={(value) => setFormData({...formData, projectId: value})}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="选择项目"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projects?.map((project) => (
-                                    <SelectItem key={project.id} value={project.id}>
-                                        <div className="flex items-center">
-                                            {getProjectIcon(project.icon || 'package2')}
-                                            <span className="ml-2">{project.name}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div>
                         <Label htmlFor="name">包名称</Label>
                         <Input
                             id="name"
@@ -124,7 +97,7 @@ export function PackageCreateDialog({
                     </div>
 
                     <div>
-                        <Label htmlFor="type">类型</Label>
+                        <Label htmlFor="type">程序类型</Label>
                         <Select
                             value={formData.type}
                             onValueChange={(value: Package['type']) => setFormData({...formData, type: value})}

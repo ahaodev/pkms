@@ -1,8 +1,8 @@
 import {FolderOpen} from 'lucide-react';
-import {getProjectIcon} from '../package';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Project} from '../../types/project';
+import { getProjectIcon } from '@/lib/package-utils';
 
 interface RecentProjectsProps {
     projects?: Project[];

@@ -44,17 +44,9 @@ export function RecentPackages({packages, onViewAllPackages}: RecentPackagesProp
                         </Button>
                     </div>
                 ) : (
-                    <div className="text-center py-6">
-                        <PackageIcon className="mx-auto h-8 w-8 text-muted-foreground mb-2"/>
+                    <div className="flex flex-col items-center justify-center py-6 h-40">
+                        <PackageIcon className="h-8 w-8 text-muted-foreground mb-2"/>
                         <p className="text-sm text-muted-foreground">暂无包</p>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={onViewAllPackages}
-                        >
-                            上传包
-                        </Button>
                     </div>
                 )}
             </CardContent>

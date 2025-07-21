@@ -26,7 +26,8 @@ export interface ReleaseUpload {
     package_id: string;
     name: string;
     type: Package['type'];
-    version: string;
+    versionCode: string;
+    versionName: string;
     changelog?: string;
 }
 

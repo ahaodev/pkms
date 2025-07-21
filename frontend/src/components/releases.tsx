@@ -13,13 +13,13 @@ interface ReleasesViewProps {
     handleDownload: (release: Release) => void;
 }
 
-export function ReleasesView({
-                                 selectedPackage,
-                                 releases,
-                                 searchTerm,
-                                 handleCreateRelease,
-                                 handleDownload
-                             }: ReleasesViewProps) {
+export function Releases({
+                             selectedPackage,
+                             releases,
+                             searchTerm,
+                             handleCreateRelease,
+                             handleDownload
+                         }: ReleasesViewProps) {
     // Filter releases based on search term
     const filteredReleases = releases.filter(release =>
         release.version.toLowerCase().includes(searchTerm.toLowerCase()) ||

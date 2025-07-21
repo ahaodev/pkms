@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from 'react';
-import {useCreateProject, useProjects} from '@/hooks/use-projects';
+import {useCreateProject, useProjects, useUpdateProject} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {ExtendedPackage} from '@/types/package';
 import {Release} from '@/types/release';
@@ -15,11 +15,12 @@ import {
 } from '@/components/ui/breadcrumb';
 import {Search} from 'lucide-react';
 import {getProjectIcon, iconOptions, ProjectDialog} from '@/components/project';
-import {PackageCreateDialog, PackageReleaseDialog} from '@/components/package';
-import {ProjectsView} from '@/components/ProjectsView';
-import {PackagesView} from '@/components/PackagesView';
-import {ReleasesView} from '@/components/ReleasesView';
+import {Projects} from '@/components/projects.tsx';
+import {Packages} from '@/components/packages.tsx';
+import {Releases} from '@/components/releases.tsx';
 import {useLocation} from 'react-router-dom';
+import {PackageReleaseDialog} from "@/components/package-release-dialog.tsx";
+import {PackageCreateDialog} from "@/components/package-create-dialog.tsx";
 
 // Hierarchy Page Component
 export default function HierarchyPage() {
@@ -28,8 +29,10 @@ export default function HierarchyPage() {
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Project creation state
+    // Project creation and editing state
     const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useState(false);
+    const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
+    const [editingProject, setEditingProject] = useState<any>(null);
     const [projectFormData, setProjectFormData] = useState({
         name: '',
         description: '',
@@ -46,6 +49,7 @@ export default function HierarchyPage() {
 
     const {data: projects} = useProjects();
     const createProject = useCreateProject();
+    const updateProject = useUpdateProject();
     const {data: packagesData} = usePackages({
         projectId: selectedProjectId || undefined
     });
@@ -149,8 +153,48 @@ export default function HierarchyPage() {
         }
     };
 
+    const handleEditProject = (project: any) => {
+        setEditingProject(project);
+        setProjectFormData({
+            name: project.name,
+            description: project.description,
+            icon: project.icon
+        });
+        setIsEditProjectDialogOpen(true);
+    };
+
+    const handleUpdateProject = async () => {
+        if (!editingProject) return;
+
+        try {
+            await updateProject.mutateAsync({
+                id: editingProject.id,
+                update: projectFormData
+            });
+            toast({
+                title: '项目更新成功',
+                description: `项目 "${projectFormData.name}" 已成功更新。`,
+            });
+            setIsEditProjectDialogOpen(false);
+            setEditingProject(null);
+            setProjectFormData({name: '', description: '', icon: 'package2'});
+        } catch {
+            toast({
+                variant: 'destructive',
+                title: '更新失败',
+                description: '项目更新失败，请重试。',
+            });
+        }
+    };
+
     const handleCreateProjectDialogClose = () => {
         setIsCreateProjectDialogOpen(false);
+        setProjectFormData({name: '', description: '', icon: 'package2'});
+    };
+
+    const handleEditProjectDialogClose = () => {
+        setIsEditProjectDialogOpen(false);
+        setEditingProject(null);
         setProjectFormData({name: '', description: '', icon: 'package2'});
     };
 
@@ -288,14 +332,15 @@ export default function HierarchyPage() {
             {/* Content */}
             <div className="grid gap-6">
                 {!selectedProjectId ? (
-                    <ProjectsView
+                    <Projects
                         projects={projects || []}
                         searchTerm={searchTerm}
                         handleProjectSelect={handleProjectSelect}
                         onCreateProject={() => setIsCreateProjectDialogOpen(true)}
+                        onEditProject={handleEditProject}
                     />
                 ) : selectedProjectId && !selectedPackageId ? (
-                    <PackagesView
+                    <Packages
                         selectedProject={selectedProject}
                         packages={packages}
                         searchTerm={searchTerm}
@@ -303,7 +348,7 @@ export default function HierarchyPage() {
                         onCreatePackage={() => setIsCreatePackageDialogOpen(true)}
                     />
                 ) : (
-                    <ReleasesView
+                    <Releases
                         selectedPackage={selectedPackage}
                         releases={releases}
                         searchTerm={searchTerm}
@@ -313,7 +358,7 @@ export default function HierarchyPage() {
                 )}
             </div>
 
-            {/* Project Dialog */}
+            {/* Create Project Dialog */}
             <ProjectDialog
                 open={isCreateProjectDialogOpen}
                 onClose={handleCreateProjectDialogClose}
@@ -326,12 +371,25 @@ export default function HierarchyPage() {
                 isLoading={createProject.isPending}
             />
 
+            {/* Edit Project Dialog */}
+            <ProjectDialog
+                open={isEditProjectDialogOpen}
+                onClose={handleEditProjectDialogClose}
+                onSubmit={handleUpdateProject}
+                title="编辑项目"
+                isEdit={true}
+                formData={projectFormData}
+                setFormData={setProjectFormData}
+                iconOptions={iconOptions}
+                getProjectIcon={getProjectIcon}
+                isLoading={updateProject.isPending}
+            />
+
             {/* Package Dialog */}
             <PackageCreateDialog
                 open={isCreatePackageDialogOpen}
                 onClose={handleCreatePackageDialogClose}
-                projects={projects}
-                initialProjectId={selectedProjectId || ''}
+                projectID={selectedProjectId || ''}
             />
 
             {/* Release Dialog */}
