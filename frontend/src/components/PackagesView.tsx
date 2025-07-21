@@ -1,7 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Package as PackageIcon, ChevronRight, Plus} from 'lucide-react';
+import {ChevronRight, Package as PackageIcon, Plus} from 'lucide-react';
 
 interface PackagesViewProps {
     selectedProject: any;
@@ -12,12 +12,12 @@ interface PackagesViewProps {
 }
 
 export function PackagesView({
-    selectedProject,
-    packages,
-    searchTerm,
-    handlePackageSelect,
-    onCreatePackage
-}: PackagesViewProps) {
+                                 selectedProject,
+                                 packages,
+                                 searchTerm,
+                                 handlePackageSelect,
+                                 onCreatePackage
+                             }: PackagesViewProps) {
     // Filter packages based on search term
     const filteredPackages = packages.filter(pkg =>
         pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,7 +31,7 @@ export function PackagesView({
                 </h2>
                 <div className="flex items-center space-x-2">
                     <Badge variant="secondary">{filteredPackages.length} 个包</Badge>
-                    <Button size="sm" onClick={onCreatePackage}>
+                    <Button onClick={onCreatePackage}>
                         <Plus className="mr-2 h-4 w-4"/>
                         新建包
                     </Button>

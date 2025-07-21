@@ -1,7 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {FolderOpen, ChevronRight, Plus} from 'lucide-react';
+import {ChevronRight, FolderOpen, Plus} from 'lucide-react';
 
 interface ProjectsViewProps {
     projects: any[];
@@ -11,11 +11,11 @@ interface ProjectsViewProps {
 }
 
 export function ProjectsView({
-    projects,
-    searchTerm,
-    handleProjectSelect,
-    onCreateProject
-}: ProjectsViewProps) {
+                                 projects,
+                                 searchTerm,
+                                 handleProjectSelect,
+                                 onCreateProject
+                             }: ProjectsViewProps) {
     // Filter projects based on search term
     const filteredProjects = projects?.filter(project =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -23,13 +23,17 @@ export function ProjectsView({
     ) || [];
     return (
         <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-                <h2 className="text-lg font-semibold">选择项目</h2>
-                <Badge variant="secondary">{filteredProjects.length} 个项目</Badge>
-                <Button variant="outline" onClick={onCreateProject}>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    新建项目
-                </Button>
+            <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">
+                    选择项目
+                </h2>
+                <div className="flex items-center space-x-2">
+                    <Badge variant="secondary">{filteredProjects.length} 个项目</Badge>
+                    <Button onClick={onCreateProject}>
+                        <Plus className="mr-2 h-4 w-4"/>
+                        新建项目
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

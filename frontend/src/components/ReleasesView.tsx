@@ -1,7 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
-import {Package as PackageIcon, Plus, Download} from 'lucide-react';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {Download, Package as PackageIcon, Plus} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
 
@@ -14,12 +14,12 @@ interface ReleasesViewProps {
 }
 
 export function ReleasesView({
-    selectedPackage,
-    releases,
-    searchTerm,
-    handleCreateRelease,
-    handleDownload
-}: ReleasesViewProps) {
+                                 selectedPackage,
+                                 releases,
+                                 searchTerm,
+                                 handleCreateRelease,
+                                 handleDownload
+                             }: ReleasesViewProps) {
     // Filter releases based on search term
     const filteredReleases = releases.filter(release =>
         release.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,10 +33,14 @@ export function ReleasesView({
                 <h2 className="text-lg font-semibold">
                     {selectedPackage?.name}
                 </h2>
-                <Button onClick={handleCreateRelease}>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    新建发布
-                </Button>
+                <div className="flex items-center space-x-2">
+                    <Badge variant="secondary">{releases.length} 个发布</Badge>
+                    <Button onClick={handleCreateRelease}>
+                        <Plus className="mr-2 h-4 w-4"/>
+                        新建发布
+                    </Button>
+                </div>
+
             </div>
             <div className="space-y-4">
                 {filteredReleases.map((release) => (
