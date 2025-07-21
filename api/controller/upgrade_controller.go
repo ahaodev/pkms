@@ -2,9 +2,11 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"pkms/bootstrap"
 	"pkms/domain"
+	"pkms/internal/constants"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,89 +16,122 @@ type UpgradeController struct {
 	Env            *bootstrap.Env
 }
 
-// CheckUpgrade 检查升级
-func (uc *UpgradeController) CheckUpgrade(c *gin.Context) {
-	packageID := c.Param("packageId")
-	upgradeInfo, err := uc.UpgradeUsecase.CheckUpgrade(c, packageID)
+// CreateUpgradeTarget 创建升级目标
+func (uc *UpgradeController) CreateUpgradeTarget(c *gin.Context) {
+	userID := c.GetString(constants.UserID)
+	tenantID := c.GetHeader(constants.TenantID)
+
+	var request domain.CreateUpgradeTargetRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	target, err := uc.UpgradeUsecase.CreateUpgradeTarget(c, &request, userID, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(upgradeInfo))
+
+	c.JSON(http.StatusCreated, domain.RespSuccess(target))
 }
 
-// PerformUpgrade 执行升级
-func (uc *UpgradeController) PerformUpgrade(c *gin.Context) {
-	packageID := c.Param("packageId")
+// GetUpgradeTargets 获取升级目标列表
+func (uc *UpgradeController) GetUpgradeTargets(c *gin.Context) {
+	tenantID := c.GetHeader(constants.TenantID)
 
-	// 获取当前用户ID
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("User not authenticated"))
-		return
+	// 构建过滤条件
+	filters := make(map[string]interface{})
+	if projectID := c.Query("project_id"); projectID != "" {
+		filters["project_id"] = projectID
+	}
+	if packageID := c.Query("package_id"); packageID != "" {
+		filters["package_id"] = packageID
+	}
+	if isActiveStr := c.Query("is_active"); isActiveStr != "" {
+		if isActive, err := strconv.ParseBool(isActiveStr); err == nil {
+			filters["is_active"] = isActive
+		}
 	}
 
-	if err := uc.UpgradeUsecase.PerformUpgrade(c, packageID, userID.(string)); err != nil {
+	targets, err := uc.UpgradeUsecase.GetUpgradeTargets(c, tenantID, filters)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
 
-	response := map[string]interface{}{
-		"package_id": packageID,
-		"user_id":    userID,
-		"message":    "Upgrade initiated successfully",
+	c.JSON(http.StatusOK, domain.RespSuccess(targets))
+}
+
+// GetUpgradeTarget 获取特定升级目标
+func (uc *UpgradeController) GetUpgradeTarget(c *gin.Context) {
+	id := c.Param("id")
+
+	target, err := uc.UpgradeUsecase.GetUpgradeTargetByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, domain.RespError("升级目标不存在"))
+		return
 	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(target))
+}
+
+// UpdateUpgradeTarget 更新升级目标
+func (uc *UpgradeController) UpdateUpgradeTarget(c *gin.Context) {
+	id := c.Param("id")
+
+	var request domain.UpdateUpgradeTargetRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	if err := uc.UpgradeUsecase.UpdateUpgradeTarget(c, id, &request); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("升级目标更新成功"))
+}
+
+// DeleteUpgradeTarget 删除升级目标
+func (uc *UpgradeController) DeleteUpgradeTarget(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := uc.UpgradeUsecase.DeleteUpgradeTarget(c, id); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("升级目标删除成功"))
+}
+
+// CheckUpdate 检查更新（供客户端调用）
+func (uc *UpgradeController) CheckUpdate(c *gin.Context) {
+	var request domain.CheckUpdateRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	response, err := uc.UpgradeUsecase.CheckUpdate(c, &request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetUpgradeHistory 获取升级历史
-func (uc *UpgradeController) GetUpgradeHistory(c *gin.Context) {
-	packageID := c.Param("packageId")
-	history, err := uc.UpgradeUsecase.GetUpgradeHistory(c, packageID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-	c.JSON(http.StatusOK, domain.RespSuccess(history))
-}
-
-// GetAvailableUpgrades 获取可用升级
-func (uc *UpgradeController) GetAvailableUpgrades(c *gin.Context) {
+// GetProjectUpgradeTargets 获取项目的所有升级目标
+func (uc *UpgradeController) GetProjectUpgradeTargets(c *gin.Context) {
 	projectID := c.Param("projectId")
-	upgrades, err := uc.UpgradeUsecase.GetAvailableUpgrades(c, projectID)
+
+	targets, err := uc.UpgradeUsecase.GetProjectUpgradeTargets(c, projectID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(upgrades))
-}
 
-// GetUpgradeStatus 获取升级状态
-func (uc *UpgradeController) GetUpgradeStatus(c *gin.Context) {
-	upgradeID := c.Param("upgradeId")
-
-	// 这里需要实现获取升级状态的逻辑
-	// 暂时返回模拟数据
-	status := map[string]interface{}{
-		"upgrade_id": upgradeID,
-		"status":     "in_progress",
-		"progress":   65,
-		"message":    "Upgrading package components...",
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(status))
-}
-
-// CancelUpgrade 取消升级
-func (uc *UpgradeController) CancelUpgrade(c *gin.Context) {
-	upgradeID := c.Param("upgradeId")
-
-	// 这里需要实现取消升级的逻辑
-	response := map[string]interface{}{
-		"upgrade_id": upgradeID,
-		"status":     "cancelled",
-		"message":    "Upgrade cancelled successfully",
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
+	c.JSON(http.StatusOK, domain.RespSuccess(targets))
 }

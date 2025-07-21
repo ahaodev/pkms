@@ -78,7 +78,7 @@ export async function uploadRelease(
     formData.append('package_id', upload.package_id);
     formData.append('name', upload.name);
     formData.append('type', upload.type);
-    formData.append('version', upload.version);
+    formData.append('version', upload.versionName);
     if (upload.changelog) formData.append('changelog', upload.changelog);
 
     const resp = await apiClient.post("/api/v1/packages/release", formData, {

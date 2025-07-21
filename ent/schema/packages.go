@@ -61,6 +61,8 @@ func (Packages) Edges() []ent.Edge {
 			Field("created_by").
 			Unique().
 			Required(),
+		// Package has upgrade targets
+		edge.To("upgrades", Upgrade.Type),
 	}
 }
 

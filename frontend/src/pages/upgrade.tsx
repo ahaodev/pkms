@@ -1,19 +1,7 @@
-import {useState, useCallback, useEffect} from 'react';
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import {useCallback, useEffect, useState} from 'react';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {Card, CardContent, CardHeader, CardTitle,} from '@/components/ui/card';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {
     Dialog,
     DialogContent,
@@ -22,108 +10,67 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
+import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {Switch} from '@/components/ui/switch';
 import {
-    Plus,
-    Edit,
-    Trash2,
-    Download,
-    Smartphone,
-    Monitor,
-    Globe,
+    Activity,
     CheckCircle,
-    AlertCircle,
-    Clock,
-    Package as PackageIcon,
+    ChevronRight,
+    Edit,
     FolderOpen,
-    ChevronRight
+    Package as PackageIcon,
+    Plus,
+    Target,
+    Trash2,
+    XCircle
 } from 'lucide-react';
 import {toast} from 'sonner';
-import {apiClient} from '@/lib/api/api';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
+import {getReleases} from '@/lib/api/releases';
+import {
+    createUpgradeTarget,
+    CreateUpgradeTargetRequest,
+    deleteUpgradeTarget,
+    getUpgradeTargets,
+    updateUpgradeTarget,
+    UpdateUpgradeTargetRequest,
+    UpgradeTarget
+} from '@/lib/api/upgrade';
 import {ExtendedPackage} from '@/types/package';
 import {Project} from '@/types/project';
-
-interface UpgradeVersion {
-    id: string;
-    packageId: string;
-    packageName: string;
-    projectName: string;
-    packageVersion: string;
-    platform: 'android' | 'ios' | 'windows' | 'web';
-    status: 'draft' | 'published' | 'deprecated';
-    isForced: boolean;
-    fileSize: number;
-    changelog: string;
-    createdAt: string;
-    updatedAt: string;
-    downloadCount: number;
-}
-
-interface CreateUpgradeVersionRequest {
-    packageId: string;
-    platform: string;
-    status: string;
-    isForced: boolean;
-    changelog: string;
-}
-
-const platformIcons = {
-    android: <Smartphone className="h-4 w-4" />,
-    ios: <Smartphone className="h-4 w-4" />,
-    windows: <Monitor className="h-4 w-4" />,
-    web: <Globe className="h-4 w-4" />
-};
-
-const statusColors = {
-    draft: 'bg-gray-100 text-gray-800',
-    published: 'bg-green-100 text-green-800',
-    deprecated: 'bg-red-100 text-red-800'
-};
-
-const statusIcons = {
-    draft: <Clock className="h-3 w-3" />,
-    published: <CheckCircle className="h-3 w-3" />,
-    deprecated: <AlertCircle className="h-3 w-3" />
-};
 
 export default function UpgradePage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [selectedVersion, setSelectedVersion] = useState<UpgradeVersion | null>(null);
-    const [formData, setFormData] = useState<CreateUpgradeVersionRequest>({
-        packageId: '',
-        platform: 'android',
-        status: 'draft',
-        isForced: false,
-        changelog: ''
+    const [selectedTarget, setSelectedTarget] = useState<UpgradeTarget | null>(null);
+    const [formData, setFormData] = useState<CreateUpgradeTargetRequest>({
+        project_id: '',
+        package_id: '',
+        release_id: '',
+        name: '',
+        description: ''
     });
+    const [editFormData, setEditFormData] = useState<UpdateUpgradeTargetRequest>({});
 
     const queryClient = useQueryClient();
 
-    // Fetch projects and packages
-    const {data: projects = []} = useProjects();
-    const {data: packagesData} = usePackages();
+    // Fetch data
+    const { data: projects = [] } = useProjects();
+    const { data: packagesData } = usePackages();
     const packages = packagesData?.data || [];
 
-    // Fetch upgrade versions
-    const {data: upgradeVersions = [], isLoading} = useQuery({
-        queryKey: ['upgrade-versions'],
+    // Fetch upgrade targets
+    const { data: upgradeTargetsData, isLoading } = useQuery({
+        queryKey: ['upgrade-targets'],
         queryFn: async () => {
-            const response = await apiClient.get('/api/v1/upgrade/versions');
-            return response.data.data || [];
+            const response = await getUpgradeTargets();
+            return response.data;
         },
         staleTime: 0,
         gcTime: 0,
@@ -131,50 +78,44 @@ export default function UpgradePage() {
         refetchOnWindowFocus: false,
     });
 
-    // Create upgrade version mutation
-    const createUpgradeVersionMutation = useMutation({
-        mutationFn: async (data: CreateUpgradeVersionRequest) => {
-            const response = await apiClient.post('/api/v1/upgrade/versions', data);
-            return response.data;
-        },
+    const upgradeTargets = upgradeTargetsData || [];
+
+    // Create upgrade target mutation
+    const createUpgradeTargetMutation = useMutation({
+        mutationFn: createUpgradeTarget,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['upgrade-versions']});
+            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
             setIsCreateDialogOpen(false);
             resetForm();
-            toast.success('升级版本创建成功');
+            toast.success('升级目标创建成功');
         },
         onError: (error: any) => {
             toast.error(`创建失败: ${error.response?.data?.message || error.message}`);
         }
     });
 
-    // Update upgrade version mutation
-    const updateUpgradeVersionMutation = useMutation({
-        mutationFn: async ({id, data}: {id: string, data: Partial<CreateUpgradeVersionRequest>}) => {
-            const response = await apiClient.put(`/api/v1/upgrade/versions/${id}`, data);
-            return response.data;
-        },
+    // Update upgrade target mutation
+    const updateUpgradeTargetMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string, data: UpdateUpgradeTargetRequest }) => 
+            updateUpgradeTarget(id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['upgrade-versions']});
+            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
             setIsEditDialogOpen(false);
-            setSelectedVersion(null);
-            resetForm();
-            toast.success('升级版本更新成功');
+            setSelectedTarget(null);
+            resetEditForm();
+            toast.success('升级目标更新成功');
         },
         onError: (error: any) => {
             toast.error(`更新失败: ${error.response?.data?.message || error.message}`);
         }
     });
 
-    // Delete upgrade version mutation
-    const deleteUpgradeVersionMutation = useMutation({
-        mutationFn: async (id: string) => {
-            const response = await apiClient.delete(`/api/v1/upgrade/versions/${id}`);
-            return response.data;
-        },
+    // Delete upgrade target mutation
+    const deleteUpgradeTargetMutation = useMutation({
+        mutationFn: deleteUpgradeTarget,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['upgrade-versions']});
-            toast.success('升级版本删除成功');
+            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
+            toast.success('升级目标删除成功');
         },
         onError: (error: any) => {
             toast.error(`删除失败: ${error.response?.data?.message || error.message}`);
@@ -183,43 +124,45 @@ export default function UpgradePage() {
 
     const resetForm = useCallback(() => {
         setFormData({
-            packageId: '',
-            platform: 'android',
-            status: 'draft',
-            isForced: false,
-            changelog: ''
+            project_id: '',
+            package_id: '',
+            release_id: '',
+            name: '',
+            description: ''
         });
     }, []);
 
-    const handleCreate = useCallback(() => {
-        createUpgradeVersionMutation.mutate(formData);
-    }, [formData, createUpgradeVersionMutation]);
+    const resetEditForm = useCallback(() => {
+        setEditFormData({});
+    }, []);
 
-    const handleEdit = useCallback((version: UpgradeVersion) => {
-        setSelectedVersion(version);
-        setFormData({
-            packageId: version.packageId,
-            platform: version.platform,
-            status: version.status,
-            isForced: version.isForced,
-            changelog: version.changelog
+    const handleCreate = useCallback(() => {
+        createUpgradeTargetMutation.mutate(formData);
+    }, [formData, createUpgradeTargetMutation]);
+
+    const handleEdit = useCallback((target: UpgradeTarget) => {
+        setSelectedTarget(target);
+        setEditFormData({
+            name: target.name,
+            description: target.description,
+            is_active: target.is_active
         });
         setIsEditDialogOpen(true);
     }, []);
 
     const handleUpdate = useCallback(() => {
-        if (!selectedVersion) return;
-        updateUpgradeVersionMutation.mutate({
-            id: selectedVersion.id,
-            data: formData
+        if (!selectedTarget) return;
+        updateUpgradeTargetMutation.mutate({
+            id: selectedTarget.id,
+            data: editFormData
         });
-    }, [selectedVersion, formData, updateUpgradeVersionMutation]);
+    }, [selectedTarget, editFormData, updateUpgradeTargetMutation]);
 
     const handleDelete = useCallback((id: string) => {
-        if (confirm('确定要删除此升级版本吗？')) {
-            deleteUpgradeVersionMutation.mutate(id);
+        if (confirm('确定要删除此升级目标吗？')) {
+            deleteUpgradeTargetMutation.mutate(id);
         }
-    }, [deleteUpgradeVersionMutation]);
+    }, [deleteUpgradeTargetMutation]);
 
     const formatFileSize = (bytes: number) => {
         if (bytes === 0) return '0 B';
@@ -233,24 +176,25 @@ export default function UpgradePage() {
         return new Date(dateString).toLocaleString('zh-CN');
     };
 
-    // Filter versions by platform
-    const androidVersions = upgradeVersions.filter((v: UpgradeVersion) => v.platform === 'android');
-    const iosVersions = upgradeVersions.filter((v: UpgradeVersion) => v.platform === 'ios');
-    const otherVersions = upgradeVersions.filter((v: UpgradeVersion) => !['android', 'ios'].includes(v.platform));
+    // Statistics
+    const totalTargets = upgradeTargets.length;
+    const activeTargets = upgradeTargets.filter(t => t.is_active).length;
+    const inactiveTargets = totalTargets - activeTargets;
+    const projectsWithTargets = new Set(upgradeTargets.map(t => t.project_id)).size;
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">升级管理</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">升级目标管理</h1>
                     <p className="text-muted-foreground">
-                        从现有项目包中选择版本，为Android、iOS等客户端配置升级策略
+                        管理软件包的升级目标，为客户端提供版本检查和下载服务
                     </p>
                 </div>
                 <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    添加升级版本
+                    创建升级目标
                 </Button>
             </div>
 
@@ -258,112 +202,163 @@ export default function UpgradePage() {
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">总升级版本</CardTitle>
-                        <PackageIcon className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">总升级目标</CardTitle>
+                        <Target className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{upgradeVersions.length}</div>
+                        <div className="text-2xl font-bold">{totalTargets}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Android版本</CardTitle>
-                        <Smartphone className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">激活状态</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{androidVersions.length}</div>
+                        <div className="text-2xl font-bold">{activeTargets}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">iOS版本</CardTitle>
-                        <Smartphone className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">非激活状态</CardTitle>
+                        <XCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{iosVersions.length}</div>
+                        <div className="text-2xl font-bold">{inactiveTargets}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">总下载量</CardTitle>
-                        <Download className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">涉及项目</CardTitle>
+                        <FolderOpen className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            {upgradeVersions.reduce((sum: number, v: UpgradeVersion) => sum + v.downloadCount, 0)}
-                        </div>
+                        <div className="text-2xl font-bold">{projectsWithTargets}</div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Versions Table */}
-            <Tabs defaultValue="all" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="all">全部版本</TabsTrigger>
-                    <TabsTrigger value="android">Android</TabsTrigger>
-                    <TabsTrigger value="ios">iOS</TabsTrigger>
-                    <TabsTrigger value="other">其他平台</TabsTrigger>
-                </TabsList>
+            {/* Upgrade Targets Table */}
+            <Card>
+                <CardContent className="p-0">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="text-muted-foreground">加载中...</div>
+                        </div>
+                    ) : upgradeTargets.length === 0 ? (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="text-center space-y-2">
+                                <div className="text-muted-foreground">暂无升级目标</div>
+                                <div className="text-sm text-muted-foreground">
+                                    点击"创建升级目标"开始配置软件包升级
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>升级目标</TableHead>
+                                    <TableHead>项目/包信息</TableHead>
+                                    <TableHead>目标版本</TableHead>
+                                    <TableHead>状态</TableHead>
+                                    <TableHead>文件大小</TableHead>
+                                    <TableHead>创建时间</TableHead>
+                                    <TableHead className="text-right">操作</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {upgradeTargets.map((target) => (
+                                    <TableRow key={target.id}>
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="font-medium">{target.name}</div>
+                                                {target.description && (
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {target.description}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center space-x-2">
+                                                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {target.project_name || target.project_id}
+                                                    </span>
+                                                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                                                    <PackageIcon className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="font-medium">
+                                                        {target.package_name || target.package_id}
+                                                    </span>
+                                                </div>
+                                                {target.package_type && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                        {target.package_type}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="font-medium">
+                                                    {target.version || 'N/A'}
+                                                </div>
+                                                {target.file_name && (
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {target.file_name}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge 
+                                                variant={target.is_active ? "default" : "secondary"}
+                                                className="flex items-center space-x-1 w-fit"
+                                            >
+                                                {target.is_active ? (
+                                                    <CheckCircle className="h-3 w-3" />
+                                                ) : (
+                                                    <XCircle className="h-3 w-3" />
+                                                )}
+                                                <span>{target.is_active ? '激活' : '未激活'}</span>
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {target.file_size ? formatFileSize(target.file_size) : 'N/A'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {formatDate(target.created_at)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end space-x-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEdit(target)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(target.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </CardContent>
+            </Card>
 
-                <TabsContent value="all" className="space-y-4">
-                    <UpgradeVersionTable 
-                        versions={upgradeVersions}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        formatFileSize={formatFileSize}
-                        formatDate={formatDate}
-                        platformIcons={platformIcons}
-                        statusColors={statusColors}
-                        statusIcons={statusIcons}
-                        isLoading={isLoading}
-                    />
-                </TabsContent>
-
-                <TabsContent value="android" className="space-y-4">
-                    <UpgradeVersionTable 
-                        versions={androidVersions}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        formatFileSize={formatFileSize}
-                        formatDate={formatDate}
-                        platformIcons={platformIcons}
-                        statusColors={statusColors}
-                        statusIcons={statusIcons}
-                        isLoading={isLoading}
-                    />
-                </TabsContent>
-
-                <TabsContent value="ios" className="space-y-4">
-                    <UpgradeVersionTable 
-                        versions={iosVersions}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        formatFileSize={formatFileSize}
-                        formatDate={formatDate}
-                        platformIcons={platformIcons}
-                        statusColors={statusColors}
-                        statusIcons={statusIcons}
-                        isLoading={isLoading}
-                    />
-                </TabsContent>
-
-                <TabsContent value="other" className="space-y-4">
-                    <UpgradeVersionTable 
-                        versions={otherVersions}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        formatFileSize={formatFileSize}
-                        formatDate={formatDate}
-                        platformIcons={platformIcons}
-                        statusColors={statusColors}
-                        statusIcons={statusIcons}
-                        isLoading={isLoading}
-                    />
-                </TabsContent>
-            </Tabs>
-
-            {/* Create Upgrade Version Dialog */}
-            <PackageSelectionDialog
+            {/* Create Upgrade Target Dialog */}
+            <CreateUpgradeTargetDialog
                 isOpen={isCreateDialogOpen}
                 onClose={() => {
                     setIsCreateDialogOpen(false);
@@ -372,221 +367,104 @@ export default function UpgradePage() {
                 onSubmit={handleCreate}
                 formData={formData}
                 setFormData={setFormData}
-                title="添加升级版本"
                 projects={projects}
                 packages={packages}
-                isLoading={createUpgradeVersionMutation.isPending}
+                isLoading={createUpgradeTargetMutation.isPending}
             />
 
-            {/* Edit Upgrade Version Dialog */}
-            <PackageSelectionDialog
+            {/* Edit Upgrade Target Dialog */}
+            <EditUpgradeTargetDialog
                 isOpen={isEditDialogOpen}
                 onClose={() => {
                     setIsEditDialogOpen(false);
-                    setSelectedVersion(null);
-                    resetForm();
+                    setSelectedTarget(null);
+                    resetEditForm();
                 }}
                 onSubmit={handleUpdate}
-                formData={formData}
-                setFormData={setFormData}
-                title="编辑升级版本"
-                projects={projects}
-                packages={packages}
-                isLoading={updateUpgradeVersionMutation.isPending}
+                formData={editFormData}
+                setFormData={setEditFormData}
+                isLoading={updateUpgradeTargetMutation.isPending}
             />
         </div>
     );
 }
 
-// Upgrade Version Table Component
-interface UpgradeVersionTableProps {
-    versions: UpgradeVersion[];
-    onEdit: (version: UpgradeVersion) => void;
-    onDelete: (id: string) => void;
-    formatFileSize: (bytes: number) => string;
-    formatDate: (dateString: string) => string;
-    platformIcons: Record<string, JSX.Element>;
-    statusColors: Record<string, string>;
-    statusIcons: Record<string, JSX.Element>;
-    isLoading: boolean;
-}
-
-function UpgradeVersionTable({
-    versions,
-    onEdit,
-    onDelete,
-    formatFileSize,
-    formatDate,
-    platformIcons,
-    statusColors,
-    statusIcons,
-    isLoading
-}: UpgradeVersionTableProps) {
-    if (isLoading) {
-        return (
-            <Card>
-                <CardContent className="flex items-center justify-center py-8">
-                    <div className="text-muted-foreground">加载中...</div>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    if (versions.length === 0) {
-        return (
-            <Card>
-                <CardContent className="flex items-center justify-center py-8">
-                    <div className="text-center space-y-2">
-                        <div className="text-muted-foreground">暂无升级版本</div>
-                        <div className="text-sm text-muted-foreground">
-                            点击"添加升级版本"从现有项目包中选择版本
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    return (
-        <Card>
-            <CardContent className="p-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>包信息</TableHead>
-                            <TableHead>版本号</TableHead>
-                            <TableHead>平台</TableHead>
-                            <TableHead>状态</TableHead>
-                            <TableHead>文件大小</TableHead>
-                            <TableHead>下载量</TableHead>
-                            <TableHead>创建时间</TableHead>
-                            <TableHead className="text-right">操作</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {versions.map((version) => (
-                            <TableRow key={version.id}>
-                                <TableCell>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center space-x-2">
-                                            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-sm text-muted-foreground">{version.projectName}</span>
-                                            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                                            <PackageIcon className="h-4 w-4 text-muted-foreground" />
-                                            <span className="font-medium">{version.packageName}</span>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="space-y-1">
-                                        <div className="font-medium">{version.packageVersion}</div>
-                                        {version.isForced && (
-                                            <Badge variant="destructive" className="text-xs">
-                                                强制更新
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center space-x-2">
-                                        {platformIcons[version.platform]}
-                                        <span className="capitalize">{version.platform}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge 
-                                        variant="secondary" 
-                                        className={`${statusColors[version.status]} flex items-center space-x-1`}
-                                    >
-                                        {statusIcons[version.status]}
-                                        <span className="capitalize">{version.status}</span>
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>{formatFileSize(version.fileSize)}</TableCell>
-                                <TableCell>{version.downloadCount.toLocaleString()}</TableCell>
-                                <TableCell>{formatDate(version.createdAt)}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end space-x-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => onEdit(version)}
-                                        >
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => onDelete(version.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
-    );
-}
-
-// Package Selection Dialog Component
-interface PackageSelectionDialogProps {
+// Create Upgrade Target Dialog Component
+interface CreateUpgradeTargetDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;
-    formData: CreateUpgradeVersionRequest;
-    setFormData: React.Dispatch<React.SetStateAction<CreateUpgradeVersionRequest>>;
-    title: string;
+    formData: CreateUpgradeTargetRequest;
+    setFormData: React.Dispatch<React.SetStateAction<CreateUpgradeTargetRequest>>;
     projects: Project[];
     packages: ExtendedPackage[];
     isLoading: boolean;
 }
 
-function PackageSelectionDialog({
+function CreateUpgradeTargetDialog({
     isOpen,
     onClose,
     onSubmit,
     formData,
     setFormData,
-    title,
     projects,
     packages,
     isLoading
-}: PackageSelectionDialogProps) {
-    const [selectedProjectId, setSelectedProjectId] = useState('');
-    const [selectedPackageId, setSelectedPackageId] = useState('');
+}: CreateUpgradeTargetDialogProps) {
+    const [releases, setReleases] = useState<any[]>([]);
+    const [loadingReleases, setLoadingReleases] = useState(false);
 
     // Filter packages by selected project
-    const filteredPackages = selectedProjectId 
-        ? packages.filter(pkg => pkg.projectId === selectedProjectId)
+    const filteredPackages = formData.project_id
+        ? packages.filter(pkg => pkg.projectId === formData.project_id)
         : [];
 
-    const selectedPackage = packages.find(pkg => pkg.id === selectedPackageId);
-
+    // Load releases when package is selected
     useEffect(() => {
-        if (selectedPackageId) {
-            setFormData(prev => ({...prev, packageId: selectedPackageId}));
+        if (formData.package_id) {
+            setLoadingReleases(true);
+            getReleases({ packageId: formData.package_id })
+                .then((response: { data: any[] }) => {
+                    setReleases(response.data || []);
+                })
+                .catch((error: any) => {
+                    console.error('Failed to load releases:', error);
+                    setReleases([]);
+                })
+                .finally(() => {
+                    setLoadingReleases(false);
+                });
+        } else {
+            setReleases([]);
         }
-    }, [selectedPackageId, setFormData]);
+    }, [formData.package_id]);
 
     const handleProjectChange = (projectId: string) => {
-        setSelectedProjectId(projectId);
-        setSelectedPackageId(''); // Reset package selection
-        setFormData(prev => ({...prev, packageId: ''}));
+        setFormData(prev => ({
+            ...prev,
+            project_id: projectId,
+            package_id: '',
+            release_id: ''
+        }));
     };
 
-    const isFormValid = formData.packageId && formData.platform && formData.status;
+    const handlePackageChange = (packageId: string) => {
+        setFormData(prev => ({
+            ...prev,
+            package_id: packageId,
+            release_id: ''
+        }));
+    };
+
+    const isFormValid = formData.project_id && formData.package_id && formData.release_id && formData.name.trim();
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
+                    <DialogTitle>创建升级目标</DialogTitle>
                     <DialogDescription>
-                        从现有项目中选择包版本，配置升级策略
+                        选择项目、软件包和版本，创建升级目标供客户端检查更新
                     </DialogDescription>
                 </DialogHeader>
 
@@ -594,7 +472,7 @@ function PackageSelectionDialog({
                     {/* Project Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="project">选择项目</Label>
-                        <Select value={selectedProjectId} onValueChange={handleProjectChange}>
+                        <Select value={formData.project_id} onValueChange={handleProjectChange}>
                             <SelectTrigger>
                                 <SelectValue placeholder="请选择项目" />
                             </SelectTrigger>
@@ -613,14 +491,14 @@ function PackageSelectionDialog({
 
                     {/* Package Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="package">选择包</Label>
-                        <Select 
-                            value={selectedPackageId} 
-                            onValueChange={setSelectedPackageId}
-                            disabled={!selectedProjectId}
+                        <Label htmlFor="package">选择软件包</Label>
+                        <Select
+                            value={formData.package_id}
+                            onValueChange={handlePackageChange}
+                            disabled={!formData.project_id}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={selectedProjectId ? "请选择包" : "请先选择项目"} />
+                                <SelectValue placeholder={formData.project_id ? "请选择软件包" : "请先选择项目"} />
                             </SelectTrigger>
                             <SelectContent>
                                 {filteredPackages.map(pkg => (
@@ -628,11 +506,40 @@ function PackageSelectionDialog({
                                         <div className="flex items-center space-x-2">
                                             <PackageIcon className="h-4 w-4" />
                                             <span>{pkg.name}</span>
-                                            <span className="text-sm text-muted-foreground">({pkg.type})</span>
-                                            {pkg.version && (
-                                                <Badge variant="outline" className="text-xs">
-                                                    v{pkg.version}
-                                                </Badge>
+                                            <Badge variant="outline" className="text-xs">
+                                                {pkg.type}
+                                            </Badge>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Release Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="release">选择版本</Label>
+                        <Select
+                            value={formData.release_id}
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, release_id: value }))}
+                            disabled={!formData.package_id || loadingReleases}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder={
+                                    loadingReleases ? "加载版本中..." :
+                                    formData.package_id ? "请选择版本" : "请先选择软件包"
+                                } />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {releases.map(release => (
+                                    <SelectItem key={release.id} value={release.id}>
+                                        <div className="flex items-center space-x-2">
+                                            <Activity className="h-4 w-4" />
+                                            <span>{release.version}</span>
+                                            {release.title && (
+                                                <span className="text-sm text-muted-foreground">
+                                                    - {release.title}
+                                                </span>
                                             )}
                                         </div>
                                     </SelectItem>
@@ -641,128 +548,25 @@ function PackageSelectionDialog({
                         </Select>
                     </div>
 
-                    {/* Selected Package Info */}
-                    {selectedPackage && (
-                        <Card>
-                            <CardContent className="pt-4">
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">包名:</span>
-                                        <span>{selectedPackage.name}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">类型:</span>
-                                        <span>{selectedPackage.type}</span>
-                                    </div>
-                                    {selectedPackage.version && (
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">版本:</span>
-                                            <span>{selectedPackage.version}</span>
-                                        </div>
-                                    )}
-                                    {selectedPackage.fileSize && (
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">文件大小:</span>
-                                            <span>{(selectedPackage.fileSize / 1024 / 1024).toFixed(2)} MB</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Platform Selection */}
+                    {/* Name */}
                     <div className="space-y-2">
-                        <Label htmlFor="platform">目标平台</Label>
-                        <Select
-                            value={formData.platform}
-                            onValueChange={(value) => setFormData(prev => ({...prev, platform: value}))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="android">
-                                    <div className="flex items-center space-x-2">
-                                        <Smartphone className="h-4 w-4" />
-                                        <span>Android</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="ios">
-                                    <div className="flex items-center space-x-2">
-                                        <Smartphone className="h-4 w-4" />
-                                        <span>iOS</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="windows">
-                                    <div className="flex items-center space-x-2">
-                                        <Monitor className="h-4 w-4" />
-                                        <span>Windows</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="web">
-                                    <div className="flex items-center space-x-2">
-                                        <Globe className="h-4 w-4" />
-                                        <span>Web</span>
-                                    </div>
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Status Selection */}
-                    <div className="space-y-2">
-                        <Label htmlFor="status">发布状态</Label>
-                        <Select
-                            value={formData.status}
-                            onValueChange={(value) => setFormData(prev => ({...prev, status: value}))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="draft">
-                                    <div className="flex items-center space-x-2">
-                                        <Clock className="h-4 w-4" />
-                                        <span>草稿</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="published">
-                                    <div className="flex items-center space-x-2">
-                                        <CheckCircle className="h-4 w-4" />
-                                        <span>已发布</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="deprecated">
-                                    <div className="flex items-center space-x-2">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <span>已废弃</span>
-                                    </div>
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Force Update Checkbox */}
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            id="isForced"
-                            checked={formData.isForced}
-                            onChange={(e) => setFormData(prev => ({...prev, isForced: e.target.checked}))}
-                            className="h-4 w-4"
+                        <Label htmlFor="name">升级目标名称</Label>
+                        <Input
+                            id="name"
+                            placeholder="输入升级目标名称"
+                            value={formData.name}
+                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         />
-                        <Label htmlFor="isForced">强制更新</Label>
                     </div>
 
-                    {/* Changelog */}
+                    {/* Description */}
                     <div className="space-y-2">
-                        <Label htmlFor="changelog">更新说明</Label>
+                        <Label htmlFor="description">描述（可选）</Label>
                         <Textarea
-                            id="changelog"
-                            placeholder="描述此版本的更新内容..."
-                            value={formData.changelog}
-                            onChange={(e) => setFormData(prev => ({...prev, changelog: e.target.value}))}
+                            id="description"
+                            placeholder="描述此升级目标的用途..."
+                            value={formData.description}
+                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             rows={3}
                         />
                     </div>
@@ -773,6 +577,82 @@ function PackageSelectionDialog({
                         取消
                     </Button>
                     <Button onClick={onSubmit} disabled={isLoading || !isFormValid}>
+                        {isLoading ? '创建中...' : '创建'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// Edit Upgrade Target Dialog Component
+interface EditUpgradeTargetDialogProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: () => void;
+    formData: UpdateUpgradeTargetRequest;
+    setFormData: React.Dispatch<React.SetStateAction<UpdateUpgradeTargetRequest>>;
+    isLoading: boolean;
+}
+
+function EditUpgradeTargetDialog({
+    isOpen,
+    onClose,
+    onSubmit,
+    formData,
+    setFormData,
+    isLoading
+}: EditUpgradeTargetDialogProps) {
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>编辑升级目标</DialogTitle>
+                    <DialogDescription>
+                        修改升级目标的名称、描述和状态
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                    {/* Name */}
+                    <div className="space-y-2">
+                        <Label htmlFor="name">升级目标名称</Label>
+                        <Input
+                            id="name"
+                            placeholder="输入升级目标名称"
+                            value={formData.name || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        />
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2">
+                        <Label htmlFor="description">描述</Label>
+                        <Textarea
+                            id="description"
+                            placeholder="描述此升级目标的用途..."
+                            value={formData.description || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            rows={3}
+                        />
+                    </div>
+
+                    {/* Is Active */}
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="is_active"
+                            checked={formData.is_active ?? true}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                        />
+                        <Label htmlFor="is_active">激活状态</Label>
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>
+                        取消
+                    </Button>
+                    <Button onClick={onSubmit} disabled={isLoading}>
                         {isLoading ? '保存中...' : '保存'}
                     </Button>
                 </DialogFooter>

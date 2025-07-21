@@ -1,7 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {ChevronRight, Package as PackageIcon, Plus} from 'lucide-react';
+import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone} from 'lucide-react';
 
 interface PackagesViewProps {
     selectedProject: any;
@@ -12,12 +12,12 @@ interface PackagesViewProps {
 }
 
 export function Packages({
-                                 selectedProject,
-                                 packages,
-                                 searchTerm,
-                                 handlePackageSelect,
-                                 onCreatePackage
-                             }: PackagesViewProps) {
+                             selectedProject,
+                             packages,
+                             searchTerm,
+                             handlePackageSelect,
+                             onCreatePackage
+                         }: PackagesViewProps) {
     // Filter packages based on search term
     const filteredPackages = packages.filter(pkg =>
         pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,7 +47,25 @@ export function Packages({
                     >
                         <CardHeader>
                             <CardTitle className="flex items-center space-x-3">
-                                <PackageIcon className="h-5 w-5 text-green-600"/>
+                                {
+                                    (() => {
+                                        switch (pkg?.type) {
+                                            case 'Android':
+                                                return <Smartphone
+                                                    className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            case 'Web':
+                                                return <Globe className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            case 'Desktop':
+                                                return <Monitor className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            case 'Linux':
+                                                return <Server className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            case 'Other':
+                                                return <Package2 className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            default:
+                                                return <PackageIcon className="h-5 w-5 text-green-600"/>;
+                                        }
+                                    })()
+                                }
                                 <span>{pkg.name}</span>
                                 <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
                             </CardTitle>

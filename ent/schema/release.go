@@ -66,6 +66,8 @@ func (Release) Edges() []ent.Edge {
 			Unique().
 			Required(),
 		edge.To("shares", Share.Type),
+		// Release has upgrade targets
+		edge.To("upgrades", Upgrade.Type),
 	}
 }
 

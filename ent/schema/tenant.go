@@ -32,5 +32,6 @@ func (Tenant) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("users", User.Type),
 		edge.To("projects", Project.Type),
+		edge.To("upgrades", Upgrade.Type),
 	}
 }

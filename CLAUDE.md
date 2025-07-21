@@ -30,7 +30,7 @@ cd ./frontend
 # Install dependencies
 npm install
 
-# Run development server
+# Run development server (port 5173, proxies /api to localhost:8080)
 npm run dev
 
 # Build for production
@@ -64,6 +64,26 @@ goreleaser release --clean
 ## Architecture
 
 ### Backend Structure (Go Clean Architecture)
+- **Router**: Router（路由层） 负责 API 路由注册和分发
+- Controller（控制器层） 处理 HTTP 请求、参数校验、调用具体业务逻辑。
+- Usecase（用例层） 处理具体业务逻辑，调用 Repository 层进行数据访问。
+- Repository（数据访问层） 负责与数据库交互，使用 Ent ORM 进行数据操作。
+- Ent（实体层） 定义数据模型和数据库 schema，使用 Ent ORM 生成代码。
+- Internal（内部包） 提供 Casbin 权限控制、日志、文件处理等工具函数。
+- 目录结构示例
+```
+├── api
+│   ├── controller          # 控制器
+│   ├── middleware          # JWT 中间件
+│   └── route               # 路由
+├── bootstrap               # 项目初始化、环境配置
+├── cmd/main.go             # 项目入口
+├── domain                  # 领域模型
+├── internal/               # Token 工具
+├── mongo                   # MongoDB 相关实现
+├── repository              # 数据仓库
+└── usecase                 # 用例/业务逻辑
+```
 - **cmd/main.go**: Application entry point, starts Gin server on port 8080
 - **bootstrap/**: Application initialization (database, env, casbin, minio)
 - **api/**: HTTP layer with controllers, middleware, and routes
@@ -76,12 +96,40 @@ goreleaser release --clean
 
 ### Frontend Structure (React + TypeScript)
 - **src/components/**: Reusable UI components organized by feature
-- **src/pages/**: Page-level components
-- **src/lib/api/**: API client and service layer
-- **src/contexts/**: React contexts for state management
-- **src/hooks/**: Custom React hooks
-- **src/types/**: TypeScript type definitions
-- **src/providers/**: Provider components for contexts
+  - **ui/**: Shadcn/UI components (buttons, forms, dialogs, etc.)
+  - **auth/**: Authentication-related components (login forms, auth layout)
+  - **dashboard/**: Dashboard-specific components (stats, recent items)
+  - **project/**, **user/**, **settings/**: Feature-specific component groups
+- **src/pages/**: Page-level components for each route
+- **src/lib/api/**: API client and service layer with axios interceptors
+- **src/providers/**: Provider components for contexts (auth, theme, query client)
+- **src/hooks/**: Custom React hooks for data fetching and state management
+- **src/types/**: TypeScript type definitions for API responses and domain models
+- **src/config/**: Configuration files (routes, API endpoints)
+
+### Frontend Architecture Patterns
+
+**State Management**:
+- TanStack Query for server state with aggressive cache invalidation
+- React Context for global UI state (auth, theme)
+- Local component state for UI interactions
+
+**Authentication Flow**:
+- JWT tokens stored in localStorage (ACCESS_TOKEN, REFRESH_TOKEN)
+- Multi-tenant support with tenant switching via x-tenant-id header
+- Route guards based on authentication status and admin roles
+- Automatic token refresh and 401 error handling
+
+**Routing System**:
+- Centralized route configuration in `src/config/routes.ts`
+- Role-based route protection (public, authenticated, admin-only)
+- Dynamic route rendering based on auth status
+
+**API Integration**:
+- Axios client with automatic JWT token injection
+- Request/response interceptors for authentication and error handling
+- Dynamic base URL resolution for different environments
+- Development proxy: `/api/*` → `http://localhost:8080`
 
 ### Key Technologies
 - **Backend**: Gin (HTTP), Ent (ORM), Casbin (RBAC), MinIO (file storage), JWT auth
@@ -135,9 +183,42 @@ Key environment variables:
 - MinIO/S3 credentials
 - Server timeouts and ports
 
+## Frontend Development Patterns
+
+### Component Organization
+- **Feature-based grouping**: Components are organized by domain (auth, dashboard, project, user)
+- **UI Components**: Shadcn/UI components in `src/components/ui/` with consistent styling
+- **Index exports**: Each component group has an `index.ts` for clean imports
+- **TypeScript**: Strict typing with interfaces for props and API responses
+
+### API Client Architecture
+- **Base client**: `apiClient` in `src/lib/api/api.ts` with interceptors
+- **Service layer**: Separate files for each domain (auth.ts, projects.ts, users.ts)
+- **Error handling**: Global 401 handling with automatic logout/redirect
+- **Multi-tenancy**: Automatic tenant ID injection via `x-tenant-id` header
+
+### Authentication System
+- **AuthProvider**: Centralized auth state in `src/providers/auth-provider.tsx`
+- **Route protection**: `RouteGuard` component for role-based access
+- **Token management**: Automatic refresh token handling
+- **Tenant switching**: Support for multi-tenant environments
+
+### Styling and Theming
+- **Tailwind CSS**: Utility-first styling with custom configuration
+- **Theme system**: Dark/light mode support via `next-themes`
+- **Component variants**: `class-variance-authority` for component styling patterns
+- **Responsive design**: Mobile-first approach with responsive utilities
+
+### State Management Strategy
+- **Server state**: TanStack Query with minimal caching (always fresh data)
+- **Client state**: React Context for auth, theme, and global UI state
+- **Form state**: React Hook Form with Zod validation
+- **URL state**: React Router for navigation and route parameters
+
 ## Testing & Development
 
 - Default admin user created on startup: admin/admin123
 - Default test users: ahao/123, test/123
 - Logs written to `logs/` directory with rotation
 - SQLite database file: `data.db`
+- Frontend development server runs on port 5173 with API proxy to port 8080

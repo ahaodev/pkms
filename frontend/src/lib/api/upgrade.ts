@@ -1,117 +1,103 @@
-import {apiClient} from './api';
-import type {
-    Version,
-    CreateVersionRequest,
-    UpdateVersionRequest,
-    CheckUpdateRequest,
-    CheckUpdateResponse
-} from '@/hooks/use-upgrade';
+import { apiClient } from './api';
 
-// Versions API
-export const getVersions = async (): Promise<{data: Version[]}> => {
-    const response = await apiClient.get('/api/v1/upgrade/versions');
+// 升级目标类型定义
+export interface UpgradeTarget {
+    id: string;
+    tenant_id: string;
+    project_id: string;
+    package_id: string;
+    release_id: string;
+    name: string;
+    description: string;
+    is_active: boolean;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+    // 关联信息
+    project_name?: string;
+    package_name?: string;
+    package_type?: string;
+    version?: string;
+    file_name?: string;
+    file_size?: number;
+    file_hash?: string;
+    download_url?: string;
+}
+
+export interface CreateUpgradeTargetRequest {
+    project_id: string;
+    package_id: string;
+    release_id: string;
+    name: string;
+    description?: string;
+}
+
+export interface UpdateUpgradeTargetRequest {
+    name?: string;
+    description?: string;
+    is_active?: boolean;
+}
+
+export interface CheckUpdateRequest {
+    project_id: string;
+    package_id: string;
+    current_version: string;
+}
+
+export interface CheckUpdateResponse {
+    has_update: boolean;
+    current_version: string;
+    latest_version: string;
+    download_url?: string;
+    file_size?: number;
+    file_hash?: string;
+    changelog?: string;
+    release_notes?: string;
+}
+
+// 升级目标 CRUD API
+export const getUpgradeTargets = async (filters?: {
+    project_id?: string;
+    package_id?: string;
+    is_active?: boolean;
+}): Promise<{ data: UpgradeTarget[] }> => {
+    const params = new URLSearchParams();
+    if (filters?.project_id) params.append('project_id', filters.project_id);
+    if (filters?.package_id) params.append('package_id', filters.package_id);
+    if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
+
+    const response = await apiClient.get(`/api/v1/upgrades?${params.toString()}`);
     return response.data;
 };
 
-export const getVersionsByPlatform = async (platform: string): Promise<{data: Version[]}> => {
-    const response = await apiClient.get(`/api/v1/upgrade/versions?platform=${platform}`);
+export const getUpgradeTarget = async (id: string): Promise<{ data: UpgradeTarget }> => {
+    const response = await apiClient.get(`/api/v1/upgrades/${id}`);
     return response.data;
 };
 
-export const getVersion = async (id: string): Promise<{data: Version}> => {
-    const response = await apiClient.get(`/api/v1/upgrade/versions/${id}`);
+export const createUpgradeTarget = async (data: CreateUpgradeTargetRequest): Promise<{ data: UpgradeTarget }> => {
+    const response = await apiClient.post('/api/v1/upgrades', data);
     return response.data;
 };
 
-export const createVersion = async (data: CreateVersionRequest): Promise<{data: Version}> => {
-    const response = await apiClient.post('/api/v1/upgrade/versions', data);
+export const updateUpgradeTarget = async (id: string, data: UpdateUpgradeTargetRequest): Promise<{ data: string }> => {
+    const response = await apiClient.put(`/api/v1/upgrades/${id}`, data);
     return response.data;
 };
 
-export const updateVersion = async (id: string, data: UpdateVersionRequest): Promise<{data: Version}> => {
-    const response = await apiClient.put(`/api/v1/upgrade/versions/${id}`, data);
+export const deleteUpgradeTarget = async (id: string): Promise<{ data: string }> => {
+    const response = await apiClient.delete(`/api/v1/upgrades/${id}`);
     return response.data;
 };
 
-export const deleteVersion = async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/upgrade/versions/${id}`);
-};
-
-export const publishVersion = async (id: string): Promise<{data: Version}> => {
-    const response = await apiClient.patch(`/api/v1/upgrade/versions/${id}/publish`);
+// 检查更新 API (供客户端调用)
+export const checkUpdate = async (data: CheckUpdateRequest): Promise<{ data: CheckUpdateResponse }> => {
+    const response = await apiClient.post('/api/v1/upgrades/check', data);
     return response.data;
 };
 
-export const deprecateVersion = async (id: string): Promise<{data: Version}> => {
-    const response = await apiClient.patch(`/api/v1/upgrade/versions/${id}/deprecate`);
+// 获取项目的所有升级目标
+export const getProjectUpgradeTargets = async (projectId: string): Promise<{ data: UpgradeTarget[] }> => {
+    const response = await apiClient.get(`/api/v1/upgrades/projects/${projectId}`);
     return response.data;
-};
-
-// Update check API (for client applications)
-export const checkUpdate = async (data: CheckUpdateRequest): Promise<{data: CheckUpdateResponse}> => {
-    const response = await apiClient.post('/api/v1/upgrade/check', data);
-    return response.data;
-};
-
-export const getLatestVersion = async (platform: string): Promise<{data: Version | null}> => {
-    const response = await apiClient.get(`/api/v1/upgrade/latest?platform=${platform}`);
-    return response.data;
-};
-
-// File operations
-export const uploadVersionFile = async (versionId: string, file: File): Promise<{data: {downloadUrl: string, fileSize: number}}> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await apiClient.post(`/api/v1/upgrade/versions/${versionId}/upload`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
-
-    return response.data;
-};
-
-export const downloadVersion = async (id: string): Promise<Blob> => {
-    const response = await apiClient.get(`/api/v1/upgrade/versions/${id}/download`, {
-        responseType: 'blob'
-    });
-    return response.data;
-};
-
-// Statistics
-export const getVersionStats = async (): Promise<{data: any}> => {
-    const response = await apiClient.get('/api/v1/upgrade/stats');
-    return response.data;
-};
-
-// Transform functions (if needed for data normalization)
-export const transformVersionFromBackend = (version: any): Version => {
-    return {
-        id: version.id,
-        version: version.version,
-        versionCode: version.versionCode || version.version_code,
-        platform: version.platform,
-        status: version.status,
-        isForced: version.isForced || version.is_forced || false,
-        downloadUrl: version.downloadUrl || version.download_url || '',
-        fileSize: version.fileSize || version.file_size || 0,
-        changelog: version.changelog || '',
-        createdAt: version.createdAt || version.created_at,
-        updatedAt: version.updatedAt || version.updated_at,
-        downloadCount: version.downloadCount || version.download_count || 0,
-    };
-};
-
-export const transformVersionToBackend = (version: CreateVersionRequest | UpdateVersionRequest): any => {
-    return {
-        version: version.version,
-        version_code: version.versionCode,
-        platform: version.platform,
-        status: version.status,
-        is_forced: version.isForced,
-        download_url: version.downloadUrl,
-        file_size: version.fileSize,
-        changelog: version.changelog,
-    };
 };
