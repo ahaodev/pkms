@@ -37,7 +37,7 @@ steps:
       #- docker image prune -f
         # 拉取最新镜像并运行
       - docker pull hao88/pkms:amd64
-      - docker run -d --name pkms --restart unless-stopped -p 55173:58080 hao88/pkms:amd64
+      - docker run -d --name pkms --restart unless-stopped -p 8080:58080 hao88/pkms:amd64
         # 检查容器状态
       - docker ps | grep pkms
 
