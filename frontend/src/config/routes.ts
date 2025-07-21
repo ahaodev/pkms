@@ -1,7 +1,5 @@
 // Direct imports instead of lazy loading to avoid route issues
 import Dashboard from "@/pages/dashboard";
-import ProjectsPage from "@/pages/projects";
-import PackagesPage from "@/pages/packages";
 import HierarchyPage from "@/pages/hierarchy";
 import LoginPage from "@/pages/login";
 import Settings from "@/pages/settings";
@@ -31,19 +29,6 @@ export const routes: RouteConfig[] = [
         element: Dashboard,
         requiresAuth: true,
     },
-
-    // Core business routes (统一风格)
-    {
-        path: "/projects",
-        element: ProjectsPage,
-        requiresAuth: true,
-    },
-    {
-        path: "/packages",
-        element: PackagesPage,
-        requiresAuth: true,
-    },
-
     // Hierarchy and settings
     {
         path: "/hierarchy",

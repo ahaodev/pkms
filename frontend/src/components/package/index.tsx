@@ -8,4 +8,5 @@ export { PackageFilterControls } from './package-filter-controls';
 export { PackageCreateDialog } from './package-create-dialog.tsx';
 export { PackageReleaseCard } from './release/package-release-card.tsx';
 export { PackageReleaseHistoryDialog } from './release/package-release-history-dialog.tsx';
+export { PackageReleaseDialog } from './release/package-release-dialog.tsx';
 export * from './package-utils';

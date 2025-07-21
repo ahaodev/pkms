@@ -19,7 +19,7 @@ import {
 import {ChevronRight, Download, FolderOpen, Package as PackageIcon, Plus, Search} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {getProjectIcon, iconOptions, ProjectDialog} from '@/components/project';
-import {PackageCreateDialog} from '@/components/package';
+import {PackageCreateDialog, PackageReleaseDialog} from '@/components/package';
 
 export default function HierarchyPage() {
     const navigate = useNavigate();
@@ -38,6 +38,11 @@ export default function HierarchyPage() {
 
     // Package creation state
     const [isCreatePackageDialogOpen, setIsCreatePackageDialogOpen] = useState(false);
+
+    // Release creation state
+    const [isCreateReleaseDialogOpen, setIsCreateReleaseDialogOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<any>(null);
 
     const {data: projects} = useProjects();
     const createProject = useCreateProject();
@@ -141,10 +146,7 @@ export default function HierarchyPage() {
     };
 
     const handleCreateRelease = () => {
-        toast({
-            title: '功能开发中',
-            description: '新建发布功能正在开发中',
-        });
+        setIsCreateReleaseDialogOpen(true);
     };
 
     const handleDownload = (release: Release) => {
@@ -182,6 +184,44 @@ export default function HierarchyPage() {
         setIsCreatePackageDialogOpen(false);
     };
 
+    const handleCreateReleaseDialogClose = () => {
+        setIsCreateReleaseDialogOpen(false);
+        setUploadProgress(null);
+    };
+
+    const handleReleaseUpload = async (releaseData: any) => {
+        setIsUploading(true);
+        setUploadProgress({ percentage: 0, loaded: 0, total: releaseData.file.size });
+
+        try {
+            // Simulate upload progress
+            for (let i = 0; i <= 100; i += 10) {
+                setUploadProgress({ 
+                    percentage: i, 
+                    loaded: (releaseData.file.size * i) / 100, 
+                    total: releaseData.file.size 
+                });
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            toast({
+                title: '发布成功',
+                description: `版本 "${releaseData.version}" 已成功发布。`,
+            });
+
+            setIsCreateReleaseDialogOpen(false);
+            setUploadProgress(null);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: '发布失败',
+                description: '发布失败，请重试。',
+            });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -189,12 +229,7 @@ export default function HierarchyPage() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">项目包管理</h1>
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Button variant="outline" onClick={() => setIsCreateProjectDialogOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4"/>
-                        新建项目
-                    </Button>
-                </div>
+
             </div>
 
             {/* Search */}
@@ -245,9 +280,13 @@ export default function HierarchyPage() {
                 {!selectedProjectId ? (
                     // Projects View
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
                             <h2 className="text-lg font-semibold">选择项目</h2>
                             <Badge variant="secondary">{filteredProjects.length} 个项目</Badge>
+                            <Button variant="outline" onClick={() => setIsCreateProjectDialogOpen(true)}>
+                                <Plus className="mr-2 h-4 w-4"/>
+                                新建项目
+                            </Button>
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -468,6 +507,19 @@ export default function HierarchyPage() {
                 projects={projects}
                 initialProjectId={selectedProjectId || ''}
             />
+
+            {/* Release Dialog */}
+            {selectedPackage && (
+                <PackageReleaseDialog
+                    open={isCreateReleaseDialogOpen}
+                    onClose={handleCreateReleaseDialogClose}
+                    onUpload={handleReleaseUpload}
+                    packageId={selectedPackage.id}
+                    packageName={selectedPackage.name}
+                    uploadProgress={uploadProgress}
+                    isUploading={isUploading}
+                />
+            )}
         </div>
     );
 }
