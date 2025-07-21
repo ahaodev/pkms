@@ -3,7 +3,6 @@ import Dashboard from "@/pages/dashboard";
 import ProjectsPage from "@/pages/projects";
 import PackagesPage from "@/pages/packages";
 import HierarchyPage from "@/pages/hierarchy";
-import ReleasesPage from "@/pages/releases";
 import LoginPage from "@/pages/login";
 import Settings from "@/pages/settings";
 import UsersPage from "@/pages/users";
@@ -42,11 +41,6 @@ export const routes: RouteConfig[] = [
     {
         path: "/packages",
         element: PackagesPage,
-        requiresAuth: true,
-    },
-    {
-        path: "/releases",
-        element: ReleasesPage,
         requiresAuth: true,
     },
 

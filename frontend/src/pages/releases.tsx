@@ -7,8 +7,9 @@ import { Release } from '@/types/simplified';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, Calendar, FileText, Package as PackageIcon, Plus, ArrowLeft } from 'lucide-react';
+import { Download, Calendar, FileText, Package as PackageIcon, Plus } from 'lucide-react';
 import { formatFileSize, formatDate } from '@/lib/utils';
+import { ReleaseHeader } from '@/components/release';
 
 export default function ReleasesPage() {
   const [searchParams] = useSearchParams();
@@ -102,17 +103,22 @@ export default function ReleasesPage() {
     }
   };
 
+  const handleCreateRelease = () => {
+    // TODO: Implement create release functionality
+    toast({
+      title: '功能开发中',
+      description: '新建发布功能正在开发中',
+    });
+  };
+
   if (!projectId) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">发布版本管理</h1>
-            <p className="text-muted-foreground">
-              请先选择项目和包来查看版本发布
-            </p>
-          </div>
-        </div>
+        <ReleaseHeader
+          onCreateRelease={handleCreateRelease}
+          title="发布版本管理"
+          description="请先选择项目和包来查看版本发布"
+        />
         
         <Card>
           <CardContent className="flex items-center justify-center py-8">
@@ -132,22 +138,13 @@ export default function ReleasesPage() {
   if (!packageId) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" onClick={handleGoBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {selectedProject?.name} - 发布版本管理
-              </h1>
-              <p className="text-muted-foreground">
-                请选择包来查看版本发布
-              </p>
-            </div>
-          </div>
-        </div>
+        <ReleaseHeader
+          onCreateRelease={handleCreateRelease}
+          onGoBack={handleGoBack}
+          title={`${selectedProject?.name} - 发布版本管理`}
+          description="请选择包来查看版本发布"
+          showBackButton={true}
+        />
         
         <Card>
           <CardContent className="flex items-center justify-center py-8">
@@ -163,27 +160,13 @@ export default function ReleasesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" onClick={handleGoBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            返回
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {selectedProject?.name} &gt; {selectedPackage?.name} - 版本发布
-            </h1>
-            <p className="text-muted-foreground">
-              管理包的版本发布和下载
-            </p>
-          </div>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          新建发布
-        </Button>
-      </div>
+      <ReleaseHeader
+        onCreateRelease={handleCreateRelease}
+        onGoBack={handleGoBack}
+        title={`${selectedProject?.name} > ${selectedPackage?.name} - 版本发布`}
+        description="管理包的版本发布和下载"
+        showBackButton={true}
+      />
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -292,7 +275,7 @@ export default function ReleasesPage() {
             <div className="text-center space-y-2">
               <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto" />
               <div className="text-muted-foreground">该包暂无版本发布</div>
-              <Button>
+              <Button onClick={handleCreateRelease}>
                 <Plus className="mr-2 h-4 w-4" />
                 创建首个发布
               </Button>
