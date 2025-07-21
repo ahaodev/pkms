@@ -187,7 +187,7 @@ export default function HierarchyPage() {
                                 <>
                                     <BreadcrumbSeparator/>
                                     <BreadcrumbItem>
-                                        <BreadcrumbPage>{selectedPackage.name} - 版本发布</BreadcrumbPage>
+                                        <BreadcrumbPage>{selectedPackage.name}</BreadcrumbPage>
                                     </BreadcrumbItem>
                                 </>
                             )}
@@ -315,7 +315,7 @@ export default function HierarchyPage() {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-semibold">
-                                {selectedPackage?.name} - 版本发布
+                                {selectedPackage?.name}
                             </h2>
                             <Button onClick={handleCreateRelease}>
                                 <Plus className="mr-2 h-4 w-4"/>
