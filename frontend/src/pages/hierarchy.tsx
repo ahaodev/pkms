@@ -1,6 +1,6 @@
-import {useState, useMemo} from 'react';
+import {useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {useProjects} from '@/hooks/use-projects';
+import {useCreateProject, useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {ExtendedPackage, Release} from '@/types/simplified';
 import {useToast} from '@/hooks/use-toast';
@@ -16,17 +16,31 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-import {ChevronRight, FolderOpen, Package as PackageIcon, Plus, Search, Download, Calendar, FileText} from 'lucide-react';
-import {formatFileSize, formatDate} from '@/lib/utils';
+import {ChevronRight, Download, FolderOpen, Package as PackageIcon, Plus, Search} from 'lucide-react';
+import {formatDate, formatFileSize} from '@/lib/utils';
+import {getProjectIcon, iconOptions, ProjectDialog} from '@/components/project';
+import {PackageCreateDialog} from '@/components/package';
 
 export default function HierarchyPage() {
     const navigate = useNavigate();
-    const { toast } = useToast();
+    const {toast} = useToast();
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Project creation state
+    const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useState(false);
+    const [projectFormData, setProjectFormData] = useState({
+        name: '',
+        description: '',
+        icon: 'package2'
+    });
+
+    // Package creation state
+    const [isCreatePackageDialogOpen, setIsCreatePackageDialogOpen] = useState(false);
+
     const {data: projects} = useProjects();
+    const createProject = useCreateProject();
     const {data: packagesData} = usePackages({
         projectId: selectedProjectId || undefined
     });
@@ -48,7 +62,7 @@ export default function HierarchyPage() {
     // Mock releases data - in real app this would come from an API
     const releases: Release[] = useMemo(() => {
         if (!selectedPackage) return [];
-        
+
         return [
             {
                 id: '1',
@@ -141,6 +155,33 @@ export default function HierarchyPage() {
         });
     };
 
+    const handleCreateProject = async () => {
+        try {
+            await createProject.mutateAsync(projectFormData);
+            toast({
+                title: '项目创建成功',
+                description: `项目 "${projectFormData.name}" 已成功创建。`,
+            });
+            setIsCreateProjectDialogOpen(false);
+            setProjectFormData({name: '', description: '', icon: 'package2'});
+        } catch {
+            toast({
+                variant: 'destructive',
+                title: '创建失败',
+                description: '项目创建失败，请重试。',
+            });
+        }
+    };
+
+    const handleCreateProjectDialogClose = () => {
+        setIsCreateProjectDialogOpen(false);
+        setProjectFormData({name: '', description: '', icon: 'package2'});
+    };
+
+    const handleCreatePackageDialogClose = () => {
+        setIsCreatePackageDialogOpen(false);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -149,7 +190,7 @@ export default function HierarchyPage() {
                     <h1 className="text-2xl font-bold tracking-tight">项目包管理</h1>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setIsCreateProjectDialogOpen(true)}>
                         <Plus className="mr-2 h-4 w-4"/>
                         新建项目
                     </Button>
@@ -171,7 +212,10 @@ export default function HierarchyPage() {
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="#" onClick={() => {setSelectedProjectId(null); setSelectedPackageId(null);}}>
+                        <BreadcrumbLink href="#" onClick={() => {
+                            setSelectedProjectId(null);
+                            setSelectedPackageId(null);
+                        }}>
                             项目
                         </BreadcrumbLink>
                     </BreadcrumbItem>
@@ -253,7 +297,7 @@ export default function HierarchyPage() {
                             </h2>
                             <div className="flex items-center space-x-2">
                                 <Badge variant="secondary">{filteredPackages.length} 个包</Badge>
-                                <Button size="sm">
+                                <Button size="sm" onClick={() => setIsCreatePackageDialogOpen(true)}>
                                     <Plus className="mr-2 h-4 w-4"/>
                                     新建包
                                 </Button>
@@ -301,7 +345,7 @@ export default function HierarchyPage() {
                                         <div className="text-muted-foreground">
                                             {searchTerm ? '未找到匹配的包' : '该项目暂无包'}
                                         </div>
-                                        <Button>
+                                        <Button onClick={() => setIsCreatePackageDialogOpen(true)}>
                                             <Plus className="mr-2 h-4 w-4"/>
                                             创建首个包
                                         </Button>
@@ -321,48 +365,6 @@ export default function HierarchyPage() {
                                 <Plus className="mr-2 h-4 w-4"/>
                                 新建发布
                             </Button>
-                        </div>
-
-                        {/* Statistics Cards */}
-                        <div className="grid gap-4 md:grid-cols-4">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">总版本数</CardTitle>
-                                    <PackageIcon className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{releases.length}</div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">最新版本</CardTitle>
-                                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{releases.find(r => r.isLatest)?.version || 'N/A'}</div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">总下载量</CardTitle>
-                                    <Download className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">
-                                        {releases.reduce((sum, r) => sum + r.downloadCount, 0)}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">包类型</CardTitle>
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold capitalize">{selectedPackage?.type}</div>
-                                </CardContent>
-                            </Card>
                         </div>
 
                         {/* Releases List */}
@@ -389,8 +391,9 @@ export default function HierarchyPage() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <Button variant="outline" size="sm" onClick={() => handleDownload(release)}>
-                                                    <Download className="h-4 w-4 mr-2" />
+                                                <Button variant="outline" size="sm"
+                                                        onClick={() => handleDownload(release)}>
+                                                    <Download className="h-4 w-4 mr-2"/>
                                                     下载
                                                 </Button>
                                             </div>
@@ -399,7 +402,7 @@ export default function HierarchyPage() {
                                     <CardContent>
                                         <div className="space-y-4">
                                             <p className="text-sm text-muted-foreground">{release.description}</p>
-                                            
+
                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                                 <div>
                                                     <span className="text-muted-foreground">文件名:</span>
@@ -407,15 +410,18 @@ export default function HierarchyPage() {
                                                 </div>
                                                 <div>
                                                     <span className="text-muted-foreground">文件大小:</span>
-                                                    <div className="font-medium">{formatFileSize(release.fileSize)}</div>
+                                                    <div
+                                                        className="font-medium">{formatFileSize(release.fileSize)}</div>
                                                 </div>
                                                 <div>
                                                     <span className="text-muted-foreground">下载次数:</span>
-                                                    <div className="font-medium">{release.downloadCount.toLocaleString()}</div>
+                                                    <div
+                                                        className="font-medium">{release.downloadCount.toLocaleString()}</div>
                                                 </div>
                                                 <div>
                                                     <span className="text-muted-foreground">发布时间:</span>
-                                                    <div className="font-medium">{formatDate(release.createdAt.toISOString())}</div>
+                                                    <div
+                                                        className="font-medium">{formatDate(release.createdAt.toISOString())}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -428,10 +434,10 @@ export default function HierarchyPage() {
                             <Card>
                                 <CardContent className="flex items-center justify-center py-8">
                                     <div className="text-center space-y-2">
-                                        <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto" />
+                                        <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
                                         <div className="text-muted-foreground">该包暂无版本发布</div>
                                         <Button onClick={handleCreateRelease}>
-                                            <Plus className="mr-2 h-4 w-4" />
+                                            <Plus className="mr-2 h-4 w-4"/>
                                             创建首个发布
                                         </Button>
                                     </div>
@@ -441,6 +447,27 @@ export default function HierarchyPage() {
                     </div>
                 )}
             </div>
+
+            {/* Project Dialog */}
+            <ProjectDialog
+                open={isCreateProjectDialogOpen}
+                onClose={handleCreateProjectDialogClose}
+                onSubmit={handleCreateProject}
+                title="创建新项目"
+                formData={projectFormData}
+                setFormData={setProjectFormData}
+                iconOptions={iconOptions}
+                getProjectIcon={getProjectIcon}
+                isLoading={createProject.isPending}
+            />
+
+            {/* Package Dialog */}
+            <PackageCreateDialog
+                open={isCreatePackageDialogOpen}
+                onClose={handleCreatePackageDialogClose}
+                projects={projects}
+                initialProjectId={selectedProjectId || ''}
+            />
         </div>
     );
 }
