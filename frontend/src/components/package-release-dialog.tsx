@@ -16,73 +16,91 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Progress} from '@/components/ui/progress.tsx';
 import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
 import {formatFileSize} from '../lib/package-utils.tsx';
+import {uploadRelease} from '@/lib/api/packages';
+import {toast} from '@/hooks/use-toast.ts';
 
 interface PackageReleaseDialogProps {
     open: boolean;
     onClose: () => void;
-    onUpload: (data: ReleaseUpload) => Promise<void>;
+    onSuccess?: () => void; // Callback when upload succeeds
     packageId: string;
     packageName: string;
-    uploadProgress?: UploadProgress | null;
-    isUploading: boolean;
+    packageType: string;
 }
 
 export function PackageReleaseDialog({
                                          open,
                                          onClose,
-                                         onUpload,
+                                         onSuccess,
                                          packageId,
                                          packageName,
-                                         uploadProgress,
-                                         isUploading
+                                         packageType
                                      }: PackageReleaseDialogProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState<Omit<ReleaseUpload, 'file'>>({
         package_id: packageId,
         name: packageName,
-        type: 'android',
+        type: packageType as any,
         versionName: '',
         versionCode: '',
         changelog: '',
     });
 
-    console.log(packageId, packageName, uploadProgress, isUploading);
-
     const handleUpload = async () => {
         if (!selectedFile) return;
 
+        setIsUploading(true);
+        setUploadProgress({ loaded: 0, total: selectedFile.size, percentage: 0 });
+
         try {
-            await onUpload({
+            const uploadData: ReleaseUpload = {
                 ...formData,
                 file: selectedFile
+            };
+
+            await uploadRelease(uploadData, (progress) => {
+                setUploadProgress(progress);
+            });
+
+            toast({
+                title: '发布成功',
+                description: `版本 "${formData.versionName}" 已成功发布。`,
             });
 
             // 重置表单
-            setSelectedFile(null);
-            setFormData({
-                package_id: packageId,
-                name: '',
-                type: 'android',
-                versionName: '',
-                versionCode: '',
-                changelog: '',
+            resetForm();
+            onSuccess?.();
+            onClose();
+        } catch (error: any) {
+            console.error('Upload failed:', error);
+            toast({
+                title: '发布失败',
+                description: error.response?.data?.message || error.message || '发布失败，请重试。',
+                variant: 'destructive'
             });
-        } catch (error) {
-            console.error(error);
+        } finally {
+            setIsUploading(false);
+            setUploadProgress(null);
         }
+    };
+
+    const resetForm = () => {
+        setSelectedFile(null);
+        setFormData({
+            package_id: packageId,
+            name: packageName,
+            type: packageType as any,
+            versionName: '',
+            versionCode: '',
+            changelog: '',
+        });
     };
 
     const handleClose = () => {
         if (!isUploading) {
-            setSelectedFile(null);
-            setFormData({
-                package_id: packageId,
-                name: packageName,
-                type: 'android',
-                versionCode: '',
-                versionName: '',
-                changelog: '',
-            });
+            resetForm();
             onClose();
         }
     };

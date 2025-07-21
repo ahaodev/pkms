@@ -121,6 +121,7 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 			Name:        p.Name,
 			Description: p.Description,
 			Icon:        p.Icon,
+			TenantID:    p.TenantID,
 			CreatedAt:   p.CreatedAt,
 			UpdatedAt:   p.UpdatedAt,
 			CreatedBy:   p.CreatedBy,

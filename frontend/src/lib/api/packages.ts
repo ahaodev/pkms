@@ -184,29 +184,40 @@ export function transformPackageFromBackend(backendPackage: any): Package {
 }
 
 // 数据转换函数：Release 后端数据转前端格式
-export function transformReleaseFromBackend(backendRelease: any): any {
+export function transformReleaseFromBackend(backendRelease: any): Release {
     return {
         id: backendRelease.id,
         packageId: backendRelease.package_id,
         version: backendRelease.version,
         title: backendRelease.title,
-        description: backendRelease.description,
-        changelog: backendRelease.changelog,
-        fileUrl: backendRelease.file_url,
+        description: backendRelease.description || backendRelease.changelog,
+        tagName: backendRelease.tag_name,
+        filePath: backendRelease.file_path,
         fileName: backendRelease.file_name,
         fileSize: backendRelease.file_size || 0,
-        checksum: backendRelease.checksum,
-        versionCode: backendRelease.version_code || 0,
+        fileHash: backendRelease.file_hash || backendRelease.checksum,
         isPrerelease: backendRelease.is_prerelease || false,
         isDraft: backendRelease.is_draft || false,
         isLatest: backendRelease.is_latest || false,
-        minSdkVersion: backendRelease.min_sdk_version,
-        targetSdkVersion: backendRelease.target_sdk_version,
         downloadCount: backendRelease.download_count || 0,
         createdAt: new Date(backendRelease.created_at),
-        updatedAt: new Date(backendRelease.updated_at),
+        publishedAt: backendRelease.published_at ? new Date(backendRelease.published_at) : undefined,
         shareToken: backendRelease.share_token,
         shareExpiry: backendRelease.share_expiry ? new Date(backendRelease.share_expiry) : undefined,
         createdBy: backendRelease.created_by || 'unknown'
+    };
+}
+
+// 获取特定包的所有发布版本
+export async function getPackageReleases(packageId: string): Promise<ApiResponse<Release[]>> {
+    console.log("Fetching releases for package ID:", packageId);
+    const resp = await apiClient.get(`/api/v1/packages/release/${packageId}`);
+    
+    // Transform the backend data to frontend format
+    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
+    
+    return {
+        ...resp.data,
+        data: releases
     };
 }

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Globe, Monitor, Package2, Server, Smartphone} from 'lucide-react';
 import {Button} from '@/components/ui/button.tsx';
 import {
@@ -21,12 +21,14 @@ interface PackageCreateDialogProps {
     open: boolean;
     onClose: () => void;
     projectID: string;
+    onSuccess?: () => void;
 }
 
 export function PackageCreateDialog({
                                         open,
                                         onClose,
                                         projectID,
+                                        onSuccess
                                     }: PackageCreateDialogProps) {
     const [formData, setFormData] = useState<{
         projectId: string;
@@ -34,14 +36,23 @@ export function PackageCreateDialog({
         description: string;
         type: Package['type'];
     }>({
-        projectId: projectID,
+        projectId: projectID || '',
         name: '',
         description: '',
         type: 'android',
     });
+
+    // Update formData.projectId when projectID prop changes
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            projectId: projectID || ''
+        }));
+    }, [projectID]);
+
     const handleClose = () => {
         setFormData({
-            projectId: projectID,
+            projectId: projectID || '',
             name: '',
             description: '',
             type: 'android',
@@ -59,6 +70,8 @@ export function PackageCreateDialog({
                         description: `包 "${formData.name}" 已成功创建。`,
                     });
                     handleClose();
+                    // Call onSuccess callback to refresh the packages list
+                    onSuccess?.();
                 } else {
                     toast({
                         title: '创建失败',

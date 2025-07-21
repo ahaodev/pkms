@@ -1,6 +1,8 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useCreateProject, useProjects, useUpdateProject} from '@/hooks/use-projects';
+import {useQueryClient} from '@tanstack/react-query';
 import {usePackages} from '@/hooks/use-packages';
+import {useReleases} from '@/hooks/use-releases';
 import {ExtendedPackage} from '@/types/package';
 import {Release} from '@/types/release';
 import {useToast} from '@/hooks/use-toast';
@@ -44,12 +46,11 @@ export default function HierarchyPage() {
 
     // Release creation state
     const [isCreateReleaseDialogOpen, setIsCreateReleaseDialogOpen] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState<any>(null);
 
     const {data: projects} = useProjects();
     const createProject = useCreateProject();
     const updateProject = useUpdateProject();
+    const queryClient = useQueryClient();
     const {data: packagesData} = usePackages({
         projectId: selectedProjectId || undefined
     });
@@ -58,48 +59,9 @@ export default function HierarchyPage() {
     const selectedProject = projects?.find(p => p.id === selectedProjectId);
     const selectedPackage = packages.find(p => p.id === selectedPackageId);
 
-
-    // Mock releases data - in real app this would come from an API
-    const releases: Release[] = useMemo(() => {
-        if (!selectedPackage) return [];
-
-        return [
-            {
-                id: '1',
-                packageId: selectedPackage.id,
-                version: '2.1.0',
-                title: '新功能发布',
-                description: '添加了新的用户界面和性能优化',
-                filePath: '/releases/app-v2.1.0.apk',
-                fileName: 'app-v2.1.0.apk',
-                fileSize: 25600000,
-                isPrerelease: false,
-                isLatest: true,
-                isDraft: false,
-                downloadCount: 156,
-                createdBy: 'admin',
-                createdAt: new Date('2024-01-15'),
-                publishedAt: new Date('2024-01-15')
-            },
-            {
-                id: '2',
-                packageId: selectedPackage.id,
-                version: '2.0.1',
-                title: '修复版本',
-                description: '修复了关键性错误和安全漏洞',
-                filePath: '/releases/app-v2.0.1.apk',
-                fileName: 'app-v2.0.1.apk',
-                fileSize: 24800000,
-                isPrerelease: false,
-                isLatest: false,
-                isDraft: false,
-                downloadCount: 89,
-                createdBy: 'admin',
-                createdAt: new Date('2024-01-10'),
-                publishedAt: new Date('2024-01-10')
-            }
-        ];
-    }, [selectedPackage]);
+    // Fetch releases data from API
+    const { data: releasesData } = useReleases(selectedPackageId || undefined);
+    const releases: Release[] = releasesData?.data || [];
 
     const handleProjectSelect = (projectId: string) => {
         if (selectedProjectId === projectId) {
@@ -202,43 +164,19 @@ export default function HierarchyPage() {
         setIsCreatePackageDialogOpen(false);
     };
 
-    const handleCreateReleaseDialogClose = () => {
-        setIsCreateReleaseDialogOpen(false);
-        setUploadProgress(null);
+    const handlePackageCreateSuccess = () => {
+        // Invalidate packages queries to refresh the list
+        queryClient.invalidateQueries({queryKey: ['packages']});
     };
 
-    const handleReleaseUpload = async (releaseData: any) => {
-        setIsUploading(true);
-        setUploadProgress({percentage: 0, loaded: 0, total: releaseData.file.size});
+    const handleCreateReleaseDialogClose = () => {
+        setIsCreateReleaseDialogOpen(false);
+    };
 
-        try {
-            // Simulate upload progress
-            for (let i = 0; i <= 100; i += 10) {
-                setUploadProgress({
-                    percentage: i,
-                    loaded: (releaseData.file.size * i) / 100,
-                    total: releaseData.file.size
-                });
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-
-            toast({
-                title: '发布成功',
-                description: `版本 "${releaseData.version}" 已成功发布。`,
-            });
-
-            setIsCreateReleaseDialogOpen(false);
-            setUploadProgress(null);
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '发布失败',
-                description: '发布失败，请重试。',
-            });
-        } finally {
-            setIsUploading(false);
-        }
+    const handleReleaseUploadSuccess = () => {
+        // Invalidate releases queries to refresh the list
+        queryClient.invalidateQueries({ queryKey: ['releases'] });
+        console.log('Release uploaded successfully');
     };
 
     // Handle mouse back button for hierarchy navigation
@@ -390,6 +328,7 @@ export default function HierarchyPage() {
                 open={isCreatePackageDialogOpen}
                 onClose={handleCreatePackageDialogClose}
                 projectID={selectedProjectId || ''}
+                onSuccess={handlePackageCreateSuccess}
             />
 
             {/* Release Dialog */}
@@ -397,11 +336,10 @@ export default function HierarchyPage() {
                 <PackageReleaseDialog
                     open={isCreateReleaseDialogOpen}
                     onClose={handleCreateReleaseDialogClose}
-                    onUpload={handleReleaseUpload}
+                    onSuccess={handleReleaseUploadSuccess}
                     packageId={selectedPackage.id}
                     packageName={selectedPackage.name}
-                    uploadProgress={uploadProgress}
-                    isUploading={isUploading}
+                    packageType={selectedPackage.type}
                 />
             )}
         </div>

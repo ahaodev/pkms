@@ -50,17 +50,16 @@ export function Packages({
                                 {
                                     (() => {
                                         switch (pkg?.type) {
-                                            case 'Android':
-                                                return <Smartphone
-                                                    className="h-12 w-12 text-muted-foreground mx-auto"/>;
-                                            case 'Web':
-                                                return <Globe className="h-12 w-12 text-muted-foreground mx-auto"/>;
-                                            case 'Desktop':
-                                                return <Monitor className="h-12 w-12 text-muted-foreground mx-auto"/>;
-                                            case 'Linux':
-                                                return <Server className="h-12 w-12 text-muted-foreground mx-auto"/>;
-                                            case 'Other':
-                                                return <Package2 className="h-12 w-12 text-muted-foreground mx-auto"/>;
+                                            case 'android':
+                                                return <Smartphone className="h-5 w-5 text-green-600"/>;
+                                            case 'web':
+                                                return <Globe className="h-5 w-5 text-green-600"/>;
+                                            case 'desktop':
+                                                return <Monitor className="h-5 w-5 text-green-600"/>;
+                                            case 'linux':
+                                                return <Server className="h-5 w-5 text-green-600"/>;
+                                            case 'other':
+                                                return <Package2 className="h-5 w-5 text-green-600"/>;
                                             default:
                                                 return <PackageIcon className="h-5 w-5 text-green-600"/>;
                                         }

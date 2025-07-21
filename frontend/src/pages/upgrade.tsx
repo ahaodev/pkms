@@ -64,6 +64,9 @@ export default function UpgradePage() {
     const { data: projects = [] } = useProjects();
     const { data: packagesData } = usePackages();
     const packages = packagesData?.data || [];
+    
+    console.log('All packages:', packages);
+    console.log('Projects:', projects);
 
     // Fetch upgrade targets
     const { data: upgradeTargetsData, isLoading } = useQuery({
@@ -416,8 +419,13 @@ function CreateUpgradeTargetDialog({
 
     // Filter packages by selected project
     const filteredPackages = formData.project_id
-        ? packages.filter(pkg => pkg.projectId === formData.project_id)
+        ? packages.filter(pkg => {
+            console.log('Package:', pkg, 'project_id:', formData.project_id, 'pkg.projectId:', pkg.projectId);
+            return pkg.projectId === formData.project_id;
+        })
         : [];
+        
+    console.log('Filtered packages count:', filteredPackages.length, 'for project:', formData.project_id);
 
     // Load releases when package is selected
     useEffect(() => {
