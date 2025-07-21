@@ -1,12 +1,8 @@
-import {useMemo, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useEffect, useMemo, useState} from 'react';
 import {useCreateProject, useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {ExtendedPackage, Release} from '@/types/simplified';
 import {useToast} from '@/hooks/use-toast';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import {Badge} from '@/components/ui/badge';
 import {Input} from '@/components/ui/input';
 import {
     Breadcrumb,
@@ -16,13 +12,16 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-import {ChevronRight, Download, FolderOpen, Package as PackageIcon, Plus, Search} from 'lucide-react';
-import {formatDate, formatFileSize} from '@/lib/utils';
+import {Search} from 'lucide-react';
 import {getProjectIcon, iconOptions, ProjectDialog} from '@/components/project';
 import {PackageCreateDialog, PackageReleaseDialog} from '@/components/package';
+import {ProjectsView} from '@/components/ProjectsView';
+import {PackagesView} from '@/components/PackagesView';
+import {ReleasesView} from '@/components/ReleasesView';
+import {useLocation} from 'react-router-dom';
 
+// Hierarchy Page Component
 export default function HierarchyPage() {
-    const navigate = useNavigate();
     const {toast} = useToast();
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
@@ -102,23 +101,6 @@ export default function HierarchyPage() {
                 createdBy: 'admin',
                 createdAt: new Date('2024-01-10'),
                 publishedAt: new Date('2024-01-10')
-            },
-            {
-                id: '3',
-                packageId: selectedPackage.id,
-                version: '2.0.0',
-                title: '重大版本更新',
-                description: '全新的架构和用户体验',
-                filePath: '/releases/app-v2.0.0.apk',
-                fileName: 'app-v2.0.0.apk',
-                fileSize: 23400000,
-                isPrerelease: false,
-                isLatest: false,
-                isDraft: false,
-                downloadCount: 234,
-                createdBy: 'admin',
-                createdAt: new Date('2024-01-01'),
-                publishedAt: new Date('2024-01-01')
             }
         ];
     }, [selectedPackage]);
@@ -191,15 +173,15 @@ export default function HierarchyPage() {
 
     const handleReleaseUpload = async (releaseData: any) => {
         setIsUploading(true);
-        setUploadProgress({ percentage: 0, loaded: 0, total: releaseData.file.size });
+        setUploadProgress({percentage: 0, loaded: 0, total: releaseData.file.size});
 
         try {
             // Simulate upload progress
             for (let i = 0; i <= 100; i += 10) {
-                setUploadProgress({ 
-                    percentage: i, 
-                    loaded: (releaseData.file.size * i) / 100, 
-                    total: releaseData.file.size 
+                setUploadProgress({
+                    percentage: i,
+                    loaded: (releaseData.file.size * i) / 100,
+                    total: releaseData.file.size
                 });
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
@@ -212,6 +194,7 @@ export default function HierarchyPage() {
             setIsCreateReleaseDialogOpen(false);
             setUploadProgress(null);
         } catch (error) {
+            console.error(error);
             toast({
                 variant: 'destructive',
                 title: '发布失败',
@@ -221,6 +204,41 @@ export default function HierarchyPage() {
             setIsUploading(false);
         }
     };
+
+    // Handle mouse back button for hierarchy navigation
+    useEffect(() => {
+        const handleMouseBack = (event: MouseEvent) => {
+            // Check if the back button (button 3) was clicked
+            if (event.button === 3) {
+                event.preventDefault();
+                handleGoBack();
+            }
+        };
+
+        // Add event listener for mouse button down
+        document.addEventListener('mousedown', handleMouseBack);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            document.removeEventListener('mousedown', handleMouseBack);
+        };
+    }, [selectedProjectId, selectedPackageId]); // Dependencies to ensure current state is captured
+
+    // 路由变化时重置搜索框
+    const location = useLocation();
+    useEffect(() => {
+        setSearchTerm('');
+    }, [location.pathname]);
+
+    // 搜索提示文案根据层级变化
+    let searchPlaceholder = '搜索项目或包...';
+    if (!selectedProjectId) {
+        searchPlaceholder = '搜索项目...';
+    } else if (selectedProjectId && !selectedPackageId) {
+        searchPlaceholder = '搜索包...';
+    } else if (selectedProjectId && selectedPackageId) {
+        searchPlaceholder = '搜索历史发布版本...';
+    }
 
     return (
         <div className="space-y-6">
@@ -236,7 +254,7 @@ export default function HierarchyPage() {
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                 <Input
-                    placeholder="搜索项目或包..."
+                    placeholder={searchPlaceholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -278,212 +296,27 @@ export default function HierarchyPage() {
             {/* Content */}
             <div className="grid gap-6">
                 {!selectedProjectId ? (
-                    // Projects View
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                            <h2 className="text-lg font-semibold">选择项目</h2>
-                            <Badge variant="secondary">{filteredProjects.length} 个项目</Badge>
-                            <Button variant="outline" onClick={() => setIsCreateProjectDialogOpen(true)}>
-                                <Plus className="mr-2 h-4 w-4"/>
-                                新建项目
-                            </Button>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {filteredProjects.map((project) => (
-                                <Card
-                                    key={project.id}
-                                    className="cursor-pointer hover:shadow-md transition-shadow"
-                                    onClick={() => handleProjectSelect(project.id)}
-                                >
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center space-x-3">
-                                            <FolderOpen className="h-5 w-5 text-blue-600"/>
-                                            <span>{project.name}</span>
-                                            <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
-                                        </CardTitle>
-                                        <CardDescription>{project.description}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">包数量</span>
-                                            <Badge variant="outline">{project.packageCount || 0}</Badge>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {filteredProjects.length === 0 && (
-                            <Card>
-                                <CardContent className="flex items-center justify-center py-8">
-                                    <div className="text-center space-y-2">
-                                        <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto"/>
-                                        <div className="text-muted-foreground">
-                                            {searchTerm ? '未找到匹配的项目' : '暂无项目'}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                    <ProjectsView
+                        filteredProjects={filteredProjects}
+                        searchTerm={searchTerm}
+                        handleProjectSelect={handleProjectSelect}
+                        onCreateProject={() => setIsCreateProjectDialogOpen(true)}
+                    />
                 ) : selectedProjectId && !selectedPackageId ? (
-                    // Packages View
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold">
-                                {selectedProject?.name} - 选择包
-                            </h2>
-                            <div className="flex items-center space-x-2">
-                                <Badge variant="secondary">{filteredPackages.length} 个包</Badge>
-                                <Button size="sm" onClick={() => setIsCreatePackageDialogOpen(true)}>
-                                    <Plus className="mr-2 h-4 w-4"/>
-                                    新建包
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {filteredPackages.map((pkg) => (
-                                <Card
-                                    key={pkg.id}
-                                    className="cursor-pointer hover:shadow-md transition-shadow"
-                                    onClick={() => handlePackageSelect(pkg.id)}
-                                >
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center space-x-3">
-                                            <PackageIcon className="h-5 w-5 text-green-600"/>
-                                            <span>{pkg.name}</span>
-                                            <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
-                                        </CardTitle>
-                                        <CardDescription>{pkg.description}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-muted-foreground">类型</span>
-                                                <Badge variant="outline" className="capitalize">{pkg.type}</Badge>
-                                            </div>
-                                            {pkg.version && (
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground">最新版本</span>
-                                                    <Badge variant="default">v{pkg.version}</Badge>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {filteredPackages.length === 0 && (
-                            <Card>
-                                <CardContent className="flex items-center justify-center py-8">
-                                    <div className="text-center space-y-2">
-                                        <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
-                                        <div className="text-muted-foreground">
-                                            {searchTerm ? '未找到匹配的包' : '该项目暂无包'}
-                                        </div>
-                                        <Button onClick={() => setIsCreatePackageDialogOpen(true)}>
-                                            <Plus className="mr-2 h-4 w-4"/>
-                                            创建首个包
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                    <PackagesView
+                        selectedProject={selectedProject}
+                        filteredPackages={filteredPackages}
+                        searchTerm={searchTerm}
+                        handlePackageSelect={handlePackageSelect}
+                        onCreatePackage={() => setIsCreatePackageDialogOpen(true)}
+                    />
                 ) : (
-                    // Releases View
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold">
-                                {selectedPackage?.name}
-                            </h2>
-                            <Button onClick={handleCreateRelease}>
-                                <Plus className="mr-2 h-4 w-4"/>
-                                新建发布
-                            </Button>
-                        </div>
-
-                        {/* Releases List */}
-                        <div className="space-y-4">
-                            {releases.map((release) => (
-                                <Card key={release.id}>
-                                    <CardHeader>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-4">
-                                                <div>
-                                                    <CardTitle className="flex items-center space-x-2">
-                                                        <span>v{release.version}</span>
-                                                        {release.isLatest && (
-                                                            <Badge variant="default">最新</Badge>
-                                                        )}
-                                                        {release.isPrerelease && (
-                                                            <Badge variant="secondary">预发布</Badge>
-                                                        )}
-                                                        {release.isDraft && (
-                                                            <Badge variant="outline">草稿</Badge>
-                                                        )}
-                                                    </CardTitle>
-                                                    <CardDescription>{release.title}</CardDescription>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Button variant="outline" size="sm"
-                                                        onClick={() => handleDownload(release)}>
-                                                    <Download className="h-4 w-4 mr-2"/>
-                                                    下载
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-4">
-                                            <p className="text-sm text-muted-foreground">{release.description}</p>
-
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                                <div>
-                                                    <span className="text-muted-foreground">文件名:</span>
-                                                    <div className="font-medium">{release.fileName}</div>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">文件大小:</span>
-                                                    <div
-                                                        className="font-medium">{formatFileSize(release.fileSize)}</div>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">下载次数:</span>
-                                                    <div
-                                                        className="font-medium">{release.downloadCount.toLocaleString()}</div>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">发布时间:</span>
-                                                    <div
-                                                        className="font-medium">{formatDate(release.createdAt.toISOString())}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {releases.length === 0 && (
-                            <Card>
-                                <CardContent className="flex items-center justify-center py-8">
-                                    <div className="text-center space-y-2">
-                                        <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
-                                        <div className="text-muted-foreground">该包暂无版本发布</div>
-                                        <Button onClick={handleCreateRelease}>
-                                            <Plus className="mr-2 h-4 w-4"/>
-                                            创建首个发布
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                    <ReleasesView
+                        selectedPackage={selectedPackage}
+                        releases={releases}
+                        handleCreateRelease={handleCreateRelease}
+                        handleDownload={handleDownload}
+                    />
                 )}
             </div>
 
