@@ -62,28 +62,44 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 	}
 
 	user.ID = id
-	// 这里需要实现用户更新逻辑，目前 UserUsecase 没有 Update 方法
+	if err := uc.UserUsecase.Update(c, &user); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
 	c.JSON(http.StatusOK, domain.RespSuccess(user))
 }
 
 // DeleteUser 删除用户
 func (uc *UserController) DeleteUser(c *gin.Context) {
-	_ = c.Param("id") // id - 待实现
-	// 这里需要实现用户删除逻辑，目前 UserUsecase 没有 Delete 方法
+	id := c.Param("id")
+
+	if err := uc.UserUsecase.Delete(c, id); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
 	c.JSON(http.StatusOK, domain.RespSuccess("User deleted successfully"))
 }
 
 // GetUserProjects 获取用户项目
 func (uc *UserController) GetUserProjects(c *gin.Context) {
-	_ = c.Param("id") // userID - 待实现
-	// 这里需要实现获取用户项目的逻辑
-	c.JSON(http.StatusOK, domain.RespSuccess([]interface{}{}))
+	userID := c.Param("id")
+
+	projects, err := uc.UserUsecase.GetUserProjects(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(projects))
 }
 
 // GetUserGroups 获取用户组
 func (uc *UserController) GetUserGroups(c *gin.Context) {
 	_ = c.Param("id") // userID - 待实现
-	// 这里需要实现获取用户组的逻辑
+	// TODO: 这里需要实现获取用户组的逻辑
+	// 需要添加 UserGroup 相关的 domain, repository, usecase
 	c.JSON(http.StatusOK, domain.RespSuccess([]interface{}{}))
 }
 
@@ -99,7 +115,11 @@ func (uc *UserController) AssignUserToProject(c *gin.Context) {
 		return
 	}
 
-	// 这里需要实现分配用户到项目的逻辑
+	if err := uc.UserUsecase.AssignUserToProject(c, userID, request.ProjectID); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
 	response := map[string]interface{}{
 		"user_id":    userID,
 		"project_id": request.ProjectID,
@@ -113,7 +133,11 @@ func (uc *UserController) UnassignUserFromProject(c *gin.Context) {
 	userID := c.Param("id")
 	projectID := c.Param("projectId")
 
-	// 这里需要实现从项目中移除用户的逻辑
+	if err := uc.UserUsecase.UnassignUserFromProject(c, userID, projectID); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
 	response := map[string]interface{}{
 		"user_id":    userID,
 		"project_id": projectID,
@@ -138,22 +162,24 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
 	userID := c.GetString(constants.UserID)
-	var updateData struct {
-		Name   string `json:"name"`
-		Avatar string `json:"avatar"`
-	}
+	var updateData domain.ProfileUpdate
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 
-	// 这里需要实现更新用户资料的逻辑
-	response := map[string]interface{}{
-		"user_id": userID,
-		"name":    updateData.Name,
-		"avatar":  updateData.Avatar,
-		"message": "Profile updated successfully",
+	if err := uc.UserUsecase.UpdateProfile(c, userID, updateData); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
+
+	// 获取更新后的用户信息
+	user, err := uc.UserUsecase.GetByID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(user))
 }

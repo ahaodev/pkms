@@ -21,6 +21,9 @@ type UserRepository interface {
 	Fetch(c context.Context) ([]User, error)
 	GetByUserName(c context.Context, userName string) (User, error)
 	GetByID(c context.Context, id string) (User, error)
+	Update(c context.Context, user *User) error
+	Delete(c context.Context, id string) error
+	GetUserProjects(c context.Context, userID string) ([]Project, error)
 }
 
 type UserUseCase interface {
@@ -28,4 +31,16 @@ type UserUseCase interface {
 	Fetch(c context.Context) ([]User, error)
 	GetByUserName(c context.Context, userName string) (User, error)
 	GetByID(c context.Context, id string) (User, error)
+	Update(c context.Context, user *User) error
+	Delete(c context.Context, id string) error
+	GetUserProjects(c context.Context, userID string) ([]Project, error)
+	UpdateProfile(c context.Context, userID string, updates ProfileUpdate) error
+	AssignUserToProject(c context.Context, userID, projectID string) error
+	UnassignUserFromProject(c context.Context, userID, projectID string) error
+}
+
+// ProfileUpdate represents profile update data
+type ProfileUpdate struct {
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }

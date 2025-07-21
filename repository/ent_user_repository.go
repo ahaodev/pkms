@@ -112,3 +112,52 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 		UpdatedAt: u.UpdatedAt,
 	}, nil
 }
+
+func (ur *entUserRepository) Update(c context.Context, u *domain.User) error {
+	updated, err := ur.client.User.
+		UpdateOneID(u.ID).
+		SetUsername(u.Name).
+		SetIsActive(u.IsActive).
+		Save(c)
+
+	if err != nil {
+		return err
+	}
+
+	u.UpdatedAt = updated.UpdatedAt
+	return nil
+}
+
+func (ur *entUserRepository) Delete(c context.Context, id string) error {
+	return ur.client.User.
+		DeleteOneID(id).
+		Exec(c)
+}
+
+func (ur *entUserRepository) GetUserProjects(c context.Context, userID string) ([]domain.Project, error) {
+	// First get the user to access their created projects
+	userEntity, err := ur.client.User.
+		Query().
+		Where(user.ID(userID)).
+		WithCreatedProjects().
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.Project
+	for _, p := range userEntity.Edges.CreatedProjects {
+		result = append(result, domain.Project{
+			ID:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Icon:        p.Icon,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+			CreatedBy:   p.CreatedBy,
+		})
+	}
+
+	return result, nil
+}

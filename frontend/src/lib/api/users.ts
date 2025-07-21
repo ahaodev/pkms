@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import { User, CreateUserRequest } from '@/types/user';
+import { User, CreateUserRequest, UpdateUserRequest, ProfileUpdateRequest } from '@/types/user';
 
 // 获取所有用户
 export async function getUsers(): Promise<ApiResponse<User[]>> {
@@ -11,12 +11,9 @@ export async function getUsers(): Promise<ApiResponse<User[]>> {
 // 创建用户
 export async function createUser(user: CreateUserRequest): Promise<ApiResponse<User>> {
     const resp = await apiClient.post("/api/v1/user/", {
-        username: user.username,
-        email: user.email,
+        name: user.name,
         password: user.password,
-        role: user.role,
-        assigned_project_ids: user.assignedProjectIds,
-        group_ids: user.groupIds
+        is_active: user.is_active ?? true
     });
     return resp.data;
 }
@@ -28,14 +25,8 @@ export async function getUser(id: string): Promise<ApiResponse<User>> {
 }
 
 // 更新用户
-export async function updateUser(id: string, update: Partial<User>): Promise<ApiResponse<User>> {
-    // 转换前端字段名到后端字段名
-    const backendUpdate: any = {};
-    if (update.username !== undefined) backendUpdate.username = update.username;
-    if (update.email !== undefined) backendUpdate.email = update.email;
-    if (update.isActive !== undefined) backendUpdate.is_active = update.isActive;
-
-    const resp = await apiClient.put(`/api/v1/user/${id}`, backendUpdate);
+export async function updateUser(id: string, update: UpdateUserRequest): Promise<ApiResponse<User>> {
+    const resp = await apiClient.put(`/api/v1/user/${id}`, update);
     return resp.data;
 }
 
@@ -78,11 +69,7 @@ export async function getUserProfile(): Promise<ApiResponse<User>> {
 }
 
 // 更新用户资料
-export async function updateUserProfile(update: Partial<User>): Promise<ApiResponse<User>> {
-    const backendUpdate: any = {};
-    if (update.username !== undefined) backendUpdate.username = update.username;
-    if (update.email !== undefined) backendUpdate.email = update.email;
-
-    const resp = await apiClient.put("/api/v1/user/profile", backendUpdate);
+export async function updateUserProfile(update: ProfileUpdateRequest): Promise<ApiResponse<any>> {
+    const resp = await apiClient.put("/api/v1/user/profile", update);
     return resp.data;
 }

@@ -3,7 +3,8 @@ import {Shield} from 'lucide-react';
 import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
-import {User, UserRole} from '@/types/user';
+import {useUsers, useCreateUser, useUpdateUser, useDeleteUser} from '@/hooks/use-users';
+import {User, UserRole, CreateUserRequest, UpdateUserRequest} from '@/types/user';
 import {Group} from '@/types/group';
 import {UserDialog, UserFilters, UserHeader, UserList} from '@/components/user';
 
@@ -12,19 +13,20 @@ import {UserDialog, UserFilters, UserHeader, UserList} from '@/components/user';
  */
 
 interface UserFormData {
-    username: string;
-    email: string;
+    name: string;
     password: string;
-    role: UserRole;
-    assignedProjectIds: string[];
-    groupIds: string[];
-    isActive: boolean;
+    is_active: boolean;
 }
 
 export default function UsersPage() {
     const {toast} = useToast();
     const {user: currentUser, isAdmin} = useAuth();
     const {data: projects} = useProjects();
+    
+    const {data: users, isLoading} = useUsers();
+    const createUserMutation = useCreateUser();
+    const updateUserMutation = useUpdateUser();
+    const deleteUserMutation = useDeleteUser();
 
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -33,13 +35,9 @@ export default function UsersPage() {
     const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
 
     const [userForm, setUserForm] = useState<UserFormData>({
-        username: '',
-        email: '',
+        name: '',
         password: '',
-        role: 'user',
-        assignedProjectIds: [],
-        groupIds: [],
-        isActive: true,
+        is_active: true,
     });
     const getAllGroups = (): Group[] => [
         {
@@ -65,38 +63,19 @@ export default function UsersPage() {
             permissions: [],
         },
     ];
-
-    const getAllUsers = (): User[] => [
-        {
-            id: 'u1',
-            username: 'admin',
-            email: 'admin@example.com',
-            isActive: true,
-            createdAt: new Date(),
-        },
-        {
-            id: 'u2',
-            username: 'test',
-            email: 'test@example.com',
-            createdAt: new Date(),
-            isActive: true,
-        },
-    ];
-    const createUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
-        console.log(userData);
-    }
-    const updateUser = async (id: string, updates: Partial<User>) => {
-        console.log(id, updates);
-    }
-
-    const deleteUser = async (id: string) => {
-        console.log(id);
-    }
-
-
-    // 只保留一次声明
-    const users = getAllUsers();
+    
     const groups = getAllGroups();
+    
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-2 text-sm text-muted-foreground">加载中...</p>
+                </div>
+            </div>
+        );
+    }
 
     // 表单状态更新函数
     const updateUserForm = useCallback((updates: Partial<UserFormData>) => {
@@ -106,21 +85,17 @@ export default function UsersPage() {
     // 重置表单
     const resetForm = useCallback(() => {
         setUserForm({
-            username: '',
-            email: '',
+            name: '',
             password: '',
-            role: 'user',
-            assignedProjectIds: [],
-            groupIds: [],
-            isActive: true,
+            is_active: true,
         });
     }, []);
 
     // 过滤用户
     const filteredUsers = useMemo(() => {
+        if (!users) return [];
         return users.filter((user: User) => {
-            const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesRole = roleFilter === 'all';
             return matchesSearch && matchesRole;
         });
@@ -144,34 +119,36 @@ export default function UsersPage() {
     }
 
     const handleCreateUser = async () => {
-        if (!userForm.username || !userForm.email || !userForm.password) {
+        if (!userForm.name || !userForm.password) {
             toast({
                 variant: 'destructive',
                 title: '请填写必填字段',
-                description: '用户名、邮箱和密码为必填项。',
+                description: '用户名和密码为必填项。',
             });
             return;
         }
 
         try {
-            await createUser({
-                username: userForm.username,
-                email: userForm.email,
-                isActive: userForm.isActive,
-            });
+            const createRequest: CreateUserRequest = {
+                name: userForm.name,
+                password: userForm.password,
+                is_active: userForm.is_active,
+            };
+            
+            await createUserMutation.mutateAsync(createRequest);
 
             toast({
                 title: '用户创建成功',
-                description: `用户 "${userForm.username}" 已创建。`,
+                description: `用户 "${userForm.name}" 已创建。`,
             });
 
             setIsCreateDialogOpen(false);
             resetForm();
-        } catch {
+        } catch (error: any) {
             toast({
                 variant: 'destructive',
                 title: '创建失败',
-                description: '用户创建失败，请重试。',
+                description: error.response?.data?.message || '用户创建失败，请重试。',
             });
         }
     };
@@ -179,47 +156,47 @@ export default function UsersPage() {
     const handleEditUser = (user: User) => {
         setEditingUser(user);
         setUserForm({
-            username: user.username,
-            email: user.email,
+            name: user.name,
             password: '',
-            role: 'user',
-            assignedProjectIds: [],
-            groupIds: [],
-            isActive: user.isActive,
+            is_active: user.is_active,
         });
         setIsEditDialogOpen(true);
     };
 
     const handleUpdateUser = async () => {
-        if (!editingUser || !userForm.username || !userForm.email) {
+        if (!editingUser || !userForm.name) {
             toast({
                 variant: 'destructive',
                 title: '请填写必填字段',
-                description: '用户名和邮箱为必填项。',
+                description: '用户名为必填项。',
             });
             return;
         }
 
         try {
-            await updateUser(editingUser.id, {
-                username: userForm.username,
-                email: userForm.email,
-                isActive: userForm.isActive,
+            const updateRequest: UpdateUserRequest = {
+                name: userForm.name,
+                is_active: userForm.is_active,
+            };
+            
+            await updateUserMutation.mutateAsync({
+                id: editingUser.id,
+                update: updateRequest
             });
 
             toast({
                 title: '用户更新成功',
-                description: `用户 "${userForm.username}" 已更新。`,
+                description: `用户 "${userForm.name}" 已更新。`,
             });
 
             setIsEditDialogOpen(false);
             setEditingUser(null);
             resetForm();
-        } catch {
+        } catch (error: any) {
             toast({
                 variant: 'destructive',
                 title: '更新失败',
-                description: '用户更新失败，请重试。',
+                description: error.response?.data?.message || '用户更新失败，请重试。',
             });
         }
     };
@@ -234,37 +211,45 @@ export default function UsersPage() {
             return;
         }
 
-        if (!confirm(`确定要删除用户 "${user.username}" 吗？此操作无法撤销。`)) {
+        if (!confirm(`确定要删除用户 "${user.name}" 吗？此操作无法撤销。`)) {
             return;
         }
 
         try {
-            await deleteUser(user.id);
+            await deleteUserMutation.mutateAsync(user.id);
             toast({
                 title: '用户删除成功',
-                description: `用户 "${user.username}" 已删除。`,
+                description: `用户 "${user.name}" 已删除。`,
             });
-        } catch {
+        } catch (error: any) {
             toast({
                 variant: 'destructive',
                 title: '删除失败',
-                description: '用户删除失败，请重试。',
+                description: error.response?.data?.message || '用户删除失败，请重试。',
             });
         }
     };
 
     const handleToggleUserStatus = async (user: User) => {
         try {
-            await updateUser(user.id, {isActive: !user.isActive});
-            toast({
-                title: user.isActive ? '用户已禁用' : '用户已启用',
-                description: `用户 "${user.username}" 已${user.isActive ? '禁用' : '启用'}。`,
+            const updateRequest: UpdateUserRequest = {
+                is_active: !user.is_active,
+            };
+            
+            await updateUserMutation.mutateAsync({
+                id: user.id,
+                update: updateRequest
             });
-        } catch {
+            
+            toast({
+                title: user.is_active ? '用户已禁用' : '用户已启用',
+                description: `用户 "${user.name}" 已${user.is_active ? '禁用' : '启用'}。`,
+            });
+        } catch (error: any) {
             toast({
                 variant: 'destructive',
                 title: '操作失败',
-                description: '用户状态更新失败，请重试。',
+                description: error.response?.data?.message || '用户状态更新失败，请重试。',
             });
         }
     };

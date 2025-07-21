@@ -9,21 +9,16 @@ export interface JwtUser {
 
 export interface User {
     id: string;
-    username: string;
-    email: string;
-    isActive: boolean;
-    createdAt: Date;
+    name: string;
+    tenants?: Tenant[];
+    is_active: boolean;
+    created_at: Date;
+    updated_at: Date;
 }
 
 export interface Profile {
     id: string;
     name: string;
-    is_active: boolean;
-    tenants: Tenant[];
-}
-export interface Profile {
-    id: string;
-    name:string;
     is_active: boolean;
     tenants: Tenant[];
 }
@@ -35,12 +30,19 @@ export interface Tenant {
 
 // 用户管理相关类型
 export interface CreateUserRequest {
-    username: string;
-    email: string;
+    name: string;
     password: string;
-    role: UserRole;
-    assignedProjectIds?: string[];
-    groupIds?: string[];
+    is_active?: boolean;
+}
+
+export interface UpdateUserRequest {
+    name?: string;
+    is_active?: boolean;
+}
+
+export interface ProfileUpdateRequest {
+    name?: string;
+    avatar?: string;
 }
 
 // 组管理相关类型
@@ -56,13 +58,4 @@ export interface UpdateGroupRequest {
     description?: string;
     color?: string;
     permissions?: GroupPermission[];
-}
-// 用户管理相关类型
-export interface CreateUserRequest {
-    username: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    assignedProjectIds?: string[];
-    groupIds?: string[];
 }
