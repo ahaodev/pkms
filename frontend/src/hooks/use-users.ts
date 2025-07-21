@@ -9,7 +9,7 @@ import {
   assignUserToProject,
   unassignUserFromProject 
 } from '@/lib/api/users';
-import { User, CreateUserRequest, UpdateUserRequest } from '@/types/user';
+import { CreateUserRequest, UpdateUserRequest } from '@/types/user';
 
 // Get all users
 export function useUsers() {
@@ -74,7 +74,7 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: ({ id, update }: { id: string; update: UpdateUserRequest }) => 
       updateUser(id, update),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', variables.id] });
     }
@@ -100,7 +100,7 @@ export function useAssignUserToProject() {
   return useMutation({
     mutationFn: ({ userId, projectId }: { userId: string; projectId: string }) => 
       assignUserToProject(userId, projectId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-projects', variables.userId] });
     }
   });
@@ -113,7 +113,7 @@ export function useUnassignUserFromProject() {
   return useMutation({
     mutationFn: ({ userId, projectId }: { userId: string; projectId: string }) => 
       unassignUserFromProject(userId, projectId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-projects', variables.userId] });
     }
   });

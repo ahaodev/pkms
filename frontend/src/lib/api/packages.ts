@@ -174,8 +174,8 @@ export function transformPackageFromBackend(backendPackage: any): Package {
         version: latestRelease?.version,
         fileSize: latestRelease?.fileSize,
         fileName: latestRelease?.fileName,
-        changelog: latestRelease?.changelog,
-        checksum: latestRelease?.checksum,
+        changelog: latestRelease?.description,
+        checksum: latestRelease?.fileHash,
         downloadCount: backendPackage.total_downloads || backendPackage.download_count || 0,
         isLatest: latestRelease?.isLatest,
 

@@ -9,7 +9,7 @@ import {
   addUserToTenant,
   removeUserFromTenant
 } from '@/lib/api/tenants';
-import { Tenant, CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
+import { CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
 
 // Get all tenants
 export function useTenants() {
@@ -74,7 +74,7 @@ export function useUpdateTenant() {
   return useMutation({
     mutationFn: ({ id, update }: { id: string; update: UpdateTenantRequest }) => 
       updateTenant(id, update),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
       queryClient.invalidateQueries({ queryKey: ['tenant', variables.id] });
     }
@@ -100,7 +100,7 @@ export function useAddUserToTenant() {
   return useMutation({
     mutationFn: ({ tenantId, userId }: { tenantId: string; userId: string }) => 
       addUserToTenant(tenantId, userId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
     }
   });
@@ -113,7 +113,7 @@ export function useRemoveUserFromTenant() {
   return useMutation({
     mutationFn: ({ tenantId, userId }: { tenantId: string; userId: string }) => 
       removeUserFromTenant(tenantId, userId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
     }
   });

@@ -55,10 +55,10 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     // profile data should contain user info
                     const user: User = {
                         id: resp.data.id,
-                        username: resp.data.name,
-                        createdAt: new Date,
-                        isActive: true,
-                        email: 'test@email.com',
+                        name: resp.data.name,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        is_active: true,
                     }
                     setUser(user);
                     const tenantsArr = Array.isArray(resp.data.tenants) ? resp.data.tenants : null;
@@ -93,10 +93,10 @@ export function AuthProvider({children}: { children: ReactNode }) {
                 if (profileResp.code === 0 && profileResp.data) {
                     const user: User = {
                         id: profileResp.data.id,
-                        username: profileResp.data.name,
-                        createdAt: new Date,
-                        isActive: true,
-                        email: 'test@email.com',
+                        name: profileResp.data.name,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        is_active: true,
                     }
                     setUser(user);
                     setTenants(profileResp.data.tenants || null);
@@ -127,7 +127,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
         setCurrentTenant(tenant);
         localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
     }
-    const isAdmin = (): boolean => user?.username === 'admin';
+    const isAdmin = (): boolean => user?.name === 'admin';
     const contextValue = {
         user,
         tenants,

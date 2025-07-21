@@ -40,13 +40,13 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
                         <Button variant="ghost"
                                 className="relative flex items-center space-x-2 h-8 hover:bg-accent focus:bg-accent rounded-full pr-2 pl-1">
                             <Avatar className="h-7 w-7">
-                                <AvatarFallback>{user?.username || '👤'}</AvatarFallback>
+                                <AvatarFallback>{user?.name || '👤'}</AvatarFallback>
                             </Avatar>
-                            {!isMobile && <span className="max-w-[100px] truncate">{user?.username || '用户'}</span>}
+                            {!isMobile && <span className="max-w-[100px] truncate">{user?.name || '用户'}</span>}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{user?.username || '用户'}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{user?.name || '用户'}</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem>
                             <UserIcon className="mr-2 h-4 w-4"/>

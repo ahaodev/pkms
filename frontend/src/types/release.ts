@@ -36,8 +36,3 @@ export interface UploadProgress {
     total: number;
     percentage: number;
 }
-export interface UploadProgress {
-    loaded: number;
-    total: number;
-    percentage: number;
-}
