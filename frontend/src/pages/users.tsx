@@ -39,6 +39,31 @@ export default function UsersPage() {
         password: '',
         is_active: true,
     });
+
+    // 表单状态更新函数
+    const updateUserForm = useCallback((updates: Partial<UserFormData>) => {
+        setUserForm(prev => ({...prev, ...updates}));
+    }, []);
+
+    // 重置表单
+    const resetForm = useCallback(() => {
+        setUserForm({
+            name: '',
+            password: '',
+            is_active: true,
+        });
+    }, []);
+
+    // 过滤用户
+    const filteredUsers = useMemo(() => {
+        if (!users) return [];
+        return users.filter((user: User) => {
+            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesRole = roleFilter === 'all';
+            return matchesSearch && matchesRole;
+        });
+    }, [users, searchTerm, roleFilter]);
+
     const getAllGroups = (): Group[] => [
         {
             id: 'g1',
@@ -76,30 +101,6 @@ export default function UsersPage() {
             </div>
         );
     }
-
-    // 表单状态更新函数
-    const updateUserForm = useCallback((updates: Partial<UserFormData>) => {
-        setUserForm(prev => ({...prev, ...updates}));
-    }, []);
-
-    // 重置表单
-    const resetForm = useCallback(() => {
-        setUserForm({
-            name: '',
-            password: '',
-            is_active: true,
-        });
-    }, []);
-
-    // 过滤用户
-    const filteredUsers = useMemo(() => {
-        if (!users) return [];
-        return users.filter((user: User) => {
-            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesRole = roleFilter === 'all';
-            return matchesSearch && matchesRole;
-        });
-    }, [users, searchTerm, roleFilter]);
 
     // 检查权限 - 只有管理员可以访问
     if (!isAdmin()) {
