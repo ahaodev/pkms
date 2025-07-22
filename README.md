@@ -75,6 +75,11 @@ go build -o pkms cmd/main.go
 docker-compose up -d
 ```
 
+## Test 
+```bash
+# 运行测试
+ go test ./...
+```
 ## 相关文档
 
 - 前端详细说明见 `frontend/README.md`。
