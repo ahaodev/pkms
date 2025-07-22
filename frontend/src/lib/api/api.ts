@@ -10,7 +10,7 @@ export const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 20000, // 60秒
+    timeout: 300000, // 300秒
 });
 
 // 动态设置 Authorization 头部
