@@ -110,14 +110,14 @@ func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string 
 	return permissions
 }
 
-// AddDefaultRolesForUser 为用户添加默认角色
-func (m *CasbinManager) AddDefaultRolesForUser(userID, role string) error {
-	added, err := m.enforcer.AddRoleForUser(userID, role)
+// AddDefaultRolesForUser 为用户添加默认角色 (支持多租户)
+func (m *CasbinManager) AddDefaultRolesForUser(userID, role, tenantID string) error {
+	added, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
 	if err != nil {
-		return fmt.Errorf("failed to add role %s for user %s: %v", role, userID, err)
+		return fmt.Errorf("failed to add role %s for user %s in tenant %s: %v", role, userID, tenantID, err)
 	}
 	if added {
-		log.Printf("为用户 %s 添加角色 %s", userID, role)
+		log.Printf("为用户 %s 在租户 %s 中添加角色 %s", userID, tenantID, role)
 	}
 
 	return m.enforcer.SavePolicy()
@@ -202,14 +202,14 @@ func (m *CasbinManager) GetAllActions() []string {
 	return actions
 }
 
-// AddPolicyForRole 为角色添加权限策略
-func (m *CasbinManager) AddPolicyForRole(role, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(role, object, action)
+// AddPolicyForRole 为角色添加权限策略 (支持多租户)
+func (m *CasbinManager) AddPolicyForRole(role, tenantID, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(role, tenantID, object, action)
 }
 
-// RemovePolicyForRole 移除角色权限策略
-func (m *CasbinManager) RemovePolicyForRole(role, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(role, object, action)
+// RemovePolicyForRole 移除角色权限策略 (支持多租户)
+func (m *CasbinManager) RemovePolicyForRole(role, tenantID, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(role, tenantID, object, action)
 }
 
 // ClearAllPolicies 清空所有策略

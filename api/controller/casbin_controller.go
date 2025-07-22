@@ -11,13 +11,17 @@ import (
 
 // CasbinController 权限管理控制器
 type CasbinController struct {
-	casbinManager *casbin.CasbinManager
+	casbinManager    *casbin.CasbinManager
+	userRepository   domain.UserRepository
+	tenantRepository domain.TenantRepository
 }
 
 // NewCasbinController 创建新的权限管理控制器
-func NewCasbinController(casbinManager *casbin.CasbinManager) *CasbinController {
+func NewCasbinController(casbinManager *casbin.CasbinManager, userRepository domain.UserRepository, tenantRepository domain.TenantRepository) *CasbinController {
 	return &CasbinController{
-		casbinManager: casbinManager,
+		casbinManager:    casbinManager,
+		userRepository:   userRepository,
+		tenantRepository: tenantRepository,
 	}
 }
 
@@ -250,7 +254,7 @@ func (cc *CasbinController) AddRolePolicy(c *gin.Context) {
 		return
 	}
 
-	added, err := cc.casbinManager.AddPolicyForRole(req.Role, req.Object, req.Action)
+	added, err := cc.casbinManager.AddPolicyForRole(req.Role, req.Tenant, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("添加角色权限失败: "+err.Error()))
 		return
@@ -272,7 +276,7 @@ func (cc *CasbinController) RemoveRolePolicy(c *gin.Context) {
 		return
 	}
 
-	removed, err := cc.casbinManager.RemovePolicyForRole(req.Role, req.Object, req.Action)
+	removed, err := cc.casbinManager.RemovePolicyForRole(req.Role, req.Tenant, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("移除角色权限失败: "+err.Error()))
 		return
@@ -426,4 +430,123 @@ func (cc *CasbinController) ClearAllRoles(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess("角色清空成功"))
+}
+
+// GetEnhancedPolicies 获取增强版策略列表（包含可读名称）
+func (cc *CasbinController) GetEnhancedPolicies(c *gin.Context) {
+	policies := cc.casbinManager.GetAllPolicies()
+	var enhancedPolicies []domain.PolicyDetail
+
+	for _, policy := range policies {
+		if len(policy) < 4 {
+			continue
+		}
+
+		policyDetail := domain.PolicyDetail{
+			Subject: policy[0],
+			Domain:  policy[1],
+			Object:  policy[2],
+			Action:  policy[3],
+		}
+
+		// 尝试获取用户名称
+		if user, err := cc.userRepository.GetByID(c.Request.Context(), policyDetail.Subject); err == nil {
+			policyDetail.SubjectName = user.Name
+		}
+
+		// 尝试获取租户名称
+		if tenant, err := cc.tenantRepository.GetByID(c.Request.Context(), policyDetail.Domain); err == nil {
+			policyDetail.DomainName = tenant.Name
+		}
+
+		enhancedPolicies = append(enhancedPolicies, policyDetail)
+	}
+
+	response := domain.EnhancedPoliciesResponse{
+		Policies: enhancedPolicies,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetEnhancedRoles 获取增强版角色列表（包含可读名称）
+func (cc *CasbinController) GetEnhancedRoles(c *gin.Context) {
+	roles := cc.casbinManager.GetAllRoles()
+	var enhancedRoles []domain.RoleDetail
+
+	for _, role := range roles {
+		if len(role) < 3 {
+			continue
+		}
+
+		roleDetail := domain.RoleDetail{
+			User:   role[0],
+			Role:   role[1],
+			Domain: role[2],
+		}
+
+		// 尝试获取用户名称
+		if user, err := cc.userRepository.GetByID(c.Request.Context(), roleDetail.User); err == nil {
+			roleDetail.UserName = user.Name
+		}
+
+		// 尝试获取租户名称
+		if tenant, err := cc.tenantRepository.GetByID(c.Request.Context(), roleDetail.Domain); err == nil {
+			roleDetail.DomainName = tenant.Name
+		}
+
+		enhancedRoles = append(enhancedRoles, roleDetail)
+	}
+
+	response := domain.EnhancedRolesResponse{
+		Roles: enhancedRoles,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetAllTenants 获取所有租户列表（用于下拉选择）
+func (cc *CasbinController) GetAllTenants(c *gin.Context) {
+	tenants, err := cc.tenantRepository.Fetch(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("获取租户列表失败: "+err.Error()))
+		return
+	}
+
+	var tenantList []gin.H
+	for _, tenant := range tenants {
+		tenantList = append(tenantList, gin.H{
+			"id":   tenant.ID,
+			"name": tenant.Name,
+		})
+	}
+
+	response := gin.H{
+		"tenants": tenantList,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetAllUsers 获取所有用户列表（用于下拉选择）
+func (cc *CasbinController) GetAllUsers(c *gin.Context) {
+	users, err := cc.userRepository.Fetch(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("获取用户列表失败: "+err.Error()))
+		return
+	}
+
+	var userList []gin.H
+	for _, user := range users {
+		userList = append(userList, gin.H{
+			"id":   user.ID,
+			"name": user.Name,
+		})
+	}
+
+	response := gin.H{
+		"users": userList,
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }

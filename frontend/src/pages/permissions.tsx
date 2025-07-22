@@ -19,9 +19,36 @@ interface Policy {
     act: string;
 }
 
+interface EnhancedPolicy {
+    subject: string;
+    subject_name?: string;
+    domain: string;
+    domain_name?: string;
+    object: string;
+    action: string;
+}
+
 interface Role {
     user: string;
     role: string;
+}
+
+interface EnhancedRole {
+    user: string;
+    user_name?: string;
+    role: string;
+    domain: string;
+    domain_name?: string;
+}
+
+interface Tenant {
+    id: string;
+    name: string;
+}
+
+interface User {
+    id: string;
+    name: string;
 }
 
 interface UserPermission {
@@ -33,10 +60,14 @@ interface UserPermission {
 
 const PermissionsPage: React.FC = () => {
     const [policies, setPolicies] = useState<Policy[]>([]);
+    const [enhancedPolicies, setEnhancedPolicies] = useState<EnhancedPolicy[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
+    const [enhancedRoles, setEnhancedRoles] = useState<EnhancedRole[]>([]);
     const [roleNames, setRoleNames] = useState<string[]>([]);
     const [objects, setObjects] = useState<string[]>([]);
     const [actions, setActions] = useState<string[]>([]);
+    const [tenants, setTenants] = useState<Tenant[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [userPermissions, setUserPermissions] = useState<UserPermission[]>([]);
     const [activeTab, setActiveTab] = useState('role-permissions');
 
@@ -76,10 +107,14 @@ const PermissionsPage: React.FC = () => {
         try {
             await Promise.all([
                 fetchPolicies(),
+                fetchEnhancedPolicies(),
                 fetchRoles(),
+                fetchEnhancedRoles(),
                 fetchRoleNames(),
                 fetchObjects(),
                 fetchActions(),
+                fetchTenants(),
+                fetchUsers(),
             ]);
         } catch (error) {
             console.error('获取数据失败:', error);
@@ -161,6 +196,50 @@ const PermissionsPage: React.FC = () => {
             console.error('获取用户权限失败:', error);
         }
         return null;
+    };
+
+    const fetchEnhancedPolicies = async () => {
+        try {
+            const response = await apiClient.get('/api/v1/casbin/policies/enhanced');
+            if (response.data && response.data.code === 0) {
+                setEnhancedPolicies(response.data.data.policies || []);
+            }
+        } catch (error) {
+            console.error('获取增强策略失败:', error);
+        }
+    };
+
+    const fetchEnhancedRoles = async () => {
+        try {
+            const response = await apiClient.get('/api/v1/casbin/roles/enhanced');
+            if (response.data && response.data.code === 0) {
+                setEnhancedRoles(response.data.data.roles || []);
+            }
+        } catch (error) {
+            console.error('获取增强角色失败:', error);
+        }
+    };
+
+    const fetchTenants = async () => {
+        try {
+            const response = await apiClient.get('/api/v1/casbin/tenants');
+            if (response.data && response.data.code === 0) {
+                setTenants(response.data.data.tenants || []);
+            }
+        } catch (error) {
+            console.error('获取租户失败:', error);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await apiClient.get('/api/v1/casbin/users');
+            if (response.data && response.data.code === 0) {
+                setUsers(response.data.data.users || []);
+            }
+        } catch (error) {
+            console.error('获取用户失败:', error);
+        }
     };
 
 

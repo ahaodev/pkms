@@ -66,3 +66,32 @@ type RolePermissionsResponse struct {
 	Role        string     `json:"role"`
 	Permissions [][]string `json:"permissions"`
 }
+
+// PolicyDetail 权限策略详情
+type PolicyDetail struct {
+	Subject     string `json:"subject"`
+	SubjectName string `json:"subject_name,omitempty"`
+	Domain      string `json:"domain"`
+	DomainName  string `json:"domain_name,omitempty"`
+	Object      string `json:"object"`
+	Action      string `json:"action"`
+}
+
+// RoleDetail 角色详情
+type RoleDetail struct {
+	User       string `json:"user"`
+	UserName   string `json:"user_name,omitempty"`
+	Role       string `json:"role"`
+	Domain     string `json:"domain"`
+	DomainName string `json:"domain_name,omitempty"`
+}
+
+// EnhancedPoliciesResponse 增强版策略响应
+type EnhancedPoliciesResponse struct {
+	Policies []PolicyDetail `json:"policies"`
+}
+
+// EnhancedRolesResponse 增强版角色响应
+type EnhancedRolesResponse struct {
+	Roles []RoleDetail `json:"roles"`
+}

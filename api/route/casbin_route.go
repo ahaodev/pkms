@@ -7,14 +7,19 @@ import (
 	"pkms/bootstrap"
 	"pkms/ent"
 	"pkms/internal/casbin"
+	"pkms/repository"
 
 	"github.com/gin-gonic/gin"
 )
 
 // NewCasbinRouter 创建 Casbin 权限管理路由
 func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, group *gin.RouterGroup) {
+	// 创建仓储
+	userRepository := repository.NewUserRepository(db)
+	tenantRepository := repository.NewTenantRepository(db)
+
 	// 创建控制器
-	casbinController := controller.NewCasbinController(casbinManager)
+	casbinController := controller.NewCasbinController(casbinManager, userRepository, tenantRepository)
 
 	// 策略管理路由
 	group.POST("/policies", casbinController.AddPolicy)
@@ -48,6 +53,14 @@ func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	// 元数据路由
 	group.GET("/objects", casbinController.GetAllObjects)
 	group.GET("/actions", casbinController.GetAllActions)
+
+	// 增强版路由（包含可读名称）
+	group.GET("/policies/enhanced", casbinController.GetEnhancedPolicies)
+	group.GET("/roles/enhanced", casbinController.GetEnhancedRoles)
+
+	// 数据源路由（用于下拉选择）
+	group.GET("/tenants", casbinController.GetAllTenants)
+	group.GET("/users", casbinController.GetAllUsers)
 
 	group.POST("/reload", casbinController.ReloadPolicies)
 }
