@@ -5,7 +5,7 @@ trigger:
   branch:
     - dev
     - main
-    - rbac-domins
+    - rbac-domains
 steps:
   - name: build_push
     image: docker:dind
