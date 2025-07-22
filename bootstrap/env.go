@@ -31,7 +31,7 @@ type Env struct {
 
 func setDefaults() {
 	viper.SetDefault("APP_ENV", "development")
-	viper.SetDefault("CONTEXT_TIMEOUT", 30)
+	viper.SetDefault("CONTEXT_TIMEOUT", 60)
 	viper.SetDefault("DB_PATH", "./data.db")
 
 	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 3)
