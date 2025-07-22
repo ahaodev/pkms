@@ -12,10 +12,12 @@ import (
 	"pkms/domain"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/xid"
 )
 
 type ReleaseController struct {
 	ReleaseUsecase domain.ReleaseUsecase
+	PackageUsecase domain.PackageUsecase
 	FileUsecase    domain.FileUsecase
 	Env            *bootstrap.Env
 }
@@ -120,6 +122,13 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 		return
 	}
 
+	// 获取包信息以获取 project_id
+	packageInfo, err := rc.PackageUsecase.GetPackageByID(c, req.PackageID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("Package not found: "+err.Error()))
+		return
+	}
+
 	// 解析可选的布尔字段
 	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
 		req.IsLatest = true
@@ -131,11 +140,18 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 		req.IsDraft = true
 	}
 
+	// 生成 release ID (在文件上传前生成，确保目录结构一致)
+	releaseID := xid.New().String()
+
+	// 构建层次化的目录结构: {project_id}/{package_id}/{release_id}/{filename}
+	// 这样可以确保即使文件名相同也不会冲突，并且便于按层级管理和追溯
+	hierarchicalPrefix := packageInfo.ProjectID + "/" + req.PackageID + "/" + releaseID
+
 	// 上传文件到存储
 	uploadRequest := &domain.UploadRequest{
 		Bucket:      rc.Env.S3Bucket,
 		ObjectName:  header.Filename,
-		Prefix:      req.PackageID,
+		Prefix:      hierarchicalPrefix,
 		Reader:      file,
 		Size:        header.Size,
 		ContentType: header.Header.Get("Content-Type"),
@@ -145,10 +161,11 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, domain.RespError("File upload failed: "+err.Error()))
 		return
 	}
-	pkg.Log.Println(uploadResp)
+	pkg.Log.Printf("文件上传成功: %s -> %s", header.Filename, uploadResp.ObjectName)
 
-	// 创建发布版本
+	// 创建发布版本，使用预先生成的 release ID 确保与文件路径一致
 	release := &domain.Release{
+		ID:           releaseID, // 使用预先生成的 ID
 		PackageID:    req.PackageID,
 		Version:      req.Version,
 		TagName:      req.TagName,
