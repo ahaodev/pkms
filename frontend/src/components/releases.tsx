@@ -1,9 +1,13 @@
+import {useState} from 'react';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Download, Package as PackageIcon, Plus} from 'lucide-react';
+import {Download, Package as PackageIcon, Plus, Share, Trash2} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
+import {ShareDialog} from '@/components/share-dialog';
+import {createShareLink, deleteRelease} from '@/lib/api/releases';
+import {useToast} from '@/hooks/use-toast';
 
 interface ReleasesViewProps {
     selectedPackage: any;
@@ -11,6 +15,7 @@ interface ReleasesViewProps {
     searchTerm: string;
     handleCreateRelease: () => void;
     handleDownload: (release: Release) => void;
+    onReleaseDeleted?: (releaseId: string) => void;
 }
 
 export function Releases({
@@ -18,8 +23,62 @@ export function Releases({
                              releases,
                              searchTerm,
                              handleCreateRelease,
-                             handleDownload
+                             handleDownload,
+                             onReleaseDeleted
                          }: ReleasesViewProps) {
+    const [shareDialog, setShareDialog] = useState<{
+        isOpen: boolean;
+        shareUrl: string;
+        packageName: string;
+    }>({ isOpen: false, shareUrl: '', packageName: '' });
+    const {toast} = useToast();
+
+    const handleShare = async (release: Release) => {
+        try {
+            const result = await createShareLink(release.id, { expiryHours: 24 });
+            const fullUrl = `${window.location.origin}${result.data.share_url}`;
+            setShareDialog({
+                isOpen: true,
+                shareUrl: fullUrl,
+                packageName: `${selectedPackage?.name} v${release.version}`
+            });
+            toast({
+                title: '分享链接已创建',
+                description: '分享链接已生成，24小时内有效。',
+            });
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: '创建分享链接失败',
+                description: '无法创建分享链接，请稍后重试。',
+            });
+        }
+    };
+
+    const handleDelete = async (release: Release) => {
+        if (!confirm(`确定要删除发布版本 v${release.version} 吗？此操作不可恢复。`)) {
+            return;
+        }
+        
+        try {
+            await deleteRelease(release.id);
+            toast({
+                title: '删除成功',
+                description: `发布版本 v${release.version} 已被删除。`,
+            });
+            onReleaseDeleted?.(release.id);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: '删除失败',
+                description: '无法删除该发布版本，请稍后重试。',
+            });
+        }
+    };
+
+    const closeShareDialog = () => {
+        setShareDialog({ isOpen: false, shareUrl: '', packageName: '' });
+    };
     // Filter releases based on search term
     const filteredReleases = releases.filter(release =>
         release.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,9 +125,19 @@ export function Releases({
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Button variant="outline" size="sm"
+                                            onClick={() => handleShare(release)}>
+                                        <Share className="h-4 w-4 mr-2"/>
+                                        分享
+                                    </Button>
+                                    <Button variant="outline" size="sm"
                                             onClick={() => handleDownload(release)}>
                                         <Download className="h-4 w-4 mr-2"/>
                                         下载
+                                    </Button>
+                                    <Button variant="outline" size="sm"
+                                            onClick={() => handleDelete(release)}>
+                                        <Trash2 className="h-4 w-4 mr-2"/>
+                                        删除
                                     </Button>
                                 </div>
                             </div>
@@ -117,6 +186,13 @@ export function Releases({
                     </CardContent>
                 </Card>
             )}
+            
+            <ShareDialog
+                isOpen={shareDialog.isOpen}
+                onClose={closeShareDialog}
+                shareUrl={shareDialog.shareUrl}
+                packageName={shareDialog.packageName}
+            />
         </div>
     );
 }
