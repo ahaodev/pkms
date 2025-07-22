@@ -10,7 +10,8 @@ permissions using RBAC (Role-Based Access Control).
 
 ## Development Commands
 
-### Backend (Go)
+### Backend (Go Backend Clean Architecture)
+
 
 ```bash
 # Generate Ent database code (run after schema changes)
@@ -29,7 +30,7 @@ go test ./...
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-### Frontend (React + Vite)
+### Frontend (React + TypeScript + Vite + shadcn-ui + Tailwind CSS)
 
 ```bash
 cd ./frontend
@@ -57,7 +58,7 @@ npm run preview
 ./start.sh
 ```
 
-> onley for Linux/MacOS
+> only for Linux/MacOS
 
 ### Docker & Release
 
@@ -114,7 +115,7 @@ goreleaser release --clean
 - **internal/**: Internal packages (casbin, utilities)
 - **pkg/**: Shared utilities (logging, file handling, time)
 
-### Frontend Structure (React + TypeScript)
+### Frontend Structure (React + TypeScript + Vite + shadcn-ui + Tailwind CSS)
 
 - **src/components/**: Reusable UI components organized by feature
     - **ui/**: Shadcn/UI components (buttons, forms, dialogs, etc.)
