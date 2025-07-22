@@ -1,11 +1,10 @@
+version: '3.8'
+# docker-compose -f docker-compose-dev.yaml up --build
 services:
-  pkms:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pkms
     ports:
-      - "65080:8080"
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
+      - "58080:8080"
+
