@@ -21,7 +21,12 @@ type Env struct {
 	// 管理员配置
 	AdminUsername string `mapstructure:"ADMIN_USERNAME"`
 	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
-	// S3 配置
+
+	// 存储配置
+	StorageType     string `mapstructure:"STORAGE_TYPE"`      // "disk" 或 "minio"
+	StorageBasePath string `mapstructure:"STORAGE_BASE_PATH"` // 本地存储基础路径
+
+	// S3/MinIO 配置
 	S3Address   string `mapstructure:"S3_ADDRESS"`
 	S3AccessKey string `mapstructure:"S3_ACCESS_KEY"`
 	S3SecretKey string `mapstructure:"S3_SECRET_KEY"`
@@ -43,7 +48,11 @@ func setDefaults() {
 	viper.SetDefault("ADMIN_USERNAME", "admin")
 	viper.SetDefault("ADMIN_PASSWORD", "123")
 
-	// S3 默认配置
+	// 存储默认配置
+	viper.SetDefault("STORAGE_TYPE", "disk")           // 默认使用本地存储
+	viper.SetDefault("STORAGE_BASE_PATH", "./uploads") // 本地存储默认路径
+
+	// S3/MinIO 默认配置
 	viper.SetDefault("S3_ADDRESS", "192.168.8.6:9000")
 	viper.SetDefault("S3_ACCESS_KEY", "IjJm2N3ZZTYjt8C9WkJf")
 	viper.SetDefault("S3_SECRET_KEY", "eIuV0i4ChbLqx54g9rhsZDRTC2LE1xEcnIAnAw1C")

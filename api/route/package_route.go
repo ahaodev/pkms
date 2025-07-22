@@ -5,15 +5,15 @@ import (
 
 	"pkms/api/controller"
 	"pkms/bootstrap"
+	"pkms/domain"
 	"pkms/ent"
 	"pkms/repository"
 	"pkms/usecase"
 
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 )
 
-func NewPackageRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClient *minio.Client, group *gin.RouterGroup) {
+func NewPackageRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, fileStorage domain.FileRepository, group *gin.RouterGroup) {
 	pkgRepo := repository.NewPackageRepository(db)
 	releaseRepo := repository.NewReleaseRepository(db)
 	pc := &controller.PackageController{

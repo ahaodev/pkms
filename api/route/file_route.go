@@ -5,19 +5,16 @@ import (
 
 	"pkms/api/controller"
 	"pkms/bootstrap"
+	"pkms/domain"
 	"pkms/ent"
-	"pkms/repository"
 	"pkms/usecase"
 
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 )
 
-func NewFileRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, minioClient *minio.Client, group *gin.RouterGroup) {
-	fr := repository.NewFileRepository(minioClient)
-
+func NewFileRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, fileStorage domain.FileRepository, group *gin.RouterGroup) {
 	fc := &controller.FileController{
-		FileUsecase: usecase.NewFileUsecase(fr, timeout),
+		FileUsecase: usecase.NewFileUsecase(fileStorage, timeout),
 		Env:         env,
 	}
 

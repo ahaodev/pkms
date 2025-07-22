@@ -7,16 +7,16 @@ import (
 
 	"pkms/api/middleware"
 	"pkms/bootstrap"
+	"pkms/domain"
 	"pkms/ent"
 	"pkms/internal/casbin"
 
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 )
 
 const ApiUri = "/api/v1"
 
-func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, minioClient *minio.Client, gin *gin.Engine) {
+func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, fileStorage domain.FileRepository, gin *gin.Engine) {
 	trustedProxies := []string{
 		"127.0.0.1",
 	}
@@ -55,12 +55,12 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	packageRouter := protectedRouter.Group("/packages")
 	packageRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
 
-	NewPackageRouter(env, timeout, db, minioClient, packageRouter)
+	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
 	releaseRouter := protectedRouter.Group("/releases")
 	releaseRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
 
-	NewReleaseRouter(env, timeout, db, minioClient, releaseRouter)
+	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
 	userRouter := protectedRouter.Group("/user")
 	userRouter.Use(casbinMiddleware.RequirePermission("user", "read"))
@@ -85,5 +85,5 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	fileRouter := protectedRouter.Group("/file")
 	fileRouter.Use(casbinMiddleware.RequirePermission("file", "read"))
 
-	NewFileRouter(env, timeout, db, minioClient, fileRouter)
+	NewFileRouter(env, timeout, db, fileStorage, fileRouter)
 }

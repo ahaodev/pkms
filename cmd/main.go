@@ -17,12 +17,12 @@ func main() {
 
 	env := app.Env
 	db := app.DB
-	s3 := app.MinioClient
+	fileStorage := app.FileStorage
 	casbin := app.CasbinManager
 	timeout := time.Duration(env.ContextTimeout) * time.Second
 
 	apiEngine := gin.Default()
-	route.Setup(env, timeout, db, casbin, s3, apiEngine)
+	route.Setup(env, timeout, db, casbin, fileStorage, apiEngine)
 	err := apiEngine.Run(":8080")
 	if err != nil {
 		pkg.Log.Error(err)
