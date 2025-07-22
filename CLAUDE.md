@@ -4,11 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PKMS (Package Management System) is a software package management system designed to simplify the delivery process. It's a full-stack application with a Go backend and React frontend that manages projects, software packages, users, and permissions using RBAC (Role-Based Access Control).
+PKMS (Package Management System) is a software package management system designed to simplify the delivery process. It's
+a full-stack application with a Go backend and React frontend that manages projects, software packages, users, and
+permissions using RBAC (Role-Based Access Control).
 
 ## Development Commands
 
 ### Backend (Go)
+
 ```bash
 # Generate Ent database code (run after schema changes)
 go generate ./ent
@@ -19,11 +22,15 @@ go run ./cmd/main.go
 # Build production binary (requires frontend to be built first)
 go build -o pkms ./cmd/main.go
 
+# Run tests
+go test ./...
+
 # Install Ent CLI tool
 go install entgo.io/ent/cmd/ent@latest
 ```
 
 ### Frontend (React + Vite)
+
 ```bash
 cd ./frontend
 
@@ -43,7 +50,17 @@ npm run lint
 npm run preview
 ```
 
+### Quick Start Script
+
+```bash
+# Alternative full-stack startup (generates Ent, builds frontend, starts backend)
+./start.sh
+```
+
+> onley for Linux/MacOS
+
 ### Docker & Release
+
 ```bash
 # Build Docker image
 docker build -t hao88/pkms:latest .
@@ -64,6 +81,7 @@ goreleaser release --clean
 ## Architecture
 
 ### Backend Structure (Go Clean Architecture)
+
 - **Router**: Router（路由层） 负责 API 路由注册和分发
 - Controller（控制器层） 处理 HTTP 请求、参数校验、调用具体业务逻辑。
 - Usecase（用例层） 处理具体业务逻辑，调用 Repository 层进行数据访问。
@@ -71,6 +89,7 @@ goreleaser release --clean
 - Ent（实体层） 定义数据模型和数据库 schema，使用 Ent ORM 生成代码。
 - Internal（内部包） 提供 Casbin 权限控制、日志、文件处理等工具函数。
 - 目录结构示例
+
 ```
 ├── api
 │   ├── controller          # 控制器
@@ -84,6 +103,7 @@ goreleaser release --clean
 ├── repository              # 数据仓库
 └── usecase                 # 用例/业务逻辑
 ```
+
 - **cmd/main.go**: Application entry point, starts Gin server on port 8080
 - **bootstrap/**: Application initialization (database, env, casbin, minio)
 - **api/**: HTTP layer with controllers, middleware, and routes
@@ -95,11 +115,12 @@ goreleaser release --clean
 - **pkg/**: Shared utilities (logging, file handling, time)
 
 ### Frontend Structure (React + TypeScript)
+
 - **src/components/**: Reusable UI components organized by feature
-  - **ui/**: Shadcn/UI components (buttons, forms, dialogs, etc.)
-  - **auth/**: Authentication-related components (login forms, auth layout)
-  - **dashboard/**: Dashboard-specific components (stats, recent items)
-  - **project/**, **user/**, **settings/**: Feature-specific component groups
+    - **ui/**: Shadcn/UI components (buttons, forms, dialogs, etc.)
+    - **auth/**: Authentication-related components (login forms, auth layout)
+    - **dashboard/**: Dashboard-specific components (stats, recent items)
+    - **project/**, **user/**, **settings/**: Feature-specific component groups
 - **src/pages/**: Page-level components for each route
 - **src/lib/api/**: API client and service layer with axios interceptors
 - **src/providers/**: Provider components for contexts (auth, theme, query client)
@@ -110,28 +131,33 @@ goreleaser release --clean
 ### Frontend Architecture Patterns
 
 **State Management**:
+
 - TanStack Query for server state with aggressive cache invalidation
 - React Context for global UI state (auth, theme)
 - Local component state for UI interactions
 
 **Authentication Flow**:
+
 - JWT tokens stored in localStorage (ACCESS_TOKEN, REFRESH_TOKEN)
 - Multi-tenant support with tenant switching via x-tenant-id header
 - Route guards based on authentication status and admin roles
 - Automatic token refresh and 401 error handling
 
 **Routing System**:
+
 - Centralized route configuration in `src/config/routes.ts`
 - Role-based route protection (public, authenticated, admin-only)
 - Dynamic route rendering based on auth status
 
 **API Integration**:
+
 - Axios client with automatic JWT token injection
 - Request/response interceptors for authentication and error handling
 - Dynamic base URL resolution for different environments
 - Development proxy: `/api/*` → `http://localhost:8080`
 
 ### Key Technologies
+
 - **Backend**: Gin (HTTP), Ent (ORM), Casbin (RBAC), MinIO (file storage), JWT auth
 - **Frontend**: Vite, React, TypeScript, Shadcn/UI, TanStack Query, React Router
 - **Database**: SQLite (default), supports MySQL and PostgreSQL
@@ -140,6 +166,7 @@ goreleaser release --clean
 ## RBAC Permission System
 
 The system uses Casbin with domain-based RBAC:
+
 - **Model**: Located in `config/rbac_model.conf`
 - **Domains**: Multi-tenant support with domain isolation
 - **Roles**: admin, USER, PM (defined in `domain/constants.go`)
@@ -147,7 +174,9 @@ The system uses Casbin with domain-based RBAC:
 - **Actions**: read, write, delete
 
 ### Permission Middleware
+
 Routes are protected using `middleware.CasbinMiddleware`:
+
 - `RequirePermission(resource, action)`: Check specific permissions
 - `RequireRole(role)`: Check role membership
 - Profile and dashboard routes allow all authenticated users
@@ -155,6 +184,7 @@ Routes are protected using `middleware.CasbinMiddleware`:
 ## Database Schema (Ent)
 
 Key entities defined in `ent/schema/`:
+
 - **User**: User accounts with authentication
 - **Project**: Software projects
 - **Packages**: Software packages belonging to projects
@@ -166,6 +196,7 @@ Key entities defined in `ent/schema/`:
 ## File Storage
 
 Uses MinIO (S3-compatible) for file storage:
+
 - Configuration via environment variables (S3_ADDRESS, S3_ACCESS_KEY, etc.)
 - File operations in `repository/minio_file_repository.go`
 - Upload/download through `api/controller/file_controller.go`
@@ -173,11 +204,13 @@ Uses MinIO (S3-compatible) for file storage:
 ## Environment Configuration
 
 Application configuration loaded via Viper from:
+
 - Environment variables
 - Configuration files
 - Default values in `bootstrap/env.go`
 
 Key environment variables:
+
 - Database connection settings
 - JWT secrets (ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET)
 - MinIO/S3 credentials
@@ -186,30 +219,35 @@ Key environment variables:
 ## Frontend Development Patterns
 
 ### Component Organization
+
 - **Feature-based grouping**: Components are organized by domain (auth, dashboard, project, user)
 - **UI Components**: Shadcn/UI components in `src/components/ui/` with consistent styling
 - **Index exports**: Each component group has an `index.ts` for clean imports
 - **TypeScript**: Strict typing with interfaces for props and API responses
 
 ### API Client Architecture
+
 - **Base client**: `apiClient` in `src/lib/api/api.ts` with interceptors
 - **Service layer**: Separate files for each domain (auth.ts, projects.ts, users.ts)
 - **Error handling**: Global 401 handling with automatic logout/redirect
 - **Multi-tenancy**: Automatic tenant ID injection via `x-tenant-id` header
 
 ### Authentication System
+
 - **AuthProvider**: Centralized auth state in `src/providers/auth-provider.tsx`
 - **Route protection**: `RouteGuard` component for role-based access
 - **Token management**: Automatic refresh token handling
 - **Tenant switching**: Support for multi-tenant environments
 
 ### Styling and Theming
+
 - **Tailwind CSS**: Utility-first styling with custom configuration
 - **Theme system**: Dark/light mode support via `next-themes`
 - **Component variants**: `class-variance-authority` for component styling patterns
 - **Responsive design**: Mobile-first approach with responsive utilities
 
 ### State Management Strategy
+
 - **Server state**: TanStack Query with minimal caching (always fresh data)
 - **Client state**: React Context for auth, theme, and global UI state
 - **Form state**: React Hook Form with Zod validation
@@ -222,8 +260,11 @@ Key environment variables:
 - Logs written to `logs/` directory with rotation
 - SQLite database file: `data.db`
 - Frontend development server runs on port 5173 with API proxy to port 8080
+
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly
+requested by the User.
