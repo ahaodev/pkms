@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"pkms/internal/constants"
-	"pkms/pkg"
 	"strconv"
 
 	"pkms/bootstrap"
@@ -14,7 +13,6 @@ import (
 
 type PackageController struct {
 	PackageUsecase domain.PackageUsecase
-	FileUsecase    domain.FileUsecase
 	Env            *bootstrap.Env
 }
 
@@ -87,146 +85,24 @@ func (pc *PackageController) DeletePackage(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, domain.RespSuccess("Package deleted successfully"))
 }
-func (pc *PackageController) GetRelease(c *gin.Context) {
-	id := c.Param("package_id")
-	// 获取包的最新发布版本
-	release, err := pc.PackageUsecase.GetReleasesByPackage(c, id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Release not found"))
-		return
-	}
-	c.JSON(http.StatusOK, domain.RespPageSuccess(release, 0, 0, 0))
 
-}
-
-// UploadRelease 上传包
-func (pc *PackageController) UploadRelease(c *gin.Context) {
-	userID := c.GetString(constants.UserID)
-	// 获取上传的文件
-	file, header, err := c.Request.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError("File upload failed: "+err.Error()))
-		return
-	}
-	defer file.Close()
-
-	// 构建上传请求
-	req := &domain.ReleaseUploadRequest{
-		PackageID:  c.PostForm("package_id"),
-		Name:       c.PostForm("name"),
-		Version:    c.PostForm("version"),
-		Type:       c.PostForm("type"),
-		Changelog:  c.PostForm("changelog"),
-		File:       file,
-		FileName:   header.Filename,
-		FileSize:   header.Size,
-		FileHeader: header.Header.Get("Content-Type"),
-	}
-	uploadRequest := &domain.UploadRequest{
-		Bucket:      pc.Env.S3Bucket,
-		ObjectName:  header.Filename,
-		Prefix:      req.PackageID,
-		Reader:      file,
-		Size:        header.Size,
-		ContentType: header.Header.Get("Content-Type"),
-	}
-	uploadResp, err := pc.FileUsecase.Upload(c, uploadRequest)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("File upload failed: "+err.Error()))
-		return
-	}
-	pkg.Log.Println(uploadResp)
-	// 验证必需字段
-	if req.PackageID == "" || req.Name == "" || req.Version == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: project_id, name, version"))
-		return
-	}
-
-	// 解析可选的布尔和数字字段
-	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
-		req.IsLatest = true
-	}
-	// 首先需要确保包存在或创建包
-	release := &domain.Release{
-		PackageID:    req.PackageID,
-		Version:      req.Version,
-		TagName:      req.TagName,
-		Title:        req.Title,
-		ChangeLog:    req.Changelog,
-		FileName:     req.FileName,
-		FileSize:     req.FileSize,
-		FilePath:     uploadResp.ObjectName,
-		IsPrerelease: req.IsPrerelease,
-		IsLatest:     req.IsLatest,
-		IsDraft:      req.IsDraft,
-		CreatedBy:    userID,
-	}
-
-	err = pc.PackageUsecase.CreateRelease(c, release)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("Create release failed: "+err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(release))
-}
-
-// DownloadPackage 下载包的最新版本
-func (pc *PackageController) DownloadPackage(c *gin.Context) {
+// UpdatePackage 更新包信息
+func (pc *PackageController) UpdatePackage(c *gin.Context) {
 	id := c.Param("id")
+	var pkg domain.Package
 
-	// 获取包的最新发布版本
-	latestRelease, err := pc.PackageUsecase.GetLatestRelease(c, id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Latest release not found"))
-		return
-	}
-
-	// 增加下载计数
-	err = pc.PackageUsecase.IncrementDownloadCount(c, latestRelease.ID)
-	if err != nil {
-		// 记录错误但不阻止下载
-		// log.Error("Failed to increment download count:", err)
-	}
-
-	// 提供下载链接（实际实现可能需要根据文件存储方式调整）
-	c.JSON(http.StatusOK, domain.RespSuccess(map[string]interface{}{
-		"download_url": latestRelease.FilePath,
-		"filename":     latestRelease.FileName,
-		"size":         latestRelease.FileSize,
-		"version":      latestRelease.Version,
-		"checksum":     latestRelease.FileHash,
-	}))
-}
-
-// GetPackageVersions 获取包版本历史
-func (pc *PackageController) GetPackageVersions(c *gin.Context) {
-	_ = c.Param("id") // packageID - 待实现
-	// 这里需要实现获取包版本历史的逻辑
-	c.JSON(http.StatusOK, domain.RespSuccess([]interface{}{}))
-}
-
-// CreateShareLink 创建分享链接
-func (pc *PackageController) CreateShareLink(c *gin.Context) {
-	id := c.Param("id")
-	var request struct {
-		ExpiryHours int `json:"expiry_hours"`
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&pkg); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 
-	// 这里需要实现创建分享链接的逻辑
-	response := map[string]interface{}{
-		"package_id":   id,
-		"share_token":  "generated_token_here",
-		"share_url":    "/api/v1/packages/share/generated_token_here",
-		"expiry_hours": request.ExpiryHours,
+	pkg.ID = id
+	if err := pc.PackageUsecase.UpdatePackage(c, &pkg); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
 	}
 
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
+	c.JSON(http.StatusOK, domain.RespSuccess("Package updated successfully"))
 }
 
 // GetProjectPackages 获取项目的所有包

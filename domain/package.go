@@ -65,6 +65,7 @@ type PackageUsecase interface {
 	GetPackageByID(c context.Context, id string) (*Package, error)
 	GetPackagesByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
 	DeletePackage(c context.Context, id string) error
+	UpdatePackage(c context.Context, pkg *Package) error
 
 	CreateRelease(c context.Context, release *Release) error
 	GetReleaseByID(c context.Context, id string) (*Release, error)

@@ -57,6 +57,11 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 
 	NewPackageRouter(env, timeout, db, minioClient, packageRouter)
 
+	releaseRouter := protectedRouter.Group("/releases")
+	releaseRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
+
+	NewReleaseRouter(env, timeout, db, minioClient, releaseRouter)
+
 	userRouter := protectedRouter.Group("/user")
 	userRouter.Use(casbinMiddleware.RequirePermission("user", "read"))
 

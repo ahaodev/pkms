@@ -64,7 +64,7 @@ export async function deletePackage(id: string): Promise<ApiResponse<void>> {
 
 export async function getRelease(packageID: string): Promise<ApiResponse<Release[]>> {
     console.log("Fetching releases for package ID:", packageID);
-    const resp = await apiClient.get(`/api/v1/packages/release/${packageID}`);
+    const resp = await apiClient.get(`/api/v1/releases/package/${packageID}`);
     return resp.data
 }
 
@@ -81,7 +81,7 @@ export async function uploadRelease(
     formData.append('version', upload.versionName);
     if (upload.changelog) formData.append('changelog', upload.changelog);
 
-    const resp = await apiClient.post("/api/v1/packages/release", formData, {
+    const resp = await apiClient.post("/api/v1/releases/", formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         },
@@ -127,24 +127,11 @@ export async function getPackageVersionsByNameAndType(packageName: string, packa
     return resp.data;
 }
 
-// 创建分享链接
-export async function createShareLink(id: string, options: { expiryHours?: number; }): Promise<ApiResponse<{
-    package_id: string;
-    share_token: string;
-    share_url: string;
-    expiry_hours: number
-}>> {
-    const resp = await apiClient.post(`/api/v1/packages/${id}/share`, {
-        expiry_hours: options.expiryHours || 24,
-    });
-    return resp.data;
-}
+// 创建发布版本分享链接（移动到 releases.ts）
+// export async function createShareLink - 已移动到 releases.ts
 
-// 通过分享令牌获取包
-export async function getSharedPackage(token: string): Promise<ApiResponse<Package>> {
-    const resp = await apiClient.get(`/api/v1/packages/share/${token}`);
-    return resp.data;
-}
+// 通过分享令牌获取发布版本（移动到 releases.ts）  
+// export async function getSharedRelease - 已移动到 releases.ts
 
 // 获取项目的所有包
 export async function getPackagesByProject(projectId: string): Promise<ApiResponse<Package[]>> {
@@ -211,7 +198,7 @@ export function transformReleaseFromBackend(backendRelease: any): Release {
 // 获取特定包的所有发布版本
 export async function getPackageReleases(packageId: string): Promise<ApiResponse<Release[]>> {
     console.log("Fetching releases for package ID:", packageId);
-    const resp = await apiClient.get(`/api/v1/packages/release/${packageId}`);
+    const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
     
     // Transform the backend data to frontend format
     const releases = (resp.data.data || []).map(transformReleaseFromBackend);

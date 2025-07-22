@@ -2,6 +2,7 @@ import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {PackageFilters} from '@/types/package';
 import * as PackagesAPI from '@/lib/api/packages';
 import {useAuth} from '@/providers/auth-provider.tsx';
+import {createShareLink} from "@/lib/api/releases.ts";
 
 export const usePackages = (filters?: PackageFilters) => {
     const {user, isAdmin} = useAuth();
@@ -64,12 +65,10 @@ export const useDeletePackage = () => {
     });
 };
 
-
-
 export const useGenerateShareLink = () => {
     return useMutation({
         mutationFn: async ({packageId, expiresIn}: { packageId: string; expiresIn?: number }) => {
-            const response = await PackagesAPI.createShareLink(packageId, { expiryHours: expiresIn });
+            const response = await createShareLink(packageId, { expiryHours: expiresIn });
             return response.data;
         },
     });
