@@ -48,3 +48,6 @@ export interface SimpleSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+// Re-export permissions types
+export * from './permissions';
