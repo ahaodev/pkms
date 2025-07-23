@@ -7,6 +7,7 @@ import UsersPage from "@/pages/users";
 import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
 import TenantsPage from "@/pages/tenants";
+import SharePage from "@/pages/share";
 
 export interface RouteConfig {
     path: string;
@@ -20,6 +21,11 @@ export const routes: RouteConfig[] = [
     {
         path: "/login",
         element: LoginPage,
+        requiresAuth: false,
+    },
+    {
+        path: "/share/:code",
+        element: SharePage,
         requiresAuth: false,
     },
 

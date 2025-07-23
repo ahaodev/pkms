@@ -65,12 +65,15 @@ export const setLatestRelease = async (id: string): Promise<{ message: string }>
 };
 
 export const createShareLink = async (releaseId: string, options: { expiryHours?: number }): Promise<{ data: {
-    release_id: string;
-    share_token: string;
+    id: string;
+    code: string;
     share_url: string;
+    release_id: string;
     expiry_hours: number;
     file_name: string;
     version: string;
+    start_at: string;
+    expired_at?: string;
 }}> => {
     const response = await apiClient.post(`/api/v1/releases/${releaseId}/share`, {
         expiry_hours: options.expiryHours || 24,

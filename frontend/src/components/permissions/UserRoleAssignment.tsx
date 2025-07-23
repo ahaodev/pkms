@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Eye, Trash2, UserPlus, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api/api';
-import type { EnhancedRole, User, UserRoleForm } from '@/types';
+import React, {useState} from 'react';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Button} from '@/components/ui/button';
+import {Label} from '@/components/ui/label';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Badge} from '@/components/ui/badge';
+import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
+import {toast} from 'sonner';
+import {apiClient} from '@/lib/api/api';
+import type {EnhancedRole, User, UserRoleForm} from '@/types';
 
 interface UserRoleAssignmentProps {
     enhancedRoles: EnhancedRole[];
@@ -19,18 +19,18 @@ interface UserRoleAssignmentProps {
 }
 
 const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
-    enhancedRoles,
-    users,
-    onRefresh,
-    onShowUserPermissions
-}) => {
+                                                                   enhancedRoles,
+                                                                   users,
+                                                                   onRefresh,
+                                                                   onShowUserPermissions
+                                                               }) => {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserRoleForm>({
         user_id: '',
         role: ''
     });
 
-    const predefinedRoles = ['admin', 'pm', 'developer', 'viewer', 'tester'];
+    const predefinedRoles = ['pm', 'developer', 'viewer'];
 
     const handleAdd = async () => {
         if (!formData.user_id || !formData.role) {
@@ -43,7 +43,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('用户角色添加成功');
                 setShowAddDialog(false);
-                setFormData({ user_id: '', role: '' });
+                setFormData({user_id: '', role: ''});
                 await onRefresh();
             } else {
                 toast.error(response.data.msg || '添加用户角色失败');
@@ -57,7 +57,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
     const handleRemove = async (userId: string, role: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/roles', {
-                data: { user_id: userId, role }
+                data: {user_id: userId, role}
             });
             if (response.data && response.data.code === 0) {
                 toast.success('用户角色删除成功');
@@ -76,13 +76,13 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5" />
+                        <Users className="w-5 h-5"/>
                         用户角色分配
                     </CardTitle>
                     <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                         <DialogTrigger asChild>
                             <Button>
-                                <UserPlus className="w-4 h-4 mr-2" />
+                                <UserPlus className="w-4 h-4 mr-2"/>
                                 添加用户角色
                             </Button>
                         </DialogTrigger>
@@ -93,7 +93,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                             <div className="space-y-4">
                                 <div>
                                     <Label htmlFor="user_id">用户</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.user_id}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -101,7 +101,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择用户" />
+                                            <SelectValue placeholder="选择用户"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {users.map(user => (
@@ -114,7 +114,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="role">角色</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.role}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -122,7 +122,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择角色" />
+                                            <SelectValue placeholder="选择角色"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {predefinedRoles.map(role => (
@@ -137,7 +137,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                     <Button onClick={handleAdd} className="flex-1">
                                         添加
                                     </Button>
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         onClick={() => setShowAddDialog(false)}
                                         className="flex-1"
@@ -182,14 +182,14 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                             size="sm"
                                             onClick={() => onShowUserPermissions(role.user)}
                                         >
-                                            <Eye className="w-4 h-4" />
+                                            <Eye className="w-4 h-4"/>
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleRemove(role.user, role.role)}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4"/>
                                         </Button>
                                     </div>
                                 </TableCell>

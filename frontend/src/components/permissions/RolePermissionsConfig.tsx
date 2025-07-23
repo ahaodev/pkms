@@ -31,7 +31,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
         action: ''
     });
 
-    const predefinedRoles = ['admin', 'pm', 'developer', 'viewer', 'tester'];
+    const predefinedRoles = ['pm', 'developer', 'viewer'];
 
     const rolePolicies = enhancedPolicies.filter(policy => 
         predefinedRoles.includes(policy.subject)

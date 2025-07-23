@@ -32,6 +32,10 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewLoginRouter(env, timeout, db, publicRouter)
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
+	// Public share routes (no authentication required)
+	shareRouter := gin.Group("/share")
+	NewShareRouter(env, timeout, db, fileStorage, shareRouter)
+
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))

@@ -16,11 +16,13 @@ import (
 func NewReleaseRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, fileStorage domain.FileRepository, group *gin.RouterGroup) {
 	releaseRepo := repository.NewReleaseRepository(db)
 	packageRepo := repository.NewPackageRepository(db)
+	shareRepo := repository.NewShareRepository(db)
 
 	rc := &controller.ReleaseController{
 		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, packageRepo, fileStorage, timeout),
 		PackageUsecase: usecase.NewPackageUsecase(packageRepo, releaseRepo, timeout), // 添加 PackageUsecase
 		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
+		ShareUsecase:   usecase.NewShareUsecase(shareRepo, releaseRepo, timeout),
 		Env:            env,
 	}
 

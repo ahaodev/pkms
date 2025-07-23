@@ -13,6 +13,6 @@ const Permissions = "permissions"
 const Settings = "settings"
 const Upgrade = "upgrade"
 
-var SidebarItems = [...]string{Dashboard, Projects, Packages, Tenants, Users, Groups, Permissions, Settings, Upgrade}
+var SidebarItems = [...]string{Dashboard, Projects, Upgrade, Tenants, Users, Groups, Permissions, Settings}
 
 var Actions = [...]string{"read", "write"}

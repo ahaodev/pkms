@@ -36,7 +36,8 @@ export function Releases({
     const handleShare = async (release: Release) => {
         try {
             const result = await createShareLink(release.id, { expiryHours: 24 });
-            const fullUrl = `${window.location.origin}${result.data.share_url}`;
+            const shareCode = result.data.code;
+            const fullUrl = `${window.location.origin}/share/${shareCode}`;
             setShareDialog({
                 isOpen: true,
                 shareUrl: fullUrl,

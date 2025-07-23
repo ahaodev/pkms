@@ -19,6 +19,7 @@ type ReleaseController struct {
 	ReleaseUsecase domain.ReleaseUsecase
 	PackageUsecase domain.PackageUsecase
 	FileUsecase    domain.FileUsecase
+	ShareUsecase   domain.ShareUsecase
 	Env            *bootstrap.Env
 }
 
@@ -297,42 +298,28 @@ func (rc *ReleaseController) SetLatestRelease(c *gin.Context) {
 // CreateShareLink 创建发布版本分享链接
 func (rc *ReleaseController) CreateShareLink(c *gin.Context) {
 	releaseID := c.Param("id")
-	var request struct {
-		ExpiryHours int `json:"expiry_hours"`
-	}
+	var request domain.CreateShareRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 
-	// 验证发布版本是否存在
-	release, err := rc.ReleaseUsecase.GetReleaseByID(c, releaseID)
+	// Set default expiry hours if not provided
+	if request.ExpiryHours <= 0 {
+		request.ExpiryHours = 24 // 默认24小时
+	}
+
+	request.ReleaseID = releaseID
+
+	// Create share using usecase
+	shareResponse, err := rc.ShareUsecase.CreateShare(c, &request)
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Release not found"))
+		c.JSON(http.StatusInternalServerError, domain.RespError("Create share failed: "+err.Error()))
 		return
 	}
 
-	// 创建分享链接（这里需要实现具体的分享逻辑）
-	shareToken := generateShareToken()
-	expiryHours := request.ExpiryHours
-	if expiryHours <= 0 {
-		expiryHours = 24 // 默认24小时
-	}
-
-	// 这里应该保存分享信息到数据库
-	// TODO: 实现分享链接的创建和存储逻辑
-
-	response := map[string]interface{}{
-		"release_id":   releaseID,
-		"share_token":  shareToken,
-		"share_url":    "/api/v1/releases/share/" + shareToken,
-		"expiry_hours": expiryHours,
-		"file_name":    release.FileName,
-		"version":      release.Version,
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
+	c.JSON(http.StatusOK, domain.RespSuccess(shareResponse))
 }
 
 // GetSharedRelease 通过分享令牌获取发布版本

@@ -1,0 +1,30 @@
+package route
+
+import (
+	"time"
+
+	"pkms/api/controller"
+	"pkms/bootstrap"
+	"pkms/domain"
+	"pkms/ent"
+	"pkms/repository"
+	"pkms/usecase"
+
+	"github.com/gin-gonic/gin"
+)
+
+func NewShareRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, fileStorage domain.FileRepository, group *gin.RouterGroup) {
+	shareRepo := repository.NewShareRepository(db)
+	releaseRepo := repository.NewReleaseRepository(db)
+
+	sc := &controller.ShareController{
+		ShareUsecase:   usecase.NewShareUsecase(shareRepo, releaseRepo, timeout),
+		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, nil, fileStorage, timeout),
+		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
+		Env:            env,
+	}
+
+	// Share operations - these routes don't require authentication
+	group.GET("/:code", sc.GetSharedRelease)                // GET /share/:code
+	group.GET("/:code/download", sc.DownloadSharedRelease)   // GET /share/:code/download
+}

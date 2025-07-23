@@ -35,7 +35,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
         action: ''
     });
 
-    const predefinedRoles = ['admin', 'pm', 'developer', 'viewer', 'tester'];
+    const predefinedRoles = ['pm', 'developer', 'viewer'];
 
     // Filter out role policies to show only user policies
     const userPolicies = enhancedPolicies.filter(policy => 
