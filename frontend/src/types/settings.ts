@@ -10,16 +10,6 @@ export interface S3Settings {
   secretKey: string;
 }
 
-
-
-export interface NotificationSettings {
-  onDeployment: boolean;
-  onFailure: boolean;
-  onNewRelease: boolean;
-  emailNotifications: boolean;
-}
-
-
 export interface SettingsTab {
   value: string;
   label: string;
@@ -28,5 +18,4 @@ export interface SettingsTab {
 
 export interface SettingsState {
   s3: S3Settings;
-  notifications: NotificationSettings;
 }

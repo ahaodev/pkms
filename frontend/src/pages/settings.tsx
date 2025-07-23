@@ -3,13 +3,35 @@ import { toast } from "@/hooks/use-toast";
 import {
   SettingsHeader,
   StorageSettings,
-  NotificationSettings,
+  AccountSettings,
+  AppearanceSettings,
+  SecuritySettings,
   SettingsTabs,
   type StorageConfig,
-  type NotificationConfig
+  type AccountConfig,
+  type AppearanceConfig,
+  type SecurityConfig
 } from "@/components/settings";
 
 export default function Settings() {
+  // 账户设置保存处理
+  const handleSaveAccount = useCallback((config: AccountConfig) => {
+    console.log('保存账户设置:', config);
+    toast({
+      title: "设置已保存",
+      description: "账户设置已成功更新",
+    });
+  }, []);
+
+  // 外观设置保存处理
+  const handleSaveAppearance = useCallback((config: AppearanceConfig) => {
+    console.log('保存外观设置:', config);
+    toast({
+      title: "设置已保存",
+      description: "外观设置已成功更新",
+    });
+  }, []);
+  
   // 存储设置保存处理
   const handleSaveStorage = useCallback((config: StorageConfig) => {
     console.log('保存存储设置:', config);
@@ -18,13 +40,13 @@ export default function Settings() {
       description: "存储设置已成功更新",
     });
   }, []);
-  
-  // 通知设置保存处理
-  const handleSaveNotifications = useCallback((config: NotificationConfig) => {
-    console.log('保存通知设置:', config);
+
+  // 安全设置保存处理
+  const handleSaveSecurity = useCallback((config: SecurityConfig) => {
+    console.log('保存安全设置:', config);
     toast({
       title: "设置已保存",
-      description: "通知偏好设置已更新",
+      description: "安全设置已成功更新",
     });
   }, []);
 
@@ -36,14 +58,18 @@ export default function Settings() {
       />
 
       <SettingsTabs
-        defaultValue="storage"
+        defaultValue="account"
+        accountContent={
+          <AccountSettings onSave={handleSaveAccount} />
+        }
+        appearanceContent={
+          <AppearanceSettings onSave={handleSaveAppearance} />
+        }
         storageContent={
           <StorageSettings onSave={handleSaveStorage} />
         }
-        notificationsContent={
-          <div className="space-y-4">
-            <NotificationSettings onSave={handleSaveNotifications} />
-          </div>
+        securityContent={
+          <SecuritySettings onSave={handleSaveSecurity} />
         }
       />
     </div>
