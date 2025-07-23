@@ -1,6 +1,8 @@
 package bootstrap
 
 import (
+	"log"
+
 	"github.com/minio/minio-go/v7"
 	"pkms/domain"
 	"pkms/ent"
@@ -20,6 +22,15 @@ func App() Application {
 	app.Env = NewEnv()
 	app.DB = NewEntDatabase(app.Env)
 	app.CasbinManager = casbin.NewCasbinManager(app.DB)
+
+	// 初始化默认角色权限
+	err := app.CasbinManager.InitializeDefaultRolePermissions()
+	if err != nil {
+		log.Printf("⚠️ Failed to initialize default role permissions: %v", err)
+	} else {
+		log.Println("✅ Default role permissions initialized")
+	}
+
 	// 初始化DB
 	InitDefaultAdmin(app.DB, app.Env, app.CasbinManager)
 	InitDefaultUser(app.DB, "ahao", "123", app.CasbinManager)

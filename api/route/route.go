@@ -73,7 +73,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 
 	// Tenant management routes - admin only
 	tenantRouter := protectedRouter.Group("/tenants")
-	tenantRouter.Use(casbinMiddleware.RequireRole("admin"))
+	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewTenantRouter(env, timeout, db, tenantRouter)
 
 	dashboardRouter := protectedRouter.Group("/dashboard")
@@ -81,7 +81,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrade")
-	upgradeRouter.Use(casbinMiddleware.RequireRole("admin"))
+	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 

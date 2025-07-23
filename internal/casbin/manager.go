@@ -268,3 +268,70 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 
 	return permissions
 }
+
+// InitializeDefaultRolePermissions 初始化默认角色权限
+func (m *CasbinManager) InitializeDefaultRolePermissions() error {
+	rolePermissions := GetDefaultRolePermissions()
+
+	for role, permissions := range rolePermissions {
+		log.Printf("初始化角色 %s 的默认权限", role)
+
+		// 添加资源权限
+		for resource, actions := range permissions.Resources {
+			for _, action := range actions {
+				// 使用通配符域表示全局权限（可以被特定域权限覆盖）
+				_, err := m.enforcer.AddPolicy(role, "*", resource, action)
+				if err != nil {
+					log.Printf("添加角色 %s 的资源权限失败: %v", role, err)
+					return err
+				}
+			}
+		}
+
+		// 添加侧边栏权限
+		for _, sidebarItem := range permissions.Sidebar {
+			_, err := m.enforcer.AddPolicy(role, "*", Sidebar, sidebarItem)
+			if err != nil {
+				log.Printf("添加角色 %s 的侧边栏权限失败: %v", role, err)
+				return err
+			}
+		}
+	}
+
+	return m.enforcer.SavePolicy()
+}
+
+// AddDefaultPermissionsForUser 为用户添加默认权限（基于角色）
+func (m *CasbinManager) AddDefaultPermissionsForUser(userID, role, tenantID string) error {
+	// 首先为用户分配角色
+	_, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
+	if err != nil {
+		return fmt.Errorf("添加用户角色失败: %v", err)
+	}
+
+	rolePermissions := GetDefaultRolePermissions()
+	defaultPerms, exists := rolePermissions[role]
+	if !exists {
+		return fmt.Errorf("未找到角色 %s 的默认权限配置", role)
+	}
+
+	// 为用户在特定租户下添加权限
+	for resource, actions := range defaultPerms.Resources {
+		for _, action := range actions {
+			_, err := m.enforcer.AddPolicy(userID, tenantID, resource, action)
+			if err != nil {
+				log.Printf("添加用户 %s 在租户 %s 的权限失败: %v", userID, tenantID, err)
+			}
+		}
+	}
+
+	// 添加侧边栏权限
+	for _, sidebarItem := range defaultPerms.Sidebar {
+		_, err := m.enforcer.AddPolicy(userID, tenantID, Sidebar, sidebarItem)
+		if err != nil {
+			log.Printf("添加用户 %s 在租户 %s 的侧边栏权限失败: %v", userID, tenantID, err)
+		}
+	}
+
+	return m.enforcer.SavePolicy()
+}

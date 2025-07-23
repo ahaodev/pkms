@@ -208,3 +208,61 @@ func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFu
 func (m *CasbinMiddleware) RequireSidebarPermission(item string) gin.HandlerFunc {
 	return m.RequireResourcePermission("sidebar", item)
 }
+
+// RequireSpecificPermission 要求特定资源和动作权限的中间件（使用常量）
+func (m *CasbinMiddleware) RequireSpecificPermission(resource, action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetString(constants.UserID)
+		tenantID := c.GetHeader(constants.TenantID)
+
+		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, resource, action)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
+			c.Abort()
+			return
+		}
+
+		if !hasPermission {
+			c.JSON(http.StatusForbidden, domain.RespError("权限不足: 需要"+resource+"的"+action+"权限"))
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// RequireCreatePermission 要求创建权限
+func (m *CasbinMiddleware) RequireCreatePermission(resource string) gin.HandlerFunc {
+	return m.RequireSpecificPermission(resource, "create")
+}
+
+// RequireUpdatePermission 要求更新权限
+func (m *CasbinMiddleware) RequireUpdatePermission(resource string) gin.HandlerFunc {
+	return m.RequireSpecificPermission(resource, "update")
+}
+
+// RequireDeletePermission 要求删除权限
+func (m *CasbinMiddleware) RequireDeletePermission(resource string) gin.HandlerFunc {
+	return m.RequireSpecificPermission(resource, "delete")
+}
+
+// RequireListPermission 要求列表权限
+func (m *CasbinMiddleware) RequireListPermission(resource string) gin.HandlerFunc {
+	return m.RequireSpecificPermission(resource, "list")
+}
+
+// RequireSharePermission 要求分享权限
+func (m *CasbinMiddleware) RequireSharePermission(resource string) gin.HandlerFunc {
+	return m.RequireSpecificPermission(resource, "share")
+}
+
+// RequireUploadPermission 要求上传权限
+func (m *CasbinMiddleware) RequireUploadPermission() gin.HandlerFunc {
+	return m.RequireSpecificPermission("file", "upload")
+}
+
+// RequireDownloadPermission 要求下载权限
+func (m *CasbinMiddleware) RequireDownloadPermission() gin.HandlerFunc {
+	return m.RequireSpecificPermission("file", "download")
+}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"pkms/domain"
 	"pkms/ent"
 	"pkms/ent/migrate"
 	"pkms/ent/user"
@@ -99,8 +100,11 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 		log.Printf("❌ Failed to create admin user: %v", err)
 		return
 	}
-	casbinManager.AddRoleForUser(adminUser.ID, "admin", "*")
-	casbinManager.AddPolicy(adminUser.ID, "*", "*", "*")
+	// 使用新的默认权限系统
+	err = casbinManager.AddDefaultPermissionsForUser(adminUser.ID, domain.RoleAdmin, "*")
+	if err != nil {
+		log.Printf("❌ Failed to add default permissions for admin user: %v", err)
+	}
 	log.Printf("✅ Default admin user created: %s", adminUsername)
 	log.Println("⚠️ Please change the default password after first login!")
 }
@@ -146,15 +150,11 @@ func InitDefaultUser(client *ent.Client, userName string, password string, casbi
 		log.Printf("❌ Failed to create user: %v", err)
 		return
 	}
-	casbinManager.AddRoleForUser(user.ID, "pm", userTenant.ID)
-	//casbinManager.AddPolicy(user.ID, userTenant.ID, "*", "*")
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "project", "*")
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "package", "*")
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "release", "*")
-	// Add sidebar permissions
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", casbin.Dashboard)
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", casbin.Projects)
-	casbinManager.AddPolicy(user.ID, userTenant.ID, "sidebar", casbin.Upgrade)
+	// 使用新的默认权限系统
+	err = casbinManager.AddDefaultPermissionsForUser(user.ID, domain.RolePm, userTenant.ID)
+	if err != nil {
+		log.Printf("❌ Failed to add default permissions for user %s: %v", userName, err)
+	}
 	log.Printf("✅ Default user created: %s", userName)
 	log.Println("⚠️ Please change the default password after first login!")
 }
