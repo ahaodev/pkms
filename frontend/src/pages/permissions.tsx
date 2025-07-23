@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
 import {
     RolePermissionsConfig,
     UserRoleAssignment,
     UserPermissionsConfig,
-    UserPermissionsDialog
+    UserPermissionsDialog,
+    PermissionsHeader,
+    PermissionsTabs
 } from '@/components/permissions';
 import type {
     EnhancedPolicy,
@@ -25,7 +26,6 @@ const PermissionsPage: React.FC = () => {
     const [userPermissions, setUserPermissions] = useState<UserPermission[]>([]);
     
     // UI state
-    const [activeTab, setActiveTab] = useState('role-permissions');
     const [showUserPermissionsDialog, setShowUserPermissionsDialog] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
 
@@ -139,37 +139,31 @@ const PermissionsPage: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">权限管理</h1>
-            </div>
+        <div className="space-y-6">
+            <PermissionsHeader 
+                title="权限管理" 
+                description="管理系统角色权限配置和用户权限分配" 
+            />
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="role-permissions">角色权限配置</TabsTrigger>
-                    <TabsTrigger value="user-roles">用户角色分配</TabsTrigger>
-                    <TabsTrigger value="user-permissions">用户权限配置</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="role-permissions">
+            <PermissionsTabs
+                defaultValue="role-permissions"
+                rolePermissionsContent={
                     <RolePermissionsConfig
                         enhancedPolicies={enhancedPolicies}
                         objects={objects}
                         actions={actions}
                         onRefresh={handleRefreshPolicies}
                     />
-                </TabsContent>
-
-                <TabsContent value="user-roles">
+                }
+                userRolesContent={
                     <UserRoleAssignment
                         enhancedRoles={enhancedRoles}
                         users={users}
                         onRefresh={handleRefreshRoles}
                         onShowUserPermissions={handleShowUserPermissions}
                     />
-                </TabsContent>
-
-                <TabsContent value="user-permissions">
+                }
+                userPermissionsContent={
                     <UserPermissionsConfig
                         enhancedPolicies={enhancedPolicies}
                         users={users}
@@ -178,8 +172,8 @@ const PermissionsPage: React.FC = () => {
                         onRefresh={handleRefreshPolicies}
                         onShowUserPermissions={handleShowUserPermissions}
                     />
-                </TabsContent>
-            </Tabs>
+                }
+            />
 
             <UserPermissionsDialog
                 isOpen={showUserPermissionsDialog}
