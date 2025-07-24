@@ -54,15 +54,17 @@ type PackageRepository interface {
 	Create(c context.Context, pkg *Package) error
 	GetByID(c context.Context, id string) (*Package, error)
 	GetByProjectID(c context.Context, projectID string) ([]*Package, error)
+	FetchAll(c context.Context, page, pageSize int) ([]*Package, int, error)
+	FetchByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
 	Update(c context.Context, pkg *Package) error
 	Delete(c context.Context, id string) error
-	FetchByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
 }
 
 // PackageUsecase interface for package business logic
 type PackageUsecase interface {
 	CreatePackage(c context.Context, pkg *Package) error
 	GetPackageByID(c context.Context, id string) (*Package, error)
+	GetAllPackages(c context.Context, page, pageSize int) ([]*Package, int, error)
 	GetPackagesByProject(c context.Context, projectID string, page, pageSize int) ([]*Package, int, error)
 	DeletePackage(c context.Context, id string) error
 	UpdatePackage(c context.Context, pkg *Package) error

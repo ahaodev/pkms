@@ -114,11 +114,17 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 }
 
 func (ur *entUserRepository) Update(c context.Context, u *domain.User) error {
-	updated, err := ur.client.User.
+	updateQuery := ur.client.User.
 		UpdateOneID(u.ID).
 		SetUsername(u.Name).
-		SetIsActive(u.IsActive).
-		Save(c)
+		SetIsActive(u.IsActive)
+
+	// 🔒 如果提供了密码，则更新密码哈希
+	if u.Password != "" {
+		updateQuery = updateQuery.SetPasswordHash(u.Password)
+	}
+
+	updated, err := updateQuery.Save(c)
 
 	if err != nil {
 		return err

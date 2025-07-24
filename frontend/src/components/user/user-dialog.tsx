@@ -67,7 +67,7 @@ export function UserDialog({
                         />
                     </div>
 
-                    {!isEdit && (
+                    {!isEdit ? (
                         <div>
                             <Label htmlFor="password">密码</Label>
                             <Input
@@ -77,6 +77,20 @@ export function UserDialog({
                                 onChange={(e) => updateUserForm({password: e.target.value})}
                                 placeholder="输入密码"
                             />
+                        </div>
+                    ) : (
+                        <div>
+                            <Label htmlFor="password">新密码（可选）</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={userForm.password}
+                                onChange={(e) => updateUserForm({password: e.target.value})}
+                                placeholder="留空则不修改密码"
+                            />
+                            <p className="text-sm text-muted-foreground mt-1">
+                                如果要修改密码，请输入新密码；留空则保持原密码不变
+                            </p>
                         </div>
                     )}
 

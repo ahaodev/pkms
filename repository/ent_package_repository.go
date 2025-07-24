@@ -59,6 +59,50 @@ func (pr *entPackageRepository) GetByProjectID(c context.Context, projectID stri
 	return result, nil
 }
 
+func (pr *entPackageRepository) FetchAll(c context.Context, page, pageSize int) ([]*domain.Package, int, error) {
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	total, err := pr.client.Packages.
+		Query().
+		Count(c)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	pkgs, err := pr.client.Packages.
+		Query().
+		Limit(pageSize).
+		Offset(offset).
+		All(c)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var result []*domain.Package
+	for _, p := range pkgs {
+		// 统计每个包的发布版本数量和下载量
+		versionCount, _ := pr.client.Release.Query().Where(release.PackageID(p.ID)).Count(c)
+		downloadCount, _ := pr.client.Release.Query().Where(release.PackageID(p.ID)).Count(c)
+		result = append(result, &domain.Package{
+			ID:             p.ID,
+			ProjectID:      p.ProjectID,
+			Name:           p.Name,
+			Description:    p.Description,
+			Type:           string(p.Type),
+			CreatedBy:      p.CreatedBy,
+			CreatedAt:      p.CreatedAt,
+			UpdatedAt:      p.UpdatedAt,
+			ReleaseCount:   versionCount,
+			TotalDownloads: downloadCount,
+		})
+	}
+
+	return result, total, nil
+}
+
 func (pr *entPackageRepository) FetchByProject(c context.Context, projectID string, page, pageSize int) ([]*domain.Package, int, error) {
 	offset := (page - 1) * pageSize
 	if offset < 0 {

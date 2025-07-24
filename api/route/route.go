@@ -49,45 +49,41 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	casbinRouter := protectedRouter.Group("/casbin")
 	NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)
 
-	// Protected routes with permission control
-	projectRouter := protectedRouter.Group("/projects")
+	// DEMO阶段大胆简化：只保留核心权限检查！
 	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
-	projectRouter.Use(casbinMiddleware.RequirePermission("project", "read"))
 
+	// 🔥 业务功能路由 - manager及以上角色可访问（兼容旧的pm角色）
+	projectRouter := protectedRouter.Group("/projects")
+	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	packageRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
-
+	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
 	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
 	releaseRouter := protectedRouter.Group("/releases")
-	releaseRouter.Use(casbinMiddleware.RequirePermission("package", "read"))
-
+	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
 	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
+	// 🔥 系统管理路由 - 只有admin可访问
 	userRouter := protectedRouter.Group("/user")
-	userRouter.Use(casbinMiddleware.RequirePermission("user", "read"))
-
+	userRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewUserRouter(env, timeout, db, userRouter)
 
-	// Tenant management routes - admin only
 	tenantRouter := protectedRouter.Group("/tenants")
 	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
+	upgradeRouter := protectedRouter.Group("/upgrade")
+	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	NewUpgradeRouter(env, timeout, db, upgradeRouter)
+
+	// 🔥 普通功能路由 - 登录即可访问
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
-	upgradeRouter := protectedRouter.Group("/upgrade")
-	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
-
-	NewUpgradeRouter(env, timeout, db, upgradeRouter)
-
-	// File management routes
 	fileRouter := protectedRouter.Group("/file")
-	fileRouter.Use(casbinMiddleware.RequirePermission("file", "read"))
-
+	// 文件操作允许所有认证用户访问
 	NewFileRouter(env, timeout, db, fileStorage, fileRouter)
 }

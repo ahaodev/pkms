@@ -35,13 +35,16 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 	}
 
 	// 如果没有project_id，查询所有有权限的包
+	var packages []*domain.Package
+	var total int
+	var err error
 
 	if projectID == "" {
-		c.JSON(http.StatusOK, domain.RespPageSuccess([]*domain.Package{}, 0, page, pageSize))
-		return
+		// 获取所有软件包（后续可以根据权限过滤）
+		packages, total, err = pc.PackageUsecase.GetAllPackages(c, page, pageSize)
+	} else {
+		packages, total, err = pc.PackageUsecase.GetPackagesByProject(c, projectID, page, pageSize)
 	}
-
-	packages, total, err := pc.PackageUsecase.GetPackagesByProject(c, projectID, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

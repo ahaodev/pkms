@@ -160,7 +160,7 @@ func InitDefaultUser(client *ent.Client, userName string, password string, casbi
 	}
 
 	// 为用户分配角色
-	err = casbinManager.AddDefaultRolesForUser(user.ID, domain.RolePm, userTenant.ID)
+	err = casbinManager.AddDefaultRolesForUser(user.ID, domain.RoleManager, userTenant.ID)
 	if err != nil {
 		log.Printf("❌ Failed to add default roles for user %s: %v", userName, err)
 	}

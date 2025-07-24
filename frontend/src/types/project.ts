@@ -1,4 +1,4 @@
-import {Package} from "@/types/package.ts";
+// Package import removed as it's unused after consolidation
 
 export interface Project {
     id: string;
@@ -11,11 +11,4 @@ export interface Project {
     createdBy: string; // 创建者用户ID
 }
 
-export interface PackageFilters {
-    projectId?: string;
-    type?: Package['type'];
-    isLatest?: boolean;
-    search?: string;
-    page?: number;
-    pageSize?: number;
-}
+// PackageFilters 已移至 package.ts 以避免重复定义

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"pkms/domain"
 	"pkms/internal/casbin"
@@ -120,8 +121,12 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 		userID := c.GetString(constants.UserID)
 		tenantID := c.GetHeader(constants.TenantID)
 
+		// DEMO调试：打印权限检查信息
+		fmt.Printf("🔍 权限检查 - UserID: %s, TenantID: %s, 需要角色: %v\n", userID, tenantID, roles)
+
 		// 获取用户角色
 		userRoles := m.casbinManager.GetRolesForUser(userID, tenantID)
+		fmt.Printf("🔍 用户实际角色: %v\n", userRoles)
 
 		// 检查是否有任一所需角色
 		hasAnyRole := false
@@ -136,6 +141,8 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 				break
 			}
 		}
+
+		fmt.Printf("🔍 权限检查结果: %t\n", hasAnyRole)
 
 		if !hasAnyRole {
 			c.JSON(http.StatusForbidden, domain.RespError("角色权限不足"))

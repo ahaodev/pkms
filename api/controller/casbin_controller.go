@@ -332,13 +332,25 @@ func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
 	// 获取项目ID（可选）
 	projectID := c.Query("project_id")
 
-	// 获取项目权限
-	projectPermissions := cc.casbinManager.GetProjectPermissions(userID, tenantID, projectID)
+	// DEMO版本：简化的项目权限检查
+	userRoles := cc.casbinManager.GetRolesForUser(userID, tenantID)
+	var permissions []string
+	for _, role := range userRoles {
+		switch role {
+		case "admin":
+			permissions = []string{"read", "write", "manage"}
+		case "manager":
+			permissions = []string{"read", "write"}
+		default:
+			permissions = []string{"read"}
+		}
+		break
+	}
 
 	response := gin.H{
 		"user_id":     userID,
 		"project_id":  projectID,
-		"permissions": projectPermissions,
+		"permissions": permissions,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
@@ -353,13 +365,25 @@ func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
 	// 获取包名（可选）
 	packageName := c.Query("package_name")
 
-	// 获取包权限
-	packagePermissions := cc.casbinManager.GetPackagePermissions(userID, tenantID, packageName)
+	// DEMO版本：简化的包权限检查
+	userRoles := cc.casbinManager.GetRolesForUser(userID, tenantID)
+	var permissions []string
+	for _, role := range userRoles {
+		switch role {
+		case "admin":
+			permissions = []string{"read", "write", "manage"}
+		case "manager":
+			permissions = []string{"read", "write"}
+		default:
+			permissions = []string{"read"}
+		}
+		break
+	}
 
 	response := gin.H{
 		"user_id":      userID,
 		"package_name": packageName,
-		"permissions":  packagePermissions,
+		"permissions":  permissions,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))

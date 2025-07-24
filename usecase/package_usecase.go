@@ -38,6 +38,12 @@ func (pu *packageUsecase) GetPackageByID(c context.Context, id string) (*domain.
 	return pu.packageRepository.GetByID(ctx, id)
 }
 
+func (pu *packageUsecase) GetAllPackages(c context.Context, page, pageSize int) ([]*domain.Package, int, error) {
+	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
+	defer cancel()
+	return pu.packageRepository.FetchAll(ctx, page, pageSize)
+}
+
 func (pu *packageUsecase) GetPackagesByProject(c context.Context, projectID string, page, pageSize int) ([]*domain.Package, int, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()

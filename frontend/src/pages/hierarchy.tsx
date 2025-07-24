@@ -16,7 +16,8 @@ import {
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import {Search} from 'lucide-react';
-import {getProjectIcon, iconOptions, ProjectDialog} from '@/components/project';
+import {iconOptions} from '@/lib/utils';
+import {ProjectDialog} from '@/components/project';
 import {Projects} from '@/components/projects.tsx';
 import {Packages} from '@/components/packages.tsx';
 import {Releases} from '@/components/releases.tsx';
@@ -305,7 +306,6 @@ export default function HierarchyPage() {
                 formData={projectFormData}
                 setFormData={setProjectFormData}
                 iconOptions={iconOptions}
-                getProjectIcon={getProjectIcon}
                 isLoading={createProject.isPending}
             />
 
@@ -319,7 +319,6 @@ export default function HierarchyPage() {
                 formData={projectFormData}
                 setFormData={setProjectFormData}
                 iconOptions={iconOptions}
-                getProjectIcon={getProjectIcon}
                 isLoading={updateProject.isPending}
             />
 

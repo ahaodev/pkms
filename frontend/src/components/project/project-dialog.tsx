@@ -10,6 +10,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Textarea} from '@/components/ui/textarea';
 import {Button} from '@/components/ui/button';
+import {getProjectIcon, iconOptions as defaultIconOptions} from '@/lib/utils';
 
 interface ProjectFormData {
     name: string;
@@ -25,8 +26,7 @@ interface ProjectDialogProps {
     isEdit?: boolean;
     formData: ProjectFormData;
     setFormData: (data: ProjectFormData) => void;
-    iconOptions: Array<{ value: string; label: string }>;
-    getProjectIcon: (iconType: string) => JSX.Element;
+    iconOptions?: Array<{ value: string; label: string }>;
     isLoading?: boolean;
     project?: any;
     onDelete?: () => void;
@@ -41,8 +41,7 @@ export function ProjectDialog({
                                   isEdit = false,
                                   formData,
                                   setFormData,
-                                  iconOptions,
-                                  getProjectIcon,
+                                  iconOptions = defaultIconOptions,
                                   isLoading = false,
                                   project,
                                   onDelete,

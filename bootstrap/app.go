@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"context"
 	"log"
 
 	"github.com/minio/minio-go/v7"
@@ -32,14 +31,6 @@ func App() Application {
 		log.Println("✅ System admin permissions initialized")
 	}
 
-	// 运行数据库权限修复
-	err = RunPermissionsMigration(app.DB, app.CasbinManager)
-	if err != nil {
-		log.Printf("⚠️ Failed to run permissions migration: %v", err)
-	} else {
-		log.Println("✅ Permissions migration completed")
-	}
-
 	// 初始化DB
 	InitDefaultAdmin(app.DB, app.Env, app.CasbinManager)
 	InitDefaultUser(app.DB, "ahao", "123", app.CasbinManager)
@@ -55,38 +46,4 @@ func App() Application {
 
 func (app *Application) CloseDBConnection() {
 	CloseEntConnection(app.DB)
-}
-
-// RunPermissionsMigration 运行权限数据库迁移
-func RunPermissionsMigration(db *ent.Client, casbinManager *casbin.CasbinManager) error {
-	ctx := context.Background()
-
-	log.Println("🔧 开始权限数据迁移...")
-
-	// 第一步：清理无效的角色权限（使用通配符域的非系统管理员角色权限）
-	err := casbinManager.CleanupInvalidRolePermissions()
-	if err != nil {
-		return err
-	}
-
-	// 第二步：获取所有现有租户
-	tenants, err := db.Tenant.Query().All(ctx)
-	if err != nil {
-		log.Printf("获取租户列表失败: %v", err)
-		return err
-	}
-
-	var tenantIDs []string
-	for _, tenant := range tenants {
-		tenantIDs = append(tenantIDs, tenant.ID)
-	}
-
-	// 第三步：为所有现有租户初始化角色权限
-	err = casbinManager.InitializeExistingTenantsRolePermissions(tenantIDs)
-	if err != nil {
-		return err
-	}
-
-	log.Println("✅ 权限数据迁移完成")
-	return nil
 }

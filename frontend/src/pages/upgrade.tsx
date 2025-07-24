@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
+import {formatFileSize} from '@/lib/utils';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {Card, CardContent, CardHeader, CardTitle,} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
@@ -167,13 +168,7 @@ export default function UpgradePage() {
         }
     }, [deleteUpgradeTargetMutation]);
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+    // formatFileSize 函数已移至 lib/utils.ts 并导入
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString('zh-CN');
@@ -190,7 +185,7 @@ export default function UpgradePage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">升级目标管理</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">升级管理</h1>
                     <p className="text-muted-foreground">
                         管理软件包的升级目标，为客户端提供版本检查和下载服务
                     </p>

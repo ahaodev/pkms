@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"pkms/domain"
 )
 
@@ -24,7 +25,16 @@ func NewUserUsecase(userRepository domain.UserRepository, tenantRepository domai
 func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
-	
+
+	// 🔒 加密密码
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
+	}
+
 	// Create the user first
 	if err := uu.userRepository.Create(ctx, user); err != nil {
 		return err
@@ -34,7 +44,7 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	tenant := &domain.Tenant{
 		Name: user.Name,
 	}
-	
+
 	if err := uu.tenantRepository.Create(ctx, tenant); err != nil {
 		// If tenant creation fails, we should log it but not fail the user creation
 		// since the user has already been created
@@ -71,6 +81,16 @@ func (uu *userUsecase) GetByID(c context.Context, id string) (domain.User, error
 func (uu *userUsecase) Update(c context.Context, user *domain.User) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
+
+	// 🔒 如果有新密码，需要加密
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
+	}
+
 	return uu.userRepository.Update(ctx, user)
 }
 

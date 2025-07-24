@@ -1,6 +1,7 @@
 package casbin
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"pkms/ent"
@@ -17,7 +18,8 @@ var (
 
 // CasbinManager 权限管理器
 type CasbinManager struct {
-	enforcer *casbin.Enforcer
+	enforcer  *casbin.Enforcer
+	entClient *ent.Client
 }
 
 func NewCasbinManager(entClient *ent.Client) *CasbinManager {
@@ -53,7 +55,7 @@ func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 		panic(err)
 	}
 
-	return &CasbinManager{enforcer: enforcer}
+	return &CasbinManager{enforcer: enforcer, entClient: entClient}
 }
 
 // GetEnforcer 获取 enforcer 实例
@@ -88,6 +90,11 @@ func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, 
 
 // GetRolesForUser 获取用户角色
 func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
+	// 检查是否是系统内置admin用户，如果是，在任何租户中都返回admin角色
+	if m.IsSystemAdmin(userID) {
+		return []string{"admin"}
+	}
+
 	roles, _ := m.enforcer.GetRolesForUser(userID, tenantID)
 	return roles
 }
@@ -229,210 +236,88 @@ func (m *CasbinManager) ClearAllRoles() error {
 	return m.enforcer.SavePolicy()
 }
 
-// GetProjectPermissions 获取项目相关权限
-func (m *CasbinManager) GetProjectPermissions(userID, tenantID, projectID string) []string {
-	var permissions []string
+// DEMO版本：项目和包权限直接通过路由中间件的角色检查实现
 
-	// 检查具体的项目权限
-	for _, action := range Actions {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, projectID, action); hasPermission {
-			permissions = append(permissions, action)
-		}
-	}
-
-	return permissions
-}
-
-// GetPackagePermissions 获取包相关权限
-func (m *CasbinManager) GetPackagePermissions(userID, tenantID, packageID string) []string {
-	var permissions []string
-	// 检查具体的包权限
-	for _, action := range Actions {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, packageID, action); hasPermission {
-			permissions = append(permissions, action)
-		}
-	}
-
-	return permissions
-}
-
-// GetSidebarPermissions 获取侧边栏权限
+// GetSidebarPermissions DEMO极简版：直接基于角色返回权限
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
-	var permissions []string
-	// 检查侧边栏
-	for _, item := range SidebarItems {
-		if hasPermission, _ := m.CheckPermission(userID, tenantID, Sidebar, item); hasPermission {
-			permissions = append(permissions, item)
+	// 系统admin全权限
+	if m.IsSystemAdmin(userID) {
+		return []string{"dashboard", "projects", "tenants", "users", "permissions", "settings", "upgrade"}
+	}
+
+	// 获取用户角色
+	userRoles := m.GetRolesForUser(userID, tenantID)
+	if len(userRoles) == 0 {
+		return []string{"dashboard", "projects"} // 默认权限
+	}
+
+	// 基于角色返回权限
+	for _, role := range userRoles {
+		switch role {
+		case RoleAdmin:
+			return []string{"dashboard", "projects", "tenants", "users", "permissions", "settings", "upgrade"}
+		case RoleManager:
+			return []string{"dashboard", "projects", "upgrade"}
 		}
 	}
 
-	return permissions
+	return []string{"dashboard", "projects"} // viewer权限
 }
 
-// InitializeDefaultRolePermissions 初始化默认角色权限
-// 注意：此函数不再使用，角色权限应该在租户上下文中创建
-func (m *CasbinManager) InitializeDefaultRolePermissions() error {
-	log.Printf("警告：InitializeDefaultRolePermissions 已弃用，请使用 InitializeRolePermissionsForTenant")
-	// 不再创建使用通配符域的角色权限，避免多租户隔离问题
-	return nil
-}
+// DEMO版本：删除复杂的权限初始化函数
 
-// InitializeRolePermissionsForTenant 为特定租户初始化角色权限
+// InitializeRolePermissionsForTenant DEMO阶段简化版 - 只需要角色分配，不需要复杂权限
 func (m *CasbinManager) InitializeRolePermissionsForTenant(tenantID string) error {
 	if tenantID == "" {
 		return fmt.Errorf("租户ID不能为空")
 	}
 
-	rolePermissions := GetDefaultRolePermissions()
+	log.Printf("DEMO版本：为租户 %s 跳过复杂权限初始化，只依赖角色检查", tenantID)
 
-	for role, permissions := range rolePermissions {
-		log.Printf("为租户 %s 初始化角色 %s 的权限", tenantID, role)
+	// DEMO阶段：不需要复杂的权限策略，只需要角色分配
+	// 权限检查主要通过角色实现：admin、manager、viewer
 
-		// 添加资源权限 - 使用具体的租户ID而不是通配符
-		for resource, actions := range permissions.Resources {
-			for _, action := range actions {
-				_, err := m.enforcer.AddPolicy(role, tenantID, resource, action)
-				if err != nil {
-					log.Printf("为租户 %s 添加角色 %s 的资源权限失败: %v", tenantID, role, err)
-					return err
-				}
-			}
-		}
-
-		// 添加侧边栏权限 - 使用具体的租户ID
-		for _, sidebarItem := range permissions.Sidebar {
-			_, err := m.enforcer.AddPolicy(role, tenantID, Sidebar, sidebarItem)
-			if err != nil {
-				log.Printf("为租户 %s 添加角色 %s 的侧边栏权限失败: %v", tenantID, role, err)
-				return err
-			}
-		}
-	}
-
-	return m.enforcer.SavePolicy()
+	return nil
 }
 
 // InitializeSystemAdminPermissions 初始化系统管理员权限（可跨租户）
 func (m *CasbinManager) InitializeSystemAdminPermissions() error {
-	adminPermissions := GetDefaultRolePermissions()["admin"]
-
 	log.Printf("初始化系统管理员权限")
 
-	// 只有系统管理员可以使用通配符域
-	for resource, actions := range adminPermissions.Resources {
-		for _, action := range actions {
-			_, err := m.enforcer.AddPolicy("admin", "*", resource, action)
-			if err != nil {
-				log.Printf("添加系统管理员资源权限失败: %v", err)
-				return err
-			}
-		}
-	}
-
-	// 添加侧边栏权限
-	for _, sidebarItem := range adminPermissions.Sidebar {
-		_, err := m.enforcer.AddPolicy("admin", "*", Sidebar, sidebarItem)
-		if err != nil {
-			log.Printf("添加系统管理员侧边栏权限失败: %v", err)
-			return err
-		}
+	// admin作为系统管理员，拥有所有资源的所有权限
+	// 使用通配符简化策略：域名、资源、操作都使用通配符
+	_, err := m.enforcer.AddPolicy("admin", "*", "*", "*")
+	if err != nil {
+		log.Printf("添加系统管理员全局权限失败: %v", err)
+		return err
 	}
 
 	return m.enforcer.SavePolicy()
 }
 
-// CleanupInvalidRolePermissions 清理使用通配符域的角色权限
-func (m *CasbinManager) CleanupInvalidRolePermissions() error {
-	log.Printf("开始清理无效的角色权限（使用通配符域的角色权限）")
-
-	// 获取所有策略
-	allPolicies := m.GetAllPolicies()
-	var invalidPolicies [][]string
-
-	for _, policy := range allPolicies {
-		if len(policy) >= 4 {
-			subject := policy[0]
-			domain := policy[1]
-
-			// 查找使用通配符域的角色权限（非用户权限）
-			// 角色名通常是 admin, pm, user，不是长ID格式
-			if domain == "*" && (subject == "admin" || subject == "pm" || subject == "user") {
-				invalidPolicies = append(invalidPolicies, policy)
-			}
-		}
-	}
-
-	log.Printf("发现 %d 个无效的角色权限策略", len(invalidPolicies))
-
-	// 删除无效的策略
-	for _, policy := range invalidPolicies {
-		if len(policy) >= 4 {
-			removed, err := m.enforcer.RemovePolicy(policy[0], policy[1], policy[2], policy[3])
-			if err != nil {
-				log.Printf("删除无效策略失败: %v", err)
-				return err
-			}
-			if removed {
-				log.Printf("已删除无效策略: %s, %s, %s, %s", policy[0], policy[1], policy[2], policy[3])
-			}
-		}
-	}
-
-	return m.enforcer.SavePolicy()
-}
-
-// InitializeExistingTenantsRolePermissions 为现有租户初始化角色权限
-func (m *CasbinManager) InitializeExistingTenantsRolePermissions(tenantIDs []string) error {
-	log.Printf("为 %d 个现有租户初始化角色权限", len(tenantIDs))
-
-	for _, tenantID := range tenantIDs {
-		if tenantID == "" {
-			continue
-		}
-
-		log.Printf("为租户 %s 初始化角色权限", tenantID)
-		err := m.InitializeRolePermissionsForTenant(tenantID)
-		if err != nil {
-			log.Printf("为租户 %s 初始化角色权限失败: %v", tenantID, err)
-			return err
-		}
-	}
-
-	log.Printf("所有现有租户的角色权限初始化完成")
-	return nil
-}
-
-// AddDefaultPermissionsForUser 为用户添加默认权限（基于角色）
+// AddDefaultPermissionsForUser DEMO版本：只分配角色，不需要复杂权限
 func (m *CasbinManager) AddDefaultPermissionsForUser(userID, role, tenantID string) error {
-	// 首先为用户分配角色
+	// DEMO阶段：只需要为用户分配角色即可
 	_, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
 	if err != nil {
 		return fmt.Errorf("添加用户角色失败: %v", err)
 	}
 
-	rolePermissions := GetDefaultRolePermissions()
-	defaultPerms, exists := rolePermissions[role]
-	if !exists {
-		return fmt.Errorf("未找到角色 %s 的默认权限配置", role)
-	}
-
-	// 为用户在特定租户下添加权限
-	for resource, actions := range defaultPerms.Resources {
-		for _, action := range actions {
-			_, err := m.enforcer.AddPolicy(userID, tenantID, resource, action)
-			if err != nil {
-				log.Printf("添加用户 %s 在租户 %s 的权限失败: %v", userID, tenantID, err)
-			}
-		}
-	}
-
-	// 添加侧边栏权限
-	for _, sidebarItem := range defaultPerms.Sidebar {
-		_, err := m.enforcer.AddPolicy(userID, tenantID, Sidebar, sidebarItem)
-		if err != nil {
-			log.Printf("添加用户 %s 在租户 %s 的侧边栏权限失败: %v", userID, tenantID, err)
-		}
-	}
+	log.Printf("DEMO版本：为用户 %s 在租户 %s 分配角色 %s", userID, tenantID, role)
 
 	return m.enforcer.SavePolicy()
+}
+
+// IsSystemAdmin 检查用户是否是系统内置的admin用户
+func (m *CasbinManager) IsSystemAdmin(userID string) bool {
+	if m.entClient == nil {
+		return false
+	}
+
+	user, err := m.entClient.User.Get(context.Background(), userID)
+	if err != nil {
+		return false
+	}
+
+	return user.Username == "admin"
 }

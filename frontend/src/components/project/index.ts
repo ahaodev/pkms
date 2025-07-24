@@ -1,2 +1,2 @@
 export { ProjectDialog } from './project-dialog';
-export { getProjectIcon, iconOptions } from './project-utils';
+// getProjectIcon and iconOptions 已移至 @/lib/utils

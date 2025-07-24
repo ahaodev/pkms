@@ -4,4 +4,3 @@ export {RecentProjects} from './recent-projects';
 export {RecentPackages} from './recent-packages';
 export {DashboardLoadingView} from './dashboard-loading-view';
 export {DashboardHeader} from './dashboard-header';
-export * from './dashboard-utils';

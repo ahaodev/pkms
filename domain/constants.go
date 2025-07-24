@@ -1,9 +1,8 @@
 package domain
 
-// 角色常量定义
+// DEMO阶段极简角色定义 - 大刀阔斧！
 const (
-	RoleAdmin = "admin"
-	RoleUser  = "user"
-	RolePm    = "pm"
-	// 如有其他角色可继续补充
+	RoleAdmin   = "admin"   // 系统管理员：全权限
+	RoleManager = "manager" // 业务管理员：项目包管理
+	RoleViewer  = "viewer"  // 普通用户：只读权限
 )

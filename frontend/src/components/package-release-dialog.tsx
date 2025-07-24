@@ -15,7 +15,7 @@ import {Textarea} from '@/components/ui/textarea.tsx';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
 import {Progress} from '@/components/ui/progress.tsx';
 import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
-import {formatFileSize} from '../lib/package-utils.tsx';
+import {formatFileSize} from '@/lib/utils';
 import {uploadRelease} from '@/lib/api/packages';
 import {toast} from '@/hooks/use-toast.ts';
 
