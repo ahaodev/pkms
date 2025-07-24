@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Plus, Shield, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
+import { useAuth } from '@/providers/auth-provider';
 import type { EnhancedPolicy, User, UserPolicyForm } from '@/types';
 
 interface UserPermissionsConfigProps {
@@ -28,9 +29,11 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
     onRefresh,
     onShowUserPermissions
 }) => {
+    const { currentTenant } = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserPolicyForm>({
         user_id: '',
+        tenant: currentTenant?.id || '',
         object: '',
         action: ''
     });
@@ -43,7 +46,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
     );
 
     const handleAdd = async () => {
-        if (!formData.user_id || !formData.object || !formData.action) {
+        if (!formData.user_id || !formData.tenant || !formData.object || !formData.action) {
             toast.error('请填写所有必填字段');
             return;
         }
@@ -53,7 +56,12 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('用户权限添加成功');
                 setShowAddDialog(false);
-                setFormData({ user_id: '', object: '', action: '' });
+                setFormData({ 
+                    user_id: '',
+                    tenant: currentTenant?.id || '', 
+                    object: '', 
+                    action: '' 
+                });
                 await onRefresh();
             } else {
                 toast.error(response.data.msg || '添加用户权限失败');
@@ -64,10 +72,10 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
         }
     };
 
-    const handleRemove = async (userId: string, object: string, action: string) => {
+    const handleRemove = async (userId: string, domain: string, object: string, action: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/policies', {
-                data: { user_id: userId, object, action }
+                data: { user_id: userId, tenant: domain, object, action }
             });
             if (response.data && response.data.code === 0) {
                 toast.success('用户权限删除成功');
@@ -119,6 +127,28 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                                     {user.name} ({user.id})
                                                 </SelectItem>
                                             ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="tenant">租户</Label>
+                                    <Select 
+                                        value={formData.tenant}
+                                        onValueChange={(value) => setFormData({
+                                            ...formData,
+                                            tenant: value
+                                        })}
+                                        disabled={!currentTenant}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="选择租户" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {currentTenant && (
+                                                <SelectItem value={currentTenant.id}>
+                                                    {currentTenant.name || currentTenant.id}
+                                                </SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -186,6 +216,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                     <TableHeader>
                         <TableRow>
                             <TableHead>用户</TableHead>
+                            <TableHead>租户</TableHead>
                             <TableHead>对象</TableHead>
                             <TableHead>操作</TableHead>
                             <TableHead>操作</TableHead>
@@ -204,6 +235,9 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                         )}
                                     </div>
                                 </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">{policy.domain_name || policy.domain}</Badge>
+                                </TableCell>
                                 <TableCell>{policy.object}</TableCell>
                                 <TableCell>
                                     <Badge variant="outline">{policy.action}</Badge>
@@ -220,7 +254,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => handleRemove(policy.subject, policy.object, policy.action)}
+                                            onClick={() => handleRemove(policy.subject, policy.domain, policy.object, policy.action)}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>

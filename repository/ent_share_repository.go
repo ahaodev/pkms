@@ -43,7 +43,7 @@ func (esr *entShareRepository) GetByCode(c context.Context, code string) (*domai
 		Code:      shareEntity.Code,
 		ReleaseID: shareEntity.ReleaseID,
 		StartAt:   shareEntity.StartAt,
-		ExpiredAt: shareEntity.ExpiredAt,
+		ExpiredAt: &shareEntity.ExpiredAt,
 	}, nil
 }
 
@@ -62,7 +62,7 @@ func (esr *entShareRepository) GetByReleaseID(c context.Context, releaseID strin
 			Code:      s.Code,
 			ReleaseID: s.ReleaseID,
 			StartAt:   s.StartAt,
-			ExpiredAt: s.ExpiredAt,
+			ExpiredAt: &s.ExpiredAt,
 		}
 	}
 	return result, nil

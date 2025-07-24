@@ -269,3 +269,23 @@ NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly
 requested by the User.
+
+## Permissions and Role Management
+
+### Casbin Policy Details
+- **Row Format**: `[type],[id],[role/domain],[resource],[action]`
+- Policy Entries Added:
+  - System-wide role-based permissions for admin, pm, and user roles
+  - Specific domain permissions for `d208s9frlmvmbf5ketk0`, `d208s9frlmvmbf5ketl0`, and `d208s9frlmvmbf5ketm0`
+  - Covers actions like read, write, delete, create, update, list, and share
+  - Sidebar access permissions for dashboard, projects, and upgrade
+  - Granular permissions for projects, packages, releases, files, and users
+
+### Casbin Rule Details for this System
+- Added Casbin rules covering complex permission mappings:
+  - Specific domain-level access rules
+  - Role-based permission sets for admin, pm, and user roles
+  - Granular permissions across various resources and actions
+```
+
+</invoke>

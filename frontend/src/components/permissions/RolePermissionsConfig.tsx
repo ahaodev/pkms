@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Key, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
+import { useAuth } from '@/providers/auth-provider';
 import type { EnhancedPolicy, RolePolicyForm } from '@/types';
 
 interface RolePermissionsConfigProps {
@@ -24,9 +25,11 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
     actions,
     onRefresh
 }) => {
+    const { currentTenant } = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<RolePolicyForm>({
         role: '',
+        tenant: currentTenant?.id || '',
         object: '',
         action: ''
     });
@@ -38,7 +41,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
     );
 
     const handleAdd = async () => {
-        if (!formData.role || !formData.object || !formData.action) {
+        if (!formData.role || !formData.tenant || !formData.object || !formData.action) {
             toast.error('请填写所有必填字段');
             return;
         }
@@ -48,7 +51,12 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('角色权限添加成功');
                 setShowAddDialog(false);
-                setFormData({ role: '', object: '', action: '' });
+                setFormData({ 
+                    role: '', 
+                    tenant: currentTenant?.id || '', 
+                    object: '', 
+                    action: '' 
+                });
                 await onRefresh();
             } else {
                 toast.error(response.data.msg || '添加角色权限失败');
@@ -59,10 +67,10 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
         }
     };
 
-    const handleRemove = async (role: string, object: string, action: string) => {
+    const handleRemove = async (role: string, domain: string, object: string, action: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/role-policies', {
-                data: { role, object, action }
+                data: { role, tenant: domain, object, action }
             });
             if (response.data && response.data.code === 0) {
                 toast.success('角色权限删除成功');
@@ -114,6 +122,28 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                                     {role}
                                                 </SelectItem>
                                             ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="tenant">租户</Label>
+                                    <Select 
+                                        value={formData.tenant}
+                                        onValueChange={(value) => setFormData({
+                                            ...formData,
+                                            tenant: value
+                                        })}
+                                        disabled={!currentTenant}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="选择租户" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {currentTenant && (
+                                                <SelectItem value={currentTenant.id}>
+                                                    {currentTenant.name || currentTenant.id}
+                                                </SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -181,6 +211,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                     <TableHeader>
                         <TableRow>
                             <TableHead>角色</TableHead>
+                            <TableHead>租户</TableHead>
                             <TableHead>对象</TableHead>
                             <TableHead>操作</TableHead>
                             <TableHead>操作</TableHead>
@@ -192,6 +223,9 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                 <TableCell>
                                     <Badge variant="secondary">{policy.subject}</Badge>
                                 </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">{policy.domain_name || policy.domain}</Badge>
+                                </TableCell>
                                 <TableCell>{policy.object}</TableCell>
                                 <TableCell>
                                     <Badge variant="outline">{policy.action}</Badge>
@@ -200,7 +234,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleRemove(policy.subject, policy.object, policy.action)}
+                                        onClick={() => handleRemove(policy.subject, policy.domain, policy.object, policy.action)}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>

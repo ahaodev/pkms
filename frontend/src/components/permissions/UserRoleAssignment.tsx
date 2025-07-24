@@ -9,6 +9,7 @@ import {Badge} from '@/components/ui/badge';
 import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
 import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
+import {useAuth} from '@/providers/auth-provider';
 import type {EnhancedRole, User, UserRoleForm} from '@/types';
 
 interface UserRoleAssignmentProps {
@@ -24,16 +25,18 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                                                    onRefresh,
                                                                    onShowUserPermissions
                                                                }) => {
+    const { currentTenant } = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserRoleForm>({
         user_id: '',
-        role: ''
+        role: '',
+        tenant: currentTenant?.id || ''
     });
 
     const predefinedRoles = ['pm', 'developer', 'viewer'];
 
     const handleAdd = async () => {
-        if (!formData.user_id || !formData.role) {
+        if (!formData.user_id || !formData.role || !formData.tenant) {
             toast.error('请填写所有必填字段');
             return;
         }
@@ -43,7 +46,11 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('用户角色添加成功');
                 setShowAddDialog(false);
-                setFormData({user_id: '', role: ''});
+                setFormData({
+                    user_id: '', 
+                    role: '',
+                    tenant: currentTenant?.id || ''
+                });
                 await onRefresh();
             } else {
                 toast.error(response.data.msg || '添加用户角色失败');
@@ -54,10 +61,10 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
         }
     };
 
-    const handleRemove = async (userId: string, role: string) => {
+    const handleRemove = async (userId: string, role: string, domain: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/roles', {
-                data: {user_id: userId, role}
+                data: {user_id: userId, role, tenant: domain}
             });
             if (response.data && response.data.code === 0) {
                 toast.success('用户角色删除成功');
@@ -113,6 +120,28 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                     </Select>
                                 </div>
                                 <div>
+                                    <Label htmlFor="tenant">租户</Label>
+                                    <Select
+                                        value={formData.tenant}
+                                        onValueChange={(value) => setFormData({
+                                            ...formData,
+                                            tenant: value
+                                        })}
+                                        disabled={!currentTenant}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="选择租户"/>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {currentTenant && (
+                                                <SelectItem value={currentTenant.id}>
+                                                    {currentTenant.name || currentTenant.id}
+                                                </SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
                                     <Label htmlFor="role">角色</Label>
                                     <Select
                                         value={formData.role}
@@ -155,6 +184,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                     <TableHeader>
                         <TableRow>
                             <TableHead>用户</TableHead>
+                            <TableHead>租户</TableHead>
                             <TableHead>角色</TableHead>
                             <TableHead>操作</TableHead>
                         </TableRow>
@@ -173,6 +203,9 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                     </div>
                                 </TableCell>
                                 <TableCell>
+                                    <Badge variant="outline">{role.domain_name || role.domain}</Badge>
+                                </TableCell>
+                                <TableCell>
                                     <Badge variant="secondary">{role.role}</Badge>
                                 </TableCell>
                                 <TableCell>
@@ -187,7 +220,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => handleRemove(role.user, role.role)}
+                                            onClick={() => handleRemove(role.user, role.role, role.domain)}
                                         >
                                             <Trash2 className="w-4 h-4"/>
                                         </Button>

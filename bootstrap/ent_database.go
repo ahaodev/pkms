@@ -138,7 +138,15 @@ func InitDefaultUser(client *ent.Client, userName string, password string, casbi
 		log.Printf("❌ Failed to create user tenant: %v", err)
 		return
 	}
-	// 创建管理员用户
+
+	// 为新租户初始化角色权限
+	err = casbinManager.InitializeRolePermissionsForTenant(userTenant.ID)
+	if err != nil {
+		log.Printf("❌ Failed to initialize role permissions for tenant %s: %v", userTenant.ID, err)
+		return
+	}
+
+	// 创建用户
 	user, err := client.User.Create().
 		SetUsername(userName).
 		SetPasswordHash(string(hashedPassword)).
@@ -150,10 +158,11 @@ func InitDefaultUser(client *ent.Client, userName string, password string, casbi
 		log.Printf("❌ Failed to create user: %v", err)
 		return
 	}
-	// 使用新的默认权限系统
-	err = casbinManager.AddDefaultPermissionsForUser(user.ID, domain.RolePm, userTenant.ID)
+
+	// 为用户分配角色
+	err = casbinManager.AddDefaultRolesForUser(user.ID, domain.RolePm, userTenant.ID)
 	if err != nil {
-		log.Printf("❌ Failed to add default permissions for user %s: %v", userName, err)
+		log.Printf("❌ Failed to add default roles for user %s: %v", userName, err)
 	}
 	log.Printf("✅ Default user created: %s", userName)
 	log.Println("⚠️ Please change the default password after first login!")

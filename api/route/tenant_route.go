@@ -6,16 +6,17 @@ import (
 	"pkms/api/controller"
 	"pkms/bootstrap"
 	"pkms/ent"
+	"pkms/internal/casbin"
 	"pkms/repository"
 	"pkms/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
-func NewTenantRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
+func NewTenantRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, group *gin.RouterGroup) {
 	tr := repository.NewTenantRepository(db)
 	tc := &controller.TenantController{
-		TenantUsecase: usecase.NewTenantUsecase(tr, timeout),
+		TenantUsecase: usecase.NewTenantUsecase(tr, casbinManager, timeout),
 		Env:           env,
 	}
 

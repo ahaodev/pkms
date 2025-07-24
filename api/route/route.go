@@ -74,7 +74,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	// Tenant management routes - admin only
 	tenantRouter := protectedRouter.Group("/tenants")
 	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
-	NewTenantRouter(env, timeout, db, tenantRouter)
+	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问

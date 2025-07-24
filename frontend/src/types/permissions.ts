@@ -29,6 +29,7 @@ export interface UserPermission {
 // Form state interfaces
 export interface RolePolicyForm {
     role: string;
+    tenant: string;
     object: string;
     action: string;
 }
@@ -36,10 +37,12 @@ export interface RolePolicyForm {
 export interface UserRoleForm {
     user_id: string;
     role: string;
+    tenant: string;
 }
 
 export interface UserPolicyForm {
     user_id: string;
+    tenant: string;
     object: string;
     action: string;
 }

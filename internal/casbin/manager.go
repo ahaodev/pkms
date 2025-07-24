@@ -270,35 +270,136 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 }
 
 // InitializeDefaultRolePermissions 初始化默认角色权限
+// 注意：此函数不再使用，角色权限应该在租户上下文中创建
 func (m *CasbinManager) InitializeDefaultRolePermissions() error {
+	log.Printf("警告：InitializeDefaultRolePermissions 已弃用，请使用 InitializeRolePermissionsForTenant")
+	// 不再创建使用通配符域的角色权限，避免多租户隔离问题
+	return nil
+}
+
+// InitializeRolePermissionsForTenant 为特定租户初始化角色权限
+func (m *CasbinManager) InitializeRolePermissionsForTenant(tenantID string) error {
+	if tenantID == "" {
+		return fmt.Errorf("租户ID不能为空")
+	}
+
 	rolePermissions := GetDefaultRolePermissions()
 
 	for role, permissions := range rolePermissions {
-		log.Printf("初始化角色 %s 的默认权限", role)
+		log.Printf("为租户 %s 初始化角色 %s 的权限", tenantID, role)
 
-		// 添加资源权限
+		// 添加资源权限 - 使用具体的租户ID而不是通配符
 		for resource, actions := range permissions.Resources {
 			for _, action := range actions {
-				// 使用通配符域表示全局权限（可以被特定域权限覆盖）
-				_, err := m.enforcer.AddPolicy(role, "*", resource, action)
+				_, err := m.enforcer.AddPolicy(role, tenantID, resource, action)
 				if err != nil {
-					log.Printf("添加角色 %s 的资源权限失败: %v", role, err)
+					log.Printf("为租户 %s 添加角色 %s 的资源权限失败: %v", tenantID, role, err)
 					return err
 				}
 			}
 		}
 
-		// 添加侧边栏权限
+		// 添加侧边栏权限 - 使用具体的租户ID
 		for _, sidebarItem := range permissions.Sidebar {
-			_, err := m.enforcer.AddPolicy(role, "*", Sidebar, sidebarItem)
+			_, err := m.enforcer.AddPolicy(role, tenantID, Sidebar, sidebarItem)
 			if err != nil {
-				log.Printf("添加角色 %s 的侧边栏权限失败: %v", role, err)
+				log.Printf("为租户 %s 添加角色 %s 的侧边栏权限失败: %v", tenantID, role, err)
 				return err
 			}
 		}
 	}
 
 	return m.enforcer.SavePolicy()
+}
+
+// InitializeSystemAdminPermissions 初始化系统管理员权限（可跨租户）
+func (m *CasbinManager) InitializeSystemAdminPermissions() error {
+	adminPermissions := GetDefaultRolePermissions()["admin"]
+
+	log.Printf("初始化系统管理员权限")
+
+	// 只有系统管理员可以使用通配符域
+	for resource, actions := range adminPermissions.Resources {
+		for _, action := range actions {
+			_, err := m.enforcer.AddPolicy("admin", "*", resource, action)
+			if err != nil {
+				log.Printf("添加系统管理员资源权限失败: %v", err)
+				return err
+			}
+		}
+	}
+
+	// 添加侧边栏权限
+	for _, sidebarItem := range adminPermissions.Sidebar {
+		_, err := m.enforcer.AddPolicy("admin", "*", Sidebar, sidebarItem)
+		if err != nil {
+			log.Printf("添加系统管理员侧边栏权限失败: %v", err)
+			return err
+		}
+	}
+
+	return m.enforcer.SavePolicy()
+}
+
+// CleanupInvalidRolePermissions 清理使用通配符域的角色权限
+func (m *CasbinManager) CleanupInvalidRolePermissions() error {
+	log.Printf("开始清理无效的角色权限（使用通配符域的角色权限）")
+
+	// 获取所有策略
+	allPolicies := m.GetAllPolicies()
+	var invalidPolicies [][]string
+
+	for _, policy := range allPolicies {
+		if len(policy) >= 4 {
+			subject := policy[0]
+			domain := policy[1]
+
+			// 查找使用通配符域的角色权限（非用户权限）
+			// 角色名通常是 admin, pm, user，不是长ID格式
+			if domain == "*" && (subject == "admin" || subject == "pm" || subject == "user") {
+				invalidPolicies = append(invalidPolicies, policy)
+			}
+		}
+	}
+
+	log.Printf("发现 %d 个无效的角色权限策略", len(invalidPolicies))
+
+	// 删除无效的策略
+	for _, policy := range invalidPolicies {
+		if len(policy) >= 4 {
+			removed, err := m.enforcer.RemovePolicy(policy[0], policy[1], policy[2], policy[3])
+			if err != nil {
+				log.Printf("删除无效策略失败: %v", err)
+				return err
+			}
+			if removed {
+				log.Printf("已删除无效策略: %s, %s, %s, %s", policy[0], policy[1], policy[2], policy[3])
+			}
+		}
+	}
+
+	return m.enforcer.SavePolicy()
+}
+
+// InitializeExistingTenantsRolePermissions 为现有租户初始化角色权限
+func (m *CasbinManager) InitializeExistingTenantsRolePermissions(tenantIDs []string) error {
+	log.Printf("为 %d 个现有租户初始化角色权限", len(tenantIDs))
+
+	for _, tenantID := range tenantIDs {
+		if tenantID == "" {
+			continue
+		}
+
+		log.Printf("为租户 %s 初始化角色权限", tenantID)
+		err := m.InitializeRolePermissionsForTenant(tenantID)
+		if err != nil {
+			log.Printf("为租户 %s 初始化角色权限失败: %v", tenantID, err)
+			return err
+		}
+	}
+
+	log.Printf("所有现有租户的角色权限初始化完成")
+	return nil
 }
 
 // AddDefaultPermissionsForUser 为用户添加默认权限（基于角色）

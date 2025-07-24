@@ -5,16 +5,19 @@ import (
 	"time"
 
 	"pkms/domain"
+	"pkms/internal/casbin"
 )
 
 type tenantUsecase struct {
 	tenantRepository domain.TenantRepository
+	casbinManager    *casbin.CasbinManager
 	contextTimeout   time.Duration
 }
 
-func NewTenantUsecase(tenantRepository domain.TenantRepository, timeout time.Duration) domain.TenantUseCase {
+func NewTenantUsecase(tenantRepository domain.TenantRepository, casbinManager *casbin.CasbinManager, timeout time.Duration) domain.TenantUseCase {
 	return &tenantUsecase{
 		tenantRepository: tenantRepository,
+		casbinManager:    casbinManager,
 		contextTimeout:   timeout,
 	}
 }
@@ -22,7 +25,23 @@ func NewTenantUsecase(tenantRepository domain.TenantRepository, timeout time.Dur
 func (tu *tenantUsecase) Create(c context.Context, tenant *domain.Tenant) error {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
-	return tu.tenantRepository.Create(ctx, tenant)
+
+	// 首先创建租户
+	err := tu.tenantRepository.Create(ctx, tenant)
+	if err != nil {
+		return err
+	}
+
+	// 为新租户初始化角色权限
+	err = tu.casbinManager.InitializeRolePermissionsForTenant(tenant.ID)
+	if err != nil {
+		// 如果权限初始化失败，记录日志但不阻止租户创建
+		// 可以在后续手动修复权限
+		// 这里可以考虑是否要回滚租户创建
+		return err
+	}
+
+	return nil
 }
 
 func (tu *tenantUsecase) Fetch(c context.Context) ([]domain.Tenant, error) {
