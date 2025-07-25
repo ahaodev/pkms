@@ -74,7 +74,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
-	upgradeRouter := protectedRouter.Group("/upgrade")
+	upgradeRouter := protectedRouter.Group("/upgrades")
 	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 

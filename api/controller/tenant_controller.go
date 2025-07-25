@@ -4,13 +4,15 @@ import (
 	"net/http"
 	"pkms/bootstrap"
 	"pkms/domain"
+	"pkms/internal/casbin"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TenantController struct {
-	TenantUsecase domain.TenantUseCase
-	Env           *bootstrap.Env
+	TenantUsecase   domain.TenantUseCase
+	CasbinManager   *casbin.CasbinManager
+	Env             *bootstrap.Env
 }
 
 // GetTenants 获取所有租户
@@ -116,6 +118,102 @@ func (tc *TenantController) AddUserToTenant(c *gin.Context) {
 		"message":   "User added to tenant successfully",
 	}
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetTenantUsersWithRole 获取租户用户及其角色信息
+func (tc *TenantController) GetTenantUsersWithRole(c *gin.Context) {
+	tenantID := c.Param("id")
+
+	tenantUsers, err := tc.TenantUsecase.GetTenantUsersWithRole(c, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(tenantUsers))
+}
+
+// AddUserToTenantWithRole 添加用户到租户并设置角色
+func (tc *TenantController) AddUserToTenantWithRole(c *gin.Context) {
+	tenantID := c.Param("id")
+	var request domain.TenantUserRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	// 获取当前用户ID作为创建者
+	createdBy, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
+		return
+	}
+
+	if err := tc.TenantUsecase.AddUserToTenantWithRole(c, request.UserID, tenantID, request.Role, createdBy.(string)); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	response := map[string]interface{}{
+		"user_id":   request.UserID,
+		"tenant_id": tenantID,
+		"role":      request.Role,
+		"message":   "User added to tenant with role successfully",
+	}
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// UpdateTenantUserRole 更新租户用户角色
+func (tc *TenantController) UpdateTenantUserRole(c *gin.Context) {
+	tenantID := c.Param("id")
+	userID := c.Param("userId")
+	var request domain.UpdateTenantUserRoleRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	if err := tc.TenantUsecase.UpdateTenantUserRole(c, userID, tenantID, request.Role, request.IsActive); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	response := map[string]interface{}{
+		"user_id":   userID,
+		"tenant_id": tenantID,
+		"role":      request.Role,
+		"message":   "Tenant user role updated successfully",
+	}
+	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetTenantUserRole 获取用户在特定租户中的角色
+func (tc *TenantController) GetTenantUserRole(c *gin.Context) {
+	tenantID := c.Param("id")
+	userID := c.Param("userId")
+
+	tenantUser, err := tc.TenantUsecase.GetTenantUserRole(c, userID, tenantID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, domain.RespError("未找到用户在该租户中的角色信息"))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(tenantUser))
+}
+
+// GetUserTenants 获取用户所属的所有租户及角色信息
+func (tc *TenantController) GetUserTenants(c *gin.Context) {
+	userID := c.Param("userId")
+
+	userTenants, err := tc.TenantUsecase.GetUserTenants(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(userTenants))
 }
 
 // RemoveUserFromTenant 从租户中移除用户

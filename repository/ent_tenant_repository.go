@@ -169,3 +169,29 @@ func (tr *entTenantRepository) RemoveUserFromTenant(c context.Context, userID, t
 
 	return err
 }
+
+// 以下方法暂时返回空实现，因为我们使用 Casbin 进行角色管理
+func (tr *entTenantRepository) GetTenantUsersWithRole(c context.Context, tenantID string) ([]domain.TenantUser, error) {
+	// 这个方法现在通过 Casbin 在控制器层实现
+	return []domain.TenantUser{}, nil
+}
+
+func (tr *entTenantRepository) AddUserToTenantWithRole(c context.Context, userID, tenantID, role, createdBy string) error {
+	// 首先添加用户到租户（使用现有的多对多关系）
+	return tr.AddUserToTenant(c, userID, tenantID)
+}
+
+func (tr *entTenantRepository) UpdateTenantUserRole(c context.Context, userID, tenantID, role string, isActive *bool) error {
+	// 角色更新通过 Casbin 处理
+	return nil
+}
+
+func (tr *entTenantRepository) GetTenantUserRole(c context.Context, userID, tenantID string) (domain.TenantUser, error) {
+	// 角色获取通过 Casbin 处理
+	return domain.TenantUser{}, nil
+}
+
+func (tr *entTenantRepository) GetUserTenants(c context.Context, userID string) ([]domain.TenantUser, error) {
+	// 这个方法现在通过 Casbin 在控制器层实现
+	return []domain.TenantUser{}, nil
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"pkms/domain"
 	"pkms/ent"
 	"sync"
 
@@ -254,9 +255,9 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 	// 基于角色返回权限
 	for _, role := range userRoles {
 		switch role {
-		case RoleAdmin:
+		case domain.RoleAdmin:
 			return []string{"dashboard", "projects", "tenants", "users", "permissions", "settings", "upgrade"}
-		case RoleManager:
+		case domain.RoleManager:
 			return []string{"dashboard", "projects", "upgrade"}
 		}
 	}
@@ -278,6 +279,69 @@ func (m *CasbinManager) InitializeRolePermissionsForTenant(tenantID string) erro
 	// 权限检查主要通过角色实现：admin、manager、viewer
 
 	return nil
+}
+
+// 租户级别的角色管理方法
+
+// AddRoleForUserInTenant 为用户在指定租户中添加角色
+func (m *CasbinManager) AddRoleForUserInTenant(userID, role, tenantID string) error {
+	log.Printf("为用户 %s 在租户 %s 中添加角色 %s", userID, tenantID, role)
+	// 使用域模式：sub, role, domain
+	_, err := m.enforcer.AddRoleForUserInDomain(userID, role, tenantID)
+	if err != nil {
+		return fmt.Errorf("添加租户角色失败: %v", err)
+	}
+	return m.enforcer.SavePolicy()
+}
+
+// DeleteRoleForUserInTenant 移除用户在指定租户中的角色
+func (m *CasbinManager) DeleteRoleForUserInTenant(userID, role, tenantID string) error {
+	log.Printf("移除用户 %s 在租户 %s 中的角色 %s", userID, tenantID, role)
+	_, err := m.enforcer.DeleteRoleForUserInDomain(userID, role, tenantID)
+	if err != nil {
+		return fmt.Errorf("移除租户角色失败: %v", err)
+	}
+	return m.enforcer.SavePolicy()
+}
+
+// GetRolesForUserInTenant 获取用户在指定租户中的所有角色
+func (m *CasbinManager) GetRolesForUserInTenant(userID, tenantID string) []string {
+	roles := m.enforcer.GetRolesForUserInDomain(userID, tenantID)
+	log.Printf("获取用户 %s 在租户 %s 中的角色: %v", userID, tenantID, roles)
+	return roles
+}
+
+// GetUsersForRoleInTenant 获取在指定租户中具有特定角色的所有用户
+func (m *CasbinManager) GetUsersForRoleInTenant(role, tenantID string) []string {
+	users := m.enforcer.GetUsersForRoleInDomain(role, tenantID)
+	log.Printf("获取租户 %s 中具有角色 %s 的用户: %v", tenantID, role, users)
+	return users
+}
+
+// HasRoleInTenant 检查用户在指定租户中是否具有特定角色
+func (m *CasbinManager) HasRoleInTenant(userID, role, tenantID string) bool {
+	has, _ := m.enforcer.HasRoleForUser(userID, role)
+	// 检查域级别的角色 - 通过GetRolesForUserInDomain检查
+	roles := m.enforcer.GetRolesForUserInDomain(userID, tenantID)
+	hasDomain := false
+	for _, r := range roles {
+		if r == role {
+			hasDomain = true
+			break
+		}
+	}
+	log.Printf("检查用户 %s 在租户 %s 中是否具有角色 %s: global=%t, domain=%t", userID, tenantID, role, has, hasDomain)
+	return hasDomain
+}
+
+// DeleteAllRolesForUserInTenant 移除用户在指定租户中的所有角色
+func (m *CasbinManager) DeleteAllRolesForUserInTenant(userID, tenantID string) error {
+	log.Printf("移除用户 %s 在租户 %s 中的所有角色", userID, tenantID)
+	_, err := m.enforcer.DeleteRolesForUserInDomain(userID, tenantID)
+	if err != nil {
+		return fmt.Errorf("移除租户中所有角色失败: %v", err)
+	}
+	return m.enforcer.SavePolicy()
 }
 
 // InitializeSystemAdminPermissions 初始化系统管理员权限（可跨租户）

@@ -17,6 +17,7 @@ func NewTenantRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	tr := repository.NewTenantRepository(db)
 	tc := &controller.TenantController{
 		TenantUsecase: usecase.NewTenantUsecase(tr, casbinManager, timeout),
+		CasbinManager: casbinManager,
 		Env:           env,
 	}
 
@@ -31,4 +32,13 @@ func NewTenantRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	group.GET("/:id/users", tc.GetTenantUsers)                  // GET /api/v1/tenants/:id/users
 	group.POST("/:id/users", tc.AddUserToTenant)                // POST /api/v1/tenants/:id/users
 	group.DELETE("/:id/users/:userId", tc.RemoveUserFromTenant) // DELETE /api/v1/tenants/:id/users/:userId
+
+	// 租户用户角色管理接口（基于Casbin）
+	group.GET("/:id/users-with-roles", tc.GetTenantUsersWithRole)  // GET /api/v1/tenants/:id/users-with-roles
+	group.POST("/:id/users/:userId/roles", tc.UpdateTenantUserRole)    // POST /api/v1/tenants/:id/users/:userId/roles
+	group.GET("/:id/users/:userId/roles", tc.GetTenantUserRole)     // GET /api/v1/tenants/:id/users/:userId/roles
+	group.DELETE("/:id/users/:userId/roles", tc.RemoveUserFromTenant) // DELETE /api/v1/tenants/:id/users/:userId/roles
+
+	// 用户租户关系查询
+	group.GET("/users/:userId/tenants", tc.GetUserTenants) // GET /api/v1/tenants/users/:userId/tenants
 }

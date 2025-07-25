@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"pkms/domain"
@@ -90,4 +91,67 @@ func (tu *tenantUsecase) RemoveUserFromTenant(c context.Context, userID, tenantI
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.RemoveUserFromTenant(ctx, userID, tenantID)
+}
+
+// GetTenantUsersWithRole 获取租户用户及其角色信息
+func (tu *tenantUsecase) GetTenantUsersWithRole(c context.Context, tenantID string) ([]domain.TenantUser, error) {
+	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
+	defer cancel()
+	return tu.tenantRepository.GetTenantUsersWithRole(ctx, tenantID)
+}
+
+// AddUserToTenantWithRole 添加用户到租户并设置角色
+func (tu *tenantUsecase) AddUserToTenantWithRole(c context.Context, userID, tenantID, role, createdBy string) error {
+	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
+	defer cancel()
+
+	// 验证角色是否有效
+	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleManager, domain.TenantRoleViewer}
+	validRole := false
+	for _, vr := range validRoles {
+		if role == vr {
+			validRole = true
+			break
+		}
+	}
+	if !validRole {
+		return fmt.Errorf("无效的角色: %s", role)
+	}
+
+	return tu.tenantRepository.AddUserToTenantWithRole(ctx, userID, tenantID, role, createdBy)
+}
+
+// UpdateTenantUserRole 更新租户用户角色
+func (tu *tenantUsecase) UpdateTenantUserRole(c context.Context, userID, tenantID, role string, isActive *bool) error {
+	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
+	defer cancel()
+
+	// 验证角色是否有效
+	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleManager, domain.TenantRoleViewer}
+	validRole := false
+	for _, vr := range validRoles {
+		if role == vr {
+			validRole = true
+			break
+		}
+	}
+	if !validRole {
+		return fmt.Errorf("无效的角色: %s", role)
+	}
+
+	return tu.tenantRepository.UpdateTenantUserRole(ctx, userID, tenantID, role, isActive)
+}
+
+// GetTenantUserRole 获取用户在特定租户中的角色
+func (tu *tenantUsecase) GetTenantUserRole(c context.Context, userID, tenantID string) (domain.TenantUser, error) {
+	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
+	defer cancel()
+	return tu.tenantRepository.GetTenantUserRole(ctx, userID, tenantID)
+}
+
+// GetUserTenants 获取用户所属的所有租户及角色信息
+func (tu *tenantUsecase) GetUserTenants(c context.Context, userID string) ([]domain.TenantUser, error) {
+	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
+	defer cancel()
+	return tu.tenantRepository.GetUserTenants(ctx, userID)
 }
