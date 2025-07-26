@@ -11,6 +11,7 @@ type dashboardUsecase struct {
 	projectRepository domain.ProjectRepository
 	packageRepository domain.PackageRepository
 	userRepository    domain.UserRepository
+	releaseRepository domain.ReleaseRepository
 	contextTimeout    time.Duration
 }
 
@@ -18,12 +19,14 @@ func NewDashboardUsecase(
 	projectRepository domain.ProjectRepository,
 	packageRepository domain.PackageRepository,
 	userRepository domain.UserRepository,
+	releaseRepository domain.ReleaseRepository,
 	timeout time.Duration,
 ) domain.DashboardUsecase {
 	return &dashboardUsecase{
 		projectRepository: projectRepository,
 		packageRepository: packageRepository,
 		userRepository:    userRepository,
+		releaseRepository: releaseRepository,
 		contextTimeout:    timeout,
 	}
 }
@@ -53,10 +56,18 @@ func (du *dashboardUsecase) GetStats(c context.Context, tenantID string) (domain
 		return domain.DashboardStats{}, err
 	}
 
+	// Get total downloads for the tenant
+	totalDownloads, err := du.releaseRepository.GetTotalDownloadsByTenant(ctx, tenantID)
+	if err != nil {
+		// Log error but don't fail the entire stats request
+		totalDownloads = 0
+	}
+
 	return domain.DashboardStats{
-		TotalProjects: len(projects),
-		TotalPackages: totalPackages,
-		TotalUsers:    len(users),
+		TotalProjects:  len(projects),
+		TotalPackages:  totalPackages,
+		TotalUsers:     len(users),
+		TotalDownloads: totalDownloads,
 	}, nil
 }
 

@@ -1,9 +1,8 @@
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useDashboardData} from '@/hooks/use-dashboard';
 import {useProjects} from '@/hooks/use-projects';
-import {usePackages} from '@/hooks/use-packages';
-import {Package} from '@/types/package.ts';
-import {DashboardHeader, DashboardLoadingView, RecentProjects, StatsGrid,} from '@/components/dashboard';
+import {DashboardHeader, DashboardLoadingView, RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
 
 /**
  * 仪表板页：展示项目、包、上传、下载等核心统计信息和最近动态
@@ -12,22 +11,7 @@ import {DashboardHeader, DashboardLoadingView, RecentProjects, StatsGrid,} from 
 export default function Dashboard() {
     const navigate = useNavigate();
     const {data: projects, isLoading: projectsLoading} = useProjects();
-    const {data: packagesPage, isLoading: packagesLoading} = usePackages();
-    // 兼容 PageResponse 返回结构
-    const packages = useMemo(() => (Array.isArray(packagesPage) ? packagesPage : packagesPage?.data || []), [packagesPage]);
-
-    // 使用 useMemo 优化统计数据计算
-    const stats = useMemo(() => {
-        const dayAgo = new Date();
-        dayAgo.setDate(dayAgo.getDate() - 1);
-
-        return {
-            totalProjects: projects?.length || 0,
-            totalPackages: packages.length,
-            recentUploads: packages.filter((p: Package) => p.createdAt > dayAgo).length,
-            totalDownloads: 0, // TODO: 需要从 Release 统计计算
-        };
-    }, [projects, packages]);
+    const {stats, activities, isLoading: dashboardLoading, error: dashboardError} = useDashboardData();
 
     // 使用 useCallback 优化导航函数
     const navigateToHierarchy = useCallback((projectId?: string) => {
@@ -42,8 +26,13 @@ export default function Dashboard() {
         navigateToHierarchy();
     }, [navigateToHierarchy]);
 
-    if (projectsLoading || packagesLoading) {
+    if (projectsLoading || dashboardLoading) {
         return <DashboardLoadingView/>;
+    }
+
+    // 如果仪表板数据加载失败，显示错误信息但仍然显示项目数据
+    if (dashboardError) {
+        console.error('Dashboard data loading failed:', dashboardError);
     }
 
     return (
@@ -62,6 +51,12 @@ export default function Dashboard() {
                 projects={projects}
                 onViewProject={handleViewProject}
                 onViewAllProjects={handleViewAllProjects}
+            />
+
+            {/* 最近活动 */}
+            <RecentActivities
+                activities={activities}
+                isLoading={dashboardLoading}
             />
         </div>
     );

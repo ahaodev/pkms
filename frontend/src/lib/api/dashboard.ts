@@ -6,19 +6,19 @@ export interface DashboardStats {
     totalProjects: number;
     totalPackages: number;
     totalUsers: number;
-    totalDownloads: number;
-    storageUsed: number;
-    activeUsers: number;
+    totalGroups?: number;
+    totalDownloads?: number;
+    storageUsed?: number;
+    activeUsers?: number;
 }
 
-// 最近活动类型
+// 最近活动类型（匹配后端返回格式）
 export interface RecentActivity {
     id: string;
-    type: 'upload' | 'download' | 'create' | 'update' | 'delete';
+    type: string; // "project_created", "package_created", "user_joined"
     description: string;
-    user: string;
-    timestamp: Date;
-    relatedId?: string;
+    user_id: string;
+    created_at: string;
 }
 
 // 图表数据类型
@@ -79,9 +79,8 @@ export function transformRecentActivityFromBackend(backendActivity: any): Recent
         id: backendActivity.id,
         type: backendActivity.type,
         description: backendActivity.description,
-        user: backendActivity.user,
-        timestamp: new Date(backendActivity.timestamp),
-        relatedId: backendActivity.related_id
+        user_id: backendActivity.user_id,
+        created_at: backendActivity.created_at
     };
 }
 

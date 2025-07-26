@@ -49,6 +49,7 @@ type ReleaseRepository interface {
 	GetByShareToken(c context.Context, token string) (*Release, error)
 	Delete(c context.Context, id string) error
 	IncrementDownloadCount(c context.Context, id string) error
+	GetTotalDownloadsByTenant(c context.Context, tenantID string) (int, error)
 }
 
 // ReleaseUsecase interface for release business logic

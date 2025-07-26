@@ -17,9 +17,10 @@ func NewDashboardRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Clien
 	ur := repository.NewUserRepository(db)
 	pr := repository.NewProjectRepository(db)
 	pkgRepo := repository.NewPackageRepository(db)
+	releaseRepo := repository.NewReleaseRepository(db)
 
 	dc := &controller.DashboardController{
-		DashboardUsecase: usecase.NewDashboardUsecase(pr, pkgRepo, ur, timeout),
+		DashboardUsecase: usecase.NewDashboardUsecase(pr, pkgRepo, ur, releaseRepo, timeout),
 		Env:              env,
 	}
 

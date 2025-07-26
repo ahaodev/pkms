@@ -5,6 +5,8 @@ import (
 
 	"pkms/domain"
 	"pkms/ent"
+	"pkms/ent/packages"
+	"pkms/ent/project"
 	"pkms/ent/release"
 )
 
@@ -136,6 +138,32 @@ func (rr *entReleaseRepository) SetAsLatest(c context.Context, packageID, releas
 		Save(c)
 
 	return err
+}
+
+func (rr *entReleaseRepository) GetTotalDownloadsByTenant(c context.Context, tenantID string) (int, error) {
+	// 需要通过 release -> package -> project -> tenant 的关系来过滤
+	// 查询该租户下所有 release 的下载次数总和
+	releases, err := rr.client.Release.
+		Query().
+		Where(
+			release.HasPackageWith(
+				packages.HasProjectWith(
+					project.TenantID(tenantID),
+				),
+			),
+		).
+		All(c)
+
+	if err != nil {
+		return 0, err
+	}
+
+	totalDownloads := 0
+	for _, rel := range releases {
+		totalDownloads += rel.DownloadCount
+	}
+
+	return totalDownloads, nil
 }
 
 func (rr *entReleaseRepository) convertToDomain(entRelease *ent.Release) *domain.Release {

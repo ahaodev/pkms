@@ -6,10 +6,11 @@ import (
 )
 
 type DashboardStats struct {
-	TotalProjects int `json:"total_projects"`
-	TotalPackages int `json:"total_packages"`
-	TotalUsers    int `json:"total_users"`
-	TotalGroups   int `json:"total_groups"`
+	TotalProjects  int `json:"total_projects"`
+	TotalPackages  int `json:"total_packages"`
+	TotalUsers     int `json:"total_users"`
+	TotalGroups    int `json:"total_groups"`
+	TotalDownloads int `json:"total_downloads"`
 }
 
 type RecentActivity struct {

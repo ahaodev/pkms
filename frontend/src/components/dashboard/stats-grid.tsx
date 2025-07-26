@@ -1,15 +1,10 @@
-import {Package as PackageIcon, Upload, Download, FolderOpen} from 'lucide-react';
+import {Package as PackageIcon, Users, Download, FolderOpen} from 'lucide-react';
 import {StatCard} from './stat-card';
 
-interface DashboardStats {
-    totalProjects: number;
-    totalPackages: number;
-    recentUploads: number;
-    totalDownloads: number;
-}
+import type { DashboardStats } from '@/lib/api/dashboard';
 
 interface StatsGridProps {
-    stats: DashboardStats;
+    stats?: DashboardStats;
 }
 
 // 统计卡片配置
@@ -27,10 +22,10 @@ const STAT_CARDS = [
         suffix: '软件包'
     },
     {
-        key: 'recentUploads',
-        title: '今日上传',
-        icon: Upload,
-        suffix: '新包上传'
+        key: 'totalUsers',
+        title: '用户总数',
+        icon: Users,
+        suffix: '注册用户'
     },
     {
         key: 'totalDownloads',
@@ -47,7 +42,7 @@ export function StatsGrid({stats}: StatsGridProps) {
                 <StatCard
                     key={key}
                     title={title}
-                    value={stats[key as keyof typeof stats]}
+                    value={stats?.[key as keyof DashboardStats] ?? 0}
                     icon={icon}
                     suffix={suffix}
                 />
