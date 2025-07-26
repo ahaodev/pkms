@@ -19,7 +19,7 @@ func NewShareRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, f
 
 	sc := &controller.ShareController{
 		ShareUsecase:   usecase.NewShareUsecase(shareRepo, releaseRepo, timeout),
-		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, nil, fileStorage, timeout),
+		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, nil, fileStorage, env, timeout),
 		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
 		Env:            env,
 	}

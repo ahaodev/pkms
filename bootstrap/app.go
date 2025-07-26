@@ -34,7 +34,7 @@ func App() Application {
 	// 初始化DB
 	InitDefaultAdmin(app.DB, app.Env, app.CasbinManager)
 	InitDefaultUser(app.DB, "ahao", "123", app.CasbinManager)
-	InitDefaultUser(app.DB, "test", "123", app.CasbinManager)
+	InitDefaultUser(app.DB, "hao88", "123", app.CasbinManager)
 
 	// 初始化文件存储
 	storageConfig := InitStorage(app.Env)

@@ -19,7 +19,7 @@ func NewReleaseRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	shareRepo := repository.NewShareRepository(db)
 
 	rc := &controller.ReleaseController{
-		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, packageRepo, fileStorage, timeout),
+		ReleaseUsecase: usecase.NewReleaseUsecase(releaseRepo, packageRepo, fileStorage, env, timeout),
 		PackageUsecase: usecase.NewPackageUsecase(packageRepo, releaseRepo, timeout), // 添加 PackageUsecase
 		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
 		ShareUsecase:   usecase.NewShareUsecase(shareRepo, releaseRepo, timeout),
