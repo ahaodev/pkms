@@ -307,7 +307,7 @@ func (rc *ReleaseController) CreateShareLink(c *gin.Context) {
 
 	// Set default expiry hours if not provided
 	if request.ExpiryHours <= 0 {
-		request.ExpiryHours = 24 // 默认24小时
+		request.ExpiryHours = 24 * 7 // 默认24小时
 	}
 
 	request.ReleaseID = releaseID

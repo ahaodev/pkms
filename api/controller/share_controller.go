@@ -17,40 +17,6 @@ type ShareController struct {
 	Env            *bootstrap.Env
 }
 
-// GetSharedRelease 通过分享码获取发布版本信息
-func (sc *ShareController) GetSharedRelease(c *gin.Context) {
-	code := c.Param("code")
-
-	// Validate share and get share info
-	share, err := sc.ShareUsecase.ValidateShare(c, code)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Share not found or expired: "+err.Error()))
-		return
-	}
-
-	// Get release information
-	release, err := sc.ReleaseUsecase.GetReleaseByID(c, share.ReleaseID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Release not found"))
-		return
-	}
-
-	// Return public release info (without sensitive data)
-	response := map[string]interface{}{
-		"code":       share.Code,
-		"file_name":  release.FileName,
-		"version":    release.Version,
-		"file_size":  release.FileSize,
-		"created_at": release.CreatedAt,
-		"share_info": map[string]interface{}{
-			"start_at":   share.StartAt,
-			"expired_at": share.ExpiredAt,
-		},
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
-}
-
 // DownloadSharedRelease 通过分享码下载发布版本文件
 func (sc *ShareController) DownloadSharedRelease(c *gin.Context) {
 	code := c.Param("code")

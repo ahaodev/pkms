@@ -30,7 +30,6 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	publicRouter := gin.Group(ApiUri)
 	// All Public APIs
 	NewLoginRouter(env, timeout, db, publicRouter)
-	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
 	// Public share routes (no authentication required)
 	shareRouter := gin.Group("/share")
@@ -43,7 +42,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
-
+	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 	// 个人资料路由，允许所有认证用户访问
 	profileRouter := protectedRouter.Group("/profile")
 	NewProfileRouter(env, timeout, db, profileRouter)

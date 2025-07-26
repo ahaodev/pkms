@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"pkms/domain"
+	"pkms/pkg"
 	"time"
 
 	"github.com/rs/xid"
@@ -25,13 +25,6 @@ func NewShareUsecase(shareRepo domain.ShareRepository, releaseRepo domain.Releas
 	}
 }
 
-// generateShareCode generates a 5-digit random code
-func generateShareCode() string {
-	// Generate a 5-digit number (10000-99999)
-	code := rand.Intn(90000) + 10000
-	return fmt.Sprintf("%d", code)
-}
-
 func (su *shareUsecase) CreateShare(c context.Context, req *domain.CreateShareRequest) (*domain.ShareResponse, error) {
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
 	defer cancel()
@@ -46,7 +39,7 @@ func (su *shareUsecase) CreateShare(c context.Context, req *domain.CreateShareRe
 	var shareCode string
 	maxRetries := 10
 	for i := 0; i < maxRetries; i++ {
-		shareCode = generateShareCode()
+		shareCode = pkg.GenerateShareCode(5)
 		// Check if code already exists
 		_, err := su.shareRepository.GetByCode(ctx, shareCode)
 		if err != nil {

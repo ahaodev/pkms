@@ -7,6 +7,7 @@ import {Label} from '@/components/ui/label';
 import {useToast} from '@/hooks/use-toast';
 import QRCode from 'qrcode';
 import type {ShareDialogProps} from '@/types';
+import {apiClient} from '@/lib/api/api';
 
 /**
  * ShareDialog 组件：用于展示包的分享链接和二维码，支持复制和下载操作
@@ -15,6 +16,7 @@ import type {ShareDialogProps} from '@/types';
 export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialogProps) {
     const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
     const [copied, setCopied] = useState(false);
+    const [downloading, setDownloading] = useState(false);
     const {toast} = useToast();
 
     // 生成二维码
@@ -53,10 +55,45 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
         }
     };
 
-    const handleDownload = () => {
-        window.open(shareUrl, '_blank');
-    };
+    const handleDownload = async () => {
+        if (!shareUrl) return;
+        
+        try {
+            setDownloading(true);
+            // Extract the share code from the URL
+            const shareCode = shareUrl.split('/share/')[1];
+            
+            // Use apiClient to download the file with proper blob handling
+            const response = await apiClient.get(`/share/${shareCode}`, {
+                responseType: 'blob',
+            });
 
+            // Create download link
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', packageName || 'download');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast({
+                title: '下载成功',
+                description: '文件已开始下载',
+            });
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || '下载失败，请稍后重试';
+            toast({
+                variant: 'destructive',
+                title: '下载失败',
+                description: errorMessage,
+            });
+        } finally {
+            setDownloading(false);
+        }
+    };
+    
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-md">
@@ -125,10 +162,11 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
                         <Button
                             variant="outline"
                             onClick={handleDownload}
+                            disabled={downloading}
                             className="flex-1"
                         >
                             <Download className="mr-2 h-4 w-4"/>
-                            立即下载
+                            {downloading ? '下载中...' : '立即下载'}
                         </Button>
                         <Button
                             onClick={handleCopyUrl}

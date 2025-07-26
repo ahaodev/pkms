@@ -23,8 +23,5 @@ func NewShareRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, f
 		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
 		Env:            env,
 	}
-
-	// Share operations - these routes don't require authentication
-	group.GET("/:code", sc.GetSharedRelease)                // GET /share/:code
-	group.GET("/:code/download", sc.DownloadSharedRelease)   // GET /share/:code/download
+	group.GET("/:code", sc.DownloadSharedRelease) // GET /share/:code/download
 }
