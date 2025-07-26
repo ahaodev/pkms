@@ -22,13 +22,14 @@ import {ProjectDialog} from '@/components/project';
 import {Projects} from '@/components/projects.tsx';
 import {Packages} from '@/components/packages.tsx';
 import {Releases} from '@/components/releases.tsx';
-import {useLocation} from 'react-router-dom';
+import {useLocation, useSearchParams} from 'react-router-dom';
 import {PackageReleaseDialog} from "@/components/package-release-dialog.tsx";
 import {PackageCreateDialog} from "@/components/package-create-dialog.tsx";
 
 // Hierarchy Page Component
 export default function HierarchyPage() {
     const {toast} = useToast();
+    const [searchParams] = useSearchParams();
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -226,6 +227,18 @@ export default function HierarchyPage() {
             document.removeEventListener('mousedown', handleMouseBack);
         };
     }, [selectedProjectId, selectedPackageId]); // Dependencies to ensure current state is captured
+
+    // Handle URL parameters to auto-select project
+    useEffect(() => {
+        const projectId = searchParams.get('projectId');
+        if (projectId && projects) {
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                setSelectedProjectId(projectId);
+                setSelectedPackageId(null);
+            }
+        }
+    }, [searchParams, projects]);
 
     // 路由变化时重置搜索框
     const location = useLocation();

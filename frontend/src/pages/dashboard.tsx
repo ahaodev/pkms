@@ -1,15 +1,9 @@
-import {useMemo, useCallback} from 'react';
+import {useCallback, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {Package} from '@/types/package.ts';
-import {
-    DashboardHeader,
-    DashboardLoadingView,
-    StatsGrid,
-    RecentProjects,
-    RecentPackages
-} from '@/components/dashboard';
+import {DashboardHeader, DashboardLoadingView, RecentProjects, StatsGrid,} from '@/components/dashboard';
 
 /**
  * 仪表板页：展示项目、包、上传、下载等核心统计信息和最近动态
@@ -36,25 +30,17 @@ export default function Dashboard() {
     }, [projects, packages]);
 
     // 使用 useCallback 优化导航函数
-    const navigateToPackages = useCallback((projectId?: string) => {
-        navigate(projectId ? `/packages?projectId=${projectId}` : '/packages');
-    }, [navigate]);
-
-    const navigateToProjects = useCallback(() => {
-        navigate('/projects');
+    const navigateToHierarchy = useCallback((projectId?: string) => {
+        navigate(projectId ? `/hierarchy?projectId=${projectId}` : '/hierarchy');
     }, [navigate]);
 
     const handleViewProject = useCallback((projectId: string) => {
-        navigateToPackages(projectId);
-    }, [navigateToPackages]);
+        navigateToHierarchy(projectId);
+    }, [navigateToHierarchy]);
 
     const handleViewAllProjects = useCallback(() => {
-        navigateToProjects();
-    }, [navigateToProjects]);
-
-    const handleViewAllPackages = useCallback(() => {
-        navigateToPackages();
-    }, [navigateToPackages]);
+        navigateToHierarchy();
+    }, [navigateToHierarchy]);
 
     if (projectsLoading || packagesLoading) {
         return <DashboardLoadingView/>;
@@ -71,20 +57,12 @@ export default function Dashboard() {
             {/* 统计卡片 */}
             <StatsGrid stats={stats}/>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-                {/* 最近项目 */}
-                <RecentProjects
-                    projects={projects}
-                    onViewProject={handleViewProject}
-                    onViewAllProjects={handleViewAllProjects}
-                />
-
-                {/* 最近包 */}
-                <RecentPackages
-                    packages={packages}
-                    onViewAllPackages={handleViewAllPackages}
-                />
-            </div>
+            {/* 最近项目 */}
+            <RecentProjects
+                projects={projects}
+                onViewProject={handleViewProject}
+                onViewAllProjects={handleViewAllProjects}
+            />
         </div>
     );
 }
