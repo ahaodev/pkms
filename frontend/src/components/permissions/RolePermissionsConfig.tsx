@@ -10,6 +10,11 @@ import { Key, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
 import { useAuth } from '@/providers/auth-provider';
+import { 
+    getObjectDisplayName, 
+    getActionDisplayName, 
+    getRoleDisplayName
+} from '@/lib/utils/permission-utils';
 import type { EnhancedPolicy, RolePolicyForm } from '@/types';
 
 interface RolePermissionsConfigProps {
@@ -114,12 +119,18 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择角色" />
+                                            <SelectValue placeholder="选择角色">
+                                                {formData.role ? (
+                                                    <span>{getRoleDisplayName(formData.role)} ({formData.role})</span>
+                                                ) : (
+                                                    "选择角色"
+                                                )}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {predefinedRoles.map(role => (
                                                 <SelectItem key={role} value={role}>
-                                                    {role}
+                                                    {getRoleDisplayName(role)} ({role})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -157,12 +168,18 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择对象" />
+                                            <SelectValue placeholder="选择对象">
+                                                {formData.object ? (
+                                                    <span>{getObjectDisplayName(formData.object)} ({formData.object})</span>
+                                                ) : (
+                                                    "选择对象"
+                                                )}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {objects.map(obj => (
                                                 <SelectItem key={obj} value={obj}>
-                                                    {obj}
+                                                    {getObjectDisplayName(obj)} ({obj})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -178,12 +195,18 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择操作" />
+                                            <SelectValue placeholder="选择操作">
+                                                {formData.action ? (
+                                                    <span>{getActionDisplayName(formData.action)} ({formData.action})</span>
+                                                ) : (
+                                                    "选择操作"
+                                                )}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {actions.map(action => (
                                                 <SelectItem key={action} value={action}>
-                                                    {action}
+                                                    {getActionDisplayName(action)} ({action})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -221,14 +244,19 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                         {rolePolicies.map((policy, index) => (
                             <TableRow key={index}>
                                 <TableCell>
-                                    <Badge variant="secondary">{policy.subject}</Badge>
+                                    <Badge variant="secondary">{getRoleDisplayName(policy.subject)}</Badge>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline">{policy.domain_name || policy.domain}</Badge>
                                 </TableCell>
-                                <TableCell>{policy.object}</TableCell>
                                 <TableCell>
-                                    <Badge variant="outline">{policy.action}</Badge>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">{getObjectDisplayName(policy.object)}</span>
+                                        <span className="text-xs text-muted-foreground">({policy.object})</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">{getActionDisplayName(policy.action)}</Badge>
                                 </TableCell>
                                 <TableCell>
                                     <Button

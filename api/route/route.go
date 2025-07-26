@@ -36,6 +36,10 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	shareRouter := gin.Group("/share")
 	NewShareRouter(env, timeout, db, fileStorage, shareRouter)
 
+	// Public file download routes (no authentication required)
+	publicFileRouter := gin.Group(ApiUri + "/files")
+	NewPublicFileRouter(env, timeout, db, fileStorage, publicFileRouter)
+
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))

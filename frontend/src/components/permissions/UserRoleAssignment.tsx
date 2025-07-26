@@ -10,6 +10,7 @@ import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
 import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider';
+import { getRoleDisplayName } from '@/lib/utils/permission-utils';
 import type {EnhancedRole, User, UserRoleForm} from '@/types';
 
 interface UserRoleAssignmentProps {
@@ -151,12 +152,18 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择角色"/>
+                                            <SelectValue placeholder="选择角色">
+                                                {formData.role ? (
+                                                    <span>{getRoleDisplayName(formData.role)} ({formData.role})</span>
+                                                ) : (
+                                                    "选择角色"
+                                                )}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {predefinedRoles.map(role => (
                                                 <SelectItem key={role} value={role}>
-                                                    {role}
+                                                    {getRoleDisplayName(role)} ({role})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -206,7 +213,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                     <Badge variant="outline">{role.domain_name || role.domain}</Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{role.role}</Badge>
+                                    <Badge variant="secondary">{getRoleDisplayName(role.role)}</Badge>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">

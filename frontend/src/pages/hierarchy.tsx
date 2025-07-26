@@ -91,7 +91,7 @@ export default function HierarchyPage() {
     };
 
     const handleDownload = (release: Release) => {
-        window.open(`/api/packages/${release.id}/download`, '_blank');
+        window.open(`/api/v1/releases/${release.id}/download`, '_blank');
         toast({
             title: '下载开始',
             description: `开始下载 ${release.fileName}`,
