@@ -538,10 +538,10 @@ function CreateUpgradeTargetDialog({
                                     <SelectItem key={release.id} value={release.id}>
                                         <div className="flex items-center space-x-2">
                                             <Activity className="h-4 w-4" />
-                                            <span>{release.version}</span>
-                                            {release.title && (
+                                            <span>{release.version_code}</span>
+                                            {release.version_name && (
                                                 <span className="text-sm text-muted-foreground">
-                                                    - {release.title}
+                                                    - {release.version_name}
                                                 </span>
                                             )}
                                         </div>
