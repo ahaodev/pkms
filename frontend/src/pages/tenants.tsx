@@ -2,8 +2,8 @@ import {useCallback, useState} from 'react';
 import {Shield} from 'lucide-react';
 import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/providers/auth-provider.tsx';
-import {useTenants, useCreateTenant, useUpdateTenant, useDeleteTenant} from '@/hooks/use-tenants';
-import {Tenant, CreateTenantRequest, UpdateTenantRequest} from '@/types/tenant';
+import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
+import {CreateTenantRequest, Tenant, UpdateTenantRequest} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList} from '@/components/tenant';
 
 /**
@@ -17,7 +17,7 @@ interface TenantFormData {
 export default function TenantsPage() {
     const {toast} = useToast();
     const {isAdmin} = useAuth();
-    
+
     const {data: tenants, isLoading} = useTenants();
     const createTenantMutation = useCreateTenant();
     const updateTenantMutation = useUpdateTenant();
@@ -85,7 +85,7 @@ export default function TenantsPage() {
             const createRequest: CreateTenantRequest = {
                 name: tenantForm.name,
             };
-            
+
             await createTenantMutation.mutateAsync(createRequest);
 
             toast({
@@ -95,11 +95,12 @@ export default function TenantsPage() {
 
             setIsCreateDialogOpen(false);
             resetForm();
-        } catch (error: any) {
+        } catch (error) {
+            console.error(error)
             toast({
                 variant: 'destructive',
                 title: '创建失败',
-                description: error.response?.data?.message || '租户创建失败，请重试。',
+                description:'租户创建失败，请重试。',
             });
         }
     };
@@ -126,7 +127,7 @@ export default function TenantsPage() {
             const updateRequest: UpdateTenantRequest = {
                 name: tenantForm.name,
             };
-            
+
             await updateTenantMutation.mutateAsync({
                 id: editingTenant.id,
                 update: updateRequest
@@ -140,11 +141,12 @@ export default function TenantsPage() {
             setIsEditDialogOpen(false);
             setEditingTenant(null);
             resetForm();
-        } catch (error: any) {
+        } catch (error) {
+            console.error(error);
             toast({
                 variant: 'destructive',
                 title: '更新失败',
-                description: error.response?.data?.message || '租户更新失败，请重试。',
+                description:  '租户更新失败，请重试。',
             });
         }
     };
@@ -160,11 +162,12 @@ export default function TenantsPage() {
                 title: '租户删除成功',
                 description: `租户 "${tenant.name}" 已删除。`,
             });
-        } catch (error: any) {
+        } catch (error) {
+            console.error(error);
             toast({
                 variant: 'destructive',
                 title: '删除失败',
-                description: error.response?.data?.message || '租户删除失败，请重试。',
+                description:'租户删除失败，请重试。',
             });
         }
     };

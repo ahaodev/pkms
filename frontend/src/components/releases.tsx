@@ -30,12 +30,12 @@ export function Releases({
         isOpen: boolean;
         shareUrl: string;
         packageName: string;
-    }>({ isOpen: false, shareUrl: '', packageName: '' });
+    }>({isOpen: false, shareUrl: '', packageName: ''});
     const {toast} = useToast();
 
     const handleShare = async (release: Release) => {
         try {
-            const result = await createShareLink(release.id, { expiryHours: 24 });
+            const result = await createShareLink(release.id, {expiryHours: 24});
             const shareCode = result.data.code;
             const fullUrl = `${window.location.origin}/share/${shareCode}`;
             setShareDialog({
@@ -48,6 +48,7 @@ export function Releases({
                 description: '分享链接已生成，24小时内有效。',
             });
         } catch (error) {
+            console.error(error)
             toast({
                 variant: 'destructive',
                 title: '创建分享链接失败',
@@ -60,7 +61,7 @@ export function Releases({
         if (!confirm(`确定要删除发布版本 v${release.version} 吗？此操作不可恢复。`)) {
             return;
         }
-        
+
         try {
             await deleteRelease(release.id);
             toast({
@@ -69,6 +70,7 @@ export function Releases({
             });
             onReleaseDeleted?.(release.id);
         } catch (error) {
+            console.error(error);
             toast({
                 variant: 'destructive',
                 title: '删除失败',
@@ -78,7 +80,7 @@ export function Releases({
     };
 
     const closeShareDialog = () => {
-        setShareDialog({ isOpen: false, shareUrl: '', packageName: '' });
+        setShareDialog({isOpen: false, shareUrl: '', packageName: ''});
     };
     // Filter releases based on search term
     const filteredReleases = releases.filter(release =>
@@ -187,7 +189,7 @@ export function Releases({
                     </CardContent>
                 </Card>
             )}
-            
+
             <ShareDialog
                 isOpen={shareDialog.isOpen}
                 onClose={closeShareDialog}

@@ -303,11 +303,6 @@ The settings page has been completely redesigned with four main sections:
 - **Features**: Basic info (username, email), password management
 - **Validation**: Password confirmation and strength validation
 
-### 2. Appearance Settings (外观设置)
-- **Location**: `components/settings/appearance-settings.tsx`
-- **Features**: Theme (light/dark/system), language, font size
-- **Theme Support**: Integrated with next-themes
-
 ### 3. Storage Settings (存储设置)
 - **Location**: `components/settings/storage-settings.tsx`
 - **Features**: Local disk vs MinIO configuration, connection testing
@@ -324,7 +319,6 @@ The settings page has been completely redesigned with four main sections:
 <Tabs defaultValue="account">
   <TabsList>
     <TabsTrigger value="account">账户</TabsTrigger>
-    <TabsTrigger value="appearance">外观</TabsTrigger>
     <TabsTrigger value="storage">存储</TabsTrigger>
     <TabsTrigger value="security">安全</TabsTrigger>
   </TabsList>

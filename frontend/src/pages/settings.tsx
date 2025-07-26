@@ -4,12 +4,10 @@ import {
   SettingsHeader,
   StorageSettings,
   AccountSettings,
-  AppearanceSettings,
   SecuritySettings,
   SettingsTabs,
   type StorageConfig,
   type AccountConfig,
-  type AppearanceConfig,
   type SecurityConfig
 } from "@/components/settings";
 
@@ -23,15 +21,6 @@ export default function Settings() {
     });
   }, []);
 
-  // 外观设置保存处理
-  const handleSaveAppearance = useCallback((config: AppearanceConfig) => {
-    console.log('保存外观设置:', config);
-    toast({
-      title: "设置已保存",
-      description: "外观设置已成功更新",
-    });
-  }, []);
-  
   // 存储设置保存处理
   const handleSaveStorage = useCallback((config: StorageConfig) => {
     console.log('保存存储设置:', config);
@@ -61,9 +50,6 @@ export default function Settings() {
         defaultValue="account"
         accountContent={
           <AccountSettings onSave={handleSaveAccount} />
-        }
-        appearanceContent={
-          <AppearanceSettings onSave={handleSaveAppearance} />
         }
         storageContent={
           <StorageSettings onSave={handleSaveStorage} />

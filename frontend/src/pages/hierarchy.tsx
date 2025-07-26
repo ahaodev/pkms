@@ -334,6 +334,10 @@ export default function HierarchyPage() {
                         searchTerm={searchTerm}
                         handleCreateRelease={handleCreateRelease}
                         handleDownload={handleDownload}
+                        onReleaseDeleted={() => {
+                            // Invalidate releases queries to refresh the list
+                            queryClient.invalidateQueries({ queryKey: ['releases'] });
+                        }}
                     />
                 )}
             </div>
