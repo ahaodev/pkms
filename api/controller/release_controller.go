@@ -106,11 +106,10 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 	req := &domain.ReleaseUploadRequest{
 		PackageID:  c.PostForm("package_id"),
 		Name:       c.PostForm("name"),
-		Version:    c.PostForm("version"),
+		Version:    c.PostForm("version_code"),
 		Type:       c.PostForm("type"),
 		Changelog:  c.PostForm("changelog"),
 		TagName:    c.PostForm("tag_name"),
-		Title:      c.PostForm("title"),
 		File:       file,
 		FileName:   header.Filename,
 		FileSize:   header.Size,
@@ -118,8 +117,8 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 	}
 
 	// 验证必需字段
-	if req.PackageID == "" || req.Name == "" || req.Version == "" {
-		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: package_id, name, version"))
+	if req.PackageID == "" || req.Version == "" {
+		c.JSON(http.StatusBadRequest, domain.RespError("Missing required fields: package_id, version_code"))
 		return
 	}
 
@@ -133,12 +132,6 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 	// 解析可选的布尔字段
 	if isLatest := c.PostForm("is_latest"); isLatest == "true" {
 		req.IsLatest = true
-	}
-	if isPrerelease := c.PostForm("is_prerelease"); isPrerelease == "true" {
-		req.IsPrerelease = true
-	}
-	if isDraft := c.PostForm("is_draft"); isDraft == "true" {
-		req.IsDraft = true
 	}
 
 	// 生成 release ID (在文件上传前生成，确保目录结构一致)
@@ -166,19 +159,16 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 
 	// 创建发布版本，使用预先生成的 release ID 确保与文件路径一致
 	release := &domain.Release{
-		ID:           releaseID, // 使用预先生成的 ID
-		PackageID:    req.PackageID,
-		Version:      req.Version,
-		TagName:      req.TagName,
-		Title:        req.Title,
-		ChangeLog:    req.Changelog,
-		FileName:     req.FileName,
-		FileSize:     req.FileSize,
-		FilePath:     uploadResp.ObjectName,
-		IsPrerelease: req.IsPrerelease,
-		IsLatest:     req.IsLatest,
-		IsDraft:      req.IsDraft,
-		CreatedBy:    userID,
+		ID:          releaseID, // 使用预先生成的 ID
+		PackageID:   req.PackageID,
+		VersionCode: req.Version,
+		TagName:     req.TagName,
+		VersionName: c.PostForm("version_name"),
+		ChangeLog:   req.Changelog,
+		FileName:    req.FileName,
+		FileSize:    req.FileSize,
+		FilePath:    uploadResp.ObjectName,
+		CreatedBy:   userID,
 	}
 
 	err = rc.ReleaseUsecase.CreateRelease(c, release)
@@ -188,26 +178,6 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, domain.RespSuccess(release))
-}
-
-// UpdateRelease 更新发布版本信息
-func (rc *ReleaseController) UpdateRelease(c *gin.Context) {
-	releaseID := c.Param("id")
-	var updateReq domain.Release
-
-	if err := c.ShouldBindJSON(&updateReq); err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
-		return
-	}
-
-	updateReq.ID = releaseID
-	err := rc.ReleaseUsecase.UpdateRelease(c, &updateReq)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("Update release failed: "+err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess("Release updated successfully"))
 }
 
 // DeleteRelease 删除发布版本
@@ -273,26 +243,6 @@ func (rc *ReleaseController) GetLatestRelease(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(release))
-}
-
-// SetLatestRelease 设置最新发布版本
-func (rc *ReleaseController) SetLatestRelease(c *gin.Context) {
-	releaseID := c.Param("id")
-
-	// First get the release to find its package ID
-	release, err := rc.ReleaseUsecase.GetReleaseByID(c, releaseID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, domain.RespError("Release not found"))
-		return
-	}
-
-	err = rc.ReleaseUsecase.SetAsLatest(c, release.PackageID, releaseID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError("Set latest release failed: "+err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess("Latest release updated successfully"))
 }
 
 // CreateShareLink 创建发布版本分享链接

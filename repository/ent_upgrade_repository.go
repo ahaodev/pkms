@@ -78,7 +78,7 @@ func (r *entUpgradeRepository) GetUpgradeTargetByID(ctx context.Context, id stri
 		target.PackageType = u.Edges.Package.Type.String()
 	}
 	if u.Edges.Release != nil {
-		target.Version = u.Edges.Release.Version
+		target.Version = u.Edges.Release.VersionCode
 		target.FileName = u.Edges.Release.FileName
 		target.FileSize = u.Edges.Release.FileSize
 		target.FileHash = u.Edges.Release.FileHash
@@ -138,7 +138,7 @@ func (r *entUpgradeRepository) GetUpgradeTargets(ctx context.Context, tenantID s
 			target.PackageType = u.Edges.Package.Type.String()
 		}
 		if u.Edges.Release != nil {
-			target.Version = u.Edges.Release.Version
+			target.Version = u.Edges.Release.VersionCode
 			target.FileName = u.Edges.Release.FileName
 			target.FileSize = u.Edges.Release.FileSize
 			target.FileHash = u.Edges.Release.FileHash
@@ -213,7 +213,7 @@ func (r *entUpgradeRepository) GetActiveUpgradeTargetByPackageID(ctx context.Con
 		target.PackageType = u.Edges.Package.Type.String()
 	}
 	if u.Edges.Release != nil {
-		target.Version = u.Edges.Release.Version
+		target.Version = u.Edges.Release.VersionCode
 		target.FileName = u.Edges.Release.FileName
 		target.FileSize = u.Edges.Release.FileSize
 		target.FileHash = u.Edges.Release.FileHash
@@ -265,7 +265,7 @@ func (r *entUpgradeRepository) CheckProjectUpgradeTargets(ctx context.Context, p
 			target.PackageType = u.Edges.Package.Type.String()
 		}
 		if u.Edges.Release != nil {
-			target.Version = u.Edges.Release.Version
+			target.Version = u.Edges.Release.VersionCode
 			target.FileName = u.Edges.Release.FileName
 			target.FileSize = u.Edges.Release.FileSize
 			target.FileHash = u.Edges.Release.FileHash

@@ -80,7 +80,7 @@ func (su *shareUsecase) CreateShare(c context.Context, req *domain.CreateShareRe
 		ReleaseID:   req.ReleaseID,
 		ExpiryHours: req.ExpiryHours,
 		FileName:    release.FileName,
-		Version:     release.Version,
+		Version:     release.VersionCode,
 		StartAt:     share.StartAt,
 		ExpiredAt:   share.ExpiredAt,
 	}

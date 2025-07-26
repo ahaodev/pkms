@@ -22,7 +22,8 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 	createBuilder := rr.client.Release.
 		Create().
 		SetPackageID(r.PackageID).
-		SetVersion(r.Version).
+		SetVersionCode(r.VersionCode).
+		SetVersionName(r.VersionName).
 		SetChangelog(r.ChangeLog).
 		SetFilePath(r.FilePath).
 		SetFileName(r.FileName).
@@ -33,9 +34,6 @@ func (rr *entReleaseRepository) Create(c context.Context, r *domain.Release) err
 	// 可选字段
 	if r.TagName != "" {
 		createBuilder = createBuilder.SetTagName(r.TagName)
-	}
-	if r.Title != "" {
-		createBuilder = createBuilder.SetTitle(r.Title)
 	}
 	if r.FileHash != "" {
 		createBuilder = createBuilder.SetFileHash(r.FileHash)
@@ -109,31 +107,6 @@ func (rr *entReleaseRepository) GetByShareToken(c context.Context, token string)
 	return rr.convertToDomain(entRelease), nil
 }
 
-func (rr *entReleaseRepository) Update(c context.Context, r *domain.Release) error {
-	updateBuilder := rr.client.Release.
-		UpdateOneID(r.ID).
-		SetVersion(r.Version).
-		SetChangelog(r.ChangeLog).
-		SetFilePath(r.FilePath).
-		SetFileName(r.FileName).
-		SetFileSize(r.FileSize).
-		SetDownloadCount(r.DownloadCount)
-
-	// 可选字段
-	if r.TagName != "" {
-		updateBuilder = updateBuilder.SetTagName(r.TagName)
-	}
-	if r.Title != "" {
-		updateBuilder = updateBuilder.SetTitle(r.Title)
-	}
-	if r.FileHash != "" {
-		updateBuilder = updateBuilder.SetFileHash(r.FileHash)
-	}
-
-	_, err := updateBuilder.Save(c)
-	return err
-}
-
 func (rr *entReleaseRepository) Delete(c context.Context, id string) error {
 	return rr.client.Release.DeleteOneID(id).Exec(c)
 }
@@ -169,9 +142,9 @@ func (rr *entReleaseRepository) convertToDomain(entRelease *ent.Release) *domain
 	return &domain.Release{
 		ID:            entRelease.ID,
 		PackageID:     entRelease.PackageID,
-		Version:       entRelease.Version,
+		VersionCode:   entRelease.VersionCode,
 		TagName:       entRelease.TagName,
-		Title:         entRelease.Title,
+		VersionName:   entRelease.VersionName,
 		ChangeLog:     entRelease.Changelog,
 		FilePath:      entRelease.FilePath,
 		FileName:      entRelease.FileName,

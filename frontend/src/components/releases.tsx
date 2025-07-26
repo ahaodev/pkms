@@ -41,7 +41,7 @@ export function Releases({
             setShareDialog({
                 isOpen: true,
                 shareUrl: fullUrl,
-                packageName: `${selectedPackage?.name} v${release.version}`
+                packageName: `${selectedPackage?.name} v${release.version_code}`
             });
             toast({
                 title: '分享链接已创建',
@@ -58,7 +58,7 @@ export function Releases({
     };
 
     const handleDelete = async (release: Release) => {
-        if (!confirm(`确定要删除发布版本 v${release.version} 吗？此操作不可恢复。`)) {
+        if (!confirm(`确定要删除发布版本 v${release.version_code} 吗？此操作不可恢复。`)) {
             return;
         }
 
@@ -66,7 +66,7 @@ export function Releases({
             await deleteRelease(release.id);
             toast({
                 title: '删除成功',
-                description: `发布版本 v${release.version} 已被删除。`,
+                description: `发布版本 v${release.version_code} 已被删除。`,
             });
             onReleaseDeleted?.(release.id);
         } catch (error) {
@@ -84,10 +84,10 @@ export function Releases({
     };
     // Filter releases based on search term
     const filteredReleases = releases.filter(release =>
-        release.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (release.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-        (release.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-        release.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+        release.version_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (release.version_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        (release.changelog?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        release.file_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     return (
         <div className="space-y-6">
@@ -112,18 +112,9 @@ export function Releases({
                                 <div className="flex items-center space-x-4">
                                     <div>
                                         <CardTitle className="flex items-center space-x-2">
-                                            <span>v{release.version}</span>
-                                            {release.isLatest && (
-                                                <Badge variant="default">最新</Badge>
-                                            )}
-                                            {release.isPrerelease && (
-                                                <Badge variant="secondary">预发布</Badge>
-                                            )}
-                                            {release.isDraft && (
-                                                <Badge variant="outline">草稿</Badge>
-                                            )}
+                                            <span>{release.version_code}</span>
                                         </CardTitle>
-                                        <CardDescription>{release.title}</CardDescription>
+                                            <CardDescription>{release.version_name || release.version_code}</CardDescription>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
@@ -147,23 +138,23 @@ export function Releases({
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <p className="text-sm text-muted-foreground">{release.description}</p>
+                                <p className="text-sm text-muted-foreground">{release.changelog}</p>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                     <div>
                                         <span className="text-muted-foreground">文件名:</span>
-                                        <div className="font-medium">{release.fileName}</div>
+                                        <div className="font-medium">{release.file_name}</div>
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">文件大小:</span>
-                                        <div className="font-medium">{formatFileSize(release.fileSize)}</div>
+                                        <div className="font-medium">{formatFileSize(release.file_size)}</div>
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">下载次数:</span>
-                                        <div className="font-medium">{release.downloadCount.toLocaleString()}</div>
+                                        <div className="font-medium">{release.download_count.toLocaleString()}</div>
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">发布时间:</span>
-                                        <div className="font-medium">{formatDate(release.createdAt.toISOString())}</div>
+                                        <div className="font-medium">{formatDate(release.created_at.toISOString())}</div>
                                     </div>
                                 </div>
                             </div>

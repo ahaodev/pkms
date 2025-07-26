@@ -171,7 +171,7 @@ func (u *upgradeUsecase) CheckUpdate(ctx context.Context, request *domain.CheckU
 			release, err := u.releaseRepository.GetByID(c, target.ReleaseID)
 			if err == nil {
 				response.Changelog = release.ChangeLog
-				response.ReleaseNotes = release.Title
+				response.ReleaseNotes = release.VersionName
 			}
 		}
 	}

@@ -96,7 +96,7 @@ export default function HierarchyPage() {
         try {
             toast({
                 title: '下载开始',
-                description: `正在准备下载 ${release.fileName}`,
+                description: `正在准备下载 ${release.file_name}`,
             });
 
             const blob = await downloadRelease(release.id);
@@ -105,7 +105,7 @@ export default function HierarchyPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = release.fileName;
+            link.download = release.file_name;
             document.body.appendChild(link);
             link.click();
             
@@ -115,7 +115,7 @@ export default function HierarchyPage() {
             
             toast({
                 title: '下载完成',
-                description: `${release.fileName} 下载完成`,
+                description: `${release.file_name} 下载完成`,
             });
         } catch (error) {
             console.error('Download failed:', error);

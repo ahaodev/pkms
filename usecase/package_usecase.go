@@ -87,12 +87,6 @@ func (pu *packageUsecase) GetLatestRelease(c context.Context, packageID string) 
 	return pu.releaseRepository.GetLatestByPackageID(ctx, packageID)
 }
 
-func (pu *packageUsecase) UpdateRelease(c context.Context, release *domain.Release) error {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.Update(ctx, release)
-}
-
 func (pu *packageUsecase) DeleteRelease(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
@@ -103,10 +97,4 @@ func (pu *packageUsecase) IncrementDownloadCount(c context.Context, releaseID st
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 	return pu.releaseRepository.IncrementDownloadCount(ctx, releaseID)
-}
-
-func (pu *packageUsecase) SetReleaseAsLatest(c context.Context, packageID, releaseID string) error {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.SetAsLatest(ctx, packageID, releaseID)
 }

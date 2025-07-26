@@ -23,13 +23,14 @@ func (Release) Fields() []ent.Field {
 				return xid.New().String()
 			}),
 		field.String("package_id"),
-		field.String("version").
-			MaxLen(100),
+		field.String("version_code").
+			MaxLen(100).
+			Default("1.0.0"),
+		field.String("version_name").
+			MaxLen(100).
+			Default("1.0.0"),
 		field.String("tag_name").
 			MaxLen(100).
-			Optional(),
-		field.String("title").
-			MaxLen(255).
 			Optional(),
 		field.String("changelog").
 			Optional(), // Release notes/changelog
@@ -75,10 +76,10 @@ func (Release) Edges() []ent.Edge {
 func (Release) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("package_id"),
-		index.Fields("version"),
+		index.Fields("version_code"),
 		index.Fields("created_at"),
 		// Unique constraint: one version per package
-		index.Fields("package_id", "version").Unique(),
+		index.Fields("package_id", "version_code").Unique(),
 		// Unique constraint: one tag per package (if provided)
 		index.Fields("package_id", "tag_name").Unique(),
 	}

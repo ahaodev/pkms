@@ -33,7 +33,6 @@ export function PackageReleaseDialog({
                                          onClose,
                                          onSuccess,
                                          packageId,
-                                         packageName,
                                          packageType
                                      }: PackageReleaseDialogProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -41,10 +40,9 @@ export function PackageReleaseDialog({
     const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState<Omit<ReleaseUpload, 'file'>>({
         package_id: packageId,
-        name: packageName,
-        type: packageType as any,
-        versionName: '',
-        versionCode: '',
+        version_name: '',
+        version_code: '',
+        tag_name: '',
         changelog: '',
     });
 
@@ -66,7 +64,7 @@ export function PackageReleaseDialog({
 
             toast({
                 title: '发布成功',
-                description: `版本 "${formData.versionName}" 已成功发布。`,
+                description: `版本 "${formData.version_name}" 已成功发布。`,
             });
 
             // 重置表单
@@ -90,10 +88,9 @@ export function PackageReleaseDialog({
         setSelectedFile(null);
         setFormData({
             package_id: packageId,
-            name: packageName,
-            type: packageType as any,
-            versionName: '',
-            versionCode: '',
+            version_name: '',
+            version_code: '',
+            tag_name: '',
             changelog: '',
         });
     };
@@ -134,7 +131,7 @@ export function PackageReleaseDialog({
                     <div>
                         <Label htmlFor="type">类型</Label>
                         <Select
-                            value={formData.type}
+                            value={packageType}
                             disabled
                         >
                             <SelectTrigger>
@@ -166,8 +163,8 @@ export function PackageReleaseDialog({
                         <Label htmlFor="versionName">版本名称</Label>
                         <Input
                             id="versionName"
-                            value={formData.versionName}
-                            onChange={(e) => setFormData({...formData, versionName: e.target.value})}
+                            value={formData.version_name}
+                            onChange={(e) => setFormData({...formData, version_name: e.target.value})}
                             placeholder="1.0.0-tab-beta.apk"
                             disabled={isUploading}
                         />
@@ -176,8 +173,8 @@ export function PackageReleaseDialog({
                         <Label htmlFor="versionCode">版本号</Label>
                         <Input
                             id="versionCode"
-                            value={formData.versionCode}
-                            onChange={(e) => setFormData({...formData, versionCode: e.target.value})}
+                            value={formData.version_code}
+                            onChange={(e) => setFormData({...formData, version_code: e.target.value})}
                             placeholder="1.0.0"
                             disabled={isUploading}
                         />
@@ -211,7 +208,7 @@ export function PackageReleaseDialog({
                     </Button>
                     <Button
                         onClick={handleUpload}
-                        disabled={!selectedFile || !formData.versionCode || !formData.versionName || isUploading}
+                        disabled={!selectedFile || !formData.version_code || !formData.version_name || isUploading}
                     >
                         {isUploading ? '上传中...' : '发布'}
                     </Button>

@@ -63,12 +63,6 @@ func (ru *releaseUsecase) GetReleaseByShareToken(c context.Context, token string
 	return ru.releaseRepository.GetByShareToken(ctx, token)
 }
 
-func (ru *releaseUsecase) UpdateRelease(c context.Context, release *domain.Release) error {
-	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
-	defer cancel()
-	return ru.releaseRepository.Update(ctx, release)
-}
-
 func (ru *releaseUsecase) DeleteRelease(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
 	defer cancel()
@@ -96,46 +90,4 @@ func (ru *releaseUsecase) IncrementDownloadCount(c context.Context, releaseID st
 	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
 	defer cancel()
 	return ru.releaseRepository.IncrementDownloadCount(ctx, releaseID)
-}
-
-func (ru *releaseUsecase) SetAsLatest(c context.Context, packageID, releaseID string) error {
-	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
-	defer cancel()
-	return ru.releaseRepository.SetAsLatest(ctx, packageID, releaseID)
-}
-
-func (ru *releaseUsecase) PublishRelease(c context.Context, releaseID string) error {
-	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
-	defer cancel()
-
-	// 获取发布版本
-	release, err := ru.releaseRepository.GetByID(ctx, releaseID)
-	if err != nil {
-		return err
-	}
-
-	// 设置为已发布状态
-	now := time.Now()
-	release.IsDraft = false
-	release.PublishedAt = now
-
-	// 如果是该包的第一个发布版本，自动设置为最新版本
-	releases, err := ru.releaseRepository.GetByPackageID(ctx, release.PackageID)
-	if err != nil {
-		return err
-	}
-
-	hasPublished := false
-	for _, r := range releases {
-		if !r.IsDraft && r.ID != releaseID {
-			hasPublished = true
-			break
-		}
-	}
-
-	if !hasPublished {
-		release.IsLatest = true
-	}
-
-	return ru.releaseRepository.Update(ctx, release)
 }

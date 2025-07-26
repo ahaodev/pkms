@@ -30,13 +30,11 @@ func NewReleaseRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	group.GET("/package/:package_id", rc.GetReleases) // GET /api/v1/releases/package/:package_id
 	group.GET("/:id", rc.GetRelease)                  // GET /api/v1/releases/:id
 	group.POST("/", rc.UploadRelease)                 // POST /api/v1/releases
-	group.PUT("/:id", rc.UpdateRelease)               // PUT /api/v1/releases/:id
 	group.DELETE("/:id", rc.DeleteRelease)            // DELETE /api/v1/releases/:id
 
 	// Release specific operations
 	group.GET("/:id/download", rc.DownloadRelease)                // GET /api/v1/releases/:id/download
 	group.GET("/package/:package_id/latest", rc.GetLatestRelease) // GET /api/v1/releases/package/:package_id/latest
-	group.POST("/:id/set-latest", rc.SetLatestRelease)            // POST /api/v1/releases/:id/set-latest
 
 	// Release sharing operations
 	group.POST("/:id/share", rc.CreateShareLink) // POST /api/v1/releases/:id/share

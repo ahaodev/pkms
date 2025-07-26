@@ -74,5 +74,4 @@ type PackageUsecase interface {
 	GetReleasesByPackage(c context.Context, packageID string) ([]*Release, error)
 	GetLatestRelease(c context.Context, packageID string) (*Release, error)
 	IncrementDownloadCount(c context.Context, releaseID string) error
-	SetReleaseAsLatest(c context.Context, packageID, releaseID string) error
 }

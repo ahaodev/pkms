@@ -76,9 +76,9 @@ export async function uploadRelease(
     const formData = new FormData();
     formData.append('file', upload.file);
     formData.append('package_id', upload.package_id);
-    formData.append('name', upload.name);
-    formData.append('type', upload.type);
-    formData.append('version', upload.versionName);
+    formData.append('version_code', upload.version_code);
+    formData.append('version_name', upload.version_name);
+    if (upload.tag_name) formData.append('tag_name', upload.tag_name);
     if (upload.changelog) formData.append('changelog', upload.changelog);
 
     const resp = await apiClient.post("/api/v1/releases/", formData, {
@@ -158,13 +158,12 @@ export function transformPackageFromBackend(backendPackage: any): Package {
         latestRelease,
 
         // 向后兼容字段
-        version: latestRelease?.version,
-        fileSize: latestRelease?.fileSize,
-        fileName: latestRelease?.fileName,
-        changelog: latestRelease?.description,
-        checksum: latestRelease?.fileHash,
+        version: latestRelease?.version_code,
+        fileSize: latestRelease?.file_size,
+        fileName: latestRelease?.file_name,
+        changelog: latestRelease?.changelog,
+        checksum: latestRelease?.file_hash,
         downloadCount: backendPackage.total_downloads || backendPackage.download_count || 0,
-        isLatest: latestRelease?.isLatest,
 
         createdBy: backendPackage.created_by || 'unknown'
     } as Package;
@@ -174,24 +173,20 @@ export function transformPackageFromBackend(backendPackage: any): Package {
 export function transformReleaseFromBackend(backendRelease: any): Release {
     return {
         id: backendRelease.id,
-        packageId: backendRelease.package_id,
-        version: backendRelease.version,
-        title: backendRelease.title,
-        description: backendRelease.description || backendRelease.changelog,
-        tagName: backendRelease.tag_name,
-        filePath: backendRelease.file_path,
-        fileName: backendRelease.file_name,
-        fileSize: backendRelease.file_size || 0,
-        fileHash: backendRelease.file_hash || backendRelease.checksum,
-        isPrerelease: backendRelease.is_prerelease || false,
-        isDraft: backendRelease.is_draft || false,
-        isLatest: backendRelease.is_latest || false,
-        downloadCount: backendRelease.download_count || 0,
-        createdAt: new Date(backendRelease.created_at),
-        publishedAt: backendRelease.published_at ? new Date(backendRelease.published_at) : undefined,
-        shareToken: backendRelease.share_token,
-        shareExpiry: backendRelease.share_expiry ? new Date(backendRelease.share_expiry) : undefined,
-        createdBy: backendRelease.created_by || 'unknown'
+        package_id: backendRelease.package_id,
+        version_code: backendRelease.version_code,
+        version_name: backendRelease.version_name,
+        tag_name: backendRelease.tag_name,
+        changelog: backendRelease.changelog,
+        file_path: backendRelease.file_path,
+        file_name: backendRelease.file_name,
+        file_size: backendRelease.file_size || 0,
+        file_hash: backendRelease.file_hash,
+        download_count: backendRelease.download_count || 0,
+        created_at: new Date(backendRelease.created_at),
+        share_token: backendRelease.share_token,
+        share_expiry: backendRelease.share_expiry ? new Date(backendRelease.share_expiry) : undefined,
+        created_by: backendRelease.created_by || 'unknown'
     };
 }
 
