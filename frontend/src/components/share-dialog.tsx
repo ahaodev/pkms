@@ -68,11 +68,30 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
                 responseType: 'blob',
             });
 
+            // Check if response is actually HTML (indicates error)
+            if (response.data.type === 'text/html') {
+                throw new Error('服务器返回了错误的内容类型，请检查分享链接是否有效');
+            }
+
+            // Get filename from Content-Disposition header
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'download';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename=(.+)/);
+                if (filenameMatch) {
+                    filename = filenameMatch[1].replace(/"/g, '');
+                }
+            }
+            // Fallback to packageName if no filename in headers
+            if (filename === 'download' && packageName) {
+                filename = packageName;
+            }
+
             // Create download link
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', packageName || 'download');
+            link.setAttribute('download', filename);
             document.body.appendChild(link);
             link.click();
             link.remove();

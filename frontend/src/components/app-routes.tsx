@@ -34,26 +34,41 @@ function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
 // Protected routes for authenticated users
 function ProtectedRoutes() {
     const protectedRoutes = routes.filter(route => route.requiresAuth);
+    const publicRoutes = routes.filter(route => !route.requiresAuth);
     console.log(protectedRoutes)
     return (
-        <Layout>
-            <Routes>
-                {protectedRoutes.map(({path, element: Component, requiresAdmin}) => (
-                    <Route
-                        key={path}
-                        path={path}
-                        element={
-                            <RouteGuard requiresAdmin={requiresAdmin}>
-                                <Component/>
-                            </RouteGuard>
-                        }
-                    />
-                ))}
+        <Routes>
+            {/* Public routes accessible even when authenticated */}
+            {publicRoutes.map(({path, element: Component}) => (
+                <Route
+                    key={path}
+                    path={path}
+                    element={<Component/>}
+                />
+            ))}
+            
+            {/* Protected routes in layout */}
+            <Route path="/*" element={
+                <Layout>
+                    <Routes>
+                        {protectedRoutes.map(({path, element: Component, requiresAdmin}) => (
+                            <Route
+                                key={path}
+                                path={path}
+                                element={
+                                    <RouteGuard requiresAdmin={requiresAdmin}>
+                                        <Component/>
+                                    </RouteGuard>
+                                }
+                            />
+                        ))}
 
-                {/* Catch all - redirect to dashboard */}
-                <Route path="*" element={<Navigate to="/" replace/>}/>
-            </Routes>
-        </Layout>
+                        {/* Catch all - redirect to dashboard */}
+                        <Route path="*" element={<Navigate to="/" replace/>}/>
+                    </Routes>
+                </Layout>
+            } />
+        </Routes>
     );
 }
 

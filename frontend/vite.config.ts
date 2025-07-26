@@ -24,6 +24,11 @@ export default defineConfig({
                 rewrite: (path) => path,      // 保持路径不变（可选）
                 // 如果后端接口没有 /api 前缀，可以移除：
                 // rewrite: (path) => path.replace(/^\/api/, '')
+            },
+            '/share': {
+                target: 'http://localhost:8080', // 代理分享下载接口到后端
+                changeOrigin: true,
+                rewrite: (path) => path,
             }
         },
     },
