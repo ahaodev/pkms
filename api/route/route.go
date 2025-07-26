@@ -62,11 +62,11 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
+	//packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
 	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
 	releaseRouter := protectedRouter.Group("/releases")
-	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
+	//releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager, "pm"}))
 	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
 	// 🔥 系统管理路由 - 只有admin可访问

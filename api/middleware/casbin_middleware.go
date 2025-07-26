@@ -238,38 +238,3 @@ func (m *CasbinMiddleware) RequireSpecificPermission(resource, action string) gi
 		c.Next()
 	}
 }
-
-// RequireCreatePermission 要求创建权限
-func (m *CasbinMiddleware) RequireCreatePermission(resource string) gin.HandlerFunc {
-	return m.RequireSpecificPermission(resource, "create")
-}
-
-// RequireUpdatePermission 要求更新权限
-func (m *CasbinMiddleware) RequireUpdatePermission(resource string) gin.HandlerFunc {
-	return m.RequireSpecificPermission(resource, "update")
-}
-
-// RequireDeletePermission 要求删除权限
-func (m *CasbinMiddleware) RequireDeletePermission(resource string) gin.HandlerFunc {
-	return m.RequireSpecificPermission(resource, "delete")
-}
-
-// RequireListPermission 要求列表权限
-func (m *CasbinMiddleware) RequireListPermission(resource string) gin.HandlerFunc {
-	return m.RequireSpecificPermission(resource, "list")
-}
-
-// RequireSharePermission 要求分享权限
-func (m *CasbinMiddleware) RequireSharePermission(resource string) gin.HandlerFunc {
-	return m.RequireSpecificPermission(resource, "share")
-}
-
-// RequireUploadPermission 要求上传权限
-func (m *CasbinMiddleware) RequireUploadPermission() gin.HandlerFunc {
-	return m.RequireSpecificPermission("file", "upload")
-}
-
-// RequireDownloadPermission 要求下载权限
-func (m *CasbinMiddleware) RequireDownloadPermission() gin.HandlerFunc {
-	return m.RequireSpecificPermission("file", "download")
-}
