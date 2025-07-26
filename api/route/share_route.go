@@ -23,5 +23,5 @@ func NewShareRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, f
 		FileUsecase:    usecase.NewFileUsecase(fileStorage, timeout),
 		Env:            env,
 	}
-	group.GET("/:code", sc.DownloadSharedRelease) // GET /share/:code/download
+	group.GET("/:code", sc.DownloadSharedRelease) // GET /share/:code - 直接下载分享的文件
 }
