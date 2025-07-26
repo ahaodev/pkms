@@ -10,6 +10,38 @@ permissions using RBAC (Role-Based Access Control).
 
 ## Development Commands
 
+### Frontend (React + TypeScript + Vite + shadcn-ui + Tailwind CSS)
+
+```bash
+cd ./frontend
+
+# Install dependencies
+npm install
+
+# Run development server (port 5173, proxies /api to localhost:8080)
+npm run dev
+
+# Build for production (includes TypeScript build check)
+# The backend must be built after the frontend. The dist directory (frontend/dist) is packaged into the backend binary via frontend.go (frontend/frontend.go).
+npm run build
+
+# Lint code
+npm run lint
+
+# Check TypeScript types
+npx tsc --noEmit
+
+# Preview production build
+npm run preview
+
+# Security audit
+npm audit
+
+# Fix security vulnerabilities
+npm audit fix
+```
+
+
 ### Backend (Go Backend Clean Architecture)
 
 
@@ -30,35 +62,6 @@ go test ./...
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-### Frontend (React + TypeScript + Vite + shadcn-ui + Tailwind CSS)
-
-```bash
-cd ./frontend
-
-# Install dependencies
-npm install
-
-# Run development server (port 5173, proxies /api to localhost:8080)
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Preview production build
-npm run preview
-```
-
-### Quick Start Script
-
-```bash
-# Alternative full-stack startup (generates Ent, builds frontend, starts backend)
-./start.sh
-```
-
-> only for Linux/MacOS
 
 ### Docker & Release
 
@@ -182,6 +185,13 @@ Routes are protected using `middleware.CasbinMiddleware`:
 - `RequireRole(role)`: Check role membership
 - Profile and dashboard routes allow all authenticated users
 
+### Current RBAC Implementation
+The system currently has extensive permission configurations in place:
+- Domain-specific permissions for tenants (`d208s9frlmvmbf5ketk0`, `d208s9frlmvmbf5ketl0`, `d208s9frlmvmbf5ketm0`)
+- Role-based access for admin, pm (project manager), and user roles
+- Granular resource permissions covering projects, packages, releases, files, and users
+- Action-level control: read, write, delete, create, update, list, share, upload, download
+
 ## Database Schema (Ent)
 
 Key entities defined in `ent/schema/`:
@@ -254,6 +264,44 @@ Key environment variables:
 - **Form state**: React Hook Form with Zod validation
 - **URL state**: React Router for navigation and route parameters
 
+## Development Workflow
+
+### Full-Stack Development Setup
+```bash
+# Terminal 1: Start backend (must be first)
+go run ./cmd/main.go
+
+# Terminal 2: Start frontend development server
+cd frontend && npm run dev
+```
+
+### After Schema Changes
+```bash
+# Always regenerate Ent code after modifying ent/schema files
+go generate ./ent
+
+# Restart backend to apply schema changes
+go run ./cmd/main.go
+```
+
+### Before Committing Code
+```bash
+# Backend checks
+go test ./...
+go mod tidy
+
+# Frontend checks
+cd frontend
+npm run lint
+npm run build
+npm audit
+```
+
+### Branch Management
+- Current branch: `rbac-domains` (RBAC optimization work)
+- Main branch for PRs: `main`
+- Recent commits focus on permission system optimization
+
 ## Testing & Development
 
 - Default admin user created on startup: admin/admin123
@@ -261,6 +309,24 @@ Key environment variables:
 - Logs written to `logs/` directory with rotation
 - SQLite database file: `data.db`
 - Frontend development server runs on port 5173 with API proxy to port 8080
+
+## Common Issues & Troubleshooting
+
+### Backend Issues
+- **"Failed to generate Ent code"**: Run `go install entgo.io/ent/cmd/ent@latest` first
+- **Database migration errors**: Delete `data.db` and restart backend for clean database
+- **Port 8080 already in use**: Kill existing Go processes or change port in `bootstrap/env.go`
+
+### Frontend Issues
+- **CORS errors**: Ensure backend is running on port 8080 before starting frontend
+- **Node module errors**: Delete `node_modules/` and `package-lock.json`, then `npm install`
+- **Build failures**: Run `npx tsc --noEmit` to check TypeScript errors first
+- **Performance warnings**: Bundle is currently oversized (628KB), needs code splitting
+
+### Permission System Issues
+- **403 Forbidden**: Check user role assignments and Casbin policies in database
+- **Authentication failures**: Verify JWT tokens in localStorage and backend configuration
+- **Multi-tenant access**: Ensure `x-tenant-id` header is set correctly in requests
 
 # important-instruction-reminders
 
