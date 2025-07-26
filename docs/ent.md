@@ -14,7 +14,7 @@ https://github.com/ent/ent/blob/master/README_zh.md
 go install -tags 'sqlite' ariga.io/atlas/cmd/atlas@latest
 
 # 导出 ent.Schema 当前对应数据库对应schema到 sql 文件
-atlas schema inspect -u "sqlite://database.db" > schema.sql
+atlas schema inspect -u "sqlite://data.db" > schema.sql
 
 # 比较两个 schema 的差异
 atlas schema diff --from "sqlite://old.db" --to "sqlite://new.db"

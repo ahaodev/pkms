@@ -6,6 +6,7 @@ import {useReleases} from '@/hooks/use-releases';
 import {ExtendedPackage} from '@/types/package';
 import {Release} from '@/types/release';
 import {useToast} from '@/hooks/use-toast';
+import {downloadRelease} from '@/lib/api/releases';
 import {Input} from '@/components/ui/input';
 import {
     Breadcrumb,
@@ -90,12 +91,39 @@ export default function HierarchyPage() {
         setIsCreateReleaseDialogOpen(true);
     };
 
-    const handleDownload = (release: Release) => {
-        window.open(`/api/v1/releases/${release.id}/download`, '_blank');
-        toast({
-            title: '下载开始',
-            description: `开始下载 ${release.fileName}`,
-        });
+    const handleDownload = async (release: Release) => {
+        try {
+            toast({
+                title: '下载开始',
+                description: `正在准备下载 ${release.fileName}`,
+            });
+
+            const blob = await downloadRelease(release.id);
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = release.fileName;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            
+            toast({
+                title: '下载完成',
+                description: `${release.fileName} 下载完成`,
+            });
+        } catch (error) {
+            console.error('Download failed:', error);
+            toast({
+                variant: 'destructive',
+                title: '下载失败',
+                description: '文件下载失败，请重试',
+            });
+        }
     };
 
     const handleCreateProject = async () => {
