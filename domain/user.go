@@ -19,6 +19,7 @@ type User struct {
 type UserRepository interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]User, error)
+	FetchByTenant(c context.Context, tenantID string) ([]User, error)
 	GetByUserName(c context.Context, userName string) (User, error)
 	GetByID(c context.Context, id string) (User, error)
 	Update(c context.Context, user *User) error

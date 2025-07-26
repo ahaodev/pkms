@@ -47,7 +47,8 @@ func (du *dashboardUsecase) GetStats(c context.Context, tenantID string) (domain
 		}
 	}
 
-	users, err := du.userRepository.Fetch(ctx)
+	// Get tenant-specific users
+	users, err := du.userRepository.FetchByTenant(ctx, tenantID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -104,8 +105,8 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID stri
 		})
 	}
 
-	// Get recent users
-	users, err := du.userRepository.Fetch(ctx)
+	// Get recent users (tenant-specific)
+	users, err := du.userRepository.FetchByTenant(ctx, tenantID)
 	if err == nil {
 		for i, user := range users {
 			if i >= limit/3 { // Limit to 1/3 of total limit

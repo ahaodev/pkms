@@ -170,7 +170,7 @@ func (m *CasbinMiddleware) HasPermission(userID, tenantID, object, action string
 	return hasPermission
 }
 
-// 通用资源权限校验中间件
+// RequireResourcePermission 通用资源权限校验中间件
 func (m *CasbinMiddleware) RequireResourcePermission(resourceType, action string, paramKey ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.GetString(constants.UserID)
@@ -199,21 +199,6 @@ func (m *CasbinMiddleware) RequireResourcePermission(resourceType, action string
 		}
 		c.Next()
 	}
-}
-
-// 用通用方法替换原有项目权限校验
-func (m *CasbinMiddleware) RequireProjectPermission(action string) gin.HandlerFunc {
-	return m.RequireResourcePermission("project", action, "project_id")
-}
-
-// 用通用方法替换原有包权限校验
-func (m *CasbinMiddleware) RequirePackagePermission(action string) gin.HandlerFunc {
-	return m.RequireResourcePermission("package", action, "package_name")
-}
-
-// 用通用方法替换原有侧边栏权限校验
-func (m *CasbinMiddleware) RequireSidebarPermission(item string) gin.HandlerFunc {
-	return m.RequireResourcePermission("sidebar", item)
 }
 
 // RequireSpecificPermission 要求特定资源和动作权限的中间件（使用常量）

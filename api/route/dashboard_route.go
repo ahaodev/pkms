@@ -24,9 +24,6 @@ func NewDashboardRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Clien
 	}
 
 	// Dashboard operations
-	group.GET("/stats", dc.GetStats)                        // GET /api/v1/dashboard/stats
-	group.GET("/activities", dc.GetRecentActivities)        // GET /api/v1/dashboard/activities
-	group.GET("/charts/packages", dc.GetPackageChartData)   // GET /api/v1/dashboard/charts/packages
-	group.GET("/charts/users", dc.GetUserChartData)         // GET /api/v1/dashboard/charts/users
-	group.GET("/charts/downloads", dc.GetDownloadChartData) // GET /api/v1/dashboard/charts/downloads
+	group.GET("/stats", dc.GetStats)                 // GET /api/v1/dashboard/stats
+	group.GET("/activities", dc.GetRecentActivities) // GET /api/v1/dashboard/activities
 }

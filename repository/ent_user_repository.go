@@ -7,6 +7,7 @@ import (
 
 	"pkms/domain"
 	"pkms/ent"
+	"pkms/ent/tenant"
 	"pkms/ent/user"
 )
 
@@ -138,6 +139,31 @@ func (ur *entUserRepository) Delete(c context.Context, id string) error {
 	return ur.client.User.
 		DeleteOneID(id).
 		Exec(c)
+}
+
+func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) ([]domain.User, error) {
+	// Query users that belong to the specified tenant
+	users, err := ur.client.User.
+		Query().
+		Where(user.HasTenantsWith(tenant.ID(tenantID))).
+		Select(user.FieldID, user.FieldUsername, user.FieldCreatedAt, user.FieldUpdatedAt).
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.User
+	for _, u := range users {
+		result = append(result, domain.User{
+			ID:        u.ID,
+			Name:      u.Username,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+		})
+	}
+
+	return result, nil
 }
 
 func (ur *entUserRepository) GetUserProjects(c context.Context, userID string) ([]domain.Project, error) {

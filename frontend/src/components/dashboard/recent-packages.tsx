@@ -28,7 +28,16 @@ export function RecentPackages({packages, onViewAllPackages}: RecentPackagesProp
                             >
                                 <div className="flex items-center space-x-3">
                                     <span className="text-lg">{getTypeIcon(pkg.type)}</span>
-
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-foreground truncate">
+                                            {pkg.name}
+                                        </p>
+                                        {pkg.description && (
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {pkg.description}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                     {pkg.createdAt.toLocaleDateString()}
