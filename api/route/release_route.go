@@ -39,7 +39,5 @@ func NewReleaseRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	group.POST("/:id/set-latest", rc.SetLatestRelease)            // POST /api/v1/releases/:id/set-latest
 
 	// Release sharing operations
-	group.POST("/:id/share", rc.CreateShareLink)                  // POST /api/v1/releases/:id/share
-	group.GET("/share/:token", rc.GetSharedRelease)               // GET /api/v1/releases/share/:token
-	group.GET("/share/:token/download", rc.DownloadSharedRelease) // GET /api/v1/releases/share/:token/download
+	group.POST("/:id/share", rc.CreateShareLink) // POST /api/v1/releases/:id/share
 }

@@ -321,27 +321,3 @@ func (rc *ReleaseController) CreateShareLink(c *gin.Context) {
 
 	c.JSON(http.StatusOK, domain.RespSuccess(shareResponse))
 }
-
-// GetSharedRelease 通过分享令牌获取发布版本
-func (rc *ReleaseController) GetSharedRelease(c *gin.Context) {
-	token := c.Param("token")
-	pkg.Log.Println(token)
-	// TODO: 实现通过分享令牌获取发布版本的逻辑
-	// 1. 验证令牌有效性和过期时间
-	// 2. 获取对应的发布版本信息
-	// 3. 返回发布版本信息（不包含敏感信息）
-
-	c.JSON(http.StatusNotImplemented, domain.RespError("Shared release feature not implemented yet"))
-}
-
-// DownloadSharedRelease 通过分享令牌下载发布版本文件
-func (rc *ReleaseController) DownloadSharedRelease(c *gin.Context) {
-	token := c.Param("token")
-	pkg.Log.Println(token)
-	// TODO: 实现通过分享令牌下载文件的逻辑
-	// 1. 验证令牌有效性和过期时间
-	// 2. 获取对应的发布版本信息
-	// 3. 提供文件下载（可能需要增加下载计数）
-
-	c.JSON(http.StatusNotImplemented, domain.RespError("Shared download feature not implemented yet"))
-}
