@@ -71,7 +71,6 @@ func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
-		Password:  u.PasswordHash,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}, nil

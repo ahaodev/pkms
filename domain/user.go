@@ -9,7 +9,7 @@ import (
 type User struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	Password  string    `json:"-"`
+	Password  string    `json:"password"`
 	Tenants   []*Tenant `json:"tenants"`
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
