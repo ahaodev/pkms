@@ -4,7 +4,7 @@ import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {CreateTenantRequest, Tenant, UpdateTenantRequest} from '@/types/tenant';
-import {TenantDialog, TenantHeader, TenantList} from '@/components/tenant';
+import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 
 /**
  * 租户管理页面：管理系统租户，分配用户权限
@@ -25,7 +25,9 @@ export default function TenantsPage() {
 
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+    const [viewingTenant, setViewingTenant] = useState<Tenant | null>(null);
 
     const [tenantForm, setTenantForm] = useState<TenantFormData>({
         name: '',
@@ -173,11 +175,8 @@ export default function TenantsPage() {
     };
 
     const handleViewUsers = (tenant: Tenant) => {
-        // TODO: 实现查看租户用户功能
-        toast({
-            title: '功能开发中',
-            description: `租户 "${tenant.name}" 的用户管理功能正在开发中。`,
-        });
+        setViewingTenant(tenant);
+        setIsUsersDialogOpen(true);
     };
 
     return (
@@ -219,6 +218,16 @@ export default function TenantsPage() {
                 isEdit={true}
                 tenantForm={tenantForm}
                 updateTenantForm={updateTenantForm}
+            />
+
+            {/* 租户用户管理对话框 */}
+            <TenantUsersDialog
+                open={isUsersDialogOpen}
+                onClose={() => {
+                    setIsUsersDialogOpen(false);
+                    setViewingTenant(null);
+                }}
+                tenant={viewingTenant}
             />
         </div>
     );

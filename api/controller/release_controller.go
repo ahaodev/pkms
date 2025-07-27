@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"net/http"
 	"pkms/internal/constants"
 	"pkms/pkg"

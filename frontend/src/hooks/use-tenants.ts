@@ -7,7 +7,10 @@ import {
   getTenant,
   getTenantUsers,
   addUserToTenant,
-  removeUserFromTenant
+  removeUserFromTenant,
+  getTenantUsersWithRole,
+  addUserToTenantWithRole,
+  updateTenantUserRole
 } from '@/lib/api/tenants';
 import { CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
 
@@ -115,6 +118,50 @@ export function useRemoveUserFromTenant() {
       removeUserFromTenant(tenantId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenant-users-with-roles', variables.tenantId] });
+    }
+  });
+}
+
+// Get tenant users with roles
+export function useTenantUsersWithRole(tenantId: string) {
+  return useQuery({
+    queryKey: ['tenant-users-with-roles', tenantId],
+    queryFn: async () => {
+      const response = await getTenantUsersWithRole(tenantId);
+      return response.data;
+    },
+    enabled: !!tenantId,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always'
+  });
+}
+
+// Add user to tenant with role mutation
+export function useAddUserToTenantWithRole() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ tenantId, userId, role }: { tenantId: string; userId: string; role: string }) => 
+      addUserToTenantWithRole(tenantId, userId, role),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenant-users-with-roles', variables.tenantId] });
+    }
+  });
+}
+
+// Update tenant user role mutation
+export function useUpdateTenantUserRole() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ tenantId, userId, role, isActive }: { tenantId: string; userId: string; role: string; isActive?: boolean }) => 
+      updateTenantUserRole(tenantId, userId, role, isActive),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenant-users-with-roles', variables.tenantId] });
     }
   });
 }

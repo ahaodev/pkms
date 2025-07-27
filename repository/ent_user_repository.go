@@ -2,9 +2,6 @@ package repository
 
 import (
 	"context"
-	"strconv"
-	"time"
-
 	"pkms/domain"
 	"pkms/ent"
 	"pkms/ent/tenant"

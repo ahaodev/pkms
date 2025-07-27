@@ -336,7 +336,7 @@ ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly
 requested by the User.
 
-## Permissions and Role Management
+## Permissions and Role Management  
 
 ### Casbin Policy Details
 - **Row Format**: `[type],[id],[role/domain],[resource],[action]`
