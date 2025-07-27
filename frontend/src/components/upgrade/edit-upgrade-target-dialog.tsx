@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import {Button} from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -7,11 +7,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { UpdateUpgradeTargetRequest } from '@/lib/api/upgrade';
+import {Input} from '@/components/ui/input';
+import {Label} from '@/components/ui/label';
+import {Switch} from '@/components/ui/switch';
+import {Textarea} from '@/components/ui/textarea';
+import {UpdateUpgradeTargetRequest} from '@/lib/api/upgrade';
 
 interface EditUpgradeTargetDialogProps {
     isOpen: boolean;
@@ -23,13 +23,13 @@ interface EditUpgradeTargetDialogProps {
 }
 
 export function EditUpgradeTargetDialog({
-    isOpen,
-    onClose,
-    onSubmit,
-    formData,
-    setFormData,
-    isLoading
-}: EditUpgradeTargetDialogProps) {
+                                            isOpen,
+                                            onClose,
+                                            onSubmit,
+                                            formData,
+                                            setFormData,
+                                            isLoading
+                                        }: EditUpgradeTargetDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-lg">
@@ -48,7 +48,7 @@ export function EditUpgradeTargetDialog({
                             id="name"
                             placeholder="输入升级目标名称"
                             value={formData.name || ''}
-                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
                         />
                     </div>
 
@@ -59,7 +59,7 @@ export function EditUpgradeTargetDialog({
                             id="description"
                             placeholder="描述此升级目标的用途..."
                             value={formData.description || ''}
-                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                             rows={3}
                         />
                     </div>
@@ -69,7 +69,7 @@ export function EditUpgradeTargetDialog({
                         <Switch
                             id="is_active"
                             checked={formData.is_active ?? true}
-                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                            onCheckedChange={(checked) => setFormData(prev => ({...prev, is_active: checked}))}
                         />
                         <Label htmlFor="is_active">激活状态</Label>
                     </div>
