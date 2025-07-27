@@ -93,7 +93,7 @@ func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, 
 func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
 	// 检查是否是系统内置admin用户，如果是，在任何租户中都返回admin角色
 	if m.IsSystemAdmin(userID) {
-		return []string{"admin"}
+		return []string{domain.RoleAdmin}
 	}
 
 	roles, _ := m.enforcer.GetRolesForUser(userID, tenantID)
@@ -381,5 +381,5 @@ func (m *CasbinManager) IsSystemAdmin(userID string) bool {
 		return false
 	}
 
-	return user.Username == "admin"
+	return user.Username == RoleAdmin
 }

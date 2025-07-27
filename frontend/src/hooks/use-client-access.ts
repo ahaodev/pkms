@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clientAccessApi } from '@/lib/api/client-access';
+import { clientAccessApi } from '@/lib/api/access-manager.ts';
 import type { 
   CreateClientAccessRequest, 
   UpdateClientAccessRequest,

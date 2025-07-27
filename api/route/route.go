@@ -82,12 +82,12 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrades")
-	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleManager))
+	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
-	clientAccessRouter := protectedRouter.Group("/client-access")
-	clientAccessRouter.Use(casbinMiddleware.RequireRole(domain.RoleManager))
-	NewClientAccessRouter(env, timeout, db, clientAccessRouter)
+	clientAccessRouter := protectedRouter.Group("/access-manager")
+	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
 	// 🔥 普通功能路由 - 登录即可访问
 	dashboardRouter := protectedRouter.Group("/dashboard")

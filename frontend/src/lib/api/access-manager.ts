@@ -17,43 +17,43 @@ export const clientAccessApi = {
     if (filters?.search) params.append('search', filters.search);
 
     return apiClient
-      .get<ApiResponse<ClientAccess[]>>(`/api/v1/client-access?${params.toString()}`)
+      .get<ApiResponse<ClientAccess[]>>(`/api/v1/access-manager?${params.toString()}`)
       .then(res => res.data.data);
   },
 
   // 根据ID获取客户端接入
   getById: (id: string): Promise<ClientAccess> =>
     apiClient
-      .get<ApiResponse<ClientAccess>>(`/api/v1/client-access/${id}`)
+      .get<ApiResponse<ClientAccess>>(`/api/v1/access-manager/${id}`)
       .then(res => res.data.data),
 
   // 创建客户端接入
   create: (data: CreateClientAccessRequest): Promise<ClientAccess> =>
     apiClient
-      .post<ApiResponse<ClientAccess>>('/api/v1/client-access', data)
+      .post<ApiResponse<ClientAccess>>('/api/v1/access-manager', data)
       .then(res => res.data.data),
 
   // 更新客户端接入
   update: (id: string, data: UpdateClientAccessRequest): Promise<void> =>
     apiClient
-      .put<ApiResponse<void>>(`/api/v1/client-access/${id}`, data)
+      .put<ApiResponse<void>>(`/api/v1/access-manager/${id}`, data)
       .then(res => res.data.data),
 
   // 删除客户端接入
   delete: (id: string): Promise<void> =>
     apiClient
-      .delete<ApiResponse<void>>(`/api/v1/client-access/${id}`)
+      .delete<ApiResponse<void>>(`/api/v1/access-manager/${id}`)
       .then(res => res.data.data),
 
   // 重新生成访问令牌
   regenerateToken: (id: string): Promise<{ access_token: string }> =>
     apiClient
-      .post<ApiResponse<{ access_token: string }>>(`/api/v1/client-access/${id}/regenerate`)
+      .post<ApiResponse<{ access_token: string }>>(`/api/v1/access-manager/${id}/regenerate`)
       .then(res => res.data.data),
 
   // 启用/禁用客户端接入
   toggleStatus: (id: string, isActive: boolean): Promise<void> =>
     apiClient
-      .put<ApiResponse<void>>(`/api/v1/client-access/${id}`, { is_active: isActive })
+      .put<ApiResponse<void>>(`/api/v1/access-manager/${id}`, { is_active: isActive })
       .then(res => res.data.data),
 };
