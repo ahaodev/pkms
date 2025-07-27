@@ -32,7 +32,7 @@ export default function ClientAccessPage() {
 
   // API hooks
   const { 
-    data: clientAccesses = [], 
+    data: clientAccesses, 
     isLoading, 
     error 
   } = useClientAccessList(filters);
@@ -96,7 +96,7 @@ export default function ClientAccessPage() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            加载设备接入管理数据时出错: {String(error) || '未知错误'}
+            加载接入管理数据时出错: {String(error) || '未知错误'}
           </AlertDescription>
         </Alert>
       </div>

@@ -242,7 +242,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                 <NavItem
                                     to="/client-access"
                                     icon={<Shield className="h-5 w-5"/>}
-                                    label="设备接入管理"
+                                    label="接入管理"
                                     onClick={handleNavClick}
                                 />
                             )}
