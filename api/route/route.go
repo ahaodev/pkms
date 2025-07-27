@@ -62,7 +62,7 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 
 	// 🔥 业务功能路由 - manager及以上角色可访问（兼容旧的pm角色）
 	projectRouter := protectedRouter.Group("/projects")
-	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
@@ -83,11 +83,11 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrades")
-	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
 	clientAccessRouter := protectedRouter.Group("/access-manager")
-	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
 	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
 	// 🔥 普通功能路由 - 登录即可访问

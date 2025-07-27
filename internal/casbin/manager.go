@@ -256,7 +256,7 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 		case domain.RoleAdmin:
 			return ADMIN_SIDEBAR
 		case domain.RoleOwner:
-			return ADMIN_SIDEBAR
+			return OWNER_SIDEBAR
 		}
 	}
 
