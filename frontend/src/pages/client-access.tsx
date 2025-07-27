@@ -48,10 +48,6 @@ export default function ClientAccessPage() {
     setFilters(newFilters);
   };
 
-  const handleResetFilters = () => {
-    setFilters({});
-  };
-
   const handleCreateClick = () => {
     setShowCreateDialog(true);
   };
@@ -112,7 +108,6 @@ export default function ClientAccessPage() {
       <ClientAccessFilters
         filters={filters}
         onFiltersChange={handleFiltersChange}
-        onReset={handleResetFilters}
       />
 
       {/* 列表组件 */}
