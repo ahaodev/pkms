@@ -238,7 +238,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                 />
                             )}
 
-                            {hasPermission("client-access") && (
+                            {hasPermission("access-manager") && (
                                 <NavItem
                                     to="/client-access"
                                     icon={<Shield className="h-5 w-5"/>}
