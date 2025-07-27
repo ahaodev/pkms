@@ -8,7 +8,7 @@ import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
 import TenantsPage from "@/pages/tenants";
 import SharePage from "@/pages/share";
-import ClientAccessPage from "@/pages/access-manager.tsx";
+import ClientAccessPage from "@/pages/client-access";
 
 export interface RouteConfig {
     path: string;
