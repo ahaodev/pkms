@@ -40,7 +40,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewPublicFileRouter(env, timeout, db, fileStorage, publicFileRouter)
 
 	// Public client access routes (no authentication required, using access_token)
-	publicClientAccessRouter := gin.Group("/client-access")
+	publicClientAccessRouter := gin.Group("/access-manager")
 	NewPublicClientAccessRouter(env, timeout, db, publicClientAccessRouter)
 
 	protectedRouter := gin.Group(ApiUri)

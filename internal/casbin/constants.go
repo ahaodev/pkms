@@ -18,7 +18,7 @@ const (
 	SidebarPermissions = "permissions"
 	SidebarSettings    = "settings"
 	SidebarUpgrade     = "upgrade"
-	ClientAccess       = "client-access"
+	ClientAccess       = "access-manager"
 )
 
 var ADMIN_MENU = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade, ClientAccess}

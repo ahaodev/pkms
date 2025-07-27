@@ -30,5 +30,5 @@ func NewPublicClientAccessRouter(env *bootstrap.Env, timeout time.Duration, db *
 	}
 
 	// Public client operations (无需JWT认证，使用access_token验证)
-	group.POST("/check-update", cac.CheckUpdate) // POST /client-access/check-update
+	group.POST("/check-update", cac.CheckUpdate) // POST /access-manager/check-update
 }

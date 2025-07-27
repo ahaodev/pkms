@@ -28,10 +28,10 @@ func NewAccessManagerRouter(env *bootstrap.Env, timeout time.Duration, db *ent.C
 	}
 
 	// Client access CRUD operations (需要管理员权限)
-	group.POST("/", cac.CreateClientAccess)            // POST /api/v1/client-access
-	group.GET("/", cac.GetClientAccessList)            // GET /api/v1/client-access
-	group.GET("/:id", cac.GetClientAccess)             // GET /api/v1/client-access/:id
-	group.PUT("/:id", cac.UpdateClientAccess)          // PUT /api/v1/client-access/:id
-	group.DELETE("/:id", cac.DeleteClientAccess)       // DELETE /api/v1/client-access/:id
-	group.POST("/:id/regenerate", cac.RegenerateToken) // POST /api/v1/client-access/:id/regenerate
+	group.POST("/", cac.CreateClientAccess)            // POST /api/v1/access-manager
+	group.GET("/", cac.GetClientAccessList)            // GET /api/v1/access-manager
+	group.GET("/:id", cac.GetClientAccess)             // GET /api/v1/access-manager/:id
+	group.PUT("/:id", cac.UpdateClientAccess)          // PUT /api/v1/access-manager/:id
+	group.DELETE("/:id", cac.DeleteClientAccess)       // DELETE /api/v1/access-manager/:id
+	group.POST("/:id/regenerate", cac.RegenerateToken) // POST /api/v1/access-manager/:id/regenerate
 }
