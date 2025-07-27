@@ -24,12 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CalendarIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { useProjects } from '@/hooks/use-projects';
 import { usePackages } from '@/hooks/use-packages';
 import type { ClientAccess, CreateClientAccessRequest, UpdateClientAccessRequest } from '@/types/client-access';
@@ -207,9 +201,6 @@ export function ClientAccessDialog({
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      描述此接入凭证的用途或相关信息
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -238,61 +229,6 @@ export function ClientAccessDialog({
               />
 
               {/* 过期时间 */}
-              <FormField
-                control={updateForm.control}
-                name="expires_at"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>过期时间</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: zhCN })
-                            ) : (
-                              <span>选择过期时间（可选）</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                        {field.value && (
-                          <div className="p-3 border-t">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => field.onChange(undefined)}
-                              className="w-full"
-                            >
-                              清除日期
-                            </Button>
-                          </div>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>
-                      留空表示永不过期
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <DialogFooter>
                 <Button 
                   type="button" 
@@ -408,70 +344,12 @@ export function ClientAccessDialog({
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      描述此接入凭证的用途或相关信息
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               {/* 过期时间 */}
-              <FormField
-                control={createForm.control}
-                name="expires_at"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>过期时间</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: zhCN })
-                            ) : (
-                              <span>选择过期时间（可选）</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                        {field.value && (
-                          <div className="p-3 border-t">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => field.onChange(undefined)}
-                              className="w-full"
-                            >
-                              清除日期
-                            </Button>
-                          </div>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>
-                      留空表示永不过期
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <DialogFooter>
                 <Button 
                   type="button" 
