@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Download, Package as PackageIcon, Plus, Share, Trash2} from 'lucide-react';
+import {Download, Package as PackageIcon, Plus, Share2, Trash2} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
 import {ShareDialog} from '@/components/share-dialog';
@@ -110,28 +110,23 @@ export function Releases({
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-4">
-                                    <div>
-                                        <CardTitle className="flex items-center space-x-2">
-                                            <span>{release.version_code}</span>
-                                        </CardTitle>
-                                            <CardDescription>{release.version_name || release.version_code}</CardDescription>
-                                    </div>
+                                    <CardTitle className="flex items-center space-x-2">
+                                        <span>{release.version_name}</span>
+                                    </CardTitle>
+                                    <CardDescription>{release.version_code || release.version_code}</CardDescription>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Button variant="outline" size="sm"
                                             onClick={() => handleShare(release)}>
-                                        <Share className="h-4 w-4 mr-2"/>
-                                        分享
+                                        <Share2 className="h-4 w-4 mr-2"/>
                                     </Button>
                                     <Button variant="outline" size="sm"
                                             onClick={() => handleDownload(release)}>
                                         <Download className="h-4 w-4 mr-2"/>
-                                        下载
                                     </Button>
                                     <Button variant="outline" size="sm"
                                             onClick={() => handleDelete(release)}>
                                         <Trash2 className="h-4 w-4 mr-2"/>
-                                        删除
                                     </Button>
                                 </div>
                             </div>
@@ -154,7 +149,8 @@ export function Releases({
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">发布时间:</span>
-                                        <div className="font-medium">{formatDate(release.created_at.toISOString())}</div>
+                                        <div
+                                            className="font-medium">{formatDate(release.created_at.toISOString())}</div>
                                     </div>
                                 </div>
                             </div>
