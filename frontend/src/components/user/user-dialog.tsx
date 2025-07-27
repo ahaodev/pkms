@@ -20,7 +20,7 @@ interface UserFormData {
     is_active: boolean;
 }
 
-interface UserDialogProps {
+export interface UserDialogProps {
     open: boolean;
     onClose: () => void;
     onSubmit: () => void;

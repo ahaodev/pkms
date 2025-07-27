@@ -3,10 +3,13 @@ import {Shield} from 'lucide-react';
 import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
-import {useUsers, useCreateUser, useUpdateUser, useDeleteUser} from '@/hooks/use-users';
-import {User, UserRole, CreateUserRequest, UpdateUserRequest} from '@/types/user';
+import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
+import {CreateUserRequest, UpdateUserRequest, User, UserRole} from '@/types/user';
 import {Group} from '@/types/group';
-import {UserDialog, UserFilters, UserHeader, UserList} from '@/components/user';
+import {UserFilters, UserList} from '@/components/user';
+import { UserHeader } from '@/components/user/user-header';
+import { UserCreateDialog } from '@/components/user/user-create-dialog';
+import { UserEditDialog } from '@/components/user/user-edit-dialog';
 
 /**
  * 用户管理页面：管理系统用户，分配项目权限
@@ -22,7 +25,7 @@ export default function UsersPage() {
     const {toast} = useToast();
     const {user: currentUser, isAdmin} = useAuth();
     const {data: projects} = useProjects();
-    
+
     const {data: users, isLoading} = useUsers();
     const createUserMutation = useCreateUser();
     const updateUserMutation = useUpdateUser();
@@ -88,9 +91,9 @@ export default function UsersPage() {
             permissions: [],
         },
     ];
-    
+
     const groups = getAllGroups();
-    
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -135,7 +138,7 @@ export default function UsersPage() {
                 password: userForm.password,
                 is_active: userForm.is_active,
             };
-            
+
             await createUserMutation.mutateAsync(createRequest);
 
             toast({
@@ -179,7 +182,7 @@ export default function UsersPage() {
                 name: userForm.name,
                 is_active: userForm.is_active,
             };
-            
+
             await updateUserMutation.mutateAsync({
                 id: editingUser.id,
                 update: updateRequest
@@ -236,12 +239,12 @@ export default function UsersPage() {
             const updateRequest: UpdateUserRequest = {
                 is_active: !user.is_active,
             };
-            
+
             await updateUserMutation.mutateAsync({
                 id: user.id,
                 update: updateRequest
             });
-            
+
             toast({
                 title: user.is_active ? '用户已禁用' : '用户已启用',
                 description: `用户 "${user.name}" 已${user.is_active ? '禁用' : '启用'}。`,
@@ -258,7 +261,7 @@ export default function UsersPage() {
     return (
         <div className="space-y-6">
             {/* 页面头部 */}
-            <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)}/>
+            <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)} />
 
             {/* 筛选器 */}
             <UserFilters
@@ -280,14 +283,13 @@ export default function UsersPage() {
             />
 
             {/* 创建用户对话框 */}
-            <UserDialog
+            <UserCreateDialog
                 open={isCreateDialogOpen}
                 onClose={() => {
                     setIsCreateDialogOpen(false);
                     resetForm();
                 }}
                 onSubmit={handleCreateUser}
-                title="创建新用户"
                 userForm={userForm}
                 projects={projects}
                 groups={groups}
@@ -295,7 +297,7 @@ export default function UsersPage() {
             />
 
             {/* 编辑用户对话框 */}
-            <UserDialog
+            <UserEditDialog
                 open={isEditDialogOpen}
                 onClose={() => {
                     setIsEditDialogOpen(false);
@@ -303,8 +305,6 @@ export default function UsersPage() {
                     resetForm();
                 }}
                 onSubmit={handleUpdateUser}
-                title="编辑用户"
-                isEdit={true}
                 userForm={userForm}
                 projects={projects}
                 groups={groups}
