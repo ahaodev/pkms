@@ -50,7 +50,7 @@ export function PackageReleaseDialog({
         if (!selectedFile) return;
 
         setIsUploading(true);
-        setUploadProgress({ loaded: 0, total: selectedFile.size, percentage: 0 });
+        setUploadProgress({loaded: 0, total: selectedFile.size, percentage: 0});
 
         try {
             const uploadData: ReleaseUpload = {

@@ -57,12 +57,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
 
     const handleDownload = async () => {
         if (!shareUrl) return;
-        
+
         try {
             setDownloading(true);
             // Extract the share code from the URL
             const shareCode = shareUrl.split('/share/')[1];
-            
+
             // Use apiClient to download the file with proper blob handling
             const response = await apiClient.get(`/share/${shareCode}`, {
                 responseType: 'blob',
@@ -112,7 +112,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
             setDownloading(false);
         }
     };
-    
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-md">

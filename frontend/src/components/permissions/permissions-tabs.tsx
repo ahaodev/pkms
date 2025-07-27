@@ -1,5 +1,5 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReactNode } from "react";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {ReactNode} from "react";
 
 interface PermissionsTabsProps {
     defaultValue?: string;
@@ -9,11 +9,11 @@ interface PermissionsTabsProps {
 }
 
 export function PermissionsTabs({
-    defaultValue = "role-permissions",
-    rolePermissionsContent,
-    userRolesContent,
-    userPermissionsContent
-}: PermissionsTabsProps) {
+                                    defaultValue = "role-permissions",
+                                    rolePermissionsContent,
+                                    userRolesContent,
+                                    userPermissionsContent
+                                }: PermissionsTabsProps) {
     return (
         <Tabs defaultValue={defaultValue} className="space-y-4">
             <TabsList className="grid grid-cols-3">

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import type { UserPermission } from '@/types';
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Badge} from '@/components/ui/badge';
+import {Separator} from '@/components/ui/separator';
+import type {UserPermission} from '@/types';
 
 interface UserPermissionsDialogProps {
     isOpen: boolean;
@@ -13,11 +13,11 @@ interface UserPermissionsDialogProps {
 }
 
 const UserPermissionsDialog: React.FC<UserPermissionsDialogProps> = ({
-    isOpen,
-    onClose,
-    userPermissions,
-    selectedUserId
-}) => {
+                                                                         isOpen,
+                                                                         onClose,
+                                                                         userPermissions,
+                                                                         selectedUserId
+                                                                     }) => {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl">
@@ -37,7 +37,7 @@ const UserPermissionsDialog: React.FC<UserPermissionsDialogProps> = ({
                                     ))}
                                 </div>
                             </div>
-                            <Separator />
+                            <Separator/>
                             <div>
                                 <h4 className="font-semibold mb-2">权限列表</h4>
                                 <Table>

@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Menu, LogOut, User as UserIcon} from "lucide-react";
+import {LogOut, Menu, User as UserIcon} from "lucide-react";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import type {HeaderProps} from '@/types';
 

@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Eye, Plus, Shield, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api/api';
-import { useAuth } from '@/providers/auth-provider';
-import { 
-    getObjectDisplayName, 
-    getActionDisplayName
-} from '@/lib/utils/permission-utils';
-import type { EnhancedPolicy, User, UserPolicyForm } from '@/types';
+import React, {useState} from 'react';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Button} from '@/components/ui/button';
+import {Label} from '@/components/ui/label';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Badge} from '@/components/ui/badge';
+import {Eye, Plus, Shield, Trash2} from 'lucide-react';
+import {toast} from 'sonner';
+import {apiClient} from '@/lib/api/api';
+import {useAuth} from '@/providers/auth-provider';
+import {getActionDisplayName, getObjectDisplayName} from '@/lib/utils/permission-utils';
+import type {EnhancedPolicy, User, UserPolicyForm} from '@/types';
 
 interface UserPermissionsConfigProps {
     enhancedPolicies: EnhancedPolicy[];
@@ -26,14 +23,14 @@ interface UserPermissionsConfigProps {
 }
 
 const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
-    enhancedPolicies,
-    users,
-    objects,
-    actions,
-    onRefresh,
-    onShowUserPermissions
-}) => {
-    const { currentTenant } = useAuth();
+                                                                         enhancedPolicies,
+                                                                         users,
+                                                                         objects,
+                                                                         actions,
+                                                                         onRefresh,
+                                                                         onShowUserPermissions
+                                                                     }) => {
+    const {currentTenant} = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserPolicyForm>({
         user_id: '',
@@ -45,7 +42,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
     const predefinedRoles = ['pm', 'developer', 'viewer'];
 
     // Filter out role policies to show only user policies
-    const userPolicies = enhancedPolicies.filter(policy => 
+    const userPolicies = enhancedPolicies.filter(policy =>
         !predefinedRoles.includes(policy.subject)
     );
 
@@ -60,11 +57,11 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('用户权限添加成功');
                 setShowAddDialog(false);
-                setFormData({ 
+                setFormData({
                     user_id: '',
-                    tenant: currentTenant?.id || '', 
-                    object: '', 
-                    action: '' 
+                    tenant: currentTenant?.id || '',
+                    object: '',
+                    action: ''
                 });
                 await onRefresh();
             } else {
@@ -79,7 +76,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
     const handleRemove = async (userId: string, domain: string, object: string, action: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/policies', {
-                data: { user_id: userId, tenant: domain, object, action }
+                data: {user_id: userId, tenant: domain, object, action}
             });
             if (response.data && response.data.code === 0) {
                 toast.success('用户权限删除成功');
@@ -98,13 +95,13 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2">
-                        <Shield className="w-5 h-5" />
+                        <Shield className="w-5 h-5"/>
                         用户权限配置
                     </CardTitle>
                     <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                         <DialogTrigger asChild>
                             <Button>
-                                <Plus className="w-4 h-4 mr-2" />
+                                <Plus className="w-4 h-4 mr-2"/>
                                 添加用户权限
                             </Button>
                         </DialogTrigger>
@@ -115,7 +112,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                             <div className="space-y-4">
                                 <div>
                                     <Label htmlFor="user_id">用户</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.user_id}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -123,7 +120,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                         })}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择用户" />
+                                            <SelectValue placeholder="选择用户"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {users.map(user => (
@@ -136,7 +133,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="tenant">租户</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.tenant}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -145,7 +142,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                         disabled={!currentTenant}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择租户" />
+                                            <SelectValue placeholder="选择租户"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {currentTenant && (
@@ -158,7 +155,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="object">对象</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.object}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -185,7 +182,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="action">操作</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.action}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -214,7 +211,7 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                     <Button onClick={handleAdd} className="flex-1">
                                         添加
                                     </Button>
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         onClick={() => setShowAddDialog(false)}
                                         className="flex-1"
@@ -270,14 +267,14 @@ const UserPermissionsConfig: React.FC<UserPermissionsConfigProps> = ({
                                             size="sm"
                                             onClick={() => onShowUserPermissions(policy.subject)}
                                         >
-                                            <Eye className="w-4 h-4" />
+                                            <Eye className="w-4 h-4"/>
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleRemove(policy.subject, policy.domain, policy.object, policy.action)}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4"/>
                                         </Button>
                                     </div>
                                 </TableCell>

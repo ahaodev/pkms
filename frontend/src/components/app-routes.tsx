@@ -1,4 +1,4 @@
-import {Routes, Route, Navigate} from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import {Layout} from "@/components/layout";
 import {routes} from "@/config/routes";
@@ -46,7 +46,7 @@ function ProtectedRoutes() {
                     element={<Component/>}
                 />
             ))}
-            
+
             {/* Protected routes in layout */}
             <Route path="/*" element={
                 <Layout>
@@ -67,7 +67,7 @@ function ProtectedRoutes() {
                         <Route path="*" element={<Navigate to="/" replace/>}/>
                     </Routes>
                 </Layout>
-            } />
+            }/>
         </Routes>
     );
 }

@@ -10,7 +10,7 @@ import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
 import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider';
-import { getRoleDisplayName } from '@/lib/utils/permission-utils';
+import {getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedRole, User, UserRoleForm} from '@/types';
 
 interface UserRoleAssignmentProps {
@@ -26,7 +26,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                                                    onRefresh,
                                                                    onShowUserPermissions
                                                                }) => {
-    const { currentTenant } = useAuth();
+    const {currentTenant} = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserRoleForm>({
         user_id: '',
@@ -48,7 +48,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                 toast.success('用户角色添加成功');
                 setShowAddDialog(false);
                 setFormData({
-                    user_id: '', 
+                    user_id: '',
                     role: '',
                     tenant: currentTenant?.id || ''
                 });

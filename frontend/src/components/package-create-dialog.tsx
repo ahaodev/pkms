@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {Globe, Monitor, Package2, Server, Smartphone} from 'lucide-react';
 import {Button} from '@/components/ui/button.tsx';
 import {

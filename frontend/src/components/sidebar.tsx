@@ -5,16 +5,16 @@ import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {
     BarChart3,
-    ChevronDown,
     Boxes,
+    ChevronDown,
     Globe,
     Lock,
     Package,
-    Settings as SettingsIcon,
-    Users,
     Rocket,
-    X,
-    Shield
+    Settings as SettingsIcon,
+    Shield,
+    Users,
+    X
 } from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
@@ -219,7 +219,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     onClick={handleNavClick}
                                 />
                             )}
-                            
+
                             {(hasPermission("projects") || hasPermission("packages")) && (
                                 <NavItem
                                     to="/hierarchy"

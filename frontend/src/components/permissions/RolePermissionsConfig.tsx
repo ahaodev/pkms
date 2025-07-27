@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Key, Plus, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api/api';
-import { useAuth } from '@/providers/auth-provider';
-import { 
-    getObjectDisplayName, 
-    getActionDisplayName, 
-    getRoleDisplayName
-} from '@/lib/utils/permission-utils';
-import type { EnhancedPolicy, RolePolicyForm } from '@/types';
+import React, {useState} from 'react';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Button} from '@/components/ui/button';
+import {Label} from '@/components/ui/label';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Badge} from '@/components/ui/badge';
+import {Key, Plus, Trash2} from 'lucide-react';
+import {toast} from 'sonner';
+import {apiClient} from '@/lib/api/api';
+import {useAuth} from '@/providers/auth-provider';
+import {getActionDisplayName, getObjectDisplayName, getRoleDisplayName} from '@/lib/utils/permission-utils';
+import type {EnhancedPolicy, RolePolicyForm} from '@/types';
 
 interface RolePermissionsConfigProps {
     enhancedPolicies: EnhancedPolicy[];
@@ -25,12 +21,12 @@ interface RolePermissionsConfigProps {
 }
 
 const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
-    enhancedPolicies,
-    objects,
-    actions,
-    onRefresh
-}) => {
-    const { currentTenant } = useAuth();
+                                                                         enhancedPolicies,
+                                                                         objects,
+                                                                         actions,
+                                                                         onRefresh
+                                                                     }) => {
+    const {currentTenant} = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<RolePolicyForm>({
         role: '',
@@ -41,7 +37,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
 
     const predefinedRoles = ['pm', 'developer', 'viewer'];
 
-    const rolePolicies = enhancedPolicies.filter(policy => 
+    const rolePolicies = enhancedPolicies.filter(policy =>
         predefinedRoles.includes(policy.subject)
     );
 
@@ -56,11 +52,11 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
             if (response.data && response.data.code === 0) {
                 toast.success('角色权限添加成功');
                 setShowAddDialog(false);
-                setFormData({ 
-                    role: '', 
-                    tenant: currentTenant?.id || '', 
-                    object: '', 
-                    action: '' 
+                setFormData({
+                    role: '',
+                    tenant: currentTenant?.id || '',
+                    object: '',
+                    action: ''
                 });
                 await onRefresh();
             } else {
@@ -75,7 +71,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
     const handleRemove = async (role: string, domain: string, object: string, action: string) => {
         try {
             const response = await apiClient.delete('/api/v1/casbin/role-policies', {
-                data: { role, tenant: domain, object, action }
+                data: {role, tenant: domain, object, action}
             });
             if (response.data && response.data.code === 0) {
                 toast.success('角色权限删除成功');
@@ -94,13 +90,13 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2">
-                        <Key className="w-5 h-5" />
+                        <Key className="w-5 h-5"/>
                         角色权限配置
                     </CardTitle>
                     <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                         <DialogTrigger asChild>
                             <Button>
-                                <Plus className="w-4 h-4 mr-2" />
+                                <Plus className="w-4 h-4 mr-2"/>
                                 添加角色权限
                             </Button>
                         </DialogTrigger>
@@ -111,7 +107,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                             <div className="space-y-4">
                                 <div>
                                     <Label htmlFor="role">角色</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.role}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -138,7 +134,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="tenant">租户</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.tenant}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -147,7 +143,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                         disabled={!currentTenant}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="选择租户" />
+                                            <SelectValue placeholder="选择租户"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {currentTenant && (
@@ -160,7 +156,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="object">对象</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.object}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -187,7 +183,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                 </div>
                                 <div>
                                     <Label htmlFor="action">操作</Label>
-                                    <Select 
+                                    <Select
                                         value={formData.action}
                                         onValueChange={(value) => setFormData({
                                             ...formData,
@@ -216,7 +212,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                     <Button onClick={handleAdd} className="flex-1">
                                         添加
                                     </Button>
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         onClick={() => setShowAddDialog(false)}
                                         className="flex-1"
@@ -264,7 +260,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                         size="sm"
                                         onClick={() => handleRemove(policy.subject, policy.domain, policy.object, policy.action)}
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-4 h-4"/>
                                     </Button>
                                 </TableCell>
                             </TableRow>
