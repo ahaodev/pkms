@@ -63,6 +63,8 @@ func (Packages) Edges() []ent.Edge {
 			Required(),
 		// Package has upgrade targets
 		edge.To("upgrades", Upgrade.Type),
+		// Package has client accesses
+		edge.To("client_accesses", ClientAccess.Type),
 	}
 }
 

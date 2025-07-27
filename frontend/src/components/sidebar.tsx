@@ -13,7 +13,8 @@ import {
     Settings as SettingsIcon,
     Users,
     Rocket,
-    X
+    X,
+    Shield
 } from "lucide-react";
 import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
@@ -233,6 +234,15 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     to="/upgrade"
                                     icon={<Rocket className="h-5 w-5"/>}
                                     label="升级管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+
+                            {hasPermission("client-access") && (
+                                <NavItem
+                                    to="/client-access"
+                                    icon={<Shield className="h-5 w-5"/>}
+                                    label="设备接入管理"
                                     onClick={handleNavClick}
                                 />
                             )}

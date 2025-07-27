@@ -5,6 +5,7 @@ export * from './packages';
 export * from './users';
 export * from './dashboard';
 export * from './files';
+export * from './client-access';
 
 // 为了向后兼容，可以单独导出每个模块
 export * as AuthAPI from './auth';
@@ -13,3 +14,4 @@ export * as PackagesAPI from './packages';
 export * as UsersAPI from './users';
 export * as DashboardAPI from './dashboard';
 export * as FilesAPI from './files';
+export * as ClientAccessAPI from './client-access';

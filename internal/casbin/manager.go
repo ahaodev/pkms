@@ -237,13 +237,11 @@ func (m *CasbinManager) ClearAllRoles() error {
 	return m.enforcer.SavePolicy()
 }
 
-// DEMO版本：项目和包权限直接通过路由中间件的角色检查实现
-
-// GetSidebarPermissions DEMO极简版：直接基于角色返回权限
+// GetSidebarPermissions 直接基于角色返回权限
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
 	// 系统admin全权限
 	if m.IsSystemAdmin(userID) {
-		return []string{"dashboard", "projects", "tenants", "users", "permissions", "settings", "upgrade"}
+		return ADMIN_MENU
 	}
 
 	// 获取用户角色
@@ -256,13 +254,13 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 	for _, role := range userRoles {
 		switch role {
 		case domain.RoleAdmin:
-			return []string{"dashboard", "projects", "tenants", "users", "permissions", "settings", "upgrade"}
+			return ADMIN_MENU
 		case domain.RoleManager:
-			return []string{"dashboard", "projects", "upgrade"}
+			return MANAGER_MENU
 		}
 	}
 
-	return []string{"dashboard", "projects"} // viewer权限
+	return DEFAULT_MENU
 }
 
 // DEMO版本：删除复杂的权限初始化函数

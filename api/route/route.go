@@ -39,6 +39,10 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	publicFileRouter := gin.Group(ApiUri + "/files")
 	NewPublicFileRouter(env, timeout, db, fileStorage, publicFileRouter)
 
+	// Public client access routes (no authentication required, using access_token)
+	publicClientAccessRouter := gin.Group("/client-access")
+	NewPublicClientAccessRouter(env, timeout, db, publicClientAccessRouter)
+
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
@@ -80,6 +84,10 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	upgradeRouter := protectedRouter.Group("/upgrades")
 	upgradeRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
+
+	clientAccessRouter := protectedRouter.Group("/client-access")
+	clientAccessRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	NewClientAccessRouter(env, timeout, db, clientAccessRouter)
 
 	// 🔥 普通功能路由 - 登录即可访问
 	dashboardRouter := protectedRouter.Group("/dashboard")

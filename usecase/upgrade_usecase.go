@@ -10,11 +10,12 @@ import (
 )
 
 type upgradeUsecase struct {
-	upgradeRepository domain.UpgradeRepository
-	projectRepository domain.ProjectRepository
-	packageRepository domain.PackageRepository
-	releaseRepository domain.ReleaseRepository
-	contextTimeout    time.Duration
+	upgradeRepository      domain.UpgradeRepository
+	projectRepository      domain.ProjectRepository
+	packageRepository      domain.PackageRepository
+	releaseRepository      domain.ReleaseRepository
+	clientAccessRepository domain.ClientAccessRepository
+	contextTimeout         time.Duration
 }
 
 func NewUpgradeUsecase(
@@ -30,6 +31,24 @@ func NewUpgradeUsecase(
 		packageRepository: packageRepository,
 		releaseRepository: releaseRepository,
 		contextTimeout:    timeout,
+	}
+}
+
+func NewUpgradeUsecaseWithClientAccess(
+	upgradeRepository domain.UpgradeRepository,
+	projectRepository domain.ProjectRepository,
+	packageRepository domain.PackageRepository,
+	releaseRepository domain.ReleaseRepository,
+	clientAccessRepository domain.ClientAccessRepository,
+	timeout time.Duration,
+) domain.UpgradeUsecase {
+	return &upgradeUsecase{
+		upgradeRepository:      upgradeRepository,
+		projectRepository:      projectRepository,
+		packageRepository:      packageRepository,
+		releaseRepository:      releaseRepository,
+		clientAccessRepository: clientAccessRepository,
+		contextTimeout:         timeout,
 	}
 }
 
@@ -138,12 +157,52 @@ func (u *upgradeUsecase) DeleteUpgradeTarget(ctx context.Context, id string) err
 
 func (u *upgradeUsecase) CheckUpdate(ctx context.Context, request *domain.CheckUpdateRequest) (*domain.CheckUpdateResponse, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	c.Value("key")
 	defer cancel()
 
-	// 根据packageID获取激活的升级目标
-	target, err := u.upgradeRepository.GetActiveUpgradeTargetByPackageID(c, request.PackageID)
+	// 这是旧的检查更新方法，目前保持不变但标记为废弃
+	// 新的客户端应该使用 CheckUpdateByToken 方法
+	return &domain.CheckUpdateResponse{
+		HasUpdate:      false,
+		CurrentVersion: request.CurrentVersion,
+		LatestVersion:  request.CurrentVersion,
+	}, errors.New("此方法已废弃，请使用基于token的升级检查")
+}
+
+func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain.CheckUpdateRequest, clientIP string) (*domain.CheckUpdateResponse, error) {
+	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	// 如果没有注入clientAccessRepository，返回错误
+	if u.clientAccessRepository == nil {
+		return nil, errors.New("客户端接入功能未启用")
+	}
+
+	// 1. 根据access_token查找ClientAccess记录
+	clientAccess, err := u.clientAccessRepository.GetByAccessToken(c, request.AccessToken)
 	if err != nil {
-		// 如果没有找到升级目标，表示没有更新
+		return nil, fmt.Errorf("无效的访问令牌: %w", err)
+	}
+
+	// 2. 验证token有效性（未过期、已启用）
+	if !clientAccess.IsActive {
+		return nil, errors.New("客户端接入凭证已被禁用")
+	}
+
+	if clientAccess.ExpiresAt != nil && clientAccess.ExpiresAt.Before(time.Now()) {
+		return nil, errors.New("客户端接入凭证已过期")
+	}
+
+	// 3. 更新使用统计
+	if err := u.clientAccessRepository.UpdateUsage(c, request.AccessToken, clientIP); err != nil {
+		// 记录错误但不影响主流程
+		fmt.Printf("更新客户端使用统计失败: %v\n", err)
+	}
+
+	// 4. 根据绑定的package_id获取升级目标
+	upgradeTarget, err := u.upgradeRepository.GetActiveUpgradeTargetByPackageID(c, clientAccess.PackageID)
+	if err != nil {
+		// 没有找到升级目标，表示当前没有可用更新
 		return &domain.CheckUpdateResponse{
 			HasUpdate:      false,
 			CurrentVersion: request.CurrentVersion,
@@ -151,28 +210,23 @@ func (u *upgradeUsecase) CheckUpdate(ctx context.Context, request *domain.CheckU
 		}, nil
 	}
 
-	// 比较版本，这里简化处理，只要版本不同就认为有更新
-	hasUpdate := request.CurrentVersion != target.Version
+	// 比较版本，简单的字符串比较（实际项目中可能需要更复杂的版本比较逻辑）
+	hasUpdate := upgradeTarget.Version != request.CurrentVersion
 
 	response := &domain.CheckUpdateResponse{
 		HasUpdate:      hasUpdate,
 		CurrentVersion: request.CurrentVersion,
-		LatestVersion:  target.Version,
+		LatestVersion:  upgradeTarget.Version,
 	}
 
 	// 如果有更新，填充下载信息
 	if hasUpdate {
-		response.DownloadURL = target.DownloadURL
-		response.FileSize = target.FileSize
-		response.FileHash = target.FileHash
-
-		// 获取release信息
-		if target.ReleaseID != "" {
-			release, err := u.releaseRepository.GetByID(c, target.ReleaseID)
-			if err == nil {
-				response.Changelog = release.ChangeLog
-				response.ReleaseNotes = release.VersionName
-			}
+		response.DownloadURL = upgradeTarget.DownloadURL
+		response.FileSize = upgradeTarget.FileSize
+		response.FileHash = upgradeTarget.FileHash
+		// 可以添加变更日志等信息
+		if upgradeTarget.Description != "" {
+			response.Changelog = upgradeTarget.Description
 		}
 	}
 

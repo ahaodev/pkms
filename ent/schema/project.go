@@ -51,6 +51,7 @@ func (Project) Edges() []ent.Edge {
 		edge.From("tenant", Tenant.Type).
 			Ref("projects").Field("tenant_id").Required().Unique(),
 		edge.To("packages", Packages.Type),
+		edge.To("client_accesses", ClientAccess.Type),
 		edge.To("upgrades", Upgrade.Type),
 	}
 }

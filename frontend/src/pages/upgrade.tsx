@@ -1,7 +1,7 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {formatFileSize} from '@/lib/utils';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {Card, CardContent, CardHeader, CardTitle,} from '@/components/ui/card';
+import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {
     Dialog,
@@ -18,15 +18,14 @@ import {Label} from '@/components/ui/label';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {EditUpgradeTargetDialog} from '@/components/upgrade/edit-upgrade-target-dialog';
+import {UpgradeFilters} from '@/components/upgrade/upgrade-filters';
 import {
     Activity,
     CheckCircle,
-    ChevronRight,
     Edit,
     FolderOpen,
     Package as PackageIcon,
     Plus,
-    Target,
     Trash2,
     XCircle
 } from 'lucide-react';
@@ -58,19 +57,23 @@ export default function UpgradePage() {
         description: ''
     });
     const [editFormData, setEditFormData] = useState<UpdateUpgradeTargetRequest>({});
+    
+    // Filter states
+    const [projectFilter, setProjectFilter] = useState<string>('all');
+    const [packageFilter, setPackageFilter] = useState<string>('all');
 
     const queryClient = useQueryClient();
 
     // Fetch data
-    const { data: projects = [] } = useProjects();
-    const { data: packagesData } = usePackages();
+    const {data: projects = []} = useProjects();
+    const {data: packagesData} = usePackages();
     const packages = packagesData?.data || [];
-    
+
     console.log('All packages:', packages);
     console.log('Projects:', projects);
 
     // Fetch upgrade targets
-    const { data: upgradeTargetsData, isLoading } = useQuery({
+    const {data: upgradeTargetsData, isLoading} = useQuery({
         queryKey: ['upgrade-targets'],
         queryFn: async () => {
             const response = await getUpgradeTargets();
@@ -84,11 +87,33 @@ export default function UpgradePage() {
 
     const upgradeTargets = upgradeTargetsData || [];
 
+    // Filter upgrade targets based on selected filters
+    const filteredUpgradeTargets = useMemo(() => {
+        let filtered = upgradeTargets;
+        
+        if (projectFilter !== 'all') {
+            filtered = filtered.filter(target => target.project_id === projectFilter);
+        }
+        
+        if (packageFilter !== 'all') {
+            filtered = filtered.filter(target => target.package_id === packageFilter);
+        }
+        
+        return filtered;
+    }, [upgradeTargets, projectFilter, packageFilter]);
+
+    // Reset package filter when project filter changes
+    useEffect(() => {
+        if (projectFilter !== 'all') {
+            setPackageFilter('all');
+        }
+    }, [projectFilter]);
+
     // Create upgrade target mutation
     const createUpgradeTargetMutation = useMutation({
         mutationFn: createUpgradeTarget,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
+            queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             setIsCreateDialogOpen(false);
             resetForm();
             toast.success('升级目标创建成功');
@@ -100,10 +125,10 @@ export default function UpgradePage() {
 
     // Update upgrade target mutation
     const updateUpgradeTargetMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string, data: UpdateUpgradeTargetRequest }) => 
+        mutationFn: ({id, data}: { id: string, data: UpdateUpgradeTargetRequest }) =>
             updateUpgradeTarget(id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
+            queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             setIsEditDialogOpen(false);
             setSelectedTarget(null);
             resetEditForm();
@@ -118,7 +143,7 @@ export default function UpgradePage() {
     const deleteUpgradeTargetMutation = useMutation({
         mutationFn: deleteUpgradeTarget,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['upgrade-targets'] });
+            queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             toast.success('升级目标删除成功');
         },
         onError: (error: any) => {
@@ -174,12 +199,8 @@ export default function UpgradePage() {
         return new Date(dateString).toLocaleString('zh-CN');
     };
 
-    // Statistics
-    const totalTargets = upgradeTargets.length;
-    const activeTargets = upgradeTargets.filter(t => t.is_active).length;
-    const inactiveTargets = totalTargets - activeTargets;
-    const projectsWithTargets = new Set(upgradeTargets.map(t => t.project_id)).size;
-
+    // Statistics - use filtered data
+    const totalTargets = filteredUpgradeTargets.length;
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -191,50 +212,21 @@ export default function UpgradePage() {
                     </p>
                 </div>
                 <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4"/>
                     创建升级目标
                 </Button>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">总升级目标</CardTitle>
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{totalTargets}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">激活状态</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{activeTargets}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">非激活状态</CardTitle>
-                        <XCircle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{inactiveTargets}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">涉及项目</CardTitle>
-                        <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{projectsWithTargets}</div>
-                    </CardContent>
-                </Card>
-            </div>
+            {/* Filters */}
+            <UpgradeFilters
+                projectFilter={projectFilter}
+                packageFilter={packageFilter}
+                totalTargets={totalTargets}
+                projects={projects}
+                packages={packages}
+                onProjectFilterChange={setProjectFilter}
+                onPackageFilterChange={setPackageFilter}
+            />
 
             {/* Upgrade Targets Table */}
             <Card>
@@ -243,12 +235,17 @@ export default function UpgradePage() {
                         <div className="flex items-center justify-center py-8">
                             <div className="text-muted-foreground">加载中...</div>
                         </div>
-                    ) : upgradeTargets.length === 0 ? (
+                    ) : filteredUpgradeTargets.length === 0 ? (
                         <div className="flex items-center justify-center py-8">
                             <div className="text-center space-y-2">
-                                <div className="text-muted-foreground">暂无升级目标</div>
+                                <div className="text-muted-foreground">
+                                    {upgradeTargets.length === 0 ? '暂无升级目标' : '没有符合筛选条件的升级目标'}
+                                </div>
                                 <div className="text-sm text-muted-foreground">
-                                    点击"创建升级目标"开始配置软件包升级
+                                    {upgradeTargets.length === 0 
+                                        ? '点击"创建升级目标"开始配置软件包升级'
+                                        : '尝试调整筛选条件或创建新的升级目标'
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -256,8 +253,9 @@ export default function UpgradePage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>项目</TableHead>
+                                    <TableHead>软件包</TableHead>
                                     <TableHead>升级目标</TableHead>
-                                    <TableHead>项目/包信息</TableHead>
                                     <TableHead>目标版本</TableHead>
                                     <TableHead>状态</TableHead>
                                     <TableHead>文件大小</TableHead>
@@ -266,27 +264,20 @@ export default function UpgradePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {upgradeTargets.map((target) => (
+                                {filteredUpgradeTargets.map((target) => (
                                     <TableRow key={target.id}>
                                         <TableCell>
-                                            <div className="space-y-1">
-                                                <div className="font-medium">{target.name}</div>
-                                                {target.description && (
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {target.description}
-                                                    </div>
-                                                )}
+                                            <div className="flex items-center space-x-2">
+                                                <FolderOpen className="h-4 w-4 text-muted-foreground"/>
+                                                <span className="font-medium">
+                                                    {target.project_name || target.project_id}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="space-y-1">
                                                 <div className="flex items-center space-x-2">
-                                                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                                                    <span className="text-sm text-muted-foreground">
-                                                        {target.project_name || target.project_id}
-                                                    </span>
-                                                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                                                    <PackageIcon className="h-4 w-4 text-muted-foreground" />
+                                                    <PackageIcon className="h-4 w-4 text-muted-foreground"/>
                                                     <span className="font-medium">
                                                         {target.package_name || target.package_id}
                                                     </span>
@@ -300,8 +291,19 @@ export default function UpgradePage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="space-y-1">
+                                                <div className="font-medium">{target.name}</div>
+                                                {target.description && (
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {target.description}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="space-y-1">
                                                 <div className="font-medium">
-                                                    {target.version || 'N/A'}
+                                                    {target.version || 'N/A'
+                                                    }
                                                 </div>
                                                 {target.file_name && (
                                                     <div className="text-sm text-muted-foreground">
@@ -311,14 +313,14 @@ export default function UpgradePage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge 
+                                            <Badge
                                                 variant={target.is_active ? "default" : "secondary"}
                                                 className="flex items-center space-x-1 w-fit"
                                             >
                                                 {target.is_active ? (
-                                                    <CheckCircle className="h-3 w-3" />
+                                                    <CheckCircle className="h-3 w-3"/>
                                                 ) : (
-                                                    <XCircle className="h-3 w-3" />
+                                                    <XCircle className="h-3 w-3"/>
                                                 )}
                                                 <span>{target.is_active ? '激活' : '未激活'}</span>
                                             </Badge>
@@ -336,14 +338,14 @@ export default function UpgradePage() {
                                                     size="sm"
                                                     onClick={() => handleEdit(target)}
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="h-4 w-4"/>
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleDelete(target.id)}
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4"/>
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -400,15 +402,15 @@ interface CreateUpgradeTargetDialogProps {
 }
 
 function CreateUpgradeTargetDialog({
-    isOpen,
-    onClose,
-    onSubmit,
-    formData,
-    setFormData,
-    projects,
-    packages,
-    isLoading
-}: CreateUpgradeTargetDialogProps) {
+                                       isOpen,
+                                       onClose,
+                                       onSubmit,
+                                       formData,
+                                       setFormData,
+                                       projects,
+                                       packages,
+                                       isLoading
+                                   }: CreateUpgradeTargetDialogProps) {
     const [releases, setReleases] = useState<any[]>([]);
     const [loadingReleases, setLoadingReleases] = useState(false);
 
@@ -419,14 +421,14 @@ function CreateUpgradeTargetDialog({
             return pkg.projectId === formData.project_id;
         })
         : [];
-        
+
     console.log('Filtered packages count:', filteredPackages.length, 'for project:', formData.project_id);
 
     // Load releases when package is selected
     useEffect(() => {
         if (formData.package_id) {
             setLoadingReleases(true);
-            getReleases({ packageId: formData.package_id })
+            getReleases({packageId: formData.package_id})
                 .then((response: { data: any[] }) => {
                     setReleases(response.data || []);
                 })
@@ -477,13 +479,13 @@ function CreateUpgradeTargetDialog({
                         <Label htmlFor="project">选择项目</Label>
                         <Select value={formData.project_id} onValueChange={handleProjectChange}>
                             <SelectTrigger>
-                                <SelectValue placeholder="请选择项目" />
+                                <SelectValue placeholder="请选择项目"/>
                             </SelectTrigger>
                             <SelectContent>
                                 {projects.map(project => (
                                     <SelectItem key={project.id} value={project.id}>
                                         <div className="flex items-center space-x-2">
-                                            <FolderOpen className="h-4 w-4" />
+                                            <FolderOpen className="h-4 w-4"/>
                                             <span>{project.name}</span>
                                         </div>
                                     </SelectItem>
@@ -501,13 +503,13 @@ function CreateUpgradeTargetDialog({
                             disabled={!formData.project_id}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={formData.project_id ? "请选择软件包" : "请先选择项目"} />
+                                <SelectValue placeholder={formData.project_id ? "请选择软件包" : "请先选择项目"}/>
                             </SelectTrigger>
                             <SelectContent>
                                 {filteredPackages.map(pkg => (
                                     <SelectItem key={pkg.id} value={pkg.id}>
                                         <div className="flex items-center space-x-2">
-                                            <PackageIcon className="h-4 w-4" />
+                                            <PackageIcon className="h-4 w-4"/>
                                             <span>{pkg.name}</span>
                                             <Badge variant="outline" className="text-xs">
                                                 {pkg.type}
@@ -524,20 +526,20 @@ function CreateUpgradeTargetDialog({
                         <Label htmlFor="release">选择版本</Label>
                         <Select
                             value={formData.release_id}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, release_id: value }))}
+                            onValueChange={(value) => setFormData(prev => ({...prev, release_id: value}))}
                             disabled={!formData.package_id || loadingReleases}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder={
                                     loadingReleases ? "加载版本中..." :
-                                    formData.package_id ? "请选择版本" : "请先选择软件包"
-                                } />
+                                        formData.package_id ? "请选择版本" : "请先选择软件包"
+                                }/>
                             </SelectTrigger>
                             <SelectContent>
                                 {releases.map(release => (
                                     <SelectItem key={release.id} value={release.id}>
                                         <div className="flex items-center space-x-2">
-                                            <Activity className="h-4 w-4" />
+                                            <Activity className="h-4 w-4"/>
                                             <span>{release.version_code}</span>
                                             {release.version_name && (
                                                 <span className="text-sm text-muted-foreground">
@@ -558,7 +560,7 @@ function CreateUpgradeTargetDialog({
                             id="name"
                             placeholder="输入升级目标名称"
                             value={formData.name}
-                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
                         />
                     </div>
 
@@ -569,7 +571,7 @@ function CreateUpgradeTargetDialog({
                             id="description"
                             placeholder="描述此升级目标的用途..."
                             value={formData.description}
-                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                             rows={3}
                         />
                     </div>

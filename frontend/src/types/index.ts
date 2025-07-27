@@ -51,3 +51,6 @@ export interface SimpleSidebarProps {
 
 // Re-export permissions types
 export * from './permissions';
+
+// Re-export client-access types
+export * from './client-access';

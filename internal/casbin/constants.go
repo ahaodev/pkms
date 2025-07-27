@@ -18,19 +18,25 @@ const (
 	SidebarPermissions = "permissions"
 	SidebarSettings    = "settings"
 	SidebarUpgrade     = "upgrade"
+	ClientAccess       = "client-access"
 )
+
+var ADMIN_MENU = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade, ClientAccess}
+var MANAGER_MENU = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
+var VIEWER_MENU = []string{SidebarDashboard, SidebarProjects}
+var DEFAULT_MENU = []string{SidebarDashboard}
 
 // 简化的侧边栏访问权限
 func GetSidebarPermissions(role string) []string {
 	switch role {
 	case RoleAdmin:
-		return []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade}
+		return ADMIN_MENU
 	case RoleManager:
-		return []string{SidebarDashboard, SidebarProjects, SidebarUpgrade}
+		return MANAGER_MENU
 	case RoleViewer:
-		return []string{SidebarDashboard, SidebarProjects}
+		return VIEWER_MENU
 	default:
-		return []string{SidebarDashboard}
+		return DEFAULT_MENU
 	}
 }
 
