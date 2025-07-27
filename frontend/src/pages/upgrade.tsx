@@ -5,7 +5,8 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeFilters, UpgradeHeader} from '@/components/upgrade';
+import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeHeader} from '@/components/upgrade';
+import {ProjectPackageFilters} from '@/components/shared';
 import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} from 'lucide-react';
 import {toast} from 'sonner';
 import {useProjects} from '@/hooks/use-projects';
@@ -182,10 +183,11 @@ export default function UpgradePage() {
             <UpgradeHeader onCreateClick={() => setIsCreateDialogOpen(true)} />
 
             {/* Filters */}
-            <UpgradeFilters
+            <ProjectPackageFilters
                 projectFilter={projectFilter}
                 packageFilter={packageFilter}
-                totalTargets={totalTargets}
+                totalCount={totalTargets}
+                countLabel="个升级目标"
                 projects={projects}
                 packages={packages}
                 onProjectFilterChange={setProjectFilter}

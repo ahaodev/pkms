@@ -20,3 +20,4 @@ dist/
 *.db
 
 .cursor/
+nul

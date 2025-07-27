@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   ClientAccessHeader,
-  ClientAccessFilters,
   ClientAccessList,
   ClientAccessDialog,
   TokenDisplayDialog
 } from '@/components/client-access';
+import { ProjectPackageFilters } from '@/components/shared';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { 
@@ -16,6 +16,8 @@ import {
   useToggleClientAccessStatus,
   useRegenerateToken
 } from '@/hooks/use-client-access';
+import { useProjects } from '@/hooks/use-projects';
+import { usePackages } from '@/hooks/use-packages';
 import type { 
   ClientAccess, 
   ClientAccessFilters as Filters,
@@ -24,11 +26,30 @@ import type {
 } from '@/types/client-access';
 
 export default function ClientAccessPage() {
-  // 状态管理
-  const [filters, setFilters] = useState<Filters>({});
+  // 筛选状态管理 - 改为与升级管理页面一致的格式
+  const [projectFilter, setProjectFilter] = useState<string>('all');
+  const [packageFilter, setPackageFilter] = useState<string>('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingClientAccess, setEditingClientAccess] = useState<ClientAccess | undefined>();
   const [viewingToken, setViewingToken] = useState<ClientAccess | null>(null);
+
+  // 基础数据
+  const { data: projects = [] } = useProjects();
+  const { data: packagesData } = usePackages();
+  const packages = packagesData?.data || [];
+
+  // 构建旧格式的筛选条件给API使用
+  const filters = useMemo<Filters>(() => ({
+    project_id: projectFilter === 'all' ? undefined : projectFilter,
+    package_id: packageFilter === 'all' ? undefined : packageFilter,
+  }), [projectFilter, packageFilter]);
+
+  // 当项目筛选改变时重置包筛选
+  useEffect(() => {
+    if (projectFilter !== 'all') {
+      setPackageFilter('all');
+    }
+  }, [projectFilter]);
 
   // API hooks
   const { 
@@ -43,10 +64,8 @@ export default function ClientAccessPage() {
   const toggleStatusMutation = useToggleClientAccessStatus();
   const regenerateTokenMutation = useRegenerateToken();
 
-  // 事件处理
-  const handleFiltersChange = (newFilters: Filters) => {
-    setFilters(newFilters);
-  };
+  // 获取总数用于显示
+  const totalCount = clientAccesses?.length || 0;
 
   const handleCreateClick = () => {
     setShowCreateDialog(true);
@@ -87,7 +106,7 @@ export default function ClientAccessPage() {
   // 错误处理
   if (error) {
     return (
-      <div className="container mx-auto py-8 space-y-6">
+      <div className="space-y-6">
         <ClientAccessHeader onCreateClick={handleCreateClick} />
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
@@ -100,14 +119,20 @@ export default function ClientAccessPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="space-y-6">
       {/* 页面标题 */}
       <ClientAccessHeader onCreateClick={handleCreateClick} />
 
       {/* 筛选组件 */}
-      <ClientAccessFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
+      <ProjectPackageFilters
+        projectFilter={projectFilter}
+        packageFilter={packageFilter}
+        totalCount={totalCount}
+        countLabel="个接入配置"
+        projects={projects}
+        packages={packages}
+        onProjectFilterChange={setProjectFilter}
+        onPackageFilterChange={setPackageFilter}
       />
 
       {/* 列表组件 */}
