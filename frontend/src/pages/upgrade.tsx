@@ -5,16 +5,8 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import { UpgradeHeader, UpgradeFilters, EditUpgradeTargetDialog, CreateUpgradeTargetDialog } from '@/components/upgrade';
-import {
-    Activity,
-    CheckCircle,
-    Edit,
-    FolderOpen,
-    Package as PackageIcon,
-    Trash2,
-    XCircle
-} from 'lucide-react';
+import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeFilters, UpgradeHeader} from '@/components/upgrade';
+import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} from 'lucide-react';
 import {toast} from 'sonner';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
@@ -27,8 +19,6 @@ import {
     UpdateUpgradeTargetRequest,
     UpgradeTarget
 } from '@/lib/api/upgrade';
-import {ExtendedPackage} from '@/types/package';
-import {Project} from '@/types/project';
 
 export default function UpgradePage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
