@@ -201,10 +201,10 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                             <TableRow key={index}>
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span>{role.user}</span>
-                                        {role.user_name && (
+                                        <span>{role.user_name}</span>
+                                        {role.user && (
                                             <span className="text-sm text-muted-foreground">
-                                                ({role.user_name})
+                                                ({role.user})
                                             </span>
                                         )}
                                     </div>
