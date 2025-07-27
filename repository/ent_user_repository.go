@@ -38,13 +38,6 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 	return nil
 }
 
-// generateUniqueID generates a unique ID for entities
-func generateUniqueID() string {
-	// For now, we'll use a simple timestamp-based ID
-	// In production, you might want to use UUID or nanoid
-	return strconv.FormatInt(time.Now().UnixNano(), 36)
-}
-
 func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 	users, err := ur.client.User.
 		Query().

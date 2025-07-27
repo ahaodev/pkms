@@ -6,5 +6,16 @@
       "Bash(sqlite3:*)"
     ],
     "deny": []
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--headless",
+        "--port",
+        "8931"
+      ]
+    }
   }
 }

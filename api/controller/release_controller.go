@@ -23,13 +23,6 @@ type ReleaseController struct {
 	Env            *bootstrap.Env
 }
 
-// generateShareToken generates a random share token
-func generateShareToken() string {
-	bytes := make([]byte, 16)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
-}
-
 // GetReleases 获取包的所有发布版本
 func (rc *ReleaseController) GetReleases(c *gin.Context) {
 	packageID := c.Param("package_id")

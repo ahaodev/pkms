@@ -18,7 +18,7 @@ cd ./frontend
 # Install dependencies
 npm install
 
-# Run development server (port 5173, proxies /api to localhost:8080)
+# Run development server (port 5173, proxies /api and /share to localhost:8080)
 npm run dev
 
 # Build for production (includes TypeScript build check)
