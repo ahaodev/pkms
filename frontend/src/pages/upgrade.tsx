@@ -17,15 +17,13 @@ import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {EditUpgradeTargetDialog} from '@/components/upgrade/edit-upgrade-target-dialog';
-import {UpgradeFilters} from '@/components/upgrade/upgrade-filters';
+import { UpgradeHeader, UpgradeFilters, EditUpgradeTargetDialog } from '@/components/upgrade';
 import {
     Activity,
     CheckCircle,
     Edit,
     FolderOpen,
     Package as PackageIcon,
-    Plus,
     Trash2,
     XCircle
 } from 'lucide-react';
@@ -204,18 +202,7 @@ export default function UpgradePage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">升级管理</h1>
-                    <p className="text-muted-foreground">
-                        管理软件包的升级目标，为客户端提供版本检查和下载服务
-                    </p>
-                </div>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    创建升级目标
-                </Button>
-            </div>
+            <UpgradeHeader onCreateClick={() => setIsCreateDialogOpen(true)} />
 
             {/* Filters */}
             <UpgradeFilters
