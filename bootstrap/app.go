@@ -17,7 +17,7 @@ type Application struct {
 	CasbinManager *casbin.CasbinManager
 }
 
-func App() Application {
+func App() *Application {
 	app := &Application{}
 	app.Env = NewEnv()
 	app.DB = NewEntDatabase(app.Env)
@@ -41,7 +41,7 @@ func App() Application {
 	app.MinioClient = storageConfig.MinioClient
 	app.FileStorage = storageConfig.FileStorage
 
-	return *app
+	return app
 }
 
 func (app *Application) CloseDBConnection() {

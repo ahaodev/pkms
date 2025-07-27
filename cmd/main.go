@@ -22,7 +22,7 @@ func main() {
 	timeout := time.Duration(env.ContextTimeout) * time.Second
 
 	apiEngine := gin.Default()
-	route.Setup(env, timeout, db, casbin, fileStorage, apiEngine)
+	route.Setup(app, timeout, db, casbin, fileStorage, apiEngine)
 	err := apiEngine.Run(":8080")
 	if err != nil {
 		pkg.Log.Error(err)

@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewUserRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
+func NewUserRouter(app *bootstrap.Application, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db)
 	tr := repository.NewTenantRepository(db)
 	uc := &controller.UserController{
-		UserUsecase: usecase.NewUserUsecase(ur, tr, timeout),
-		Env:         env,
+		UserUsecase: usecase.NewUserUsecase(ur, tr, app.CasbinManager, timeout),
+		Env:         app.Env,
 	}
 
 	// User CRUD operations

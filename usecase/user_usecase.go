@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"pkms/internal/casbin"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,13 +12,15 @@ import (
 type userUsecase struct {
 	userRepository   domain.UserRepository
 	tenantRepository domain.TenantRepository
+	casbinManager    *casbin.CasbinManager
 	contextTimeout   time.Duration
 }
 
-func NewUserUsecase(userRepository domain.UserRepository, tenantRepository domain.TenantRepository, timeout time.Duration) domain.UserUseCase {
+func NewUserUsecase(userRepository domain.UserRepository, tenantRepository domain.TenantRepository, casbinManager *casbin.CasbinManager, timeout time.Duration) domain.UserUseCase {
 	return &userUsecase{
 		userRepository:   userRepository,
 		tenantRepository: tenantRepository,
+		casbinManager:    casbinManager,
 		contextTimeout:   timeout,
 	}
 }
@@ -56,7 +59,8 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, tenant.ID); err != nil {
 		return err
 	}
-
+	uu.casbinManager.AddPolicy(domain.RoleOwner, tenant.ID, "*", "*")
+	uu.casbinManager.AddRoleForUser(user.ID, domain.RoleOwner, tenant.ID)
 	return nil
 }
 

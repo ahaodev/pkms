@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewProfileRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
+func NewProfileRouter(app *bootstrap.Application, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db)
 	tr := repository.NewTenantRepository(db)
 	uc := &controller.ProfileController{
-		UserUsecase: usecase.NewUserUsecase(ur, tr, timeout),
-		Env:         env,
+		UserUsecase: usecase.NewUserUsecase(ur, tr, app.CasbinManager, timeout),
+		Env:         app.Env,
 	}
 	group.GET("/", uc.GetProfile)    // GET /api/v1/users/profile
 	group.PUT("/", uc.UpdateProfile) // PUT /api/v1/users/profile

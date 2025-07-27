@@ -43,7 +43,7 @@ func (tuc *TenantUserController) SetUserTenantRole(c *gin.Context) {
 	}
 
 	// 验证角色是否有效
-	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleManager, domain.TenantRoleViewer}
+	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleViewer}
 	validRole := false
 	for _, vr := range validRoles {
 		if request.Role == vr {
@@ -88,7 +88,7 @@ func (tuc *TenantUserController) GetUserTenantRole(c *gin.Context) {
 func (tuc *TenantUserController) RemoveUserTenantRole(c *gin.Context) {
 	tenantID := c.Param("id")
 	userID := c.Param("userId")
-	
+
 	var request struct {
 		Role string `json:"role" binding:"required"`
 	}

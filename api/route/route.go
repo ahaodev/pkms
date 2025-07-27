@@ -16,7 +16,8 @@ import (
 
 const ApiUri = "/api/v1"
 
-func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, fileStorage domain.FileRepository, gin *gin.Engine) {
+func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, fileStorage domain.FileRepository, gin *gin.Engine) {
+	env := app.Env
 	trustedProxies := []string{
 		"127.0.0.1",
 	}
@@ -49,7 +50,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 	// 个人资料路由，允许所有认证用户访问
 	profileRouter := protectedRouter.Group("/profile")
-	NewProfileRouter(env, timeout, db, profileRouter)
+	NewProfileRouter(app, timeout, db, profileRouter)
 
 	// 再通过casbin中间件进行权限控制
 	// Casbin 权限管理路由（需要认证但不需要特定权限）
@@ -75,7 +76,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinMana
 	// 🔥 系统管理路由 - 只有admin可访问
 	userRouter := protectedRouter.Group("/user")
 	userRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
-	NewUserRouter(env, timeout, db, userRouter)
+	NewUserRouter(app, timeout, db, userRouter)
 
 	tenantRouter := protectedRouter.Group("/tenants")
 	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))

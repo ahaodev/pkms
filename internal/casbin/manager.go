@@ -241,7 +241,7 @@ func (m *CasbinManager) ClearAllRoles() error {
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
 	// 系统admin全权限
 	if m.IsSystemAdmin(userID) {
-		return ADMIN_MENU
+		return ADMIN_SIDEBAR
 	}
 
 	// 获取用户角色
@@ -254,13 +254,13 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 	for _, role := range userRoles {
 		switch role {
 		case domain.RoleAdmin:
-			return ADMIN_MENU
-		case domain.RoleManager:
-			return MANAGER_MENU
+			return ADMIN_SIDEBAR
+		case domain.RoleOwner:
+			return ADMIN_SIDEBAR
 		}
 	}
 
-	return DEFAULT_MENU
+	return ADMIN_SIDEBAR
 }
 
 // DEMO版本：删除复杂的权限初始化函数

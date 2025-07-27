@@ -106,7 +106,7 @@ func (tu *tenantUsecase) AddUserToTenantWithRole(c context.Context, userID, tena
 	defer cancel()
 
 	// 验证角色是否有效
-	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleManager, domain.TenantRoleViewer}
+	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleViewer}
 	validRole := false
 	for _, vr := range validRoles {
 		if role == vr {
@@ -127,7 +127,7 @@ func (tu *tenantUsecase) UpdateTenantUserRole(c context.Context, userID, tenantI
 	defer cancel()
 
 	// 验证角色是否有效
-	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleManager, domain.TenantRoleViewer}
+	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleViewer}
 	validRole := false
 	for _, vr := range validRoles {
 		if role == vr {
