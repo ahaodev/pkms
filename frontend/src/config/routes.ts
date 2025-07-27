@@ -43,6 +43,15 @@ export const routes: RouteConfig[] = [
         requiresAuth: true,
     },
     {
+        path: "/upgrade",
+        element: UpgradePage,
+        requiresAuth: true,
+    }, {
+        path: "/client-access",
+        element: ClientAccessPage,
+        requiresAuth: true,
+    },
+    {
         path: "/settings",
         element: Settings,
         requiresAuth: true,
@@ -62,21 +71,10 @@ export const routes: RouteConfig[] = [
         requiresAdmin: true,
     },
     {
-        path: "/upgrade",
-        element: UpgradePage,
-        requiresAuth: true,
-        requiresAdmin: true,
-    },
-    {
         path: "/tenants",
         element: TenantsPage,
         requiresAuth: true,
         requiresAdmin: true,
     },
-    {
-        path: "/client-access",
-        element: ClientAccessPage,
-        requiresAuth: true,
-        requiresAdmin: true,
-    },
+
 ];
