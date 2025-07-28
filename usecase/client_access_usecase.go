@@ -2,10 +2,9 @@ package usecase
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
+	"pkms/pkg"
 	"time"
 
 	"pkms/domain"
@@ -32,12 +31,7 @@ func NewClientAccessUsecase(
 	}
 }
 
-// generateAccessToken 生成32字节的随机访问令牌
-func generateAccessToken() string {
-	bytes := make([]byte, 32)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
-}
+// generateAccessToken 生成16字节的随机访问令牌
 
 func (u *clientAccessUsecase) Create(ctx context.Context, request *domain.CreateClientAccessRequest, userID, tenantID string) (*domain.ClientAccess, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
@@ -60,7 +54,7 @@ func (u *clientAccessUsecase) Create(ctx context.Context, request *domain.Create
 		TenantID:    tenantID,
 		ProjectID:   request.ProjectID,
 		PackageID:   request.PackageID,
-		AccessToken: generateAccessToken(),
+		AccessToken: pkg.GenerateAccessToken(),
 		Name:        request.Name,
 		Description: request.Description,
 		IsActive:    true,
@@ -176,7 +170,7 @@ func (u *clientAccessUsecase) RegenerateToken(ctx context.Context, id string) (s
 	}
 
 	// 生成新的访问令牌
-	newToken := generateAccessToken()
+	newToken := pkg.GenerateAccessToken()
 
 	// 更新令牌
 	updates := map[string]interface{}{

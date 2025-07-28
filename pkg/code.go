@@ -19,3 +19,6 @@ func GenerateShareCode(length int) string {
 
 	return string(result)
 }
+func GenerateAccessToken() string {
+	return "PKMS-" + GenerateShareCode(16)
+}
