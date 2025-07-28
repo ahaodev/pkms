@@ -21,7 +21,8 @@ const (
 	ClientAccess       = "access-manager"
 )
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade, ClientAccess}
+// var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade, ClientAccess}
+var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, SidebarSettings}
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
 var DEFAULT_SIDEBAR = []string{SidebarDashboard}

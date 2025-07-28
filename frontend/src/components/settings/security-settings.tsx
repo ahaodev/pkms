@@ -1,18 +1,13 @@
 import { useState } from 'react';
-import { Shield, Clock, Key } from 'lucide-react';
+import {  Clock, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 
 export interface SecurityConfig {
   sessionTimeout: string;
-  twoFactorEnabled: boolean;
-  loginNotifications: boolean;
-  ipWhitelist: boolean;
   passwordExpiration: string;
 }
 
@@ -22,17 +17,11 @@ interface SecuritySettingsProps {
 
 export function SecuritySettings({ onSave }: SecuritySettingsProps) {
   const [sessionTimeout, setSessionTimeout] = useState('24');
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [loginNotifications, setLoginNotifications] = useState(true);
-  const [ipWhitelist, setIpWhitelist] = useState(false);
   const [passwordExpiration, setPasswordExpiration] = useState('90');
 
   const handleSaveSecurity = () => {
     const config: SecurityConfig = {
       sessionTimeout,
-      twoFactorEnabled,
-      loginNotifications,
-      ipWhitelist,
       passwordExpiration
     };
 
@@ -89,63 +78,6 @@ export function SecuritySettings({ onSave }: SecuritySettingsProps) {
             清理所有会话
           </Button>
         </CardFooter>
-      </Card>
-
-      {/* 安全选项 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Shield className="mr-2 h-5 w-5" />
-            安全选项
-          </CardTitle>
-          <CardDescription>
-            配置额外的安全保护措施
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>双因素认证</Label>
-              <p className="text-sm text-muted-foreground">
-                启用双因素认证以增强账户安全性
-              </p>
-            </div>
-            <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>登录通知</Label>
-              <p className="text-sm text-muted-foreground">
-                有新设备登录时发送通知
-              </p>
-            </div>
-            <Switch
-              checked={loginNotifications}
-              onCheckedChange={setLoginNotifications}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>IP白名单</Label>
-              <p className="text-sm text-muted-foreground">
-                只允许特定IP地址访问
-              </p>
-            </div>
-            <Switch
-              checked={ipWhitelist}
-              onCheckedChange={setIpWhitelist}
-            />
-          </div>
-        </CardContent>
       </Card>
 
       {/* 密码策略 */}
