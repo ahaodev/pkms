@@ -260,7 +260,7 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 		}
 	}
 
-	return ADMIN_SIDEBAR
+	return DEFAULT_SIDEBAR
 }
 
 // DEMO版本：删除复杂的权限初始化函数
