@@ -86,7 +86,7 @@ export function StorageSettings({onSave}: StorageSettingsProps) {
                             <RadioGroupItem value="disk" id="disk" />
                             <Label htmlFor="disk" className="flex items-center cursor-pointer">
                                 <HardDrive className="mr-2 h-4 w-4" />
-                                本地磁盘存储 (推荐)
+                                本地磁盘存储
                             </Label>
                         </div>
                         <div className="flex items-center space-x-2">

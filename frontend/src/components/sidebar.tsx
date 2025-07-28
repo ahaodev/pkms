@@ -286,7 +286,7 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
-                        v1.5.0
+                        v0.0.1
                     </div>
                 </div>
             </div>

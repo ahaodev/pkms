@@ -303,27 +303,10 @@ The settings page has been completely redesigned with four main sections:
 - **Features**: Basic info (username, email), password management
 - **Validation**: Password confirmation and strength validation
 
-### 3. Storage Settings (存储设置)
+### 2. Storage Settings (存储设置)
 - **Location**: `components/settings/storage-settings.tsx`
 - **Features**: Local disk vs MinIO configuration, connection testing
 - **Backend Integration**: Connects to Go storage configuration
-
-### 4. Security Settings (安全设置)
-- **Location**: `components/settings/security-settings.tsx`
-- **Features**: Session management, 2FA, login notifications, password policies
-- **Security**: IP whitelist, session timeout configuration
-
-### Settings Tab Structure
-```typescript
-// settings-tabs.tsx
-<Tabs defaultValue="account">
-  <TabsList>
-    <TabsTrigger value="account">账户</TabsTrigger>
-    <TabsTrigger value="storage">存储</TabsTrigger>
-    <TabsTrigger value="security">安全</TabsTrigger>
-  </TabsList>
-</Tabs>
-```
 
 ## RBAC Integration
 
