@@ -8,6 +8,16 @@ trigger:
     - rbac-domains
     - Single
 steps:
+  - name: clear-old-images
+    image: docker:dind
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - docker stop pkms || true
+      - docker rm pkms || true
+      # 清理旧镜像
+      - docker images | grep 'hao88/pkms' | awk '{print $3}' | xargs -r docker rmi -f
   - name: build_push
     image: docker:dind
     volumes:
@@ -21,9 +31,7 @@ steps:
         from_secret: DOCKER_PWD
     commands:
       - docker --version
-      # 清理旧镜像
-      - docker images | grep 'hao88/pkms' | awk '{print $3}' | xargs -r docker rmi -f
-      #      - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
+      # - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
       - echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
       - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
@@ -35,8 +43,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       # 停止并删除旧容器（如果存在）
-      - docker stop pkms || true
-      - docker rm pkms || true
+
       # 清理旧镜像（可选）
       #- docker image prune -f
         # 拉取最新镜像并运行
