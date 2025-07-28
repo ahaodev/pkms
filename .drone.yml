@@ -8,7 +8,7 @@ trigger:
     - rbac-domains
     - Single
 steps:
-  - name: clear-old-images
+  - name: docker-image-cleanup
     image: docker:dind
     volumes:
       - name: docker
@@ -18,7 +18,7 @@ steps:
       - docker rm pkms || true
       # 清理旧镜像
       - docker images | grep 'hao88/pkms' | awk '{print $3}' | xargs -r docker rmi -f
-  - name: build_push
+  - name: docker-build_push
     image: docker:dind
     volumes:
       - name: docker
@@ -34,7 +34,8 @@ steps:
       # - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
       - echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
-      - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
+      #- docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
+      - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 . # Build only
       - docker buildx rm aBuildX  # Remove the Buildx builder
   - name: deploy-docker
     image: docker:dind
