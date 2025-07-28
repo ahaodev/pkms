@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {LogOut, Menu, User as UserIcon} from "lucide-react";
+import {LogOut, Menu} from "lucide-react";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import type {HeaderProps} from '@/types';
 
@@ -48,10 +48,6 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>{user?.name || '用户'}</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
-                        <DropdownMenuItem>
-                            <UserIcon className="mr-2 h-4 w-4"/>
-                            <span>个人资料</span>
-                        </DropdownMenuItem>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem onClick={logout}>
                             <LogOut className="mr-2 h-4 w-4"/>
