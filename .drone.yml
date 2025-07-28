@@ -6,7 +6,7 @@ trigger:
     - dev
     - main
     - rbac-domains
-    - single
+    - Single
 steps:
   - name: build_push
     image: docker:dind
