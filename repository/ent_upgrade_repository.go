@@ -217,7 +217,7 @@ func (r *entUpgradeRepository) GetActiveUpgradeTargetByPackageID(ctx context.Con
 		target.FileName = u.Edges.Release.FileName
 		target.FileSize = u.Edges.Release.FileSize
 		target.FileHash = u.Edges.Release.FileHash
-		target.DownloadURL = fmt.Sprintf("/api/files/download/%s", u.Edges.Release.ID)
+		target.DownloadURL = fmt.Sprintf("/client-access/download/%s", u.Edges.Release.ID)
 	}
 
 	return target, nil

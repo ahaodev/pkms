@@ -42,7 +42,7 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 
 	// Public client access routes (no authentication required, using access_token)
 	publicClientAccessRouter := gin.Group("/client-access")
-	NewPublicClientAccessRouter(env, timeout, db, publicClientAccessRouter)
+	NewPublicClientAccessRouter(env, timeout, db, fileStorage, publicClientAccessRouter)
 
 	protectedRouter := gin.Group(ApiUri)
 	// 安全的路由组，所有路由都需要认证
