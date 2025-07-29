@@ -98,4 +98,9 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	fileRouter := protectedRouter.Group("/file")
 	// 文件操作允许所有认证用户访问
 	NewFileRouter(env, timeout, db, fileStorage, fileRouter)
+
+	// 🔥 系统设置路由 - 只有admin可访问
+	settingsRouter := protectedRouter.Group("/settings")
+	settingsRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	NewSettingRouter(app, timeout, db, settingsRouter)
 }

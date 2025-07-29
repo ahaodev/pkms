@@ -102,6 +102,15 @@ export async function getUserProfile(): Promise<ApiResponse<User>> {
 
 // 更新用户资料
 export async function updateUserProfile(update: ProfileUpdateRequest): Promise<ApiResponse<any>> {
-    const resp = await apiClient.put("/api/v1/user/profile", update);
+    const resp = await apiClient.put("/api/v1/profile", update);
+    return resp.data;
+}
+
+// 更新用户密码
+export async function updateUserPassword(passwordUpdate: {
+    current_password: string;
+    new_password: string;
+}): Promise<ApiResponse<any>> {
+    const resp = await apiClient.put("/api/v1/profile/password", passwordUpdate);
     return resp.data;
 }

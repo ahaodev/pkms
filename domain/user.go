@@ -2,7 +2,12 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	ErrInvalidPassword = errors.New("invalid password")
 )
 
 // User 结构体定义了用户的基本信息
@@ -36,6 +41,7 @@ type UserUseCase interface {
 	Delete(c context.Context, id string) error
 	GetUserProjects(c context.Context, userID string) ([]Project, error)
 	UpdateProfile(c context.Context, userID string, updates ProfileUpdate) error
+	UpdatePassword(c context.Context, userID string, passwordUpdate PasswordUpdate) error
 	AssignUserToProject(c context.Context, userID, projectID string) error
 	UnassignUserFromProject(c context.Context, userID, projectID string) error
 }
@@ -44,4 +50,10 @@ type UserUseCase interface {
 type ProfileUpdate struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
+}
+
+// PasswordUpdate represents password change data
+type PasswordUpdate struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
 }

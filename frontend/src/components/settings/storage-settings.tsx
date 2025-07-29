@@ -9,6 +9,7 @@ import {toast} from '@/hooks/use-toast';
 
 interface StorageSettingsProps {
     onSave?: (settings: StorageConfig) => void;
+    onTest?: () => void;
 }
 
 export interface StorageConfig {
@@ -21,7 +22,7 @@ export interface StorageConfig {
     s3SecretKey?: string;
 }
 
-export function StorageSettings({onSave}: StorageSettingsProps) {
+export function StorageSettings({onSave, onTest}: StorageSettingsProps) {
     const [storageType, setStorageType] = useState<'disk' | 'minio'>('disk');
     const [diskPath, setDiskPath] = useState('./uploads');
     const [s3Endpoint, setS3Endpoint] = useState('http://localhost:9000');
@@ -31,16 +32,21 @@ export function StorageSettings({onSave}: StorageSettingsProps) {
     const [s3SecretKey, setS3SecretKey] = useState('minioadmin');
 
     const handleTest = () => {
-        if (storageType === 'disk') {
-            toast({
-                title: "连接测试",
-                description: "本地磁盘存储配置正常",
-            });
+        if (onTest) {
+            onTest();
         } else {
-            toast({
-                title: "连接测试", 
-                description: "成功连接到 MinIO",
-            });
+            // 默认行为
+            if (storageType === 'disk') {
+                toast({
+                    title: "连接测试",
+                    description: "本地磁盘存储配置正常",
+                });
+            } else {
+                toast({
+                    title: "连接测试", 
+                    description: "成功连接到 MinIO",
+                });
+            }
         }
     };
 

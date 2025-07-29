@@ -129,6 +129,32 @@ func (uu *userUsecase) UpdateProfile(c context.Context, userID string, updates d
 	return uu.userRepository.Update(ctx, &user)
 }
 
+func (uu *userUsecase) UpdatePassword(c context.Context, userID string, passwordUpdate domain.PasswordUpdate) error {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+
+	// Get existing user
+	user, err := uu.userRepository.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordUpdate.CurrentPassword)); err != nil {
+		return domain.ErrInvalidPassword
+	}
+
+	// Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(passwordUpdate.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// Update password
+	user.Password = string(hashedPassword)
+	return uu.userRepository.Update(ctx, &user)
+}
+
 func (uu *userUsecase) AssignUserToProject(c context.Context, userID, projectID string) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
