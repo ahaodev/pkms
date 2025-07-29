@@ -170,15 +170,44 @@ func (tr *entTenantRepository) RemoveUserFromTenant(c context.Context, userID, t
 	return err
 }
 
-// 以下方法暂时返回空实现，因为我们使用 Casbin 进行角色管理
+// GetTenantUsersWithRole 获取租户用户及其角色信息
 func (tr *entTenantRepository) GetTenantUsersWithRole(c context.Context, tenantID string) ([]domain.TenantUser, error) {
-	// 这个方法现在通过 Casbin 在控制器层实现
-	return []domain.TenantUser{}, nil
+	// 首先获取租户下的所有用户
+	tenantEntity, err := tr.client.Tenant.
+		Query().
+		Where(tenant.ID(tenantID)).
+		WithUsers().
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.TenantUser
+	for _, u := range tenantEntity.Edges.Users {
+		result = append(result, domain.TenantUser{
+			TenantID:   tenantID,
+			UserID:     u.ID,
+			Username:   u.Username,
+			IsActive:   u.IsActive,
+			CreatedAt:  u.CreatedAt,
+			UpdatedAt:  u.UpdatedAt,
+			Role:       "user", // 默认角色，实际角色会在控制器层通过 Casbin 获取并覆盖
+			TenantName: tenantEntity.Name,
+		})
+	}
+
+	return result, nil
 }
 
 func (tr *entTenantRepository) AddUserToTenantWithRole(c context.Context, userID, tenantID, role, createdBy string) error {
 	// 首先添加用户到租户（使用现有的多对多关系）
-	return tr.AddUserToTenant(c, userID, tenantID)
+	err := tr.AddUserToTenant(c, userID, tenantID)
+	if err != nil {
+		return err
+	}
+	// 角色分配在 usecase 层通过 Casbin 处理
+	return nil
 }
 
 func (tr *entTenantRepository) UpdateTenantUserRole(c context.Context, userID, tenantID, role string, isActive *bool) error {

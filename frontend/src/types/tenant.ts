@@ -16,11 +16,16 @@ export interface UpdateTenantRequest {
 // 租户用户相关类型
 export interface TenantUser {
     id: string;
-    name: string;
+    tenant_id: string;
+    user_id: string;
     role: string;
     is_active: boolean;
     created_at: Date;
     updated_at: Date;
+    created_by?: string;
+    // 关联信息
+    username: string;
+    tenant_name?: string;
 }
 
 export interface TenantUserRequest {

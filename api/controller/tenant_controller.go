@@ -10,9 +10,9 @@ import (
 )
 
 type TenantController struct {
-	TenantUsecase   domain.TenantUseCase
-	CasbinManager   *casbin.CasbinManager
-	Env             *bootstrap.Env
+	TenantUsecase domain.TenantUseCase
+	CasbinManager *casbin.CasbinManager
+	Env           *bootstrap.Env
 }
 
 // GetTenants 获取所有租户
@@ -128,6 +128,16 @@ func (tc *TenantController) GetTenantUsersWithRole(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
+	}
+
+	// 从 Casbin 获取每个用户的实际角色并更新
+	for i := range tenantUsers {
+		roles := tc.CasbinManager.GetRolesForUserInTenant(tenantUsers[i].UserID, tenantID)
+		if len(roles) > 0 {
+			tenantUsers[i].Role = roles[0] // 取第一个角色，通常用户在租户中只有一个角色
+		} else {
+			tenantUsers[i].Role = "user" // 默认角色
+		}
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(tenantUsers))

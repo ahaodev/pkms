@@ -34,9 +34,10 @@ func NewTenantRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	group.DELETE("/:id/users/:userId", tc.RemoveUserFromTenant) // DELETE /api/v1/tenants/:id/users/:userId
 
 	// 租户用户角色管理接口（基于Casbin）
-	group.GET("/:id/users-with-roles", tc.GetTenantUsersWithRole)  // GET /api/v1/tenants/:id/users-with-roles
-	group.POST("/:id/users/:userId/roles", tc.UpdateTenantUserRole)    // POST /api/v1/tenants/:id/users/:userId/roles
-	group.GET("/:id/users/:userId/roles", tc.GetTenantUserRole)     // GET /api/v1/tenants/:id/users/:userId/roles
+	group.GET("/:id/users-with-roles", tc.GetTenantUsersWithRole)     // GET /api/v1/tenants/:id/users-with-roles
+	group.POST("/:id/users-with-roles", tc.AddUserToTenantWithRole)   // POST /api/v1/tenants/:id/users-with-roles
+	group.POST("/:id/users/:userId/roles", tc.UpdateTenantUserRole)   // POST /api/v1/tenants/:id/users/:userId/roles
+	group.GET("/:id/users/:userId/roles", tc.GetTenantUserRole)       // GET /api/v1/tenants/:id/users/:userId/roles
 	group.DELETE("/:id/users/:userId/roles", tc.RemoveUserFromTenant) // DELETE /api/v1/tenants/:id/users/:userId/roles
 
 	// 用户租户关系查询

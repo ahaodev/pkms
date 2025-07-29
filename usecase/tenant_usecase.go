@@ -90,6 +90,14 @@ func (tu *tenantUsecase) AddUserToTenant(c context.Context, userID, tenantID str
 func (tu *tenantUsecase) RemoveUserFromTenant(c context.Context, userID, tenantID string) error {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
+
+	// 先从 Casbin 中删除用户在该租户中的所有角色
+	err := tu.casbinManager.DeleteAllRolesForUserInTenant(userID, tenantID)
+	if err != nil {
+		return fmt.Errorf("删除用户角色失败: %v", err)
+	}
+
+	// 然后从数据库中移除用户与租户的关联
 	return tu.tenantRepository.RemoveUserFromTenant(ctx, userID, tenantID)
 }
 
@@ -106,7 +114,7 @@ func (tu *tenantUsecase) AddUserToTenantWithRole(c context.Context, userID, tena
 	defer cancel()
 
 	// 验证角色是否有效
-	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleViewer}
+	validRoles := []string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}
 	validRole := false
 	for _, vr := range validRoles {
 		if role == vr {
@@ -118,7 +126,19 @@ func (tu *tenantUsecase) AddUserToTenantWithRole(c context.Context, userID, tena
 		return fmt.Errorf("无效的角色: %s", role)
 	}
 
-	return tu.tenantRepository.AddUserToTenantWithRole(ctx, userID, tenantID, role, createdBy)
+	// 添加用户到租户
+	err := tu.tenantRepository.AddUserToTenantWithRole(ctx, userID, tenantID, role, createdBy)
+	if err != nil {
+		return err
+	}
+
+	// 通过 Casbin 为用户在租户中分配角色
+	err = tu.casbinManager.AddRoleForUserInTenant(userID, role, tenantID)
+	if err != nil {
+		return fmt.Errorf("角色分配失败: %v", err)
+	}
+
+	return nil
 }
 
 // UpdateTenantUserRole 更新租户用户角色
@@ -127,7 +147,7 @@ func (tu *tenantUsecase) UpdateTenantUserRole(c context.Context, userID, tenantI
 	defer cancel()
 
 	// 验证角色是否有效
-	validRoles := []string{domain.TenantRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleViewer}
+	validRoles := []string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}
 	validRole := false
 	for _, vr := range validRoles {
 		if role == vr {
@@ -137,6 +157,18 @@ func (tu *tenantUsecase) UpdateTenantUserRole(c context.Context, userID, tenantI
 	}
 	if !validRole {
 		return fmt.Errorf("无效的角色: %s", role)
+	}
+
+	// 先删除用户在该租户中的所有角色
+	err := tu.casbinManager.DeleteAllRolesForUserInTenant(userID, tenantID)
+	if err != nil {
+		return fmt.Errorf("删除用户角色失败: %v", err)
+	}
+
+	// 重新分配新角色
+	err = tu.casbinManager.AddRoleForUserInTenant(userID, role, tenantID)
+	if err != nil {
+		return fmt.Errorf("分配新角色失败: %v", err)
 	}
 
 	return tu.tenantRepository.UpdateTenantUserRole(ctx, userID, tenantID, role, isActive)

@@ -88,7 +88,7 @@ export async function getTenantUsersWithRole(tenantId: string): Promise<ApiRespo
 
 // 添加用户到租户并设置角色
 export async function addUserToTenantWithRole(tenantId: string, userId: string, role: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.post(`/api/v1/tenants/${tenantId}/users/${userId}/roles`, {
+    const resp = await apiClient.post(`/api/v1/tenants/${tenantId}/users-with-roles`, {
         user_id: userId,
         role: role
     });
