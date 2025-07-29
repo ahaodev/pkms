@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Globe, Monitor, Smartphone} from 'lucide-react';
 import {Button} from '@/components/ui/button.tsx';
 import {
@@ -45,6 +45,38 @@ export function PackageReleaseDialog({
         tag_name: '',
         changelog: '',
     });
+
+    const parseAPKInfo = async (file: File) => {
+        if (!file.name.toLowerCase().endsWith('.apk') || packageType !== 'android') {
+            return;
+        }
+
+        try {
+            if (typeof window.AppInfoParser === 'undefined') {
+                return;
+            }
+
+            const parser = new window.AppInfoParser(file);
+            const result = await parser.parse();
+            
+            if (result && result.versionName && result.versionCode) {
+                setFormData(prev => ({
+                    ...prev,
+                    version_name: result.versionName || '',
+                    version_code: result.versionCode?.toString() || '',
+                }));
+            }
+        } catch (error) {
+            // Silently fail APK parsing
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedFile) {
+            parseAPKInfo(selectedFile);
+        }
+    }, [selectedFile, packageType]);
 
     const handleUpload = async () => {
         if (!selectedFile) return;
