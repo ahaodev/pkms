@@ -5,6 +5,7 @@ import (
 	"pkms/bootstrap"
 	"pkms/domain"
 	"pkms/internal/casbin"
+	"pkms/internal/constants"
 
 	"github.com/gin-gonic/gin"
 )
@@ -154,7 +155,7 @@ func (tc *TenantController) AddUserToTenantWithRole(c *gin.Context) {
 	}
 
 	// 获取当前用户ID作为创建者
-	createdBy, exists := c.Get("userId")
+	createdBy, exists := c.Get(constants.UserID)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
 		return
