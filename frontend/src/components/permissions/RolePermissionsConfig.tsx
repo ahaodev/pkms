@@ -12,7 +12,7 @@ import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider';
 import {getActionDisplayName, getObjectDisplayName, getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedPolicy, RolePolicyForm} from '@/types';
-import {PREDEFINED_ROLES} from '@/types';
+import {ASSIGNABLE_ROLES} from '@/types';
 
 interface RolePermissionsConfigProps {
     enhancedPolicies: EnhancedPolicy[];
@@ -36,10 +36,10 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
         action: ''
     });
 
-    const predefinedRoles = [...PREDEFINED_ROLES];
+    const assignableRoles = [...ASSIGNABLE_ROLES];
 
     const rolePolicies = enhancedPolicies.filter(policy =>
-        (predefinedRoles as readonly string[]).includes(policy.subject)
+        (assignableRoles as readonly string[]).includes(policy.subject) && policy.subject !== 'admin'
     );
 
     const handleAdd = async () => {
@@ -125,7 +125,7 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {predefinedRoles.map(role => (
+                                            {assignableRoles.map(role => (
                                                 <SelectItem key={role} value={role}>
                                                     {getRoleDisplayName(role)} ({role})
                                                 </SelectItem>

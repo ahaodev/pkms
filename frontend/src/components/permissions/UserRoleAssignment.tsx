@@ -12,7 +12,7 @@ import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider';
 import {getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedRole, User, UserRoleForm} from '@/types';
-import {PREDEFINED_ROLES} from '@/types';
+import {ASSIGNABLE_ROLES} from '@/types';
 
 interface UserRoleAssignmentProps {
     enhancedRoles: EnhancedRole[];
@@ -35,7 +35,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
         tenant: currentTenant?.id || ''
     });
 
-    const predefinedRoles = [...PREDEFINED_ROLES];
+    const assignableRoles = [...ASSIGNABLE_ROLES];
 
     const handleAdd = async () => {
         if (!formData.user_id || !formData.role || !formData.tenant) {
@@ -162,7 +162,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {predefinedRoles.map(role => (
+                                            {assignableRoles.map(role => (
                                                 <SelectItem key={role} value={role}>
                                                     {getRoleDisplayName(role)} ({role})
                                                 </SelectItem>

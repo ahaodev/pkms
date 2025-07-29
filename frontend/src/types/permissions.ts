@@ -47,6 +47,14 @@ export interface UserPolicyForm {
     action: string;
 }
 
-// Predefined roles - aligned with backend constants.go
-export const PREDEFINED_ROLES = ['admin', 'owner', 'user', 'viewer'] as const;
-export type PredefinedRole = typeof PREDEFINED_ROLES[number];
+// All roles defined in backend constants.go
+export const ALL_ROLES = ['admin', 'owner', 'user', 'viewer'] as const;
+export type AllRole = typeof ALL_ROLES[number];
+
+// Assignable roles (excluding admin - system administrator)
+export const ASSIGNABLE_ROLES = ['owner', 'user', 'viewer'] as const;
+export type AssignableRole = typeof ASSIGNABLE_ROLES[number];
+
+// Legacy export for backward compatibility
+export const PREDEFINED_ROLES = ASSIGNABLE_ROLES;
+export type PredefinedRole = AssignableRole;

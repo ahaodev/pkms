@@ -59,10 +59,17 @@ export function getActionDisplayName(action: string): string {
 }
 
 /**
- * Get all available roles
+ * Get all available roles (including admin)
  */
 export function getAvailableRoles(): string[] {
   return Object.keys(ROLE_DISPLAY_NAMES);
+}
+
+/**
+ * Get assignable roles (excluding admin - system administrator)
+ */
+export function getAssignableRoles(): string[] {
+  return Object.keys(ROLE_DISPLAY_NAMES).filter(role => role !== 'admin');
 }
 
 /**
