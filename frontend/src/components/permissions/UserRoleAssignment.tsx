@@ -9,7 +9,7 @@ import {Badge} from '@/components/ui/badge';
 import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
 import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
-import {useAuth} from '@/providers/auth-provider';
+import {useTenants} from '@/hooks/use-tenants';
 import {getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedRole, User, UserRoleForm} from '@/types';
 import {ASSIGNABLE_ROLES} from '@/types';
@@ -27,12 +27,12 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                                                    onRefresh,
                                                                    onShowUserPermissions
                                                                }) => {
-    const {currentTenant} = useAuth();
+    const {data: tenants = []} = useTenants();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [formData, setFormData] = useState<UserRoleForm>({
         user_id: '',
         role: '',
-        tenant: currentTenant?.id || ''
+        tenant: ''
     });
 
     const assignableRoles = [...ASSIGNABLE_ROLES];
@@ -51,7 +51,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                 setFormData({
                     user_id: '',
                     role: '',
-                    tenant: currentTenant?.id || ''
+                    tenant: ''
                 });
                 await onRefresh();
             } else {
@@ -129,17 +129,17 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
                                             ...formData,
                                             tenant: value
                                         })}
-                                        disabled={!currentTenant}
+                                        disabled={false}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="选择租户"/>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {currentTenant && (
-                                                <SelectItem value={currentTenant.id}>
-                                                    {currentTenant.name || currentTenant.id}
+                                            {tenants.map(tenant => (
+                                                <SelectItem key={tenant.id} value={tenant.id}>
+                                                    {tenant.name || tenant.id}
                                                 </SelectItem>
-                                            )}
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
