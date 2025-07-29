@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"pkms/bootstrap"
 	"pkms/domain"
+	"pkms/internal/constants"
 	"strconv"
 	"time"
 )
@@ -22,7 +23,7 @@ type ClientAccessController struct {
 // CheckUpdate 检查更新（客户端调用，无需JWT认证，使用access_token）
 func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 	clientIP := c.ClientIP()
-
+	accessToken := c.GetHeader(constants.AccessToken)
 	var request domain.CheckUpdateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
@@ -30,7 +31,7 @@ func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 	}
 
 	// 验证 access_token
-	clientAccess, err := cac.ClientAccessUsecase.ValidateAccessToken(c, request.AccessToken)
+	clientAccess, err := cac.ClientAccessUsecase.ValidateAccessToken(c, accessToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, domain.RespError("无效的访问令牌"))
 		return
@@ -49,7 +50,7 @@ func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 	}
 
 	// 调用升级检查业务逻辑
-	response, err := cac.UpgradeUsecase.CheckUpdateByToken(c, &request, clientIP)
+	response, err := cac.UpgradeUsecase.CheckUpdateByToken(c, &request, clientIP, accessToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
@@ -67,14 +68,14 @@ func (cac *ClientAccessController) Download(c *gin.Context) {
 		return
 	}
 
-	// 验证 access_token
+	//验证 access_token
 	clientAccess, err := cac.ClientAccessUsecase.ValidateAccessToken(c, accessToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, domain.RespError("无效的访问令牌"))
 		return
 	}
 
-	// 检查凭证是否激活
+	//检查凭证是否激活
 	if !clientAccess.IsActive {
 		c.JSON(http.StatusForbidden, domain.RespError("客户端接入凭证已被禁用"))
 		return

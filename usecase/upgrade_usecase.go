@@ -169,7 +169,7 @@ func (u *upgradeUsecase) CheckUpdate(ctx context.Context, request *domain.CheckU
 	}, errors.New("此方法已废弃，请使用基于token的升级检查")
 }
 
-func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain.CheckUpdateRequest, clientIP string) (*domain.CheckUpdateResponse, error) {
+func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain.CheckUpdateRequest, clientIP, accessToken string) (*domain.CheckUpdateResponse, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
@@ -179,7 +179,7 @@ func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain
 	}
 
 	// 1. 根据access_token查找ClientAccess记录
-	clientAccess, err := u.clientAccessRepository.GetByAccessToken(c, request.AccessToken)
+	clientAccess, err := u.clientAccessRepository.GetByAccessToken(c, accessToken)
 	if err != nil {
 		return nil, fmt.Errorf("无效的访问令牌: %w", err)
 	}
@@ -194,7 +194,7 @@ func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain
 	}
 
 	// 3. 更新使用统计
-	if err := u.clientAccessRepository.UpdateUsage(c, request.AccessToken, clientIP); err != nil {
+	if err := u.clientAccessRepository.UpdateUsage(c, accessToken, clientIP); err != nil {
 		// 记录错误但不影响主流程
 		fmt.Printf("更新客户端使用统计失败: %v\n", err)
 	}

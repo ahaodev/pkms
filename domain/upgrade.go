@@ -48,7 +48,6 @@ type UpdateUpgradeTargetRequest struct {
 
 // CheckUpdateRequest 检查更新请求
 type CheckUpdateRequest struct {
-	AccessToken    string `json:"access_token" binding:"required"`
 	CurrentVersion string `json:"current_version" binding:"required"`
 	ClientInfo     string `json:"client_info,omitempty"` // 客户端信息，可选
 }
@@ -66,21 +65,21 @@ type CheckUpdateResponse struct {
 
 // ClientAccess 客户端接入实体
 type ClientAccess struct {
-	ID           string    `json:"id"`
-	TenantID     string    `json:"tenant_id"`
-	ProjectID    string    `json:"project_id"`
-	PackageID    string    `json:"package_id"`
-	AccessToken  string    `json:"access_token"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description,omitempty"`
-	IsActive     bool      `json:"is_active"`
-	ExpiresAt    *time.Time `json:"expires_at,omitempty"`
-	LastUsedAt   *time.Time `json:"last_used_at,omitempty"`
-	LastUsedIP   string    `json:"last_used_ip,omitempty"`
-	UsageCount   int       `json:"usage_count"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	CreatedBy    string    `json:"created_by"`
+	ID          string     `json:"id"`
+	TenantID    string     `json:"tenant_id"`
+	ProjectID   string     `json:"project_id"`
+	PackageID   string     `json:"package_id"`
+	AccessToken string     `json:"access_token"`
+	Name        string     `json:"name"`
+	Description string     `json:"description,omitempty"`
+	IsActive    bool       `json:"is_active"`
+	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
+	LastUsedAt  *time.Time `json:"last_used_at,omitempty"`
+	LastUsedIP  string     `json:"last_used_ip,omitempty"`
+	UsageCount  int        `json:"usage_count"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	CreatedBy   string     `json:"created_by"`
 
 	// 关联信息
 	ProjectName string `json:"project_name,omitempty"`
@@ -160,7 +159,7 @@ type UpgradeUsecase interface {
 	// 检查更新（供客户端调用）
 	CheckUpdate(ctx context.Context, request *CheckUpdateRequest) (*CheckUpdateResponse, error)
 	// 通过access token检查更新
-	CheckUpdateByToken(ctx context.Context, request *CheckUpdateRequest, clientIP string) (*CheckUpdateResponse, error)
+	CheckUpdateByToken(ctx context.Context, request *CheckUpdateRequest, clientIP, accessToken string) (*CheckUpdateResponse, error)
 	// 获取项目的所有升级目标
 	GetProjectUpgradeTargets(ctx context.Context, projectID string) ([]*UpgradeTarget, error)
 }

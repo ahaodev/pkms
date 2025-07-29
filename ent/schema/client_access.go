@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"time"
 
 	"entgo.io/ent"
@@ -16,13 +14,6 @@ import (
 // 客户端接入凭证表，用于客户端安全接入升级服务
 type ClientAccess struct {
 	ent.Schema
-}
-
-// generateAccessToken 生成32字节的随机访问令牌
-func generateAccessToken() string {
-	bytes := make([]byte, 32)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
 }
 
 // Fields of the ClientAccess.
@@ -43,7 +34,6 @@ func (ClientAccess) Fields() []ent.Field {
 			Comment("关联的包ID"),
 		field.String("access_token").
 			Unique().
-			DefaultFunc(generateAccessToken).
 			Comment("客户端访问令牌，64字符十六进制字符串"),
 		field.String("name").
 			MaxLen(255).
