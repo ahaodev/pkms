@@ -139,8 +139,7 @@ export function TenantUsersList({ tenantId, tenantUsers, isLoading }: TenantUser
           {sortedTenantUsers.map((user: TenantUser) => {
             const isProtectedUser = user.role === 'admin' || user.role === 'owner';
             const isAdmin = user.role === 'admin';
-            const isOwner = user.role === 'owner';
-            
+
             return (
               <TableRow key={user.user_id}>
                 <TableCell className="font-medium">{user.username}</TableCell>
