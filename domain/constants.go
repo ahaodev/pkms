@@ -4,8 +4,8 @@ package domain
 const (
 	RoleAdmin  = "admin"  // 系统管理员：全权限
 	RoleOwner  = "owner"  // 所有者
-	RoleUser   = "owner"  // 所有者
-	RoleViewer = "viewer" // 普通用户：只读权限
+	RoleUser   = "user"   // 普通用户
+	RoleViewer = "viewer" // 只读用户：只读权限
 )
 
 // 租户内角色定义

@@ -47,6 +47,6 @@ export interface UserPolicyForm {
     action: string;
 }
 
-// Predefined roles
-export const PREDEFINED_ROLES = ['admin', 'pm', 'developer', 'viewer', 'tester'] as const;
+// Predefined roles - aligned with backend constants.go
+export const PREDEFINED_ROLES = ['admin', 'owner', 'user', 'viewer'] as const;
 export type PredefinedRole = typeof PREDEFINED_ROLES[number];

@@ -1,9 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Bash(npm run lint)",
-      "Bash(sqlite3:*)"
+      "Bash(npm run build:*)"
     ],
     "deny": []
   },

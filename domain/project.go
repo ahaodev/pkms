@@ -1,20 +1,5 @@
 package domain
 
-/**
-CREATE TABLE projects (
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    icon VARCHAR(100),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    package_count INTEGER NOT NULL DEFAULT 0,
-    created_by VARCHAR(50) NOT NULL,
-    is_public BOOLEAN NOT NULL DEFAULT 0,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
-);
-*/
-
 import (
 	"context"
 	"time"

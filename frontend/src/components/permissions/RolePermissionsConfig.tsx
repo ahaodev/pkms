@@ -12,6 +12,7 @@ import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider';
 import {getActionDisplayName, getObjectDisplayName, getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedPolicy, RolePolicyForm} from '@/types';
+import {PREDEFINED_ROLES} from '@/types';
 
 interface RolePermissionsConfigProps {
     enhancedPolicies: EnhancedPolicy[];
@@ -35,10 +36,10 @@ const RolePermissionsConfig: React.FC<RolePermissionsConfigProps> = ({
         action: ''
     });
 
-    const predefinedRoles = ['pm', 'developer', 'viewer'];
+    const predefinedRoles = [...PREDEFINED_ROLES];
 
     const rolePolicies = enhancedPolicies.filter(policy =>
-        predefinedRoles.includes(policy.subject)
+        (predefinedRoles as readonly string[]).includes(policy.subject)
     );
 
     const handleAdd = async () => {

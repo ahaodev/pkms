@@ -2,11 +2,12 @@
  * Permission utility functions for RBAC system
  */
 
-// Role display names mapping
+// Role display names mapping - aligned with backend constants.go
 const ROLE_DISPLAY_NAMES: Record<string, string> = {
   admin: '管理员',
-  pm: '项目经理',
+  owner: '所有者',
   user: '用户',
+  viewer: '查看者',
 };
 
 // Object/Resource display names mapping
