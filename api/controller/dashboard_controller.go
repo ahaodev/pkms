@@ -16,7 +16,17 @@ type DashboardController struct {
 	Env              *bootstrap.Env
 }
 
-// GetStats 获取统计信息
+// GetStats godoc
+// @Summary      Get dashboard statistics
+// @Description  Retrieve dashboard statistics for the current tenant
+// @Tags         Dashboard
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        x-tenant-id  header    string  true  "Tenant ID"
+// @Success      200  {object}  domain.Response{data=domain.DashboardStats}  "Statistics retrieved successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /dashboard/stats [get]
 func (dc *DashboardController) GetStats(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
 	stats, err := dc.DashboardUsecase.GetStats(c, tenantID)
@@ -27,7 +37,18 @@ func (dc *DashboardController) GetStats(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(stats))
 }
 
-// GetRecentActivities 获取最近活动
+// GetRecentActivities godoc
+// @Summary      Get recent activities
+// @Description  Retrieve recent activities for the current user and tenant
+// @Tags         Dashboard
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        x-tenant-id  header    string  true   "Tenant ID"
+// @Param        limit        query     int     false  "Number of activities to retrieve (default: 10)"
+// @Success      200  {object}  domain.Response{data=[]domain.RecentActivity}  "Recent activities retrieved successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /dashboard/activities [get]
 func (dc *DashboardController) GetRecentActivities(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
 	userID := c.GetString(constants.UserID)

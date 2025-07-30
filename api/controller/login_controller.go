@@ -16,6 +16,18 @@ type LoginController struct {
 	Env          *bootstrap.Env
 }
 
+// Login godoc
+// @Summary      User login
+// @Description  Authenticate user and return JWT tokens
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      domain.LoginRequest  true  "Login credentials"
+// @Success      200  {object}  domain.Response{data=domain.LoginResponse}  "Login successful"
+// @Failure      400  {object}  domain.Response  "Invalid request format"
+// @Failure      401  {object}  domain.Response  "Invalid credentials"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /login [post]
 func (lc *LoginController) Login(c *gin.Context) {
 	var request domain.LoginRequest
 

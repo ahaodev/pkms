@@ -14,6 +14,18 @@ type RefreshTokenController struct {
 	Env                 *bootstrap.Env
 }
 
+// RefreshToken 刷新访问令牌
+// @Summary      Refresh access token
+// @Description  Generate new access and refresh tokens using a valid refresh token
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      domain.RefreshTokenRequest  true  "Refresh token request"
+// @Success      200      {object}  domain.RefreshTokenResponse  "Successfully refreshed tokens"
+// @Failure      400      {object}  domain.Response  "Bad request - invalid parameters"
+// @Failure      401      {object}  domain.Response  "Unauthorized - invalid or expired refresh token"
+// @Failure      500      {object}  domain.Response  "Internal server error"
+// @Router       /refresh [post]
 func (rtc *RefreshTokenController) RefreshToken(c *gin.Context) {
 	var request domain.RefreshTokenRequest
 

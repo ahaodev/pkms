@@ -20,7 +20,20 @@ type ClientAccessController struct {
 	Env                 *bootstrap.Env
 }
 
-// CheckUpdate 检查更新（客户端调用，无需JWT认证，使用access_token）
+// CheckUpdate godoc
+// @Summary      Check for updates
+// @Description  Check for application updates using client access token (no JWT required)
+// @Tags         Client Access
+// @Accept       json
+// @Produce      json
+// @Param        access-token  header    string                     true  "Client access token"
+// @Param        request       body      domain.CheckUpdateRequest  true  "Update check request"
+// @Success      200  {object}  domain.Response{data=domain.CheckUpdateResponse}  "Update check completed"
+// @Failure      400  {object}  domain.Response  "Invalid request data"
+// @Failure      401  {object}  domain.Response  "Invalid access token"
+// @Failure      403  {object}  domain.Response  "Access token disabled or expired"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /client-access/check-update [post]
 func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 	clientIP := c.ClientIP()
 	accessToken := c.GetHeader(constants.AccessToken)
@@ -59,7 +72,21 @@ func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// Download 下载文件（客户端调用，无需JWT认证，使用access_token）
+// Download godoc
+// @Summary      Download release file
+// @Description  Download release file using client access token (no JWT required)
+// @Tags         Client Access
+// @Produce      application/octet-stream
+// @Param        id            path   string  true   "Release ID"
+// @Param        access_token  query  string  true   "Client access token"
+// @Param        bucket        query  string  false  "S3 bucket name"
+// @Success      200  {file}    file    "File download successful"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      401  {object}  domain.Response  "Invalid access token"
+// @Failure      403  {object}  domain.Response  "Access token disabled or expired"
+// @Failure      404  {object}  domain.Response  "Release not found"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /client-access/download/{id} [get]
 func (cac *ClientAccessController) Download(c *gin.Context) {
 	// 从查询参数获取 access_token
 	accessToken := c.Query("access_token")

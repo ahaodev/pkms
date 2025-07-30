@@ -18,6 +18,16 @@ type ShareController struct {
 }
 
 // DownloadSharedRelease 通过分享码下载发布版本文件
+// @Summary      Download shared release
+// @Description  Download a release file using a share code without authentication
+// @Tags         Sharing
+// @Accept       json
+// @Produce      application/octet-stream
+// @Param        code  path  string  true  "Share code"
+// @Success      200   {file} file   "Successfully downloaded shared release file"
+// @Failure      404   {object} domain.Response  "Share not found or expired"
+// @Failure      500   {object} domain.Response  "Download failed"
+// @Router       /share/{code}/download [get]
 func (sc *ShareController) DownloadSharedRelease(c *gin.Context) {
 	code := c.Param("code")
 

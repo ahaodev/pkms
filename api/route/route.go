@@ -12,6 +12,8 @@ import (
 	"pkms/internal/casbin"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const ApiUri = "/api/v1"
@@ -28,6 +30,10 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 
 	frontend.Register(gin)
 	gin.RedirectTrailingSlash = true
+
+	// Swagger documentation
+	gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	publicRouter := gin.Group(ApiUri)
 	// All Public APIs
 	NewLoginRouter(env, timeout, db, publicRouter)

@@ -17,6 +17,15 @@ type TenantController struct {
 }
 
 // GetTenants 获取所有租户
+// @Summary      Get all tenants
+// @Description  Retrieve a list of all tenants
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object} domain.Response  "Successfully retrieved tenants"
+// @Failure      500  {object} domain.Response  "Internal server error"
+// @Router       /tenants [get]
 func (tc *TenantController) GetTenants(c *gin.Context) {
 	tenants, err := tc.TenantUsecase.Fetch(c)
 	if err != nil {
@@ -27,6 +36,17 @@ func (tc *TenantController) GetTenants(c *gin.Context) {
 }
 
 // CreateTenant 创建租户
+// @Summary      Create tenant
+// @Description  Create a new tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant  body     domain.Tenant     true  "Tenant information"
+// @Success      201     {object} domain.Response  "Successfully created tenant"
+// @Failure      400     {object} domain.Response  "Bad request - invalid parameters"
+// @Failure      500     {object} domain.Response  "Internal server error"
+// @Router       /tenants [post]
 func (tc *TenantController) CreateTenant(c *gin.Context) {
 	var tenant domain.Tenant
 	if err := c.ShouldBindJSON(&tenant); err != nil {
@@ -43,6 +63,16 @@ func (tc *TenantController) CreateTenant(c *gin.Context) {
 }
 
 // GetTenant 获取特定租户
+// @Summary      Get specific tenant
+// @Description  Get a specific tenant by ID
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Tenant ID"
+// @Success      200  {object} domain.Response  "Successfully retrieved tenant"
+// @Failure      404  {object} domain.Response  "Tenant not found"
+// @Router       /tenants/{id} [get]
 func (tc *TenantController) GetTenant(c *gin.Context) {
 	id := c.Param("id")
 	tenant, err := tc.TenantUsecase.GetByID(c, id)
@@ -54,6 +84,18 @@ func (tc *TenantController) GetTenant(c *gin.Context) {
 }
 
 // UpdateTenant 更新租户
+// @Summary      Update tenant
+// @Description  Update a specific tenant by ID
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string        true  "Tenant ID"
+// @Param        tenant  body     domain.Tenant true  "Updated tenant information"
+// @Success      200     {object} domain.Response  "Successfully updated tenant"
+// @Failure      400     {object} domain.Response  "Bad request - invalid parameters"
+// @Failure      500     {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id} [put]
 func (tc *TenantController) UpdateTenant(c *gin.Context) {
 	id := c.Param("id")
 	var tenant domain.Tenant
@@ -72,6 +114,16 @@ func (tc *TenantController) UpdateTenant(c *gin.Context) {
 }
 
 // DeleteTenant 删除租户
+// @Summary      Delete tenant
+// @Description  Delete a specific tenant by ID
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Tenant ID"
+// @Success      200  {object} domain.Response  "Successfully deleted tenant"
+// @Failure      500  {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id} [delete]
 func (tc *TenantController) DeleteTenant(c *gin.Context) {
 	id := c.Param("id")
 
@@ -84,6 +136,16 @@ func (tc *TenantController) DeleteTenant(c *gin.Context) {
 }
 
 // GetTenantUsers 获取租户用户
+// @Summary      Get tenant users
+// @Description  Get all users belonging to a specific tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Tenant ID"
+// @Success      200  {object} domain.Response  "Successfully retrieved tenant users"
+// @Failure      500  {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id}/users [get]
 func (tc *TenantController) GetTenantUsers(c *gin.Context) {
 	tenantID := c.Param("id")
 
@@ -97,6 +159,18 @@ func (tc *TenantController) GetTenantUsers(c *gin.Context) {
 }
 
 // AddUserToTenant 添加用户到租户
+// @Summary      Add user to tenant
+// @Description  Add a user to a specific tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string  true  "Tenant ID"
+// @Param        request body     object  true  "User ID"
+// @Success      200     {object} domain.Response  "Successfully added user to tenant"
+// @Failure      400     {object} domain.Response  "Bad request - invalid parameters"
+// @Failure      500     {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id}/users [post]
 func (tc *TenantController) AddUserToTenant(c *gin.Context) {
 	tenantID := c.Param("id")
 	var request struct {
@@ -122,6 +196,16 @@ func (tc *TenantController) AddUserToTenant(c *gin.Context) {
 }
 
 // GetTenantUsersWithRole 获取租户用户及其角色信息
+// @Summary      Get tenant users with roles
+// @Description  Get all users in a tenant with their role information
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Tenant ID"
+// @Success      200  {object} domain.Response  "Successfully retrieved tenant users with roles"
+// @Failure      500  {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id}/users/roles [get]
 func (tc *TenantController) GetTenantUsersWithRole(c *gin.Context) {
 	tenantID := c.Param("id")
 
@@ -145,6 +229,19 @@ func (tc *TenantController) GetTenantUsersWithRole(c *gin.Context) {
 }
 
 // AddUserToTenantWithRole 添加用户到租户并设置角色
+// @Summary      Add user to tenant with role
+// @Description  Add a user to a tenant and assign a specific role
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string                      true  "Tenant ID"
+// @Param        request body     domain.TenantUserRequest    true  "User and role information"
+// @Success      200     {object} domain.Response            "Successfully added user to tenant with role"
+// @Failure      400     {object} domain.Response            "Bad request - invalid parameters"
+// @Failure      401     {object} domain.Response            "Unauthorized - user information not found"
+// @Failure      500     {object} domain.Response            "Internal server error"
+// @Router       /tenants/{id}/users/role [post]
 func (tc *TenantController) AddUserToTenantWithRole(c *gin.Context) {
 	tenantID := c.Param("id")
 	var request domain.TenantUserRequest
@@ -176,6 +273,19 @@ func (tc *TenantController) AddUserToTenantWithRole(c *gin.Context) {
 }
 
 // UpdateTenantUserRole 更新租户用户角色
+// @Summary      Update tenant user role
+// @Description  Update the role of a user in a specific tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string                              true  "Tenant ID"
+// @Param        userId  path     string                              true  "User ID"
+// @Param        request body     domain.UpdateTenantUserRoleRequest  true  "Role update information"
+// @Success      200     {object} domain.Response                    "Successfully updated tenant user role"
+// @Failure      400     {object} domain.Response                    "Bad request - invalid parameters"
+// @Failure      500     {object} domain.Response                    "Internal server error"
+// @Router       /tenants/{id}/users/{userId}/role [put]
 func (tc *TenantController) UpdateTenantUserRole(c *gin.Context) {
 	tenantID := c.Param("id")
 	userID := c.Param("userId")
@@ -201,6 +311,17 @@ func (tc *TenantController) UpdateTenantUserRole(c *gin.Context) {
 }
 
 // GetTenantUserRole 获取用户在特定租户中的角色
+// @Summary      Get tenant user role
+// @Description  Get the role of a specific user in a tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string  true  "Tenant ID"
+// @Param        userId  path     string  true  "User ID"
+// @Success      200     {object} domain.Response  "Successfully retrieved tenant user role"
+// @Failure      404     {object} domain.Response  "User role not found in tenant"
+// @Router       /tenants/{id}/users/{userId}/role [get]
 func (tc *TenantController) GetTenantUserRole(c *gin.Context) {
 	tenantID := c.Param("id")
 	userID := c.Param("userId")
@@ -215,6 +336,16 @@ func (tc *TenantController) GetTenantUserRole(c *gin.Context) {
 }
 
 // GetUserTenants 获取用户所属的所有租户及角色信息
+// @Summary      Get user tenants
+// @Description  Get all tenants that a user belongs to with role information
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        userId  path     string  true  "User ID"
+// @Success      200     {object} domain.Response  "Successfully retrieved user tenants"
+// @Failure      500     {object} domain.Response  "Internal server error"
+// @Router       /users/{userId}/tenants [get]
 func (tc *TenantController) GetUserTenants(c *gin.Context) {
 	userID := c.Param("userId")
 
@@ -228,6 +359,17 @@ func (tc *TenantController) GetUserTenants(c *gin.Context) {
 }
 
 // RemoveUserFromTenant 从租户中移除用户
+// @Summary      Remove user from tenant
+// @Description  Remove a user from a specific tenant
+// @Tags         Tenants
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path     string  true  "Tenant ID"
+// @Param        userId  path     string  true  "User ID"
+// @Success      200     {object} domain.Response  "Successfully removed user from tenant"
+// @Failure      500     {object} domain.Response  "Internal server error"
+// @Router       /tenants/{id}/users/{userId} [delete]
 func (tc *TenantController) RemoveUserFromTenant(c *gin.Context) {
 	tenantID := c.Param("id")
 	userID := c.Param("userId")

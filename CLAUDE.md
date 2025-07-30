@@ -60,6 +60,9 @@ go test ./...
 
 # Install Ent CLI tool
 go install entgo.io/ent/cmd/ent@latest
+
+# Generate Swagger documentation (run after adding/modifying API annotations)
+swag init -g cmd/main.go -o docs
 ```
 
 
@@ -212,6 +215,37 @@ Uses MinIO (S3-compatible) for file storage:
 - File operations in `repository/minio_file_repository.go`
 - Upload/download through `api/controller/file_controller.go`
 
+## API Documentation
+
+The project uses Swagger/OpenAPI for API documentation:
+
+- **Swagger UI**: Accessible at `http://localhost:8080/swagger/index.html`
+- **Documentation Source**: API annotations in controller files using `swaggo` format
+- **Generation**: Run `swag init -g cmd/main.go -o docs` to regenerate documentation
+- **Authentication**: Most endpoints require JWT Bearer token authentication
+- **Multi-tenancy**: Endpoints require `x-tenant-id` header for tenant-specific operations
+
+### Adding API Documentation
+
+When adding new API endpoints:
+
+1. Add swagger annotations to controller methods:
+   ```go
+   // @Summary      Brief description
+   // @Description  Detailed description
+   // @Tags         GroupName
+   // @Accept       json
+   // @Produce      json
+   // @Security     BearerAuth
+   // @Param        name  path/query/body  type  required  "description"
+   // @Success      200  {object}  domain.Response  "success message"
+   // @Failure      400  {object}  domain.Response  "error message"
+   // @Router       /endpoint [method]
+   ```
+
+2. Regenerate documentation: `swag init -g cmd/main.go -o docs`
+3. Restart the backend to serve updated documentation
+
 ## Environment Configuration
 
 Application configuration loaded via Viper from:
@@ -309,6 +343,7 @@ npm audit
 - Logs written to `logs/` directory with rotation
 - SQLite database file: `data.db`
 - Frontend development server runs on port 5173 with API proxy to port 8080
+- **Swagger UI**: Available at `http://localhost:8080/swagger/index.html` when backend is running
 
 ## Common Issues & Troubleshooting
 

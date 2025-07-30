@@ -15,7 +15,16 @@ type ProfileController struct {
 	Env         *bootstrap.Env
 }
 
-// GetProfile 获取当前用户资料
+// GetProfile godoc
+// @Summary      Get current user profile
+// @Description  Get profile information for the currently authenticated user
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=domain.User}  "Profile retrieved successfully"
+// @Failure      404  {object}  domain.Response  "User not found"
+// @Router       /profile [get]
 func (uc *ProfileController) GetProfile(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	user, err := uc.UserUsecase.GetByID(c, userID)
@@ -26,7 +35,18 @@ func (uc *ProfileController) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(user))
 }
 
-// UpdateProfile 更新当前用户资料
+// UpdateProfile godoc
+// @Summary      Update current user profile
+// @Description  Update profile information for the currently authenticated user
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        profile  body      domain.ProfileUpdate  true  "Profile update data"
+// @Success      200  {object}  domain.Response  "Profile updated successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request data"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /profile [put]
 func (uc *ProfileController) UpdateProfile(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
 	userID := c.GetString(constants.UserID)
@@ -45,7 +65,18 @@ func (uc *ProfileController) UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("Profile updated successfully"))
 }
 
-// UpdatePassword 更新当前用户密码
+// UpdatePassword godoc
+// @Summary      Update current user password
+// @Description  Update password for the currently authenticated user
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        password  body      domain.PasswordUpdate  true  "Password update data"
+// @Success      200  {object}  domain.Response  "Password updated successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request data or incorrect current password"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /profile/password [put]
 func (uc *ProfileController) UpdatePassword(c *gin.Context) {
 	// 从 JWT token 中获取用户ID
 	userID := c.GetString(constants.UserID)

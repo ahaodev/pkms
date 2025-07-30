@@ -25,6 +25,14 @@ type StorageConfig struct {
 }
 
 // GetStorageConfig 获取存储配置
+// @Summary      Get storage configuration
+// @Description  Get current storage configuration settings
+// @Tags         Settings
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object} domain.Response  "Successfully retrieved storage configuration"
+// @Router       /settings/storage [get]
 func (sc *SettingController) GetStorageConfig(c *gin.Context) {
 	config := StorageConfig{
 		StorageType:     sc.Env.StorageType,
@@ -39,6 +47,16 @@ func (sc *SettingController) GetStorageConfig(c *gin.Context) {
 }
 
 // UpdateStorageConfig 更新存储配置
+// @Summary      Update storage configuration
+// @Description  Update storage configuration settings
+// @Tags         Settings
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        config  body     StorageConfig     true  "Storage configuration"
+// @Success      200     {object} domain.Response  "Successfully updated storage configuration"
+// @Failure      400     {object} domain.Response  "Bad request - invalid parameters"
+// @Router       /settings/storage [put]
 func (sc *SettingController) UpdateStorageConfig(c *gin.Context) {
 	var config StorageConfig
 	if err := c.ShouldBindJSON(&config); err != nil {
@@ -75,6 +93,15 @@ func (sc *SettingController) UpdateStorageConfig(c *gin.Context) {
 }
 
 // TestStorageConfig 测试存储配置
+// @Summary      Test storage configuration
+// @Description  Test the current storage configuration connectivity
+// @Tags         Settings
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object} domain.Response  "Storage connection test successful"
+// @Failure      400  {object} domain.Response  "Unknown storage type or test failed"
+// @Router       /settings/storage/test [post]
 func (sc *SettingController) TestStorageConfig(c *gin.Context) {
 	// 这里可以实现存储连接测试逻辑
 	// 根据当前配置尝试连接存储后端

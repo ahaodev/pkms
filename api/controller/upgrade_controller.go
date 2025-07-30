@@ -11,12 +11,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UpgradeController 升级相关接口
 type UpgradeController struct {
 	UpgradeUsecase domain.UpgradeUsecase
 	Env            *bootstrap.Env
 }
 
 // CreateUpgradeTarget 创建升级目标
+// @Summary      Create upgrade target
+// @Description  Create a new upgrade target
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        data  body     domain.CreateUpgradeTargetRequest  true  "Upgrade target information"
+// @Success      201   {object} domain.Response  "Successfully created upgrade target"
+// @Failure      400   {object} domain.Response  "Bad request - invalid parameters"
+// @Failure      500   {object} domain.Response  "Internal server error"
+// @Router       /upgrade/target [post]
 func (uc *UpgradeController) CreateUpgradeTarget(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetHeader(constants.TenantID)
@@ -37,6 +49,18 @@ func (uc *UpgradeController) CreateUpgradeTarget(c *gin.Context) {
 }
 
 // GetUpgradeTargets 获取升级目标列表
+// @Summary      Get upgrade targets
+// @Description  Get all upgrade targets with optional filtering
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        project_id  query  string  false  "Project ID"
+// @Param        package_id  query  string  false  "Package ID"
+// @Param        is_active   query  bool    false  "Is active"
+// @Success      200         {object} domain.Response  "Successfully retrieved upgrade targets"
+// @Failure      500         {object} domain.Response  "Internal server error"
+// @Router       /upgrade/targets [get]
 func (uc *UpgradeController) GetUpgradeTargets(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
 
@@ -64,6 +88,16 @@ func (uc *UpgradeController) GetUpgradeTargets(c *gin.Context) {
 }
 
 // GetUpgradeTarget 获取特定升级目标
+// @Summary      Get specific upgrade target
+// @Description  Get a specific upgrade target by ID
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Upgrade target ID"
+// @Success      200  {object} domain.Response  "Successfully retrieved upgrade target"
+// @Failure      404  {object} domain.Response  "Upgrade target not found"
+// @Router       /upgrade/target/{id} [get]
 func (uc *UpgradeController) GetUpgradeTarget(c *gin.Context) {
 	id := c.Param("id")
 
@@ -77,6 +111,18 @@ func (uc *UpgradeController) GetUpgradeTarget(c *gin.Context) {
 }
 
 // UpdateUpgradeTarget 更新升级目标
+// @Summary      Update upgrade target
+// @Description  Update a specific upgrade target by ID
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id    path     string                              true  "Upgrade target ID"
+// @Param        data  body     domain.UpdateUpgradeTargetRequest  true  "Upgrade target information"
+// @Success      200   {object} domain.Response                    "Successfully updated upgrade target"
+// @Failure      400   {object} domain.Response                    "Bad request - invalid parameters"
+// @Failure      500   {object} domain.Response                    "Internal server error"
+// @Router       /upgrade/target/{id} [put]
 func (uc *UpgradeController) UpdateUpgradeTarget(c *gin.Context) {
 	id := c.Param("id")
 
@@ -95,6 +141,16 @@ func (uc *UpgradeController) UpdateUpgradeTarget(c *gin.Context) {
 }
 
 // DeleteUpgradeTarget 删除升级目标
+// @Summary      Delete upgrade target
+// @Description  Delete a specific upgrade target by ID
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Upgrade target ID"
+// @Success      200  {object} domain.Response  "Successfully deleted upgrade target"
+// @Failure      500  {object} domain.Response  "Internal server error"
+// @Router       /upgrade/target/{id} [delete]
 func (uc *UpgradeController) DeleteUpgradeTarget(c *gin.Context) {
 	id := c.Param("id")
 
@@ -107,6 +163,16 @@ func (uc *UpgradeController) DeleteUpgradeTarget(c *gin.Context) {
 }
 
 // CheckUpdate 检查更新（供客户端调用）
+// @Summary      Check for updates
+// @Description  Check if there are available updates for the client
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Param        data  body     domain.CheckUpdateRequest  true  "Update check request"
+// @Success      200   {object} domain.Response           "Successfully checked for updates"
+// @Failure      400   {object} domain.Response           "Bad request - invalid parameters"
+// @Failure      500   {object} domain.Response           "Internal server error"
+// @Router       /upgrade/check [post]
 func (uc *UpgradeController) CheckUpdate(c *gin.Context) {
 	var request domain.CheckUpdateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -124,6 +190,16 @@ func (uc *UpgradeController) CheckUpdate(c *gin.Context) {
 }
 
 // GetProjectUpgradeTargets 获取项目的所有升级目标
+// @Summary      Get project upgrade targets
+// @Description  Get all upgrade targets for a specific project
+// @Tags         Upgrades
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectId  path     string  true  "Project ID"
+// @Success      200        {object} domain.Response  "Successfully retrieved project upgrade targets"
+// @Failure      500        {object} domain.Response  "Internal server error"
+// @Router       /upgrade/project/{projectId}/targets [get]
 func (uc *UpgradeController) GetProjectUpgradeTargets(c *gin.Context) {
 	projectID := c.Param("projectId")
 

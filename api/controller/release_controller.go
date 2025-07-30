@@ -22,6 +22,19 @@ type ReleaseController struct {
 }
 
 // GetReleases 获取包的所有发布版本
+// @Summary      Get package releases
+// @Description  Get all releases for a specific package with pagination
+// @Tags         Releases
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        package_id   path     string  true   "Package ID"
+// @Param        page         query    int     false  "Page number (default: 1)"
+// @Param        pageSize     query    int     false  "Page size (default: 20)"
+// @Success      200          {object} domain.Response  "Successfully retrieved releases"
+// @Failure      400          {object} domain.Response  "Bad request - package_id is required"
+// @Failure      404          {object} domain.Response  "Releases not found"
+// @Router       /packages/{package_id}/releases [get]
 func (rc *ReleaseController) GetReleases(c *gin.Context) {
 	packageID := c.Param("package_id")
 	if packageID == "" {
@@ -71,6 +84,16 @@ func (rc *ReleaseController) GetReleases(c *gin.Context) {
 }
 
 // GetRelease 获取特定发布版本
+// @Summary      Get specific release
+// @Description  Get a specific release by ID
+// @Tags         Releases
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Release ID"
+// @Success      200  {object} domain.Response  "Successfully retrieved release"
+// @Failure      404  {object} domain.Response  "Release not found"
+// @Router       /releases/{id} [get]
 func (rc *ReleaseController) GetRelease(c *gin.Context) {
 	releaseID := c.Param("id")
 	release, err := rc.ReleaseUsecase.GetReleaseByID(c, releaseID)
@@ -82,6 +105,25 @@ func (rc *ReleaseController) GetRelease(c *gin.Context) {
 }
 
 // UploadRelease 上传发布版本
+// @Summary      Upload release
+// @Description  Upload a new release file with metadata
+// @Tags         Releases
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        file          formData  file    true   "Release file"
+// @Param        package_id    formData  string  true   "Package ID"
+// @Param        name          formData  string  false  "Release name"
+// @Param        version_code  formData  string  true   "Version code"
+// @Param        version_name  formData  string  false  "Version name"
+// @Param        type          formData  string  false  "Release type"
+// @Param        changelog     formData  string  false  "Changelog"
+// @Param        tag_name      formData  string  false  "Tag name"
+// @Param        is_latest     formData  bool    false  "Is latest version"
+// @Success      201           {object} domain.Response  "Successfully uploaded release"
+// @Failure      400           {object} domain.Response  "Bad request - missing required fields or file upload failed"
+// @Failure      500           {object} domain.Response  "Internal server error"
+// @Router       /releases/upload [post]
 func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 
@@ -172,6 +214,16 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 }
 
 // DeleteRelease 删除发布版本
+// @Summary      Delete release
+// @Description  Delete a specific release by ID
+// @Tags         Releases
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Release ID"
+// @Success      200  {object} domain.Response  "Successfully deleted release"
+// @Failure      500  {object} domain.Response  "Delete release failed"
+// @Router       /releases/{id} [delete]
 func (rc *ReleaseController) DeleteRelease(c *gin.Context) {
 	releaseID := c.Param("id")
 	err := rc.ReleaseUsecase.DeleteRelease(c, releaseID)
@@ -183,6 +235,17 @@ func (rc *ReleaseController) DeleteRelease(c *gin.Context) {
 }
 
 // DownloadRelease 下载发布版本文件
+// @Summary      Download release file
+// @Description  Download the file associated with a specific release
+// @Tags         Releases
+// @Accept       json
+// @Produce      application/octet-stream
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Release ID"
+// @Success      200  {file}   file    "Successfully downloaded release file"
+// @Failure      404  {object} domain.Response  "Release not found"
+// @Failure      500  {object} domain.Response  "Download failed"
+// @Router       /releases/{id}/download [get]
 func (rc *ReleaseController) DownloadRelease(c *gin.Context) {
 	releaseID := c.Param("id")
 
@@ -224,6 +287,16 @@ func (rc *ReleaseController) DownloadRelease(c *gin.Context) {
 }
 
 // GetLatestRelease 获取包的最新发布版本
+// @Summary      Get latest release
+// @Description  Get the latest release for a specific package
+// @Tags         Releases
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        package_id   path     string  true  "Package ID"
+// @Success      200          {object} domain.Response  "Successfully retrieved latest release"
+// @Failure      404          {object} domain.Response  "Latest release not found"
+// @Router       /packages/{package_id}/releases/latest [get]
 func (rc *ReleaseController) GetLatestRelease(c *gin.Context) {
 	packageID := c.Param("package_id")
 
@@ -237,6 +310,18 @@ func (rc *ReleaseController) GetLatestRelease(c *gin.Context) {
 }
 
 // CreateShareLink 创建发布版本分享链接
+// @Summary      Create share link
+// @Description  Create a shareable link for a specific release
+// @Tags         Releases
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path     string                    true  "Release ID"
+// @Param        request  body     domain.CreateShareRequest true  "Share link request"
+// @Success      200      {object} domain.Response          "Successfully created share link"
+// @Failure      400      {object} domain.Response          "Bad request - invalid parameters"
+// @Failure      500      {object} domain.Response          "Create share failed"
+// @Router       /releases/{id}/share [post]
 func (rc *ReleaseController) CreateShareLink(c *gin.Context) {
 	releaseID := c.Param("id")
 	var request domain.CreateShareRequest

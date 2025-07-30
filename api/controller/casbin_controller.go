@@ -26,7 +26,19 @@ func NewCasbinController(casbinManager *casbin.CasbinManager, userRepository dom
 	}
 }
 
-// AddPolicy 添加权限策略
+// AddPolicy godoc
+// @Summary      Add permission policy
+// @Description  Add a new permission policy to Casbin
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.AddPolicyRequest  true  "Policy to add"
+// @Success      200  {object}  domain.Response  "Policy added successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      409  {object}  domain.Response  "Policy already exists"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policy [post]
 func (cc *CasbinController) AddPolicy(c *gin.Context) {
 	var req domain.AddPolicyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -48,7 +60,19 @@ func (cc *CasbinController) AddPolicy(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("策略添加成功"))
 }
 
-// RemovePolicy 移除权限策略
+// RemovePolicy godoc
+// @Summary      Remove permission policy
+// @Description  Remove an existing permission policy from Casbin
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.RemovePolicyRequest  true  "Policy to remove"
+// @Success      200  {object}  domain.Response  "Policy removed successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      404  {object}  domain.Response  "Policy not found"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policy [delete]
 func (cc *CasbinController) RemovePolicy(c *gin.Context) {
 	var req domain.RemovePolicyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -70,7 +94,19 @@ func (cc *CasbinController) RemovePolicy(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("策略移除成功"))
 }
 
-// AddRole 为用户添加角色
+// AddRole godoc
+// @Summary      Add role to user
+// @Description  Add a role to a user in a specific tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.AddRoleRequest  true  "Role assignment data"
+// @Success      200  {object}  domain.Response  "Role added successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      409  {object}  domain.Response  "Role already exists"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role [post]
 func (cc *CasbinController) AddRole(c *gin.Context) {
 	var req domain.AddRoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -92,7 +128,19 @@ func (cc *CasbinController) AddRole(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("角色添加成功"))
 }
 
-// RemoveRole 移除用户角色
+// RemoveRole godoc
+// @Summary      Remove role from user
+// @Description  Remove a role from a user in a specific tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.RemoveRoleRequest  true  "Role removal data"
+// @Success      200  {object}  domain.Response  "Role removed successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      404  {object}  domain.Response  "Role not found"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role [delete]
 func (cc *CasbinController) RemoveRole(c *gin.Context) {
 	var req domain.RemoveRoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -114,7 +162,18 @@ func (cc *CasbinController) RemoveRole(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("角色移除成功"))
 }
 
-// CheckPermission 检查权限
+// CheckPermission godoc
+// @Summary      Check user permission
+// @Description  Check if a user has specific permission for an object and action in a tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.CheckPermissionRequest  true  "Permission check data"
+// @Success      200  {object}  domain.Response  "Permission check result"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/permission/check [post]
 func (cc *CasbinController) CheckPermission(c *gin.Context) {
 	var req domain.CheckPermissionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -138,7 +197,16 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetUserPermissions 获取用户权限
+// GetUserPermissions godoc
+// @Summary      Get user permissions
+// @Description  Get all permissions and roles for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=domain.UserPermissionsResponse}  "User permissions and roles"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/user/permissions [get]
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetString(constants.TenantID)
@@ -160,7 +228,19 @@ func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetUserRoles 获取用户角色
+// GetUserRoles godoc
+// @Summary      Get user roles
+// @Description  Get all roles for a specific user in a tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        user_id    path      string  true  "User ID"
+// @Param        tenant_id  path      string  true  "Tenant ID"
+// @Success      200  {object}  domain.Response  "User roles"
+// @Failure      400  {object}  domain.Response  "Invalid parameters"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/user/{user_id}/tenant/{tenant_id}/roles [get]
 func (cc *CasbinController) GetUserRoles(c *gin.Context) {
 	userID := c.Param("user_id")
 	tenantID := c.Param("tenant_id")
@@ -179,7 +259,19 @@ func (cc *CasbinController) GetUserRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetRoleUsers 获取角色下的用户
+// GetRoleUsers godoc
+// @Summary      Get users with role
+// @Description  Get all users that have a specific role in a tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        role       path      string  true  "Role name"
+// @Param        tenant_id  path      string  true  "Tenant ID"
+// @Success      200  {object}  domain.Response  "Users with the role"
+// @Failure      400  {object}  domain.Response  "Invalid parameters"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role/{role}/tenant/{tenant_id}/users [get]
 func (cc *CasbinController) GetRoleUsers(c *gin.Context) {
 	role := c.Param("role")
 	tenantId := c.Param("tenant_id")
@@ -198,7 +290,16 @@ func (cc *CasbinController) GetRoleUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllPolicies 获取所有策略
+// GetAllPolicies godoc
+// @Summary      Get all policies
+// @Description  Get all permission policies in the system
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All policies"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policies [get]
 func (cc *CasbinController) GetAllPolicies(c *gin.Context) {
 	policies := cc.casbinManager.GetAllPolicies()
 
@@ -209,7 +310,16 @@ func (cc *CasbinController) GetAllPolicies(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllRoles 获取所有角色
+// GetAllRoles godoc
+// @Summary      Get all roles
+// @Description  Get all role assignments in the system
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All roles"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/roles [get]
 func (cc *CasbinController) GetAllRoles(c *gin.Context) {
 	roles := cc.casbinManager.GetAllRoles()
 
@@ -220,7 +330,16 @@ func (cc *CasbinController) GetAllRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllRoleNames 获取所有角色名称
+// GetAllRoleNames godoc
+// @Summary      Get all role names
+// @Description  Get all unique role names in the system
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All role names"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role-names [get]
 func (cc *CasbinController) GetAllRoleNames(c *gin.Context) {
 	roleNames := cc.casbinManager.GetAllRoleNames()
 
@@ -231,7 +350,16 @@ func (cc *CasbinController) GetAllRoleNames(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllObjects 获取所有对象名称
+// GetAllObjects godoc
+// @Summary      Get all objects
+// @Description  Get all unique object names used in policies
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All object names"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/objects [get]
 func (cc *CasbinController) GetAllObjects(c *gin.Context) {
 	objects := cc.casbinManager.GetAllObjects()
 
@@ -242,7 +370,16 @@ func (cc *CasbinController) GetAllObjects(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllActions 获取所有操作名称
+// GetAllActions godoc
+// @Summary      Get all actions
+// @Description  Get all unique action names used in policies
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All action names"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/actions [get]
 func (cc *CasbinController) GetAllActions(c *gin.Context) {
 	actions := cc.casbinManager.GetAllActions()
 
@@ -253,7 +390,19 @@ func (cc *CasbinController) GetAllActions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// AddRolePolicy 为角色添加权限策略
+// AddRolePolicy godoc
+// @Summary      Add role policy
+// @Description  Add a permission policy to a role in a specific tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.AddRolePolicyRequest  true  "Role policy data"
+// @Success      200  {object}  domain.Response  "Role policy added successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      409  {object}  domain.Response  "Role policy already exists"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role/policy [post]
 func (cc *CasbinController) AddRolePolicy(c *gin.Context) {
 	var req domain.AddRolePolicyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -275,7 +424,19 @@ func (cc *CasbinController) AddRolePolicy(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("角色权限添加成功"))
 }
 
-// RemoveRolePolicy 移除角色权限策略
+// RemoveRolePolicy godoc
+// @Summary      Remove role policy
+// @Description  Remove a permission policy from a role in a specific tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      domain.RemoveRolePolicyRequest  true  "Role policy removal data"
+// @Success      200  {object}  domain.Response  "Role policy removed successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request parameters"
+// @Failure      404  {object}  domain.Response  "Role policy not found"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role/policy [delete]
 func (cc *CasbinController) RemoveRolePolicy(c *gin.Context) {
 	var req domain.RemoveRolePolicyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -297,7 +458,19 @@ func (cc *CasbinController) RemoveRolePolicy(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("角色权限移除成功"))
 }
 
-// GetRolePermissions 获取角色权限
+// GetRolePermissions godoc
+// @Summary      Get role permissions
+// @Description  Get all permissions for a specific role in a tenant domain
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        role       path      string  true  "Role name"
+// @Param        tenant_id  path      string  true  "Tenant ID"
+// @Success      200  {object}  domain.Response{data=domain.RolePermissionsResponse}  "Role permissions"
+// @Failure      400  {object}  domain.Response  "Invalid parameters"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/role/{role}/tenant/{tenant_id}/permissions [get]
 func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
 	role := c.Param("role")
 	tenant_id := c.Param("tenant_id")
@@ -316,7 +489,16 @@ func (cc *CasbinController) GetRolePermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetSidebarPermissions 获取侧边栏权限
+// GetSidebarPermissions godoc
+// @Summary      Get sidebar permissions
+// @Description  Get sidebar navigation permissions for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "Sidebar permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/sidebar/permissions [get]
 func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
@@ -331,7 +513,17 @@ func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetProjectPermissions 获取项目权限
+// GetProjectPermissions godoc
+// @Summary      Get project permissions
+// @Description  Get project-specific permissions for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        project_id  query     string  false  "Project ID (optional)"
+// @Success      200  {object}  domain.Response  "Project permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/project/permissions [get]
 func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
@@ -363,7 +555,17 @@ func (cc *CasbinController) GetProjectPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetPackagePermissions 获取包权限
+// GetPackagePermissions godoc
+// @Summary      Get package permissions
+// @Description  Get package-specific permissions for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        package_name  query     string  false  "Package name (optional)"
+// @Success      200  {object}  domain.Response  "Package permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/package/permissions [get]
 func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
@@ -396,7 +598,16 @@ func (cc *CasbinController) GetPackagePermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// ReloadPolicies 重新加载策略
+// ReloadPolicies godoc
+// @Summary      Reload policies
+// @Description  Reload all policies from the database into memory
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "Policies reloaded successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policies/reload [post]
 func (cc *CasbinController) ReloadPolicies(c *gin.Context) {
 	err := cc.casbinManager.LoadPolicy()
 	if err != nil {
@@ -407,7 +618,17 @@ func (cc *CasbinController) ReloadPolicies(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("策略重新加载成功"))
 }
 
-// ClearAllPolicies 清空所有策略
+// ClearAllPolicies godoc
+// @Summary      Clear all policies
+// @Description  Clear all permission policies from the system (admin only)
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All policies cleared successfully"
+// @Failure      403  {object}  domain.Response  "Insufficient permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policies/clear [delete]
 func (cc *CasbinController) ClearAllPolicies(c *gin.Context) {
 	// 检查是否是管理员
 	userID := c.GetString(constants.UserID)
@@ -435,7 +656,17 @@ func (cc *CasbinController) ClearAllPolicies(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("策略清空成功"))
 }
 
-// ClearAllRoles 清空所有角色
+// ClearAllRoles godoc
+// @Summary      Clear all roles
+// @Description  Clear all role assignments from the system (admin only)
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All roles cleared successfully"
+// @Failure      403  {object}  domain.Response  "Insufficient permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/roles/clear [delete]
 func (cc *CasbinController) ClearAllRoles(c *gin.Context) {
 	// 检查是否是管理员
 	userID := c.GetString(constants.UserID)
@@ -463,7 +694,16 @@ func (cc *CasbinController) ClearAllRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("角色清空成功"))
 }
 
-// GetEnhancedPolicies 获取增强版策略列表（包含可读名称）
+// GetEnhancedPolicies godoc
+// @Summary      Get enhanced policies
+// @Description  Get all policies with enhanced information including readable names
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=domain.EnhancedPoliciesResponse}  "Enhanced policies with readable names"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/policies/enhanced [get]
 func (cc *CasbinController) GetEnhancedPolicies(c *gin.Context) {
 	policies := cc.casbinManager.GetAllPolicies()
 	var enhancedPolicies []domain.PolicyDetail
@@ -500,7 +740,16 @@ func (cc *CasbinController) GetEnhancedPolicies(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetEnhancedRoles 获取增强版角色列表（包含可读名称）
+// GetEnhancedRoles godoc
+// @Summary      Get enhanced roles
+// @Description  Get all roles with enhanced information including readable names
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=domain.EnhancedRolesResponse}  "Enhanced roles with readable names"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/roles/enhanced [get]
 func (cc *CasbinController) GetEnhancedRoles(c *gin.Context) {
 	roles := cc.casbinManager.GetAllRoles()
 	var enhancedRoles []domain.RoleDetail
@@ -536,7 +785,16 @@ func (cc *CasbinController) GetEnhancedRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllTenants 获取所有租户列表（用于下拉选择）
+// GetAllTenants godoc
+// @Summary      Get all tenants
+// @Description  Get all tenants for dropdown selection in UI
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All tenants list"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/tenants [get]
 func (cc *CasbinController) GetAllTenants(c *gin.Context) {
 	tenants, err := cc.tenantRepository.Fetch(c.Request.Context())
 	if err != nil {
@@ -559,7 +817,16 @@ func (cc *CasbinController) GetAllTenants(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
-// GetAllUsers 获取所有用户列表（用于下拉选择）
+// GetAllUsers godoc
+// @Summary      Get all users
+// @Description  Get all users for dropdown selection in UI
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response  "All users list"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/users [get]
 func (cc *CasbinController) GetAllUsers(c *gin.Context) {
 	users, err := cc.userRepository.Fetch(c.Request.Context())
 	if err != nil {

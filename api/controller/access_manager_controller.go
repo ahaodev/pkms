@@ -17,7 +17,19 @@ type AccessManagerController struct {
 	Env                 *bootstrap.Env
 }
 
-// CreateClientAccess 创建客户端接入凭证（需要管理员权限）
+// CreateClientAccess godoc
+// @Summary      Create client access credentials
+// @Description  Create new client access credentials for API access (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        x-tenant-id  header    string                          true  "Tenant ID"
+// @Param        request      body      domain.CreateClientAccessRequest true  "Client access request"
+// @Success      201  {object}  domain.Response{data=domain.ClientAccess}  "Client access created successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request data"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /access-manager [post]
 func (cac *AccessManagerController) CreateClientAccess(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetHeader(constants.TenantID)
@@ -37,7 +49,20 @@ func (cac *AccessManagerController) CreateClientAccess(c *gin.Context) {
 	c.JSON(http.StatusCreated, domain.RespSuccess(access))
 }
 
-// GetClientAccessList 获取客户端接入凭证列表（需要管理员权限）
+// GetClientAccessList godoc
+// @Summary      Get client access credentials list
+// @Description  Retrieve list of client access credentials with optional filters (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        x-tenant-id  header    string  true   "Tenant ID"
+// @Param        project_id   query     string  false  "Filter by project ID"
+// @Param        package_id   query     string  false  "Filter by package ID"
+// @Param        is_active    query     bool    false  "Filter by active status"
+// @Success      200  {object}  domain.Response{data=[]domain.ClientAccess}  "Client access list retrieved successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /access-manager [get]
 func (cac *AccessManagerController) GetClientAccessList(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
 
@@ -64,7 +89,17 @@ func (cac *AccessManagerController) GetClientAccessList(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(accessList))
 }
 
-// GetClientAccess 获取特定客户端接入凭证（需要管理员权限）
+// GetClientAccess godoc
+// @Summary      Get specific client access credentials
+// @Description  Retrieve specific client access credentials by ID (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Client access ID"
+// @Success      200  {object}  domain.Response{data=domain.ClientAccess}  "Client access retrieved successfully"
+// @Failure      404  {object}  domain.Response  "Client access not found"
+// @Router       /access-manager/{id} [get]
 func (cac *AccessManagerController) GetClientAccess(c *gin.Context) {
 	id := c.Param("id")
 
@@ -77,7 +112,19 @@ func (cac *AccessManagerController) GetClientAccess(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(access))
 }
 
-// UpdateClientAccess 更新客户端接入凭证（需要管理员权限）
+// UpdateClientAccess godoc
+// @Summary      Update client access credentials
+// @Description  Update existing client access credentials (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path  string                          true  "Client access ID"
+// @Param        request  body  domain.UpdateClientAccessRequest true  "Update request"
+// @Success      200  {object}  domain.Response  "Client access updated successfully"
+// @Failure      400  {object}  domain.Response  "Invalid request data"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /access-manager/{id} [put]
 func (cac *AccessManagerController) UpdateClientAccess(c *gin.Context) {
 	id := c.Param("id")
 
@@ -95,7 +142,17 @@ func (cac *AccessManagerController) UpdateClientAccess(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("客户端接入凭证更新成功"))
 }
 
-// DeleteClientAccess 删除客户端接入凭证（需要管理员权限）
+// DeleteClientAccess godoc
+// @Summary      Delete client access credentials
+// @Description  Delete client access credentials by ID (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path  string  true  "Client access ID"
+// @Success      200  {object}  domain.Response  "Client access deleted successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /access-manager/{id} [delete]
 func (cac *AccessManagerController) DeleteClientAccess(c *gin.Context) {
 	id := c.Param("id")
 
@@ -107,7 +164,17 @@ func (cac *AccessManagerController) DeleteClientAccess(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("客户端接入凭证删除成功"))
 }
 
-// RegenerateToken 重新生成访问令牌（需要管理员权限）
+// RegenerateToken godoc
+// @Summary      Regenerate access token
+// @Description  Regenerate access token for client access credentials (admin only)
+// @Tags         Access Manager
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path  string  true  "Client access ID"
+// @Success      200  {object}  domain.Response{data=object}  "New access token generated successfully"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /access-manager/{id}/regenerate-token [post]
 func (cac *AccessManagerController) RegenerateToken(c *gin.Context) {
 	id := c.Param("id")
 
