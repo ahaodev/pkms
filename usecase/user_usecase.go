@@ -59,8 +59,8 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, tenant.ID); err != nil {
 		return err
 	}
-	uu.casbinManager.AddPolicy(domain.RoleOwner, tenant.ID, "*", "*")
-	uu.casbinManager.AddRoleForUser(user.ID, domain.RoleOwner, tenant.ID)
+	uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
+	uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	return nil
 }
 

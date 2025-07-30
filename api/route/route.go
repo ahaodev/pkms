@@ -60,17 +60,17 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	// DEMO阶段大胆简化：只保留核心权限检查！
 	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
 
-	// 🔥 业务功能路由 - manager及以上角色可访问（兼容旧的pm角色）
+	// 🔥 业务功能路由 - 认证用户都可访问项目（admin, owner, user）
 	projectRouter := protectedRouter.Group("/projects")
-	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
+	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	//packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
 	releaseRouter := protectedRouter.Group("/releases")
-	//releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleManager}))
+	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
 	// 🔥 系统管理路由 - 只有admin可访问
@@ -83,11 +83,11 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrades")
-	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
+	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
 	clientAccessRouter := protectedRouter.Group("/access-manager")
-	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.RoleOwner}))
+	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
 	// 🔥 普通功能路由 - 登录即可访问

@@ -2,10 +2,7 @@ package domain
 
 // 角色定义
 const (
-	RoleAdmin  = "admin"  // 系统管理员：全权限
-	RoleOwner  = "owner"  // 所有者
-	RoleUser   = "user"   // 普通用户
-	RoleViewer = "viewer" // 只读用户：只读权限
+	RoleAdmin = "admin" // 系统管理员：全权限
 )
 
 // 租户内角色定义

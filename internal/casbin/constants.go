@@ -25,6 +25,7 @@ var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, 
 
 // var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, SidebarSettings}
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
+var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
 var DEFAULT_SIDEBAR = []string{SidebarDashboard}
 
