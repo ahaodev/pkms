@@ -66,6 +66,32 @@ func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]dom
 	return result, nil
 }
 
+func (pr *entProjectRepository) FetchAll(c context.Context) ([]*domain.Project, error) {
+	projects, err := pr.client.Project.
+		Query().
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.Project
+	for _, p := range projects {
+		result = append(result, &domain.Project{
+			ID:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Icon:        p.Icon,
+			TenantID:    p.TenantID,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+			CreatedBy:   p.CreatedBy,
+		})
+	}
+
+	return result, nil
+}
+
 func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Project, error) {
 	p, err := pr.client.Project.
 		Query().

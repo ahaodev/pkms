@@ -71,14 +71,32 @@ func (du *dashboardUsecase) GetStats(c context.Context, tenantID string) (domain
 	}, nil
 }
 
-func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID string, limit int) ([]domain.RecentActivity, error) {
+func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID string, userID string, limit int) ([]domain.RecentActivity, error) {
 	ctx, cancel := context.WithTimeout(c, du.contextTimeout)
 	defer cancel()
 
 	var activities []domain.RecentActivity
 
-	// Get recent projects
-	projects, err := du.projectRepository.Fetch(ctx, tenantID)
+	// Check if the user is admin - admin sees all activities across all tenants
+	isAdmin := (userID == "admin")
+
+	var projects []*domain.Project
+	var err error
+
+	if isAdmin {
+		// Admin gets all projects across all tenants
+		projects, err = du.projectRepository.FetchAll(ctx)
+	} else {
+		// Regular users get only tenant-specific projects
+		tenantProjects, err := du.projectRepository.Fetch(ctx, tenantID)
+		if err == nil {
+			// Convert []domain.Project to []*domain.Project
+			for i := range tenantProjects {
+				projects = append(projects, &tenantProjects[i])
+			}
+		}
+	}
+
 	if err == nil {
 		for i, project := range projects {
 			if i >= limit/3 { // Limit to 1/3 of total limit
@@ -116,8 +134,16 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID stri
 		})
 	}
 
-	// Get recent users (tenant-specific)
-	users, err := du.userRepository.FetchByTenant(ctx, tenantID)
+	// Get recent users
+	var users []domain.User
+	if isAdmin {
+		// Admin gets all users across all tenants
+		users, err = du.userRepository.Fetch(ctx)
+	} else {
+		// Regular users get only tenant-specific users
+		users, err = du.userRepository.FetchByTenant(ctx, tenantID)
+	}
+
 	if err == nil {
 		for i, user := range users {
 			if i >= limit/3 { // Limit to 1/3 of total limit

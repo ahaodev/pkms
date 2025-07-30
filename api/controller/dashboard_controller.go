@@ -30,13 +30,14 @@ func (dc *DashboardController) GetStats(c *gin.Context) {
 // GetRecentActivities 获取最近活动
 func (dc *DashboardController) GetRecentActivities(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
+	userID := c.GetString(constants.UserID)
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		limit = 10
 	}
 
-	activities, err := dc.DashboardUsecase.GetRecentActivities(c, tenantID, limit)
+	activities, err := dc.DashboardUsecase.GetRecentActivities(c, tenantID, userID, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
