@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 
 export interface AccountConfig {
-  username: string;
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -19,7 +18,6 @@ interface AccountSettingsProps {
 }
 
 export function AccountSettings({ onSave }: AccountSettingsProps) {
-  const [username, setUsername] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,7 +33,6 @@ export function AccountSettings({ onSave }: AccountSettingsProps) {
     }
 
     const config: AccountConfig = {
-      username,
       currentPassword,
       newPassword,
       confirmPassword
@@ -68,15 +65,6 @@ export function AccountSettings({ onSave }: AccountSettingsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">用户名</Label>
-            <Input
-                id="username"
-                placeholder="请输入用户名"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="currentPassword">当前密码</Label>
             <Input

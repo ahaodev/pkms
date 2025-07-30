@@ -68,8 +68,8 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
     const {currentTenant, tenants, selectTenant} = useAuth()
 
     // 切换租户逻辑
-    const handleTenantChange = (tenant: { id: string, name: string }) => {
-        selectTenant(tenant);
+    const handleTenantChange = async (tenant: { id: string, name: string }) => {
+        await selectTenant(tenant);
         if (onTenantChange) onTenantChange(tenant);
     };
 

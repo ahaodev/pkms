@@ -97,6 +97,7 @@ func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User,
 	return domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
+		Password:  u.PasswordHash,
 		Tenants:   tenant,
 		IsActive:  u.IsActive,
 		CreatedAt: u.CreatedAt,

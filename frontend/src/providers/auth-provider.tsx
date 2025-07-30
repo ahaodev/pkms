@@ -1,4 +1,5 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
+import {useQueryClient} from '@tanstack/react-query';
 import * as authAPI from '@/lib/api/auth.ts';
 import {ACCESS_TOKEN, CURRENT_TENANT, REFRESH_TOKEN} from '@/types/constants.ts';
 import {Tenant, User, UserPermissions} from '@/types/user';
@@ -10,7 +11,7 @@ interface AuthContextType {
     userPermissions: UserPermissions | null;
     login: (username: string, password: string) => Promise<boolean>;
     logout: () => void;
-    selectTenant: (tenant: Tenant | null) => void;
+    selectTenant: (tenant: Tenant | null) => Promise<void>;
     isLoading: boolean;
     hasRole: (role: string) => boolean;
     isAdmin: () => boolean;
@@ -26,7 +27,7 @@ const AuthContext = createContext<AuthContextType>({
     login: async () => false,
     logout: () => {
     },
-    selectTenant: () => {
+    selectTenant: async () => {
 
     },
     isLoading: false,
@@ -41,6 +42,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
     const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
     const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
 
     const loadUserPermissions = async () => {
         if (!user?.id) {
@@ -92,17 +94,17 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     setUser(user);
                     const tenantsArr = Array.isArray(resp.data.tenants) ? resp.data.tenants : null;
                     setTenants(tenantsArr);
-                    selectTenant(tenantsArr && tenantsArr.length > 0 ? tenantsArr[0] : null);
+                    await selectTenant(tenantsArr && tenantsArr.length > 0 ? tenantsArr[0] : null);
                 } else {
                     setUser(null);
                     setTenants(null);
-                    selectTenant(null);
+                    await selectTenant(null);
                 }
             } catch (e) {
                 console.log('validateToken error:', e);
                 setUser(null);
                 setTenants(null);
-                selectTenant(null);
+                await selectTenant(null);
             }
             setIsLoading(false);
         };
@@ -136,7 +138,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     }
                     setUser(user);
                     setTenants(profileResp.data.tenants || null);
-                    selectTenant(profileResp.data.tenants[0] || null);
+                    await selectTenant(profileResp.data.tenants[0] || null);
                 }
 
                 return true;
@@ -160,9 +162,15 @@ export function AuthProvider({children}: { children: ReactNode }) {
         localStorage.removeItem(REFRESH_TOKEN);
         localStorage.removeItem(CURRENT_TENANT);
     };
-    const selectTenant = (tenant: Tenant | null) => {
+    const selectTenant = async (tenant: Tenant | null) => {
+        const previousTenantId = currentTenant?.id;
         setCurrentTenant(tenant);
         localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
+        
+        // 如果租户发生了变化，清除所有查询缓存以强制刷新页面数据
+        if (previousTenantId !== tenant?.id) {
+            await queryClient.invalidateQueries();
+        }
     };
     
     const hasRole = (role: string): boolean => {
