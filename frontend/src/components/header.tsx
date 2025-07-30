@@ -1,6 +1,5 @@
 import {Button} from "@/components/ui/button";
 import {ModeToggle} from "@/components/mode-toggle";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,9 +38,7 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost"
                                 className="relative flex items-center space-x-2 h-8 hover:bg-accent focus:bg-accent rounded-full pr-2 pl-1">
-                            <Avatar className="h-7 w-7">
-                                <AvatarFallback>{user?.name || '👤'}</AvatarFallback>
-                            </Avatar>
+
                             {!isMobile && <span className="max-w-[100px] truncate">{user?.name || '用户'}</span>}
                         </Button>
                     </DropdownMenuTrigger>
