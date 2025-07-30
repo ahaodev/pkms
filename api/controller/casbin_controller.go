@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"pkms/domain"
 	"pkms/internal/casbin"
@@ -141,8 +142,14 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetString(constants.TenantID)
+
+	// 添加调试日志
+	fmt.Printf("GetUserPermissions - UserID: %s, TenantID: %s\n", userID, tenantID)
+
 	permissions := cc.casbinManager.GetPermissionsForUser(userID, tenantID)
 	roles := cc.casbinManager.GetRolesForUser(userID, tenantID)
+
+	fmt.Printf("GetUserPermissions - Permissions: %v, Roles: %v\n", permissions, roles)
 
 	response := domain.UserPermissionsResponse{
 		UserID:      userID,

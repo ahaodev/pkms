@@ -16,6 +16,12 @@ export interface User {
     updated_at: Date;
 }
 
+export interface UserPermissions {
+    user_id: string;
+    permissions: string[][];
+    roles: string[];
+}
+
 export interface Profile {
     id: string;
     name: string;

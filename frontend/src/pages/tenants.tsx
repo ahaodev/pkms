@@ -16,7 +16,7 @@ interface TenantFormData {
 
 export default function TenantsPage() {
     const {toast} = useToast();
-    const {isAdmin} = useAuth();
+    const {hasRole} = useAuth();
 
     const {data: tenants, isLoading} = useTenants();
     const createTenantMutation = useCreateTenant();
@@ -57,7 +57,7 @@ export default function TenantsPage() {
     }
 
     // 检查权限 - 只有管理员可以访问
-    if (!isAdmin()) {
+    if (!hasRole('admin')) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">

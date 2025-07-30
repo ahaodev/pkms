@@ -1,16 +1,18 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import * as authAPI from '@/lib/api/auth.ts';
 import {ACCESS_TOKEN, CURRENT_TENANT, REFRESH_TOKEN} from '@/types/constants.ts';
-import {Tenant, User} from '@/types/user';
+import {Tenant, User, UserPermissions} from '@/types/user';
 
 interface AuthContextType {
     user: User | null;
     currentTenant: Tenant | null;
     tenants: Tenant[] | null;
+    userPermissions: UserPermissions | null;
     login: (username: string, password: string) => Promise<boolean>;
     logout: () => void;
     selectTenant: (tenant: Tenant | null) => void;
     isLoading: boolean;
+    hasRole: (role: string) => boolean;
     isAdmin: () => boolean;
 }
 
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     currentTenant: null,
     tenants: null,
+    userPermissions: null,
     login: async () => false,
     logout: () => {
     },
@@ -27,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
 
     },
     isLoading: false,
+    hasRole: () => false,
     isAdmin: () => false,
 });
 
@@ -35,7 +39,32 @@ export function AuthProvider({children}: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [tenants, setTenants] = useState<Tenant[] | null>(null);
     const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
+    const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const loadUserPermissions = async () => {
+        if (!user?.id) {
+            console.log('No user ID, clearing permissions');
+            setUserPermissions(null);
+            return;
+        }
+        
+        console.log('Loading permissions for user:', user.id, 'name:', user.name);
+        try {
+            const permissionsResp = await authAPI.getUserPermissions(user.id);
+            console.log('Permissions API response:', permissionsResp);
+            if (permissionsResp.code === 0) {
+                console.log('Setting user permissions:', permissionsResp.data);
+                setUserPermissions(permissionsResp.data);
+            } else {
+                console.error('Permissions API returned error code:', permissionsResp.code);
+                setUserPermissions(null);
+            }
+        } catch (error) {
+            console.error('Failed to load user permissions:', error);
+            setUserPermissions(null);
+        }
+    };
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -79,6 +108,13 @@ export function AuthProvider({children}: { children: ReactNode }) {
         };
         initializeAuth();
     }, []);
+    
+    // Load user permissions when user or tenant changes
+    useEffect(() => {
+        if (user?.id && currentTenant?.id) {
+            loadUserPermissions();
+        }
+    }, [user?.id, currentTenant?.id]);
 
     const login = async (username: string, password: string): Promise<boolean> => {
         setIsLoading(true);
@@ -119,6 +155,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
         setUser(null);
         setTenants(null);
         setCurrentTenant(null);
+        setUserPermissions(null);
         localStorage.removeItem(ACCESS_TOKEN);
         localStorage.removeItem(REFRESH_TOKEN);
         localStorage.removeItem(CURRENT_TENANT);
@@ -126,16 +163,26 @@ export function AuthProvider({children}: { children: ReactNode }) {
     const selectTenant = (tenant: Tenant | null) => {
         setCurrentTenant(tenant);
         localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
-    }
-    const isAdmin = (): boolean => user?.name === 'admin';
+    };
+    
+    const hasRole = (role: string): boolean => {
+        const hasRoleResult = userPermissions?.roles?.includes(role) ?? false;
+        console.log(`Checking role '${role}' for user ${user?.name}:`, hasRoleResult);
+        console.log('Current userPermissions:', userPermissions);
+        return hasRoleResult;
+    };
+    
+    const isAdmin = (): boolean => hasRole('admin');
     const contextValue = {
         user,
         tenants,
         currentTenant,
+        userPermissions,
         login,
         logout,
         selectTenant,
         isLoading,
+        hasRole,
         isAdmin,
     };
 

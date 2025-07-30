@@ -5,7 +5,7 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 import {createShareLink} from "@/lib/api/releases.ts";
 
 export const usePackages = (filters?: PackageFilters) => {
-    const {user, isAdmin} = useAuth();
+    const {user, hasRole} = useAuth();
     
     console.log('usePackages called with filters:', filters);
     
@@ -37,7 +37,7 @@ export const usePackages = (filters?: PackageFilters) => {
             let filtered = result.data;
             
             // Apply permission filtering for non-admin users
-            if (!isAdmin()) {
+            if (!hasRole('admin')) {
                 // Filter packages based on user's tenant/permissions
                 // Backend should handle this, but frontend can provide additional filtering if needed
                 filtered = result.data; // Trust backend permissions for now

@@ -66,8 +66,8 @@ export function UserCard({
             </CardHeader>
             <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-2 mb-3">
-                    <Badge variant={user.name === 'admin' ? 'default' : 'outline'}>
-                        {user.name === 'admin' ? '管理员' : '普通用户'}
+                    <Badge variant="outline">
+                        用户
                     </Badge>
                     <Badge variant={user.is_active ? 'outline' : 'destructive'}>
                         {user.is_active ? '启用' : '禁用'}

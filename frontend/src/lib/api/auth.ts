@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import {Profile, User} from '@/types/user';
+import {Profile, User, UserPermissions} from '@/types/user';
 
 // 登录请求类型
 export interface LoginRequest {
@@ -57,5 +57,11 @@ export async function logout(): Promise<ApiResponse<void>> {
 // 验证当前令牌是否有效
 export async function validateToken(): Promise<ApiResponse<Profile>> {
     const resp = await apiClient.get("/api/v1/profile");
+    return resp.data;
+}
+
+// 获取指定用户权限和角色
+export async function getUserPermissions(userId: string): Promise<ApiResponse<UserPermissions>> {
+    const resp = await apiClient.get(`/api/v1/casbin/users/${userId}/permissions`);
     return resp.data;
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"pkms/domain"
+	"pkms/internal/casbin"
 )
 
 type dashboardUsecase struct {
@@ -12,6 +13,7 @@ type dashboardUsecase struct {
 	packageRepository domain.PackageRepository
 	userRepository    domain.UserRepository
 	releaseRepository domain.ReleaseRepository
+	casbinManager     *casbin.CasbinManager
 	contextTimeout    time.Duration
 }
 
@@ -20,6 +22,7 @@ func NewDashboardUsecase(
 	packageRepository domain.PackageRepository,
 	userRepository domain.UserRepository,
 	releaseRepository domain.ReleaseRepository,
+	casbinManager *casbin.CasbinManager,
 	timeout time.Duration,
 ) domain.DashboardUsecase {
 	return &dashboardUsecase{
@@ -27,6 +30,7 @@ func NewDashboardUsecase(
 		packageRepository: packageRepository,
 		userRepository:    userRepository,
 		releaseRepository: releaseRepository,
+		casbinManager:     casbinManager,
 		contextTimeout:    timeout,
 	}
 }
@@ -77,8 +81,9 @@ func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID stri
 
 	var activities []domain.RecentActivity
 
-	// Check if the user is admin - admin sees all activities across all tenants
-	isAdmin := (userID == "admin")
+	// Check if the user has admin role - admin sees all activities across all tenants
+	// Use Casbin to check if user has admin role in any tenant
+	isAdmin := du.casbinManager.IsSystemAdmin(userID)
 
 	var projects []*domain.Project
 	var err error

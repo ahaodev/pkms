@@ -23,7 +23,7 @@ interface UserFormData {
 
 export default function UsersPage() {
     const {toast} = useToast();
-    const {user: currentUser, isAdmin} = useAuth();
+    const {user: currentUser, hasRole} = useAuth();
     const {data: projects} = useProjects();
 
     const {data: users, isLoading} = useUsers();
@@ -106,7 +106,7 @@ export default function UsersPage() {
     }
 
     // 检查权限 - 只有管理员可以访问
-    if (!isAdmin()) {
+    if (!hasRole('admin')) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
