@@ -23,6 +23,7 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 		Create().
 		SetUsername(u.Name).
 		SetPasswordHash(u.Password).
+		SetIsActive(u.IsActive).
 		Save(c)
 
 	if err != nil {
@@ -30,6 +31,7 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 	}
 
 	u.ID = created.ID
+	u.IsActive = created.IsActive
 	u.CreatedAt = created.CreatedAt
 	u.UpdatedAt = created.UpdatedAt
 	return nil
@@ -38,7 +40,7 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 	users, err := ur.client.User.
 		Query().
-		Select(user.FieldID, user.FieldUsername, user.FieldCreatedAt, user.FieldUpdatedAt).
+		Select(user.FieldID, user.FieldUsername, user.FieldIsActive, user.FieldCreatedAt, user.FieldUpdatedAt).
 		All(c)
 
 	if err != nil {
@@ -50,6 +52,7 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 		result = append(result, domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
+			IsActive:  u.IsActive,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
 		})
@@ -137,7 +140,7 @@ func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) (
 	users, err := ur.client.User.
 		Query().
 		Where(user.HasTenantsWith(tenant.ID(tenantID))).
-		Select(user.FieldID, user.FieldUsername, user.FieldCreatedAt, user.FieldUpdatedAt).
+		Select(user.FieldID, user.FieldUsername, user.FieldIsActive, user.FieldCreatedAt, user.FieldUpdatedAt).
 		All(c)
 
 	if err != nil {
@@ -149,6 +152,7 @@ func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) (
 		result = append(result, domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
+			IsActive:  u.IsActive,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
 		})

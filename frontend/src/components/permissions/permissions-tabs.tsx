@@ -3,35 +3,28 @@ import {ReactNode} from "react";
 
 interface PermissionsTabsProps {
     defaultValue?: string;
-    rolePermissionsContent: ReactNode;
-    userRolesContent: ReactNode;
-    userPermissionsContent: ReactNode;
+    roleManagementContent: ReactNode;
+    userManagementContent: ReactNode;
 }
 
 export function PermissionsTabs({
-                                    defaultValue = "role-permissions",
-                                    rolePermissionsContent,
-                                    userRolesContent,
-                                    userPermissionsContent
+                                    defaultValue = "role-management",
+                                    roleManagementContent,
+                                    userManagementContent
                                 }: PermissionsTabsProps) {
     return (
         <Tabs defaultValue={defaultValue} className="space-y-4">
-            <TabsList className="grid grid-cols-3">
-                <TabsTrigger value="role-permissions">角色权限配置</TabsTrigger>
-                <TabsTrigger value="user-roles">用户角色分配</TabsTrigger>
-                <TabsTrigger value="user-permissions">用户权限配置</TabsTrigger>
+            <TabsList className="grid grid-cols-2">
+                <TabsTrigger value="role-management">角色管理</TabsTrigger>
+                <TabsTrigger value="user-management">用户管理</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="role-permissions" className="space-y-4">
-                {rolePermissionsContent}
+            <TabsContent value="role-management" className="space-y-4">
+                {roleManagementContent}
             </TabsContent>
 
-            <TabsContent value="user-roles" className="space-y-4">
-                {userRolesContent}
-            </TabsContent>
-
-            <TabsContent value="user-permissions" className="space-y-4">
-                {userPermissionsContent}
+            <TabsContent value="user-management" className="space-y-4">
+                {userManagementContent}
             </TabsContent>
         </Tabs>
     );
