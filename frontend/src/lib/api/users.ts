@@ -8,7 +8,7 @@ function transformUserFromBackend(backendUser: any): User {
         id: backendUser.id,
         name: backendUser.name,
         tenants: backendUser.tenants,
-        is_active: backendUser.is_active ?? true,
+        is_active: backendUser.is_active !== undefined ? backendUser.is_active : true,
         created_at: backendUser.created_at ? new Date(backendUser.created_at) : new Date(),
         updated_at: backendUser.updated_at ? new Date(backendUser.updated_at) : new Date(),
     };

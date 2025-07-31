@@ -4,13 +4,12 @@ import { Shield } from 'lucide-react';
 import { apiClient } from '@/lib/api/api';
 import { useAuth } from '@/providers/auth-provider.tsx';
 import {
-    RolePermissionsConfig,
-    UserRoleAssignment,
-    UserPermissionsConfig,
     UserPermissionsDialog,
     PermissionsHeader,
     PermissionsTabs
 } from '@/components/permissions';
+import RoleManagement from '@/components/permissions/RoleManagement';
+import UserManagement from '@/components/permissions/UserManagement';
 import type {
     EnhancedPolicy,
     EnhancedRole,
@@ -167,30 +166,20 @@ const PermissionsPage: React.FC = () => {
             />
 
             <PermissionsTabs
-                defaultValue="role-permissions"
-                rolePermissionsContent={
-                    <RolePermissionsConfig
+                defaultValue="role-management"
+                roleManagementContent={
+                    <RoleManagement
                         enhancedPolicies={enhancedPolicies}
                         objects={objects}
                         actions={actions}
                         onRefresh={handleRefreshPolicies}
                     />
                 }
-                userRolesContent={
-                    <UserRoleAssignment
+                userManagementContent={
+                    <UserManagement
                         enhancedRoles={enhancedRoles}
                         users={users}
                         onRefresh={handleRefreshRoles}
-                        onShowUserPermissions={handleShowUserPermissions}
-                    />
-                }
-                userPermissionsContent={
-                    <UserPermissionsConfig
-                        enhancedPolicies={enhancedPolicies}
-                        users={users}
-                        objects={objects}
-                        actions={actions}
-                        onRefresh={handleRefreshPolicies}
                         onShowUserPermissions={handleShowUserPermissions}
                     />
                 }

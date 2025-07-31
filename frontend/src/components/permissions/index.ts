@@ -1,6 +1,6 @@
-export { default as RolePermissionsConfig } from './RolePermissionsConfig';
-export { default as UserRoleAssignment } from './UserRoleAssignment';
-export { default as UserPermissionsConfig } from './UserPermissionsConfig';
+// 精简版权限管理组件
+export { default as RoleManagement } from './RoleManagement';
+export { default as UserManagement } from './UserManagement';
 export { default as UserPermissionsDialog } from './UserPermissionsDialog';
 export { PermissionsHeader } from './permissions-header';
 export { PermissionsTabs } from './permissions-tabs';
