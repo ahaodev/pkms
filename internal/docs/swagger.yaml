@@ -1,0 +1,4276 @@
+basePath: /api
+definitions:
+  controller.StorageConfig:
+    properties:
+      s3_access_key:
+        type: string
+      s3_address:
+        type: string
+      s3_bucket:
+        type: string
+      s3_secret_key:
+        type: string
+      s3_token:
+        type: string
+      storage_base_path:
+        type: string
+      storage_type:
+        type: string
+    type: object
+  domain.AddPolicyRequest:
+    properties:
+      action:
+        type: string
+      object:
+        type: string
+      tenant:
+        type: string
+      user_id:
+        type: string
+    required:
+    - action
+    - object
+    - tenant
+    - user_id
+    type: object
+  domain.AddRolePolicyRequest:
+    properties:
+      action:
+        type: string
+      object:
+        type: string
+      role:
+        type: string
+      tenant:
+        type: string
+    required:
+    - action
+    - object
+    - role
+    - tenant
+    type: object
+  domain.AddRoleRequest:
+    properties:
+      role:
+        type: string
+      tenant:
+        type: string
+      user_id:
+        type: string
+    required:
+    - role
+    - tenant
+    - user_id
+    type: object
+  domain.CheckPermissionRequest:
+    properties:
+      action:
+        type: string
+      object:
+        type: string
+      tenant:
+        type: string
+      user_id:
+        type: string
+    required:
+    - action
+    - object
+    - tenant
+    - user_id
+    type: object
+  domain.CheckUpdateRequest:
+    properties:
+      client_info:
+        description: 客户端信息，可选
+        type: string
+      current_version:
+        type: string
+    required:
+    - current_version
+    type: object
+  domain.CheckUpdateResponse:
+    properties:
+      changelog:
+        type: string
+      current_version:
+        type: string
+      download_url:
+        type: string
+      file_hash:
+        type: string
+      file_size:
+        type: integer
+      has_update:
+        type: boolean
+      latest_version:
+        type: string
+    type: object
+  domain.ClientAccess:
+    properties:
+      access_token:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      creator_name:
+        type: string
+      description:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_used_at:
+        type: string
+      last_used_ip:
+        type: string
+      name:
+        type: string
+      package_id:
+        type: string
+      package_name:
+        type: string
+      project_id:
+        type: string
+      project_name:
+        description: 关联信息
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      usage_count:
+        type: integer
+    type: object
+  domain.CreateClientAccessRequest:
+    properties:
+      description:
+        type: string
+      expires_at:
+        type: string
+      name:
+        type: string
+      package_id:
+        type: string
+      project_id:
+        type: string
+    required:
+    - name
+    - package_id
+    - project_id
+    type: object
+  domain.CreateShareRequest:
+    properties:
+      expiry_hours:
+        type: integer
+      release_id:
+        type: string
+    type: object
+  domain.CreateUpgradeTargetRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      package_id:
+        type: string
+      project_id:
+        type: string
+      release_id:
+        type: string
+    required:
+    - name
+    - package_id
+    - project_id
+    - release_id
+    type: object
+  domain.DashboardStats:
+    properties:
+      total_downloads:
+        type: integer
+      total_groups:
+        type: integer
+      total_packages:
+        type: integer
+      total_projects:
+        type: integer
+      total_users:
+        type: integer
+    type: object
+  domain.EnhancedPoliciesResponse:
+    properties:
+      policies:
+        items:
+          $ref: '#/definitions/domain.PolicyDetail'
+        type: array
+    type: object
+  domain.EnhancedRolesResponse:
+    properties:
+      roles:
+        items:
+          $ref: '#/definitions/domain.RoleDetail'
+        type: array
+    type: object
+  domain.FileInfo:
+    properties:
+      content_type:
+        type: string
+      etag:
+        type: string
+      is_folder:
+        type: boolean
+      key:
+        type: string
+      last_modified:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+      size:
+        type: integer
+      type:
+        type: string
+    type: object
+  domain.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  domain.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  domain.Package:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      latest_release:
+        $ref: '#/definitions/domain.Release'
+      name:
+        type: string
+      project_id:
+        type: string
+      release_count:
+        type: integer
+      total_downloads:
+        type: integer
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.PasswordUpdate:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        type: string
+    type: object
+  domain.PolicyDetail:
+    properties:
+      action:
+        type: string
+      domain:
+        type: string
+      domain_name:
+        type: string
+      object:
+        type: string
+      subject:
+        type: string
+      subject_name:
+        type: string
+    type: object
+  domain.ProfileUpdate:
+    properties:
+      avatar:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.Project:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      package_count:
+        type: integer
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.RecentActivity:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      type:
+        description: '"project_created", "package_uploaded", "user_joined"'
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  domain.RefreshTokenResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  domain.Release:
+    properties:
+      changelog:
+        description: Release notes/changelog
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      download_count:
+        type: integer
+      file_hash:
+        type: string
+      file_name:
+        type: string
+      file_path:
+        type: string
+      file_size:
+        type: integer
+      id:
+        type: string
+      package_id:
+        type: string
+      share_expiry:
+        type: string
+      share_token:
+        type: string
+      tag_name:
+        type: string
+      version_code:
+        type: string
+      version_name:
+        type: string
+    type: object
+  domain.RemovePolicyRequest:
+    properties:
+      action:
+        type: string
+      object:
+        type: string
+      tenant:
+        type: string
+      user_id:
+        type: string
+    required:
+    - action
+    - object
+    - tenant
+    - user_id
+    type: object
+  domain.RemoveRolePolicyRequest:
+    properties:
+      action:
+        type: string
+      object:
+        type: string
+      role:
+        type: string
+      tenant:
+        type: string
+    required:
+    - action
+    - object
+    - role
+    - tenant
+    type: object
+  domain.RemoveRoleRequest:
+    properties:
+      role:
+        type: string
+      tenant:
+        type: string
+      user_id:
+        type: string
+    required:
+    - role
+    - tenant
+    - user_id
+    type: object
+  domain.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+  domain.RoleDetail:
+    properties:
+      domain:
+        type: string
+      domain_name:
+        type: string
+      role:
+        type: string
+      user:
+        type: string
+      user_name:
+        type: string
+    type: object
+  domain.RolePermissionsResponse:
+    properties:
+      permissions:
+        items:
+          items:
+            type: string
+          type: array
+        type: array
+      role:
+        type: string
+    type: object
+  domain.Tenant:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.TenantUserRequest:
+    properties:
+      role:
+        type: string
+      user_id:
+        type: string
+    required:
+    - role
+    - user_id
+    type: object
+  domain.UpdateClientAccessRequest:
+    properties:
+      description:
+        type: string
+      expires_at:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  domain.UpdateTenantUserRoleRequest:
+    properties:
+      is_active:
+        type: boolean
+      role:
+        type: string
+    required:
+    - role
+    type: object
+  domain.UpdateUpgradeTargetRequest:
+    properties:
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  domain.UploadResult:
+    properties:
+      bucket:
+        type: string
+      etag:
+        type: string
+      key:
+        type: string
+      object_name:
+        type: string
+      size:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      tenants:
+        items:
+          $ref: '#/definitions/domain.Tenant'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  domain.UserPermissionsResponse:
+    properties:
+      permissions:
+        items:
+          items:
+            type: string
+          type: array
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
+      user_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Package Management System API for managing projects, packages, and
+    users with RBAC.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: PKMS API
+  version: "1.0"
+paths:
+  /access-manager:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve list of client access credentials with optional filters
+        (admin only)
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Filter by project ID
+        in: query
+        name: project_id
+        type: string
+      - description: Filter by package ID
+        in: query
+        name: package_id
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Client access list retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.ClientAccess'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get client access credentials list
+      tags:
+      - Access Manager
+    post:
+      consumes:
+      - application/json
+      description: Create new client access credentials for API access (admin only)
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Client access request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateClientAccessRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Client access created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.ClientAccess'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create client access credentials
+      tags:
+      - Access Manager
+  /access-manager/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete client access credentials by ID (admin only)
+      parameters:
+      - description: Client access ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Client access deleted successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete client access credentials
+      tags:
+      - Access Manager
+    get:
+      consumes:
+      - application/json
+      description: Retrieve specific client access credentials by ID (admin only)
+      parameters:
+      - description: Client access ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Client access retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.ClientAccess'
+              type: object
+        "404":
+          description: Client access not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific client access credentials
+      tags:
+      - Access Manager
+    put:
+      consumes:
+      - application/json
+      description: Update existing client access credentials (admin only)
+      parameters:
+      - description: Client access ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateClientAccessRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Client access updated successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update client access credentials
+      tags:
+      - Access Manager
+  /access-manager/{id}/regenerate-token:
+    post:
+      consumes:
+      - application/json
+      description: Regenerate access token for client access credentials (admin only)
+      parameters:
+      - description: Client access ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New access token generated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Regenerate access token
+      tags:
+      - Access Manager
+  /casbin/actions:
+    get:
+      consumes:
+      - application/json
+      description: Get all unique action names used in policies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All action names
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all actions
+      tags:
+      - RBAC
+  /casbin/objects:
+    get:
+      consumes:
+      - application/json
+      description: Get all unique object names used in policies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All object names
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all objects
+      tags:
+      - RBAC
+  /casbin/package/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get package-specific permissions for the current authenticated
+        user
+      parameters:
+      - description: Package name (optional)
+        in: query
+        name: package_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Package permissions
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get package permissions
+      tags:
+      - RBAC
+  /casbin/permission/check:
+    post:
+      consumes:
+      - application/json
+      description: Check if a user has specific permission for an object and action
+        in a tenant domain
+      parameters:
+      - description: Permission check data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CheckPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission check result
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Check user permission
+      tags:
+      - RBAC
+  /casbin/policies:
+    get:
+      consumes:
+      - application/json
+      description: Get all permission policies in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All policies
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all policies
+      tags:
+      - RBAC
+  /casbin/policies/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Clear all permission policies from the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All policies cleared successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Clear all policies
+      tags:
+      - RBAC
+  /casbin/policies/enhanced:
+    get:
+      consumes:
+      - application/json
+      description: Get all policies with enhanced information including readable names
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Enhanced policies with readable names
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.EnhancedPoliciesResponse'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get enhanced policies
+      tags:
+      - RBAC
+  /casbin/policies/reload:
+    post:
+      consumes:
+      - application/json
+      description: Reload all policies from the database into memory
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Policies reloaded successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Reload policies
+      tags:
+      - RBAC
+  /casbin/policy:
+    delete:
+      consumes:
+      - application/json
+      description: Remove an existing permission policy from Casbin
+      parameters:
+      - description: Policy to remove
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RemovePolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Policy removed successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Policy not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove permission policy
+      tags:
+      - RBAC
+    post:
+      consumes:
+      - application/json
+      description: Add a new permission policy to Casbin
+      parameters:
+      - description: Policy to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddPolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Policy added successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "409":
+          description: Policy already exists
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add permission policy
+      tags:
+      - RBAC
+  /casbin/project/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get project-specific permissions for the current authenticated
+        user
+      parameters:
+      - description: Project ID (optional)
+        in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project permissions
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get project permissions
+      tags:
+      - RBAC
+  /casbin/role:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a role from a user in a specific tenant domain
+      parameters:
+      - description: Role removal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RemoveRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role removed successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Role not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove role from user
+      tags:
+      - RBAC
+    post:
+      consumes:
+      - application/json
+      description: Add a role to a user in a specific tenant domain
+      parameters:
+      - description: Role assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role added successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "409":
+          description: Role already exists
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add role to user
+      tags:
+      - RBAC
+  /casbin/role-names:
+    get:
+      consumes:
+      - application/json
+      description: Get all unique role names in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All role names
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all role names
+      tags:
+      - RBAC
+  /casbin/role/{role}/tenant/{tenant_id}/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all permissions for a specific role in a tenant domain
+      parameters:
+      - description: Role name
+        in: path
+        name: role
+        required: true
+        type: string
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role permissions
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.RolePermissionsResponse'
+              type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get role permissions
+      tags:
+      - RBAC
+  /casbin/role/{role}/tenant/{tenant_id}/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users that have a specific role in a tenant domain
+      parameters:
+      - description: Role name
+        in: path
+        name: role
+        required: true
+        type: string
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users with the role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get users with role
+      tags:
+      - RBAC
+  /casbin/role/policy:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a permission policy from a role in a specific tenant domain
+      parameters:
+      - description: Role policy removal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RemoveRolePolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role policy removed successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Role policy not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove role policy
+      tags:
+      - RBAC
+    post:
+      consumes:
+      - application/json
+      description: Add a permission policy to a role in a specific tenant domain
+      parameters:
+      - description: Role policy data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddRolePolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role policy added successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "409":
+          description: Role policy already exists
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add role policy
+      tags:
+      - RBAC
+  /casbin/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all role assignments in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All roles
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - RBAC
+  /casbin/roles/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Clear all role assignments from the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All roles cleared successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Clear all roles
+      tags:
+      - RBAC
+  /casbin/roles/enhanced:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles with enhanced information including readable names
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Enhanced roles with readable names
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.EnhancedRolesResponse'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get enhanced roles
+      tags:
+      - RBAC
+  /casbin/sidebar/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get sidebar navigation permissions for the current authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sidebar permissions
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get sidebar permissions
+      tags:
+      - RBAC
+  /casbin/tenants:
+    get:
+      consumes:
+      - application/json
+      description: Get all tenants for dropdown selection in UI
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All tenants list
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all tenants
+      tags:
+      - RBAC
+  /casbin/user/{user_id}/tenant/{tenant_id}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles for a specific user in a tenant domain
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User roles
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user roles
+      tags:
+      - RBAC
+  /casbin/user/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all permissions and roles for the current authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User permissions and roles
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserPermissionsResponse'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user permissions
+      tags:
+      - RBAC
+  /casbin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users for dropdown selection in UI
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All users list
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - RBAC
+  /client-access/check-update:
+    post:
+      consumes:
+      - application/json
+      description: Check for application updates using client access token (no JWT
+        required)
+      parameters:
+      - description: Client access token
+        in: header
+        name: access-token
+        required: true
+        type: string
+      - description: Update check request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CheckUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update check completed
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.CheckUpdateResponse'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Access token disabled or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Check for updates
+      tags:
+      - Client Access
+  /client-access/download/{id}:
+    get:
+      description: Download release file using client access token (no JWT required)
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Client access token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: S3 bucket name
+        in: query
+        name: bucket
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File download successful
+          schema:
+            type: file
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Access token disabled or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Release not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Download release file
+      tags:
+      - Client Access
+  /client-access/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload artifact files for GoReleaser publish process using client
+        access token (no JWT required). Project and package are determined from the
+        access token.
+      parameters:
+      - description: Client access token for GoReleaser
+        in: header
+        name: x-access-token
+        required: true
+        type: string
+      - description: Artifact file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Version tag (required)
+        in: formData
+        name: version
+        required: true
+        type: string
+      - description: Artifact name
+        in: formData
+        name: artifact
+        type: string
+      - description: Operating system
+        in: formData
+        name: os
+        type: string
+      - description: Architecture
+        in: formData
+        name: arch
+        type: string
+      - description: Release changelog
+        in: formData
+        name: changelog
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Upload successful
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Access token disabled or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Upload artifact for GoReleaser
+      tags:
+      - Client Access
+  /dashboard/activities:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve recent activities for the current user and tenant
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: 'Number of activities to retrieve (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Recent activities retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.RecentActivity'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get recent activities
+      tags:
+      - Dashboard
+  /dashboard/stats:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve dashboard statistics for the current tenant
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.DashboardStats'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get dashboard statistics
+      tags:
+      - Dashboard
+  /file:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a file from the specified S3 bucket by object name
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object name to delete
+        in: query
+        name: object
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad request - object name is required
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete file
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get list of files from specified bucket with optional prefix filter
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object prefix filter
+        in: query
+        name: prefix
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File list retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.FileInfo'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get file list
+      tags:
+      - Files
+  /file/info/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific object in the S3 bucket
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object name to get info for
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Object information retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FileInfo'
+              type: object
+        "400":
+          description: Bad request - object name is required
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get object information
+      tags:
+      - Files
+  /file/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to the specified S3 bucket with optional prefix
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object prefix for organization
+        in: query
+        name: prefix
+        type: string
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UploadResult'
+              type: object
+        "400":
+          description: Bad request - failed to get file
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error - failed to upload file
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload file
+      tags:
+      - Files
+  /files/download/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Download a file from the specified S3 bucket by object name
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object name to download
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File downloaded successfully
+          schema:
+            type: file
+        "400":
+          description: Bad request - object name is required
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Download file
+      tags:
+      - Files
+  /files/stream:
+    get:
+      consumes:
+      - application/json
+      description: Stream download a file from the specified S3 bucket with progress
+        support
+      parameters:
+      - description: S3 bucket name (defaults to configured bucket)
+        in: query
+        name: bucket
+        type: string
+      - description: Object name to download
+        in: query
+        name: object
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File streamed successfully
+          schema:
+            type: file
+        "400":
+          description: Bad request - object name is required
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Download file with progress
+      tags:
+      - Files
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LoginResponse'
+              type: object
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: User login
+      tags:
+      - Authentication
+  /packages:
+    get:
+      consumes:
+      - application/json
+      description: Get all packages with pagination and optional project filtering
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: pageSize
+        type: integer
+      - description: Filter by project ID
+        in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved packages
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Package'
+                  type: array
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all packages
+      tags:
+      - Packages
+    post:
+      consumes:
+      - application/json
+      description: Create a new package with provided details
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Package details
+        in: body
+        name: package
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Package'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created package
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Package'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new package
+      tags:
+      - Packages
+  /packages/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific package by its ID
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Package ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Package deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid package ID
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Package not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete package by ID
+      tags:
+      - Packages
+    get:
+      consumes:
+      - application/json
+      description: Get a specific package by its ID
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Package ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved package
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Package'
+              type: object
+        "400":
+          description: Invalid package ID
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Package not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get package by ID
+      tags:
+      - Packages
+    put:
+      consumes:
+      - application/json
+      description: Update a specific package with new details
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Package ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated package details
+        in: body
+        name: package
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Package'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Package updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid request body or package ID
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Package not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update package by ID
+      tags:
+      - Packages
+  /packages/{package_id}/releases:
+    get:
+      consumes:
+      - application/json
+      description: Get all releases for a specific package with pagination
+      parameters:
+      - description: Package ID
+        in: path
+        name: package_id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved releases
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - package_id is required
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Releases not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get package releases
+      tags:
+      - Releases
+  /packages/{package_id}/releases/latest:
+    get:
+      consumes:
+      - application/json
+      description: Get the latest release for a specific package
+      parameters:
+      - description: Package ID
+        in: path
+        name: package_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved latest release
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Latest release not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get latest release
+      tags:
+      - Releases
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Get profile information for the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Profile
+    put:
+      consumes:
+      - application/json
+      description: Update profile information for the currently authenticated user
+      parameters:
+      - description: Profile update data
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update current user profile
+      tags:
+      - Profile
+  /profile/password:
+    put:
+      consumes:
+      - application/json
+      description: Update password for the currently authenticated user
+      parameters:
+      - description: Password update data
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PasswordUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data or incorrect current password
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update current user password
+      tags:
+      - Profile
+  /projects:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all projects for the current tenant
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Projects retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Project'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all projects
+      tags:
+      - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create a new project for the current tenant
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Project'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Project created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Project'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new project
+      tags:
+      - Projects
+  /projects/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete project
+      tags:
+      - Projects
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Project'
+              type: object
+        "404":
+          description: Project not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get project by ID
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      description: Update a specific project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Project'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update project
+      tags:
+      - Projects
+  /projects/{id}/members:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all members associated with a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project members retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items: {}
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get project members
+      tags:
+      - Projects
+    post:
+      consumes:
+      - application/json
+      description: Add a user as a member to a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Member assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Member added successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add project member
+      tags:
+      - Projects
+  /projects/{id}/members/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user from a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Member removed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove project member
+      tags:
+      - Projects
+  /projects/{id}/packages:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all packages associated with a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project packages retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items: {}
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get project packages
+      tags:
+      - Projects
+  /projects/{projectId}/packages:
+    get:
+      consumes:
+      - application/json
+      description: Get all packages belonging to a specific project
+      parameters:
+      - description: Tenant ID
+        in: header
+        name: x-tenant-id
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project packages
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Package'
+                  type: array
+              type: object
+        "400":
+          description: Invalid project ID
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Project not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all packages for a project
+      tags:
+      - Packages
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access and refresh tokens using a valid refresh token
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully refreshed tokens
+          schema:
+            $ref: '#/definitions/domain.RefreshTokenResponse'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized - invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Refresh access token
+      tags:
+      - Authentication
+  /releases/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific release by ID
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted release
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Delete release failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete release
+      tags:
+      - Releases
+    get:
+      consumes:
+      - application/json
+      description: Get a specific release by ID
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved release
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Release not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific release
+      tags:
+      - Releases
+  /releases/{id}/download:
+    get:
+      consumes:
+      - application/json
+      description: Download the file associated with a specific release
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Successfully downloaded release file
+          schema:
+            type: file
+        "404":
+          description: Release not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Download failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Download release file
+      tags:
+      - Releases
+  /releases/{id}/share:
+    post:
+      consumes:
+      - application/json
+      description: Create a shareable link for a specific release
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Share link request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateShareRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created share link
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Create share failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create share link
+      tags:
+      - Releases
+  /releases/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new release file with metadata
+      parameters:
+      - description: Release file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Package ID
+        in: formData
+        name: package_id
+        required: true
+        type: string
+      - description: Release name
+        in: formData
+        name: name
+        type: string
+      - description: Version code
+        in: formData
+        name: version_code
+        required: true
+        type: string
+      - description: Version name
+        in: formData
+        name: version_name
+        type: string
+      - description: Release type
+        in: formData
+        name: type
+        type: string
+      - description: Changelog
+        in: formData
+        name: changelog
+        type: string
+      - description: Tag name
+        in: formData
+        name: tag_name
+        type: string
+      - description: Is latest version
+        in: formData
+        name: is_latest
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully uploaded release
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - missing required fields or file upload failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload release
+      tags:
+      - Releases
+  /settings/storage:
+    get:
+      consumes:
+      - application/json
+      description: Get current storage configuration settings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved storage configuration
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get storage configuration
+      tags:
+      - Settings
+    put:
+      consumes:
+      - application/json
+      description: Update storage configuration settings
+      parameters:
+      - description: Storage configuration
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/controller.StorageConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated storage configuration
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update storage configuration
+      tags:
+      - Settings
+  /settings/storage/test:
+    post:
+      consumes:
+      - application/json
+      description: Test the current storage configuration connectivity
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Storage connection test successful
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Unknown storage type or test failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Test storage configuration
+      tags:
+      - Settings
+  /share/{code}/download:
+    get:
+      consumes:
+      - application/json
+      description: Download a release file using a share code without authentication
+      parameters:
+      - description: Share code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Successfully downloaded shared release file
+          schema:
+            type: file
+        "404":
+          description: Share not found or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Download failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Download shared release
+      tags:
+      - Sharing
+  /tenant/{id}/user/{userId}/role:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user's role in a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Role information to remove
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully removed user tenant role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove user tenant role
+      tags:
+      - Tenant Users
+    get:
+      consumes:
+      - application/json
+      description: Get a user's role in a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user tenant role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user tenant role
+      tags:
+      - Tenant Users
+  /tenant/{id}/user/role:
+    post:
+      consumes:
+      - application/json
+      description: Set a user's role in a specific tenant through Casbin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID and role information
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully set user tenant role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters or role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Set user tenant role
+      tags:
+      - Tenant Users
+  /tenant/{id}/users/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all users in a tenant with their role information from Casbin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenant users with roles
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get tenant users with roles
+      tags:
+      - Tenant Users
+  /tenants:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tenants
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenants
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all tenants
+      tags:
+      - Tenants
+    post:
+      consumes:
+      - application/json
+      description: Create a new tenant
+      parameters:
+      - description: Tenant information
+        in: body
+        name: tenant
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Tenant'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create tenant
+      tags:
+      - Tenants
+  /tenants/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific tenant by ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete tenant
+      tags:
+      - Tenants
+    get:
+      consumes:
+      - application/json
+      description: Get a specific tenant by ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Tenant not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific tenant
+      tags:
+      - Tenants
+    put:
+      consumes:
+      - application/json
+      description: Update a specific tenant by ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated tenant information
+        in: body
+        name: tenant
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Tenant'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update tenant
+      tags:
+      - Tenants
+  /tenants/{id}/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users belonging to a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenant users
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get tenant users
+      tags:
+      - Tenants
+    post:
+      consumes:
+      - application/json
+      description: Add a user to a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added user to tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add user to tenant
+      tags:
+      - Tenants
+  /tenants/{id}/users/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user from a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully removed user from tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove user from tenant
+      tags:
+      - Tenants
+  /tenants/{id}/users/{userId}/role:
+    get:
+      consumes:
+      - application/json
+      description: Get the role of a specific user in a tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenant user role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: User role not found in tenant
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get tenant user role
+      tags:
+      - Tenants
+    put:
+      consumes:
+      - application/json
+      description: Update the role of a user in a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Role update information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateTenantUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated tenant user role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update tenant user role
+      tags:
+      - Tenants
+  /tenants/{id}/users/role:
+    post:
+      consumes:
+      - application/json
+      description: Add a user to a tenant and assign a specific role
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User and role information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.TenantUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added user to tenant with role
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Unauthorized - user information not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Add user to tenant with role
+      tags:
+      - Tenants
+  /tenants/{id}/users/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all users in a tenant with their role information
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tenant users with roles
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get tenant users with roles
+      tags:
+      - Tenants
+  /upgrade/check:
+    post:
+      consumes:
+      - application/json
+      description: Check if there are available updates for the client
+      parameters:
+      - description: Update check request
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CheckUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully checked for updates
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Check for updates
+      tags:
+      - Upgrades
+  /upgrade/project/{projectId}/targets:
+    get:
+      consumes:
+      - application/json
+      description: Get all upgrade targets for a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project upgrade targets
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get project upgrade targets
+      tags:
+      - Upgrades
+  /upgrade/target:
+    post:
+      consumes:
+      - application/json
+      description: Create a new upgrade target
+      parameters:
+      - description: Upgrade target information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateUpgradeTargetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created upgrade target
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create upgrade target
+      tags:
+      - Upgrades
+  /upgrade/target/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific upgrade target by ID
+      parameters:
+      - description: Upgrade target ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted upgrade target
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete upgrade target
+      tags:
+      - Upgrades
+    get:
+      consumes:
+      - application/json
+      description: Get a specific upgrade target by ID
+      parameters:
+      - description: Upgrade target ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved upgrade target
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Upgrade target not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific upgrade target
+      tags:
+      - Upgrades
+    put:
+      consumes:
+      - application/json
+      description: Update a specific upgrade target by ID
+      parameters:
+      - description: Upgrade target ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Upgrade target information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateUpgradeTargetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated upgrade target
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update upgrade target
+      tags:
+      - Upgrades
+  /upgrade/targets:
+    get:
+      consumes:
+      - application/json
+      description: Get all upgrade targets with optional filtering
+      parameters:
+      - description: Project ID
+        in: query
+        name: project_id
+        type: string
+      - description: Package ID
+        in: query
+        name: package_id
+        type: string
+      - description: Is active
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved upgrade targets
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get upgrade targets
+      tags:
+      - Upgrades
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.User'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user (admin only)
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new user
+      tags:
+      - Users
+  /user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific user by ID (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update a specific user by ID (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+  /user/{id}/groups:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all groups associated with a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User groups retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items: {}
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user groups
+      tags:
+      - Users
+  /user/{id}/projects:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all projects associated with a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User projects retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Project'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user projects
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Assign a user to a specific project
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User assigned to project successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Assign user to project
+      tags:
+      - Users
+  /user/{id}/projects/{projectId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user from a specific project
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User unassigned from project successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Unassign user from project
+      tags:
+      - Users
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the profile information of the currently authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of the currently authenticated user
+      parameters:
+      - description: Profile update data
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Update current user profile
+      tags:
+      - Users
+  /users/{userId}/tenants:
+    get:
+      consumes:
+      - application/json
+      description: Get all tenants that a user belongs to with role information
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user tenants
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user tenants
+      tags:
+      - Tenants
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
