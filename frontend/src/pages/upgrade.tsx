@@ -94,8 +94,9 @@ export default function UpgradePage() {
             resetForm();
             toast.success('升级目标创建成功');
         },
-        onError: (error: any) => {
-            toast.error(`创建失败: ${error.response?.data?.message || error.message}`);
+        onError: (err) => {
+            console.error(err)
+            toast.error("创建失败")
         }
     });
 
@@ -110,8 +111,9 @@ export default function UpgradePage() {
             resetEditForm();
             toast.success('升级目标更新成功');
         },
-        onError: (error: any) => {
-            toast.error(`更新失败: ${error.response?.data?.message || error.message}`);
+        onError: (error) => {
+            console.error(error)
+            toast.error(`更新失败: ${error}`);
         }
     });
 
@@ -122,8 +124,9 @@ export default function UpgradePage() {
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             toast.success('升级目标删除成功');
         },
-        onError: (error: any) => {
-            toast.error(`删除失败: ${error.response?.data?.message || error.message}`);
+        onError: (error) => {
+            toast.error(`删除失败: ${error}`);
+            console.error(error)
         }
     });
 

@@ -41,6 +41,9 @@ apiClient.interceptors.response.use(
     },
     (error: any) => {
         console.error('API Error:', error.response?.status, error.config?.url, error.message);
+        if (error.response?.data) {
+            console.error('API Error Response:', error.response.data);
+        }
 
         // 处理401未授权错误
         if (error.response && error.response.status === 401) {

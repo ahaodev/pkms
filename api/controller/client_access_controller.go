@@ -89,7 +89,7 @@ func (cac *ClientAccessController) CheckUpdate(c *gin.Context) {
 // @Router       /client-access/download/{id} [get]
 func (cac *ClientAccessController) Download(c *gin.Context) {
 	// 从查询参数获取 access_token
-	accessToken := c.Query("access_token")
+	accessToken := c.GetHeader(constants.AccessToken)
 	if accessToken == "" {
 		c.JSON(http.StatusUnauthorized, domain.RespError("access_token is required"))
 		return
