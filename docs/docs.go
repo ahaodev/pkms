@@ -1550,6 +1550,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/client-access/Release": {
+            "post": {
+                "description": "Upload artifact files for GoReleaser publish process using client access token (no JWT required). Project and package are determined from the access token.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client Access"
+                ],
+                "summary": "Upload artifact for GoReleaser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client access token for GoReleaser",
+                        "name": "x-access-token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Artifact file to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version tag (required)",
+                        "name": "version",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Artifact name",
+                        "name": "artifact",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Operating system",
+                        "name": "os",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Architecture",
+                        "name": "arch",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release changelog",
+                        "name": "changelog",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Upload successful",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid access token",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Access token disabled or expired",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/client-access/check-update": {
             "post": {
                 "description": "Check for application updates using client access token (no JWT required)",
@@ -1686,100 +1780,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Release not found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/client-access/upload": {
-            "post": {
-                "description": "Upload artifact files for GoReleaser publish process using client access token (no JWT required). Project and package are determined from the access token.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Client Access"
-                ],
-                "summary": "Upload artifact for GoReleaser",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Client access token for GoReleaser",
-                        "name": "x-access-token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Artifact file to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Version tag (required)",
-                        "name": "version",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Artifact name",
-                        "name": "artifact",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Operating system",
-                        "name": "os",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Architecture",
-                        "name": "arch",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release changelog",
-                        "name": "changelog",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Upload successful",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid access token",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Access token disabled or expired",
                         "schema": {
                             "$ref": "#/definitions/domain.Response"
                         }

@@ -172,7 +172,7 @@ func (cac *ClientAccessController) Download(c *gin.Context) {
 // @Failure      401  {object}  domain.Response  "Invalid access token"
 // @Failure      403  {object}  domain.Response  "Access token disabled or expired"
 // @Failure      500  {object}  domain.Response  "Internal server error"
-// @Router       /client-access/upload [post]
+// @Router       /client-access/release [post]
 func (cac *ClientAccessController) Release(c *gin.Context) {
 	// 从自定义头获取 x-access-token
 	accessToken := c.GetHeader("x-access-token")
