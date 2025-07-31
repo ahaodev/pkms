@@ -1620,6 +1620,71 @@ paths:
       summary: Download release file
       tags:
       - Client Access
+  /client-access/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload artifact files for GoReleaser publish process using client
+        access token (no JWT required). Project and package are determined from the
+        access token.
+      parameters:
+      - description: Client access token for GoReleaser
+        in: header
+        name: x-access-token
+        required: true
+        type: string
+      - description: Artifact file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Version tag (required)
+        in: formData
+        name: version
+        required: true
+        type: string
+      - description: Artifact name
+        in: formData
+        name: artifact
+        type: string
+      - description: Operating system
+        in: formData
+        name: os
+        type: string
+      - description: Architecture
+        in: formData
+        name: arch
+        type: string
+      - description: Release changelog
+        in: formData
+        name: changelog
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Upload successful
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Access token disabled or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Upload artifact for GoReleaser
+      tags:
+      - Client Access
   /dashboard/activities:
     get:
       consumes:

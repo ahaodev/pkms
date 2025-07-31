@@ -37,4 +37,5 @@ func NewPublicClientAccessRouter(env *bootstrap.Env, timeout time.Duration, db *
 	// Public client operations (无需JWT认证，使用access_token验证)
 	group.POST("/check", cac.CheckUpdate)    // POST /client-access/check
 	group.GET("/download/:id", cac.Download) // GET /client-access/download/:id?access_token=xxx
+	group.POST("/release", cac.Release)      // POST /client-access/upload (GoReleaser upload)
 }

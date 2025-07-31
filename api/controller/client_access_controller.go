@@ -153,3 +153,136 @@ func (cac *ClientAccessController) Download(c *gin.Context) {
 		return
 	}
 }
+
+// Release godoc
+// @Summary      Upload artifact for GoReleaser
+// @Description  Upload artifact files for GoReleaser publish process using client access token (no JWT required). Project and package are determined from the access token.
+// @Tags         Client Access
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        x-access-token  header    string  true   "Client access token for GoReleaser"
+// @Param        file           formData  file    true   "Artifact file to upload"
+// @Param        version        formData  string  true   "Version tag (required)"
+// @Param        artifact       formData  string  false  "Artifact name"
+// @Param        os             formData  string  false  "Operating system"
+// @Param        arch           formData  string  false  "Architecture"
+// @Param        changelog      formData  string  false  "Release changelog"
+// @Success      201  {object}  domain.Response  "Upload successful"
+// @Failure      400  {object}  domain.Response  "Invalid request data"
+// @Failure      401  {object}  domain.Response  "Invalid access token"
+// @Failure      403  {object}  domain.Response  "Access token disabled or expired"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /client-access/upload [post]
+func (cac *ClientAccessController) Release(c *gin.Context) {
+	// 从自定义头获取 x-access-token
+	accessToken := c.GetHeader("x-access-token")
+	if accessToken == "" {
+		c.JSON(http.StatusUnauthorized, domain.RespError("x-access-token is required"))
+		return
+	}
+
+	// 验证 access_token
+	clientAccess, err := cac.ClientAccessUsecase.ValidateAccessToken(c, accessToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, domain.RespError("无效的访问令牌"))
+		return
+	}
+
+	// 检查凭证是否激活
+	if !clientAccess.IsActive {
+		c.JSON(http.StatusForbidden, domain.RespError("客户端接入凭证已被禁用"))
+		return
+	}
+
+	// 检查是否过期
+	if clientAccess.ExpiresAt != nil && clientAccess.ExpiresAt.Before(time.Now()) {
+		c.JSON(http.StatusForbidden, domain.RespError("客户端接入凭证已过期"))
+		return
+	}
+
+	// 获取上传的文件
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("无法获取上传文件: "+err.Error()))
+		return
+	}
+	defer file.Close()
+
+	// 获取GoReleaser相关参数
+	version := c.PostForm("version")
+	artifact := c.PostForm("artifact")
+	osParam := c.PostForm("os")
+	arch := c.PostForm("arch")
+	changelog := c.PostForm("changelog")
+
+	// 参数验证
+	if version == "" {
+		c.JSON(http.StatusBadRequest, domain.RespError("version is required"))
+		return
+	}
+
+	// 从clientAccess中获取project_id和package_id
+	projectID := clientAccess.ProjectID
+	packageID := clientAccess.PackageID
+
+	// 构建文件路径，支持GoReleaser的文件组织方式
+	filePath := "releases/" + packageID + "/" + version + "/" + header.Filename
+
+	// 准备上传请求
+	uploadReq := &domain.UploadRequest{
+		Bucket:      cac.Env.S3Bucket,
+		ObjectName:  filePath,
+		Reader:      file,
+		Size:        header.Size,
+		ContentType: "application/octet-stream",
+	}
+
+	// 调用文件上传业务逻辑
+	uploadResp, err := cac.FileUsecase.Upload(c, uploadReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("文件上传失败: "+err.Error()))
+		return
+	}
+
+	// 创建Release记录
+	release := &domain.Release{
+		PackageID:     packageID,
+		VersionCode:   version,
+		VersionName:   version,
+		TagName:       version, // GoReleaser通常使用tag作为版本
+		ChangeLog:     changelog,
+		FilePath:      uploadResp.ObjectName,
+		FileName:      header.Filename,
+		FileSize:      header.Size,
+		DownloadCount: 0,
+		CreatedBy:     clientAccess.CreatedBy, // 使用客户端接入凭证的创建者
+		CreatedAt:     time.Now(),
+	}
+
+	// 保存Release到数据库
+	if err := cac.ReleaseUsecase.CreateRelease(c, release); err != nil {
+		// 如果数据库保存失败，尝试删除已上传的文件
+		_ = cac.FileUsecase.Delete(c, cac.Env.S3Bucket, uploadResp.ObjectName)
+		c.JSON(http.StatusInternalServerError, domain.RespError("创建发布记录失败: "+err.Error()))
+		return
+	}
+
+	// 构建响应数据
+	response := map[string]interface{}{
+		"release_id":  release.ID,
+		"file_path":   uploadResp.ObjectName,
+		"file_size":   header.Size,
+		"filename":    header.Filename,
+		"project_id":  projectID,
+		"version":     version,
+		"package_id":  packageID,
+		"artifact":    artifact,
+		"os":          osParam,
+		"arch":        arch,
+		"changelog":   changelog,
+		"upload_time": time.Now(),
+		"created_by":  release.CreatedBy,
+	}
+
+	c.JSON(http.StatusCreated, domain.RespSuccess(response))
+}
