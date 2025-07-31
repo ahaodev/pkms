@@ -1,20 +1,13 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {formatFileSize} from '@/lib/utils';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {Card, CardContent} from '@/components/ui/card';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
-import {Badge} from '@/components/ui/badge';
-import {Button} from '@/components/ui/button';
-import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeHeader} from '@/components/upgrade';
+import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeHeader, UpgradeTargetsTable} from '@/components/upgrade';
 import {ProjectPackageFilters} from '@/components/shared';
-import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} from 'lucide-react';
 import {toast} from 'sonner';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {
     createUpgradeTarget,
     CreateUpgradeTargetRequest,
-    deleteUpgradeTarget,
     getUpgradeTargets,
     updateUpgradeTarget,
     UpdateUpgradeTargetRequest,
@@ -117,19 +110,6 @@ export default function UpgradePage() {
         }
     });
 
-    // Delete upgrade target mutation
-    const deleteUpgradeTargetMutation = useMutation({
-        mutationFn: deleteUpgradeTarget,
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
-            toast.success('升级目标删除成功');
-        },
-        onError: (error) => {
-            toast.error(`删除失败: ${error}`);
-            console.error(error)
-        }
-    });
-
     const resetForm = useCallback(() => {
         setFormData({
             project_id: '',
@@ -152,8 +132,7 @@ export default function UpgradePage() {
         setSelectedTarget(target);
         setEditFormData({
             name: target.name,
-            description: target.description,
-            is_active: target.is_active
+            description: target.description
         });
         setIsEditDialogOpen(true);
     }, []);
@@ -165,18 +144,6 @@ export default function UpgradePage() {
             data: editFormData
         });
     }, [selectedTarget, editFormData, updateUpgradeTargetMutation]);
-
-    const handleDelete = useCallback((id: string) => {
-        if (confirm('确定要删除此升级目标吗？')) {
-            deleteUpgradeTargetMutation.mutate(id);
-        }
-    }, [deleteUpgradeTargetMutation]);
-
-    // formatFileSize 函数已移至 lib/utils.ts 并导入
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString('zh-CN');
-    };
 
     // Statistics - use filtered data
     const totalTargets = filteredUpgradeTargets.length;
@@ -198,133 +165,11 @@ export default function UpgradePage() {
             />
 
             {/* Upgrade Targets Table */}
-            <Card>
-                <CardContent className="p-0">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="text-muted-foreground">加载中...</div>
-                        </div>
-                    ) : filteredUpgradeTargets.length === 0 ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="text-center space-y-2">
-                                <div className="text-muted-foreground">
-                                    {upgradeTargets.length === 0 ? '暂无升级目标' : '没有符合筛选条件的升级目标'}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {upgradeTargets.length === 0 
-                                        ? '点击"创建升级目标"开始配置软件包升级'
-                                        : '尝试调整筛选条件或创建新的升级目标'
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>项目</TableHead>
-                                    <TableHead>软件包</TableHead>
-                                    <TableHead>升级目标</TableHead>
-                                    <TableHead>目标版本</TableHead>
-                                    <TableHead>状态</TableHead>
-                                    <TableHead>文件大小</TableHead>
-                                    <TableHead>创建时间</TableHead>
-                                    <TableHead className="text-right">操作</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredUpgradeTargets.map((target) => (
-                                    <TableRow key={target.id}>
-                                        <TableCell>
-                                            <div className="flex items-center space-x-2">
-                                                <FolderOpen className="h-4 w-4 text-muted-foreground"/>
-                                                <span className="font-medium">
-                                                    {target.project_name || target.project_id}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="space-y-1">
-                                                <div className="flex items-center space-x-2">
-                                                    <PackageIcon className="h-4 w-4 text-muted-foreground"/>
-                                                    <span className="font-medium">
-                                                        {target.package_name || target.package_id}
-                                                    </span>
-                                                </div>
-                                                {target.package_type && (
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {target.package_type}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="space-y-1">
-                                                <div className="font-medium">{target.name}</div>
-                                                {target.description && (
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {target.description}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="space-y-1">
-                                                <div className="font-medium">
-                                                    {target.version || 'N/A'
-                                                    }
-                                                </div>
-                                                {target.file_name && (
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {target.file_name}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={target.is_active ? "default" : "secondary"}
-                                                className="flex items-center space-x-1 w-fit"
-                                            >
-                                                {target.is_active ? (
-                                                    <CheckCircle className="h-3 w-3"/>
-                                                ) : (
-                                                    <XCircle className="h-3 w-3"/>
-                                                )}
-                                                <span>{target.is_active ? '激活' : '未激活'}</span>
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {target.file_size ? formatFileSize(target.file_size) : 'N/A'}
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatDate(target.created_at)}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end space-x-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(target)}
-                                                >
-                                                    <Edit className="h-4 w-4"/>
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(target.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4"/>
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    )}
-                </CardContent>
-            </Card>
+            <UpgradeTargetsTable
+                upgradeTargets={filteredUpgradeTargets}
+                isLoading={isLoading}
+                onEdit={handleEdit}
+            />
 
             {/* Create Upgrade Target Dialog */}
             <CreateUpgradeTargetDialog

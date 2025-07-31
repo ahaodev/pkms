@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
-import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
 import {UpdateUpgradeTargetRequest} from '@/lib/api/upgrade';
 
@@ -36,7 +35,7 @@ export function EditUpgradeTargetDialog({
                 <DialogHeader>
                     <DialogTitle>编辑升级目标</DialogTitle>
                     <DialogDescription>
-                        修改升级目标的名称、描述和状态
+                        修改升级目标的名称和描述信息
                     </DialogDescription>
                 </DialogHeader>
 
@@ -64,15 +63,6 @@ export function EditUpgradeTargetDialog({
                         />
                     </div>
 
-                    {/* Is Active */}
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="is_active"
-                            checked={formData.is_active ?? true}
-                            onCheckedChange={(checked) => setFormData(prev => ({...prev, is_active: checked}))}
-                        />
-                        <Label htmlFor="is_active">激活状态</Label>
-                    </div>
                 </div>
 
                 <DialogFooter>

@@ -1,0 +1,321 @@
+[33mcommit e1c84fc95f4fe71efc3b3ff412d206beb78fa191[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrbac-domains[m[33m)[m
+Author: ahao <52927295@qq.com>
+Date:   Thu Jul 31 18:30:57 2025 +0800
+
+    upgrade header add
+
+[33mcommit 376acc494532d3ca922d793c631b486312d5af63[m[33m ([m[1;31morigin/rbac-domains[m[33m)[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 16:49:53 2025 +0800
+
+    添加swagger 文档
+
+[33mcommit e0864eb88f0f4fb0ce737e85a3ebfe6ac7f3a87c[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 14:24:58 2025 +0800
+
+    个人密码更改
+
+[33mcommit dfdc79bbdb222adcc9e97b19a560dceaf28be35b[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 11:07:25 2025 +0800
+
+    优化权限
+
+[33mcommit 22286a1fdae1d247fdc7159ecb1e385cfdeebf5b[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 10:07:31 2025 +0800
+
+    删除冗余的活动
+
+[33mcommit bda7fc50e1ae77d75776e5a9c82ac9be209dae57[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 09:50:13 2025 +0800
+
+    删除冗余的活动
+
+[33mcommit 0c19345435ab862cff9989bbec3416db27961455[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 09:48:08 2025 +0800
+
+    删除头像
+
+[33mcommit 90b7ef990d24b33bd07551760acab2bbc988f43a[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 09:43:50 2025 +0800
+
+    权限完善
+
+[33mcommit 532da02d78f1d117564dae142061403bd45d19da[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 00:54:57 2025 +0800
+
+    设置
+
+[33mcommit c7c0f9c67d2ace911df720083e867428f991f54a[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 00:41:05 2025 +0800
+
+    修复权限
+
+[33mcommit 9606cc14d99c0c10040e0c2e2f5aa669be2bc1d8[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 00:33:12 2025 +0800
+
+    修复权限
+
+[33mcommit 33ebc268e84a80c86100efe12041a9af5bf1f8ff[m
+Author: ahao <52927295@qq.com>
+Date:   Wed Jul 30 00:23:52 2025 +0800
+
+    修复权限
+
+[33mcommit 8d02f8c0ec1dab9e15bcd09f0e856b5a662b08c6[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 23:48:01 2025 +0800
+
+    修复权限
+
+[33mcommit bf6904e56f3e3b175597c1dd96ea7ee4e65e1bd4[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 23:38:05 2025 +0800
+
+    优化格式
+
+[33mcommit 47a71102b4ab2db3d309a12d4a029c31821df677[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 23:32:16 2025 +0800
+
+    优化角色判断
+
+[33mcommit 1d3df0c8bf5c55942ce4d854b68a155bcc04d94e[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 23:31:19 2025 +0800
+
+    完善租户角色
+
+[33mcommit 3efe7d224a0b99ef7defd6572a3f438fd854b657[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 11:50:40 2025 +0800
+
+    添加图标
+
+[33mcommit bfbba28ebb48102da714b5965cac16530216e7b7[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 10:45:43 2025 +0800
+
+    客户端接入完善
+
+[33mcommit 235b8bc268e7916837afca6d1a5866b63e5da7cf[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 00:20:09 2025 +0800
+
+    下载
+
+[33mcommit 1e3a40c2e030f1e0276e98349d585422594aa274[m
+Author: ahao <52927295@qq.com>
+Date:   Tue Jul 29 00:07:13 2025 +0800
+
+    租户菜单调整
+
+[33mcommit dacd9b912f276286b9771e4b7ef10a540e88d50d[m
+Merge: ad14ef9 0424af6
+Author: ahao <52927295@qq.com>
+Date:   Mon Jul 28 22:16:33 2025 +0800
+
+    Merge remote-tracking branch 'origin/Single' into rbac-domains
+
+[33mcommit 0424af65775860aacf1712e27051e57b12e4a3fb[m[33m ([m[1;31morigin/Single[m[33m, [m[1;32mSingle[m[33m)[m
+Author: ahao <52927295@qq.com>
+Date:   Mon Jul 28 17:39:21 2025 +0800
+
+    检查
+
+[33mcommit 161a150ec04f16cb0115dcad2e02d7c0ceafdba8[m
+Author: ahao <52927295@qq.com>
+Date:   Mon Jul 28 16:43:38 2025 +0800
+
+    接入码
+
+[33mcommit ffd97563bfb7d693964b684681588dd5308b6a78[m
+Author: ahao <52927295@qq.com>
+Date:   Mon Jul 28 16:33:22 2025 +0800
+
+    精简设置
+
+[33mcommit ad14ef9d59568680ac301ca633972437ac51f34b[m
+Author: ahao <52927295@qq.com>
+Date:   Mon Jul 28 16:17:51 2025 +0800
+
+    默认权限
+
+[33mcommit ec5f86f4932924112248df64865cdd1937a0ae68[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 11:10:11 2025 +0800
+
+    build only
+
+[33mcommit 54fb3a5c60de31bb67eda51e2f449a0bba89f8ea[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 11:07:14 2025 +0800
+
+    分步骤
+
+[33mcommit 543364c8c18aca67190a934297812f32816cc516[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 11:02:35 2025 +0800
+
+    清理过往的镜像
+
+[33mcommit 95f5c7d646c8bda72792d08f201d3f5c23404441[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 10:57:10 2025 +0800
+
+    先清理镜像
+
+[33mcommit d0bb98d6a6c8ecbd1c9304e7bc43b4c0472300a6[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 10:16:50 2025 +0800
+
+    0.0.1
+
+[33mcommit df9e46edb4d148713c804fb3160c118d5d7a394b[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 10:15:55 2025 +0800
+
+    直接运行
+
+[33mcommit 49eca30529b63bbb353e9f024600c7cdf3319505[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 10:07:46 2025 +0800
+
+    cicd
+
+[33mcommit f736dfc65c01dbf66f801fac7e9debbe6b9a8c1b[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 10:03:52 2025 +0800
+
+    single
+
+[33mcommit 1100733c758c6b4f31b850db67aa20a64b366a22[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: hao88 <52927295@qq.com>
+Date:   Mon Jul 28 00:53:16 2025 +0800
+
+    用户名称在前
+
+[33mcommit 023da895311cad0ac758d05418397105fcd3e838[m
+Author: hao88 <52927295@qq.com>
+Date:   Sun Jul 27 23:36:59 2025 +0800
+
+    继续完善
+
+[33mcommit ccdcf7ff798f4978b2e9129e8dfe22aa618fec79[m
+Author: hao88 <52927295@qq.com>
+Date:   Sun Jul 27 23:18:54 2025 +0800
+
+    user pwd
+
+[33mcommit f5c6d7891416abd888749e2d63bae42aafebb6f3[m
+Author: hao88 <52927295@qq.com>
+Date:   Sun Jul 27 22:05:05 2025 +0800
+
+    user pwd
+
+[33mcommit d947b507c25f1c4f0bbdf3eb58fc560e1b7d8c1d[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 20:36:52 2025 +0800
+
+    db
+
+[33mcommit 48d2c1767eda1ba0bdcf32ce5e8dc095411b9e71[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 20:36:19 2025 +0800
+
+    claude config
+
+[33mcommit 93c346c2069edb05cd884561863607505f2d0b76[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 20:19:09 2025 +0800
+
+    claude config
+
+[33mcommit 0341e5e326c1554e8cca2fc795d6987525f29a8b[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 20:18:31 2025 +0800
+
+    优化接入管理
+
+[33mcommit a6610cdb8e2357685dd4929ce10721efcbc287b9[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 19:54:25 2025 +0800
+
+    优化接入管理
+
+[33mcommit 7e7aee3d15a3ef9b96c90f0435a033f19323734e[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 19:54:14 2025 +0800
+
+    优化接入管理
+
+[33mcommit 99d6bc75fdf7554f611a07a43fb8347a439dc0f5[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 19:53:55 2025 +0800
+
+    优化接入管理
+
+[33mcommit 76e50342a1e951ac03a2af86a14cc7db392b15f4[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 19:26:50 2025 +0800
+
+    优化接入管理
+
+[33mcommit 81732c02a9896758dc0dc25b15596a108552b83e[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 18:55:56 2025 +0800
+
+    删除冗余代码
+
+[33mcommit bd974f5c57f900776a30d57d55c15d223d6d503c[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 18:52:13 2025 +0800
+
+    优化404
+
+[33mcommit 2133ee2975b4a098eaa2cdb5e39829ea4fa0eca1[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 18:03:35 2025 +0800
+
+    骨架屏
+
+[33mcommit 8ed6165f051c039fb6ba3538895eb1d2000c2e68[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 17:39:46 2025 +0800
+
+    优化升级管理
+
+[33mcommit 7f0bf91c798ca9b0d980440a90f3d6526970b404[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 17:18:08 2025 +0800
+
+    优化升级管理
+
+[33mcommit 57be93ca94dae412d8bf555a99562c888af56ffc[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 16:31:39 2025 +0800
+
+    优化升级管理
+
+[33mcommit 7c0a588a309ea5a54f6bbda76e7efeff9ff2c231[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 16:29:43 2025 +0800
+
+    优化升级管理
+
+[33mcommit f876121f9c20c6032c2246dbdcbef884e8c0a321[m
+Author: ahao <52927295@qq.com>
+Date:   Sun Jul 27 16:29:09 2025 +0800
+
+    优化升级管理
+
+[33mcommit dba2093614809371c9e2b8750910f52ed5873deb[m
+Author: 

@@ -18,6 +18,7 @@ export interface UpgradeTarget {
     package_name?: string;
     package_type?: string;
     version?: string;
+    version_code?: number;
     file_name?: string;
     file_size?: number;
     file_hash?: string;

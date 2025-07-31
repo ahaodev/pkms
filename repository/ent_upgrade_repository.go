@@ -95,7 +95,8 @@ func (r *entUpgradeRepository) GetUpgradeTargets(ctx context.Context, tenantID s
 		Where(upgrade.TenantID(tenantID)).
 		WithProject().
 		WithPackage().
-		WithRelease()
+		WithRelease().
+		Order(ent.Desc(upgrade.FieldCreatedAt)) // 按创建时间降序排列
 
 	// 应用过滤条件
 	if projectID, ok := filters["project_id"].(string); ok && projectID != "" {
