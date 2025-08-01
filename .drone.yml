@@ -8,7 +8,7 @@ trigger:
     - rbac-domains
     - Single
 steps:
-  - name: docker-build_push
+  - name: all_in_docker
     image: docker:dind
     volumes:
       - name: docker
