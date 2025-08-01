@@ -17,7 +17,7 @@ import {Progress} from '@/components/ui/progress.tsx';
 import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
 import {formatFileSize} from '@/lib/utils';
 import {uploadRelease} from '@/lib/api/packages';
-import {toast} from '@/hooks/use-toast.ts';
+import {toast} from 'sonner';
 
 interface PackageReleaseDialogProps {
     open: boolean;
@@ -94,10 +94,7 @@ export function PackageReleaseDialog({
                 setUploadProgress(progress);
             });
 
-            toast({
-                title: '发布成功',
-                description: `版本 "${formData.version_name}" 已成功发布。`,
-            });
+            toast.success(`版本 "${formData.version_name}" 已成功发布`);
 
             // 重置表单
             resetForm();
@@ -105,11 +102,7 @@ export function PackageReleaseDialog({
             onClose();
         } catch (error: any) {
             console.error('Upload failed:', error);
-            toast({
-                title: '发布失败',
-                description: error.response?.data?.message || error.message || '发布失败，请重试。',
-                variant: 'destructive'
-            });
+            toast.error(error.response?.data?.message || error.message || '发布失败，请重试');
         } finally {
             setIsUploading(false);
             setUploadProgress(null);

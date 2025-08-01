@@ -1,4 +1,4 @@
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
@@ -8,7 +8,7 @@ import {Switch} from '@/components/ui/switch';
 import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} from 'lucide-react';
 import {toast} from 'sonner';
 import {formatFileSize} from '@/lib/utils';
-import {updateUpgradeTarget, deleteUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';
+import {deleteUpgradeTarget, updateUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';
 
 interface UpgradeTargetsTableProps {
     upgradeTargets: UpgradeTarget[];
@@ -33,9 +33,11 @@ export function UpgradeTargetsTable({
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             toast.success('升级目标删除成功');
         },
-        onError: (error) => {
-            toast.error(`删除失败: ${error}`);
+        onError: (error: any) => {
             console.error(error);
+            // 提取后端返回的具体错误消息
+            const errorMessage = error?.response?.data?.msg || error?.message || '未知错误';
+            toast.error(`删除失败: ${errorMessage}`);
         }
     });
 
@@ -47,9 +49,11 @@ export function UpgradeTargetsTable({
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             toast.success('状态更新成功');
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.error(error);
-            toast.error(`状态更新失败: ${error}`);
+            // 提取后端返回的具体错误消息
+            const errorMessage = error?.response?.data?.msg || error?.message || '未知错误';
+            toast.error(`状态更新失败: ${errorMessage}`);
         }
     });
 

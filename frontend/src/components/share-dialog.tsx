@@ -4,7 +4,7 @@ import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import QRCode from 'qrcode';
 import type {ShareDialogProps} from '@/types';
 import {apiClient} from '@/lib/api/api';
@@ -17,7 +17,6 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
     const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const {toast} = useToast();
 
     // 生成二维码
     useEffect(() => {
@@ -39,17 +38,14 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
         try {
             await navigator.clipboard.writeText(shareUrl);
             setCopied(true);
-            toast({
-                title: '链接已复制',
+            toast.success('链接已复制', {
                 description: '分享链接已复制到剪贴板。',
             });
 
             // 2秒后重置复制状态
             setTimeout(() => setCopied(false), 2000);
         } catch {
-            toast({
-                variant: 'destructive',
-                title: '复制失败',
+            toast.error('复制失败', {
                 description: '无法复制到剪贴板，请手动复制链接。',
             });
         }
@@ -97,15 +93,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
             link.remove();
             window.URL.revokeObjectURL(url);
 
-            toast({
-                title: '下载成功',
+            toast.success('下载成功', {
                 description: '文件已开始下载',
             });
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || '下载失败，请稍后重试';
-            toast({
-                variant: 'destructive',
-                title: '下载失败',
+            toast.error('下载失败', {
                 description: errorMessage,
             });
         } finally {

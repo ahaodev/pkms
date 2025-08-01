@@ -35,7 +35,7 @@ import {formatDistanceToNow} from 'date-fns';
 import {zhCN} from 'date-fns/locale';
 import {useState} from 'react';
 import type {ClientAccess} from '@/types/client-access';
-import {toast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 
 interface ClientAccessCardProps {
     clientAccess: ClientAccess;
@@ -60,16 +60,9 @@ export function ClientAccessCard({
     const handleCopyToken = async () => {
         try {
             await navigator.clipboard.writeText(clientAccess.access_token);
-            toast({
-                title: "复制成功",
-                description: "访问令牌已复制到剪贴板",
-            });
+            toast.success("访问令牌已复制到剪贴板");
         } catch {
-            toast({
-                title: "复制失败",
-                description: "请手动复制访问令牌",
-                variant: "destructive",
-            });
+            toast.error("复制失败，请手动复制访问令牌");
         }
     };
 

@@ -1,6 +1,6 @@
 import {useState, useCallback, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 
 export interface UseLoginOptions {
@@ -14,7 +14,6 @@ type Field = 'username' | 'password';
 export function useLogin(options: UseLoginOptions = {}) {
     const {redirectTo = '/', onSuccess, onError} = options;
     const navigate = useNavigate();
-    const {toast} = useToast();
     const {login: authLogin, isLoading} = useAuth();
 
     const initialFormData = useMemo(() => ({
@@ -35,11 +34,7 @@ export function useLogin(options: UseLoginOptions = {}) {
     const validateForm = useCallback((): boolean => {
         if (!formData.username || !formData.password) {
             const errorMessage = '请输入用户名和密码。';
-            toast({
-                variant: 'destructive',
-                title: '登录失败',
-                description: errorMessage,
-            });
+            toast.error(errorMessage);
             onError?.(errorMessage);
             return false;
         }
@@ -52,20 +47,13 @@ export function useLogin(options: UseLoginOptions = {}) {
         const success = await authLogin(formData.username, formData.password);
 
         if (success) {
-            toast({
-                title: '登录成功',
-                description: '欢迎使用 PKMS 包管理系统。',
-            });
+            toast.success('欢迎使用 PKMS 包管理系统');
             onSuccess?.();
             navigate(redirectTo, {replace: true});
             return true;
         } else {
             const errorMessage = '用户名或密码错误。';
-            toast({
-                variant: 'destructive',
-                title: '登录失败',
-                description: errorMessage,
-            });
+            toast.error(errorMessage);
             onError?.(errorMessage);
             return false;
         }

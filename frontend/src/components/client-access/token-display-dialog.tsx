@@ -6,7 +6,7 @@ import {Label} from '@/components/ui/label';
 import {Badge} from '@/components/ui/badge';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {AlertTriangle, Copy, Eye, EyeOff, Shield} from 'lucide-react';
-import {toast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import type {ClientAccess} from '@/types/client-access';
 
 interface TokenDisplayDialogProps {
@@ -27,16 +27,9 @@ export function TokenDisplayDialog({
 
         try {
             await navigator.clipboard.writeText(clientAccess.access_token);
-            toast({
-                title: "复制成功",
-                description: "访问令牌已复制到剪贴板",
-            });
+            toast.success('访问令牌已复制到剪贴板');
         } catch {
-            toast({
-                title: "复制失败",
-                description: "请手动复制访问令牌",
-                variant: "destructive",
-            });
+            toast.error('请手动复制访问令牌');
         }
     };
 
@@ -51,16 +44,10 @@ export function TokenDisplayDialog({
 
         try {
             await navigator.clipboard.writeText(example);
-            toast({
-                title: "复制成功",
-                description: "示例代码已复制到剪贴板",
-            });
+            toast.success("已复制到剪贴板")
+
         } catch {
-            toast({
-                title: "复制失败",
-                description: "请手动复制示例代码",
-                variant: "destructive",
-            });
+            toast.error('复制失败,请手动复制示例代码');
         }
     };
 

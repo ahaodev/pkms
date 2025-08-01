@@ -3,12 +3,11 @@ import {useParams} from 'react-router-dom';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {AlertCircle, Download, FileText} from 'lucide-react';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {apiClient} from '@/lib/api/api';
 
 export default function SharePage() {
     const {code} = useParams<{ code: string }>();
-    const {toast} = useToast();
     const [downloading, setDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -53,17 +52,14 @@ export default function SharePage() {
             link.remove();
             window.URL.revokeObjectURL(url);
 
-            toast({
-                title: '下载成功',
+            toast.success('下载成功', {
                 description: '文件已开始下载',
             });
             setError(null);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || '下载失败，请稍后重试';
             setError(errorMessage);
-            toast({
-                variant: 'destructive',
-                title: '下载失败',
+            toast.error('下载失败', {
                 description: errorMessage,
             });
         } finally {

@@ -42,7 +42,7 @@ export default function UpgradePage() {
     console.log('Projects:', projects);
 
     // Fetch upgrade targets
-    const {data: upgradeTargetsData, isLoading} = useQuery({
+    const {data: upgradeTargetsData, isLoading, error} = useQuery({
         queryKey: ['upgrade-targets'],
         queryFn: async () => {
             const response = await getUpgradeTargets();
@@ -51,21 +51,30 @@ export default function UpgradePage() {
         staleTime: 0,
         gcTime: 0,
         refetchOnMount: "always",
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: false
     });
 
-    const upgradeTargets = upgradeTargetsData || [];
+    // Handle query error
+    useEffect(() => {
+        if (error) {
+            console.error('获取升级目标失败:', error);
+            const errorMessage = (error as any)?.response?.data?.msg || (error as any)?.message || '获取升级目标失败';
+            toast.error(errorMessage);
+        }
+    }, [error]);
+
+    const upgradeTargets: UpgradeTarget[] = upgradeTargetsData || [];
 
     // Filter upgrade targets based on selected filters
     const filteredUpgradeTargets = useMemo(() => {
-        let filtered = upgradeTargets;
+        let filtered: UpgradeTarget[] = upgradeTargets;
         
         if (projectFilter !== 'all') {
-            filtered = filtered.filter(target => target.project_id === projectFilter);
+            filtered = filtered.filter((target: UpgradeTarget) => target.project_id === projectFilter);
         }
         
         if (packageFilter !== 'all') {
-            filtered = filtered.filter(target => target.package_id === packageFilter);
+            filtered = filtered.filter((target: UpgradeTarget) => target.package_id === packageFilter);
         }
         
         return filtered;
@@ -87,9 +96,10 @@ export default function UpgradePage() {
             resetForm();
             toast.success('升级目标创建成功');
         },
-        onError: (err) => {
-            console.error(err)
-            toast.error("创建失败")
+        onError: (err: any) => {
+            console.error(err);
+            const errorMessage = err?.response?.data?.msg || err?.message || '创建失败';
+            toast.error(errorMessage);
         }
     });
 
@@ -104,9 +114,10 @@ export default function UpgradePage() {
             resetEditForm();
             toast.success('升级目标更新成功');
         },
-        onError: (error) => {
-            console.error(error)
-            toast.error(`更新失败: ${error}`);
+        onError: (error: any) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.msg || error?.message || '更新失败';
+            toast.error(errorMessage);
         }
     });
 

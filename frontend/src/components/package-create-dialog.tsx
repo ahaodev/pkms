@@ -15,7 +15,7 @@ import {Textarea} from '@/components/ui/textarea.tsx';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
 import {Package} from '@/types/package.ts';
 import {createPackage} from "@/lib/api";
-import {toast} from '@/hooks/use-toast.ts';
+import {toast} from 'sonner';
 
 interface PackageCreateDialogProps {
     open: boolean;
@@ -65,27 +65,16 @@ export function PackageCreateDialog({
         createPackage(formData)
             .then(response => {
                 if (response.code == 0) {
-                    toast({
-                        title: '包创建成功',
-                        description: `包 "${formData.name}" 已成功创建。`,
-                    });
+                    toast.success(`包 "${formData.name}" 已成功创建`);
                     handleClose();
                     // Call onSuccess callback to refresh the packages list
                     onSuccess?.();
                 } else {
-                    toast({
-                        title: '创建失败',
-                        description: response.msg || '请稍后再试。',
-                        variant: 'destructive'
-                    });
+                    toast.error(response.msg || '创建失败，请稍后再试');
                 }
             }).catch(error => {
             console.error('创建包失败:', error);
-            toast({
-                title: '创建失败',
-                description: '包创建失败，请稍后再试。',
-                variant: 'destructive'
-            });
+            toast.error('包创建失败，请稍后再试');
         })
     }
 

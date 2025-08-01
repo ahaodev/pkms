@@ -5,7 +5,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
-import {toast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 
 interface StorageSettingsProps {
     onSave?: (settings: StorageConfig) => void;
@@ -37,13 +37,11 @@ export function StorageSettings({onSave, onTest}: StorageSettingsProps) {
         } else {
             // 默认行为
             if (storageType === 'disk') {
-                toast({
-                    title: "连接测试",
+                toast.success("连接测试", {
                     description: "本地磁盘存储配置正常",
                 });
             } else {
-                toast({
-                    title: "连接测试", 
+                toast.success("连接测试", {
                     description: "成功连接到 MinIO",
                 });
             }
@@ -66,8 +64,7 @@ export function StorageSettings({onSave, onTest}: StorageSettingsProps) {
 
         onSave?.(config);
 
-        toast({
-            title: "设置已保存",
+        toast.success("设置已保存", {
             description: "存储设置已成功更新",
         });
     };

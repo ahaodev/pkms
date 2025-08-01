@@ -1,5 +1,5 @@
 import {useCallback} from "react";
-import {toast} from "@/hooks/use-toast";
+import {toast} from "sonner";
 import {updateUserPassword} from "@/lib/api/users";
 import {testStorageConfig, updateStorageConfig} from "@/lib/api/settings";
 import {
@@ -23,18 +23,11 @@ export default function Settings() {
                 });
             }
 
-            toast({
-                title: "设置已保存",
-                description: "账户设置已成功更新",
-            });
+            toast.success("账户设置已成功更新");
         } catch (error: any) {
             console.error('Failed to save account settings:', error);
             const errorMessage = error?.response?.data?.message || "账户设置更新失败，请稍后重试";
-            toast({
-                title: "保存失败",
-                description: errorMessage,
-                variant: "destructive",
-            });
+            toast.error(errorMessage);
         }
     }, []);
 
@@ -54,18 +47,11 @@ export default function Settings() {
 
             await updateStorageConfig(backendConfig);
 
-            toast({
-                title: "设置已保存",
-                description: "存储设置已成功更新",
-            });
+            toast.success("存储设置已成功更新");
         } catch (error: any) {
             console.error('Failed to save storage settings:', error);
             const errorMessage = error?.response?.data?.message || "存储设置更新失败，请稍后重试";
-            toast({
-                title: "保存失败",
-                description: errorMessage,
-                variant: "destructive",
-            });
+            toast.error(errorMessage);
         }
     }, []);
 
@@ -73,18 +59,11 @@ export default function Settings() {
     const handleTestStorage = useCallback(async () => {
         try {
             const result = await testStorageConfig();
-            toast({
-                title: "测试成功",
-                description: result.data || "存储配置测试通过",
-            });
+            toast.success(result.data || "存储配置测试通过");
         } catch (error: any) {
             console.error('Failed to test storage config:', error);
             const errorMessage = error?.response?.data?.message || "存储配置测试失败";
-            toast({
-                title: "测试失败",
-                description: errorMessage,
-                variant: "destructive",
-            });
+            toast.error(errorMessage);
         }
     }, []);
 

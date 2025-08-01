@@ -1,6 +1,6 @@
 import {useCallback, useState} from 'react';
 import {Shield} from 'lucide-react';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {CreateTenantRequest, Tenant, UpdateTenantRequest} from '@/types/tenant';
@@ -15,7 +15,6 @@ interface TenantFormData {
 }
 
 export default function TenantsPage() {
-    const {toast} = useToast();
     const {hasRole} = useAuth();
 
     const {data: tenants, isLoading} = useTenants();
@@ -75,9 +74,7 @@ export default function TenantsPage() {
 
     const handleCreateTenant = async () => {
         if (!tenantForm.name) {
-            toast({
-                variant: 'destructive',
-                title: '请填写必填字段',
+            toast.error('请填写必填字段', {
                 description: '租户名称为必填项。',
             });
             return;
@@ -90,8 +87,7 @@ export default function TenantsPage() {
 
             await createTenantMutation.mutateAsync(createRequest);
 
-            toast({
-                title: '租户创建成功',
+            toast.success('租户创建成功', {
                 description: `租户 "${tenantForm.name}" 已创建。`,
             });
 
@@ -99,10 +95,8 @@ export default function TenantsPage() {
             resetForm();
         } catch (error) {
             console.error(error)
-            toast({
-                variant: 'destructive',
-                title: '创建失败',
-                description:'租户创建失败，请重试。',
+            toast.error('创建失败', {
+                description: '租户创建失败，请重试。',
             });
         }
     };
@@ -117,9 +111,7 @@ export default function TenantsPage() {
 
     const handleUpdateTenant = async () => {
         if (!editingTenant || !tenantForm.name) {
-            toast({
-                variant: 'destructive',
-                title: '请填写必填字段',
+            toast.error('请填写必填字段', {
                 description: '租户名称为必填项。',
             });
             return;
@@ -135,8 +127,7 @@ export default function TenantsPage() {
                 update: updateRequest
             });
 
-            toast({
-                title: '租户更新成功',
+            toast.success('租户更新成功', {
                 description: `租户 "${tenantForm.name}" 已更新。`,
             });
 
@@ -145,10 +136,8 @@ export default function TenantsPage() {
             resetForm();
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '更新失败',
-                description:  '租户更新失败，请重试。',
+            toast.error('更新失败', {
+                description: '租户更新失败，请重试。',
             });
         }
     };
@@ -160,16 +149,13 @@ export default function TenantsPage() {
 
         try {
             await deleteTenantMutation.mutateAsync(tenant.id);
-            toast({
-                title: '租户删除成功',
+            toast.success('租户删除成功', {
                 description: `租户 "${tenant.name}" 已删除。`,
             });
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '删除失败',
-                description:'租户删除失败，请重试。',
+            toast.error('删除失败', {
+                description: '租户删除失败，请重试。',
             });
         }
     };

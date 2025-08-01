@@ -1,6 +1,6 @@
 import {useCallback, useMemo, useState} from 'react';
 import {Shield} from 'lucide-react';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
 import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
@@ -22,7 +22,6 @@ interface UserFormData {
 }
 
 export default function UsersPage() {
-    const {toast} = useToast();
     const {user: currentUser, hasRole} = useAuth();
     const {data: projects} = useProjects();
 
@@ -124,11 +123,7 @@ export default function UsersPage() {
 
     const handleCreateUser = async () => {
         if (!userForm.name || !userForm.password) {
-            toast({
-                variant: 'destructive',
-                title: '请填写必填字段',
-                description: '用户名和密码为必填项。',
-            });
+            toast.error('请填写必填字段：用户名和密码为必填项');
             return;
         }
 
@@ -141,19 +136,12 @@ export default function UsersPage() {
 
             await createUserMutation.mutateAsync(createRequest);
 
-            toast({
-                title: '用户创建成功',
-                description: `用户 "${userForm.name}" 已创建。`,
-            });
+            toast.success(`用户 "${userForm.name}" 已创建`);
 
             setIsCreateDialogOpen(false);
             resetForm();
         } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: '创建失败',
-                description: error.response?.data?.message || '用户创建失败，请重试。',
-            });
+            toast.error(error.response?.data?.message || '用户创建失败，请重试');
         }
     };
 
@@ -169,11 +157,7 @@ export default function UsersPage() {
 
     const handleUpdateUser = async () => {
         if (!editingUser || !userForm.name) {
-            toast({
-                variant: 'destructive',
-                title: '请填写必填字段',
-                description: '用户名为必填项。',
-            });
+            toast.error('请填写必填字段：用户名为必填项');
             return;
         }
 
@@ -188,30 +172,19 @@ export default function UsersPage() {
                 update: updateRequest
             });
 
-            toast({
-                title: '用户更新成功',
-                description: `用户 "${userForm.name}" 已更新。`,
-            });
+            toast.success(`用户 "${userForm.name}" 已更新`);
 
             setIsEditDialogOpen(false);
             setEditingUser(null);
             resetForm();
         } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: '更新失败',
-                description: error.response?.data?.message || '用户更新失败，请重试。',
-            });
+            toast.error(error.response?.data?.message || '用户更新失败，请重试');
         }
     };
 
     const handleDeleteUser = async (user: User) => {
         if (user.id === currentUser?.id) {
-            toast({
-                variant: 'destructive',
-                title: '不能删除自己',
-                description: '您不能删除自己的账户。',
-            });
+            toast.error('不能删除自己：您不能删除自己的账户');
             return;
         }
 
@@ -221,16 +194,9 @@ export default function UsersPage() {
 
         try {
             await deleteUserMutation.mutateAsync(user.id);
-            toast({
-                title: '用户删除成功',
-                description: `用户 "${user.name}" 已删除。`,
-            });
+            toast.success(`用户 "${user.name}" 已删除`);
         } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: '删除失败',
-                description: error.response?.data?.message || '用户删除失败，请重试。',
-            });
+            toast.error(error.response?.data?.message || '用户删除失败，请重试');
         }
     };
 
@@ -245,16 +211,9 @@ export default function UsersPage() {
                 update: updateRequest
             });
 
-            toast({
-                title: user.is_active ? '用户已禁用' : '用户已启用',
-                description: `用户 "${user.name}" 已${user.is_active ? '禁用' : '启用'}。`,
-            });
+            toast.success(`用户 "${user.name}" 已${user.is_active ? '禁用' : '启用'}`);
         } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: '操作失败',
-                description: error.response?.data?.message || '用户状态更新失败，请重试。',
-            });
+            toast.error(error.response?.data?.message || '用户状态更新失败，请重试');
         }
     };
 

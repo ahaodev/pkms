@@ -3,7 +3,7 @@ import {UserPlus, Users} from 'lucide-react';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from '@/components/ui/dialog';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {useAddUserToTenantWithRole, useTenantUsersWithRole} from '@/hooks/use-tenants';
 import {useUsers} from '@/hooks/use-users';
 import {Tenant, TenantUser} from '@/types/tenant';
@@ -22,7 +22,6 @@ const ROLES = [
 ];
 
 export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProps) {
-    const {toast} = useToast();
     const [showAddUser, setShowAddUser] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [selectedRole, setSelectedRole] = useState('user');
@@ -52,9 +51,7 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
 
     const handleAddUser = async () => {
         if (!tenant?.id || !selectedUserId) {
-            toast({
-                variant: 'destructive',
-                title: '请选择用户',
+            toast.error('请选择用户', {
                 description: '请选择要添加的用户。',
             });
             return;
@@ -67,17 +64,14 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                 role: selectedRole,
             });
 
-            toast({
-                title: '用户添加成功',
+            toast.success('用户添加成功', {
                 description: '用户已成功添加到租户。',
             });
 
             resetAddForm();
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '添加失败',
+            toast.error('添加失败', {
                 description: '用户添加失败，请重试。',
             });
         }

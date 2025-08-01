@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface AccountConfig {
   currentPassword: string;
@@ -24,10 +24,8 @@ export function AccountSettings({ onSave }: AccountSettingsProps) {
 
   const handleSaveAccount = () => {
     if (newPassword && newPassword !== confirmPassword) {
-      toast({
-        title: "密码错误",
+      toast.error("密码错误", {
         description: "新密码和确认密码不匹配",
-        variant: "destructive",
       });
       return;
     }
@@ -40,8 +38,7 @@ export function AccountSettings({ onSave }: AccountSettingsProps) {
 
     onSave?.(config);
 
-    toast({
-      title: "设置已保存",
+    toast.success("设置已保存", {
       description: "账户设置已成功更新",
     });
 

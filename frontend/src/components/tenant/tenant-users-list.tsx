@@ -3,7 +3,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
 import {Badge} from '@/components/ui/badge';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {useRemoveUserFromTenant, useUpdateTenantUserRole} from '@/hooks/use-tenants';
 import {TenantUser} from '@/types/tenant';
 
@@ -21,7 +21,6 @@ const ROLES = [
 ];
 
 export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersListProps) {
-    const {toast} = useToast();
     const updateRoleMutation = useUpdateTenantUserRole();
     const removeUserMutation = useRemoveUserFromTenant();
 
@@ -34,15 +33,12 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                 isActive: true,
             });
 
-            toast({
-                title: '角色更新成功',
+            toast.success('角色更新成功', {
                 description: '用户角色已更新。',
             });
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '更新失败',
+            toast.error('更新失败', {
                 description: '角色更新失败，请重试。',
             });
         }
@@ -59,15 +55,12 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                 userId,
             });
 
-            toast({
-                title: '用户移除成功',
+            toast.success('用户移除成功', {
                 description: '用户已从租户中移除。',
             });
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '移除失败',
+            toast.error('移除失败', {
                 description: '用户移除失败，请重试。',
             });
         }

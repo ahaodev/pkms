@@ -5,7 +5,7 @@ import {usePackages} from '@/hooks/use-packages';
 import {useReleases} from '@/hooks/use-releases';
 import {ExtendedPackage} from '@/types/package';
 import {Release} from '@/types/release';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import {downloadRelease} from '@/lib/api/releases';
 import {Input} from '@/components/ui/input';
 import {
@@ -28,7 +28,6 @@ import {PackageCreateDialog} from "@/components/package-create-dialog.tsx";
 
 // Hierarchy Page Component
 export default function HierarchyPage() {
-    const {toast} = useToast();
     const [searchParams] = useSearchParams();
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
@@ -94,8 +93,7 @@ export default function HierarchyPage() {
 
     const handleDownload = async (release: Release) => {
         try {
-            toast({
-                title: '下载开始',
+            toast.info('下载开始', {
                 description: `正在准备下载 ${release.file_name}`,
             });
 
@@ -113,15 +111,12 @@ export default function HierarchyPage() {
             link.remove();
             window.URL.revokeObjectURL(url);
             
-            toast({
-                title: '下载完成',
+            toast.success('下载完成', {
                 description: `${release.file_name} 下载完成`,
             });
         } catch (error) {
             console.error('Download failed:', error);
-            toast({
-                variant: 'destructive',
-                title: '下载失败',
+            toast.error('下载失败', {
                 description: '文件下载失败，请重试',
             });
         }
@@ -130,16 +125,13 @@ export default function HierarchyPage() {
     const handleCreateProject = async () => {
         try {
             await createProject.mutateAsync(projectFormData);
-            toast({
-                title: '项目创建成功',
+            toast.success('项目创建成功', {
                 description: `项目 "${projectFormData.name}" 已成功创建。`,
             });
             setIsCreateProjectDialogOpen(false);
             setProjectFormData({name: '', description: '', icon: 'package2'});
         } catch {
-            toast({
-                variant: 'destructive',
-                title: '创建失败',
+            toast.error('创建失败', {
                 description: '项目创建失败，请重试。',
             });
         }
@@ -163,17 +155,14 @@ export default function HierarchyPage() {
                 id: editingProject.id,
                 update: projectFormData
             });
-            toast({
-                title: '项目更新成功',
+            toast.success('项目更新成功', {
                 description: `项目 "${projectFormData.name}" 已成功更新。`,
             });
             setIsEditProjectDialogOpen(false);
             setEditingProject(null);
             setProjectFormData({name: '', description: '', icon: 'package2'});
         } catch {
-            toast({
-                variant: 'destructive',
-                title: '更新失败',
+            toast.error('更新失败', {
                 description: '项目更新失败，请重试。',
             });
         }

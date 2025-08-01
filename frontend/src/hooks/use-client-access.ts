@@ -5,7 +5,7 @@ import type {
   UpdateClientAccessRequest,
   ClientAccessFilters 
 } from '@/types/client-access';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 // 查询key常量
 const CLIENT_ACCESS_KEYS = {
@@ -45,17 +45,10 @@ export function useCreateClientAccess() {
     mutationFn: (data: CreateClientAccessRequest) => clientAccessApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.lists() });
-      toast({
-        title: "创建成功",
-        description: "设备接入凭证已创建",
-      });
+      toast.success("设备接入凭证已创建");
     },
     onError: (error: Error) => {
-      toast({
-        title: "创建失败",
-        description: (error as any).response?.data?.message || "请稍后重试",
-        variant: "destructive",
-      });
+      toast.error((error as any).response?.data?.message || "创建失败，请稍后重试");
     },
   });
 }
@@ -70,17 +63,10 @@ export function useUpdateClientAccess() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.detail(id) });
-      toast({
-        title: "更新成功",
-        description: "设备接入凭证已更新",
-      });
+      toast.success("设备接入凭证已更新");
     },
     onError: (error: Error) => {
-      toast({
-        title: "更新失败",
-        description: (error as any).response?.data?.message || "请稍后重试",
-        variant: "destructive",
-      });
+      toast.error((error as any).response?.data?.message || "更新失败，请稍后重试");
     },
   });
 }
@@ -93,17 +79,10 @@ export function useDeleteClientAccess() {
     mutationFn: (id: string) => clientAccessApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.lists() });
-      toast({
-        title: "删除成功",
-        description: "设备接入凭证已删除",
-      });
+      toast.success("设备接入凭证已删除");
     },
     onError: (error: Error) => {
-      toast({
-        title: "删除失败",
-        description: (error as any).response?.data?.message || "请稍后重试",
-        variant: "destructive",
-      });
+      toast.error((error as any).response?.data?.message || "删除失败，请稍后重试");
     },
   });
 }
@@ -117,17 +96,10 @@ export function useRegenerateToken() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.detail(id) });
-      toast({
-        title: "令牌已重新生成",
-        description: "请及时更新客户端配置",
-      });
+      toast.success("令牌已重新生成，请及时更新客户端配置");
     },
     onError: (error: Error) => {
-      toast({
-        title: "重新生成失败",
-        description: (error as any).response?.data?.message || "请稍后重试",
-        variant: "destructive",
-      });
+      toast.error((error as any).response?.data?.message || "重新生成失败，请稍后重试");
     },
   });
 }
@@ -142,17 +114,10 @@ export function useToggleClientAccessStatus() {
     onSuccess: (_, { id, isActive }) => {
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: CLIENT_ACCESS_KEYS.detail(id) });
-      toast({
-        title: isActive ? "已启用" : "已禁用",
-        description: `设备接入凭证已${isActive ? "启用" : "禁用"}`,
-      });
+      toast.success(`设备接入凭证已${isActive ? "启用" : "禁用"}`);
     },
     onError: (error: Error) => {
-      toast({
-        title: "操作失败",
-        description: (error as any).response?.data?.message || "请稍后重试",
-        variant: "destructive",
-      });
+      toast.error((error as any).response?.data?.message || "操作失败，请稍后重试");
     },
   });
 }

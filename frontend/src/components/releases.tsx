@@ -7,7 +7,7 @@ import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
 import {ShareDialog} from '@/components/share-dialog';
 import {createShareLink, deleteRelease} from '@/lib/api/releases';
-import {useToast} from '@/hooks/use-toast';
+import {toast} from 'sonner';
 
 interface ReleasesViewProps {
     selectedPackage: any;
@@ -31,7 +31,6 @@ export function Releases({
         shareUrl: string;
         packageName: string;
     }>({isOpen: false, shareUrl: '', packageName: ''});
-    const {toast} = useToast();
 
     const handleShare = async (release: Release) => {
         try {
@@ -43,15 +42,12 @@ export function Releases({
                 shareUrl: fullUrl,
                 packageName: `${selectedPackage?.name} v${release.version_code}`
             });
-            toast({
-                title: '分享链接已创建',
+            toast.success('分享链接已创建', {
                 description: '分享链接已生成，24小时内有效。',
             });
         } catch (error) {
             console.error(error)
-            toast({
-                variant: 'destructive',
-                title: '创建分享链接失败',
+            toast.error('创建分享链接失败', {
                 description: '无法创建分享链接，请稍后重试。',
             });
         }
@@ -64,16 +60,13 @@ export function Releases({
 
         try {
             await deleteRelease(release.id);
-            toast({
-                title: '删除成功',
+            toast.success('删除成功', {
                 description: `发布版本 v${release.version_code} 已被删除。`,
             });
             onReleaseDeleted?.(release.id);
         } catch (error) {
             console.error(error);
-            toast({
-                variant: 'destructive',
-                title: '删除失败',
+            toast.error('删除失败', {
                 description: '无法删除该发布版本，请稍后重试。',
             });
         }
