@@ -44,6 +44,7 @@ func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]dom
 	projects, err := pr.client.Project.
 		Query().
 		Where(project.TenantID(tenantID)).
+		WithPackages().
 		All(c)
 
 	if err != nil {
@@ -53,13 +54,15 @@ func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]dom
 	var result []domain.Project
 	for _, p := range projects {
 		result = append(result, domain.Project{
-			ID:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Icon:        p.Icon,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-			CreatedBy:   p.CreatedBy,
+			ID:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Icon:         p.Icon,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+			CreatedBy:    p.CreatedBy,
+			TenantID:     p.TenantID,
+			PackageCount: len(p.Edges.Packages),
 		})
 	}
 
@@ -69,6 +72,7 @@ func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]dom
 func (pr *entProjectRepository) FetchAll(c context.Context) ([]*domain.Project, error) {
 	projects, err := pr.client.Project.
 		Query().
+		WithPackages().
 		All(c)
 
 	if err != nil {
@@ -78,14 +82,15 @@ func (pr *entProjectRepository) FetchAll(c context.Context) ([]*domain.Project, 
 	var result []*domain.Project
 	for _, p := range projects {
 		result = append(result, &domain.Project{
-			ID:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Icon:        p.Icon,
-			TenantID:    p.TenantID,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-			CreatedBy:   p.CreatedBy,
+			ID:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Icon:         p.Icon,
+			TenantID:     p.TenantID,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+			CreatedBy:    p.CreatedBy,
+			PackageCount: len(p.Edges.Packages),
 		})
 	}
 
@@ -96,6 +101,7 @@ func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Pr
 	p, err := pr.client.Project.
 		Query().
 		Where(project.ID(id)).
+		WithPackages().
 		First(c)
 
 	if err != nil {
@@ -103,13 +109,15 @@ func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Pr
 	}
 
 	return domain.Project{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Icon:        p.Icon,
-		CreatedAt:   p.CreatedAt,
-		UpdatedAt:   p.UpdatedAt,
-		CreatedBy:   p.CreatedBy,
+		ID:           p.ID,
+		Name:         p.Name,
+		Description:  p.Description,
+		Icon:         p.Icon,
+		CreatedAt:    p.CreatedAt,
+		UpdatedAt:    p.UpdatedAt,
+		CreatedBy:    p.CreatedBy,
+		TenantID:     p.TenantID,
+		PackageCount: len(p.Edges.Packages),
 	}, nil
 }
 
@@ -134,6 +142,7 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 	projects, err := pr.client.Project.
 		Query().
 		Where(project.CreatedBy(userID)).
+		WithPackages().
 		All(c)
 
 	if err != nil {
@@ -143,14 +152,15 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 	var result []domain.Project
 	for _, p := range projects {
 		result = append(result, domain.Project{
-			ID:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Icon:        p.Icon,
-			TenantID:    p.TenantID,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-			CreatedBy:   p.CreatedBy,
+			ID:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Icon:         p.Icon,
+			TenantID:     p.TenantID,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+			CreatedBy:    p.CreatedBy,
+			PackageCount: len(p.Edges.Packages),
 		})
 	}
 
