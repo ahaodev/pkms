@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// Package holds the schema definition for the Package entity.
+// Packages holds the schema definition for the Package entity.
 // 包的基本信息，不包含具体版本
 type Packages struct {
 	ent.Schema
