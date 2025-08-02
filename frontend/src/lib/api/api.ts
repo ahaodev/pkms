@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config: any) => {
     if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;
-        if(currentTenant){
+        if (currentTenant) {
             console.log('API Request: Using tenant ID:', currentTenant);
             config.headers['x-tenant-id'] = currentTenant || ''; // 添加租户ID头部
         }
