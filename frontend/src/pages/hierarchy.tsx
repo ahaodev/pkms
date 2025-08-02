@@ -78,15 +78,6 @@ export default function HierarchyPage() {
     const handlePackageSelect = (packageId: string) => {
         setSelectedPackageId(packageId);
     };
-
-    const handleGoBack = () => {
-        if (selectedPackageId) {
-            setSelectedPackageId(null);
-        } else if (selectedProjectId) {
-            setSelectedProjectId(null);
-        }
-    };
-
     const handleCreateRelease = () => {
         setIsCreateReleaseDialogOpen(true);
     };
@@ -198,24 +189,6 @@ export default function HierarchyPage() {
         console.log('Release uploaded successfully');
     };
 
-    // Handle mouse back button for hierarchy navigation
-    useEffect(() => {
-        const handleMouseBack = (event: MouseEvent) => {
-            // Check if the back button (button 3) was clicked
-            if (event.button === 3) {
-                event.preventDefault();
-                handleGoBack();
-            }
-        };
-
-        // Add event listener for mouse button down
-        document.addEventListener('mousedown', handleMouseBack);
-
-        // Cleanup event listener on component unmount
-        return () => {
-            document.removeEventListener('mousedown', handleMouseBack);
-        };
-    }, [selectedProjectId, selectedPackageId]); // Dependencies to ensure current state is captured
 
     // Handle URL parameters to auto-select project
     useEffect(() => {
