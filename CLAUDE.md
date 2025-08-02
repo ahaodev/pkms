@@ -18,7 +18,7 @@ cd ./frontend
 # Install dependencies
 npm install
 
-# Run development server (port 5173, proxies /api and /share to localhost:8080)
+# Run development server (port 5173, proxies /api and /share to localhost:65080)
 npm run dev
 
 # Build for production (includes TypeScript build check)
@@ -49,7 +49,7 @@ npm audit fix
 # Generate Ent database code (run after schema changes)
 go generate ./ent
 
-# Run development server (port 8080)
+# Run development server (port 65080)
 go run ./cmd/main.go
 
 # Build production binary (requires frontend to be built first)
@@ -111,7 +111,7 @@ goreleaser release --clean
 └── usecase                 # 用例/业务逻辑
 ```
 
-- **cmd/main.go**: Application entry point, starts Gin server on port 8080
+- **cmd/main.go**: Application entry point, starts Gin server on port 65080
 - **bootstrap/**: Application initialization (database, env, casbin, minio)
 - **api/**: HTTP layer with controllers, middleware, and routes
 - **domain/**: Business entities and constants
@@ -161,7 +161,7 @@ goreleaser release --clean
 - Axios client with automatic JWT token injection
 - Request/response interceptors for authentication and error handling
 - Dynamic base URL resolution for different environments
-- Development proxy: `/api/*` → `http://localhost:8080`
+- Development proxy: `/api/*` → `http://localhost:65080`
 
 ### Key Technologies
 
@@ -219,7 +219,7 @@ Uses MinIO (S3-compatible) for file storage:
 
 The project uses Swagger/OpenAPI for API documentation:
 
-- **Swagger UI**: Accessible at `http://localhost:8080/swagger/index.html`
+- **Swagger UI**: Accessible at `http://localhost:65080/swagger/index.html`
 - **Documentation Source**: API annotations in controller files using `swaggo` format
 - **Generation**: Run `swag init -g cmd/main.go -o docs` to regenerate documentation
 - **Authentication**: Most endpoints require JWT Bearer token authentication
@@ -342,18 +342,18 @@ npm audit
 - Default test users: ahao/123, test/123
 - Logs written to `logs/` directory with rotation
 - SQLite database file: `data.db`
-- Frontend development server runs on port 5173 with API proxy to port 8080
-- **Swagger UI**: Available at `http://localhost:8080/swagger/index.html` when backend is running
+- Frontend development server runs on port 5173 with API proxy to port 65080
+- **Swagger UI**: Available at `http://localhost:65080/swagger/index.html` when backend is running
 
 ## Common Issues & Troubleshooting
 
 ### Backend Issues
 - **"Failed to generate Ent code"**: Run `go install entgo.io/ent/cmd/ent@latest` first
 - **Database migration errors**: Delete `data.db` and restart backend for clean database
-- **Port 8080 already in use**: Kill existing Go processes or change port in `bootstrap/env.go`
+- **Port 65080 already in use**: Kill existing Go processes or change port in `bootstrap/env.go`
 
 ### Frontend Issues
-- **CORS errors**: Ensure backend is running on port 8080 before starting frontend
+- **CORS errors**: Ensure backend is running on port 65080 before starting frontend
 - **Node module errors**: Delete `node_modules/` and `package-lock.json`, then `npm install`
 - **Build failures**: Run `npx tsc --noEmit` to check TypeScript errors first
 - **Performance warnings**: Bundle is currently oversized (628KB), needs code splitting

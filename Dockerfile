@@ -33,6 +33,6 @@ COPY --from=builder_go /app/config ./config
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-EXPOSE 8080
+EXPOSE 65080
 CMD ["./kpms-runner"]
 

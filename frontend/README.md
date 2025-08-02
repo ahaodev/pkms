@@ -33,7 +33,7 @@ npm run dev      # 本地开发
 npm run build    # 生产构建
 ```
 
-本地开发默认访问地址为 `http://localhost:5173`,通过vite.config.ts配置端口和代理,解决跨域问题,访问后端的本地8080端口。
+本地开发默认访问地址为 `http://localhost:5173`,通过vite.config.ts配置端口和代理,解决跨域问题,访问后端的本地65080端口。
 
 ## 相关文档
 

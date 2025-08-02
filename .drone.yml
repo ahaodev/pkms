@@ -31,7 +31,7 @@ steps:
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
       - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
       - docker buildx rm aBuildX  # Remove the Buildx builder
-      - docker run -d --name pkms --restart unless-stopped -p 65080:8080 hao88/pkms:amd64
+      - docker run -d --name pkms --restart unless-stopped -p 65080:65080 hao88/pkms:amd64
       # 检查容器状态
       - docker ps | grep pkms
 
