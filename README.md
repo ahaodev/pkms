@@ -63,6 +63,13 @@ npm run dev
 # 项目根目录
 go mod tidy
 # 首先编译前端资源(确保frontend/frontend.go embed dist/* 到二进制文件 )
+
+# 生成 ent
+go run -mod=mod entgo.io/ent/cmd/ent generate ./ent/schema
+
+# 生成 swagger 文档
+swag init -g cmd/main.go -o docs
+
 # 运行
 go run cmd/main.go
 # 或者编译成二进制可执行文件
