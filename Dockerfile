@@ -10,9 +10,10 @@ RUN npm run build
 FROM golang:1.24-bullseye AS builder_go
 WORKDIR /app
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod tidy
 COPY . .
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
+
 RUN go generate ./...
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o kpms-runner  ./cmd/main.go
 
