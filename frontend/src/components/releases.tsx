@@ -44,7 +44,7 @@ export function Releases({
                 packageName: `${selectedPackage?.name} v${release.version_code}`
             });
             toast.success('分享链接已创建', {
-                description: '分享链接已生成，24小时内有效。',
+                description: '分享链接已生成。',
             });
         } catch (error) {
             console.error(error)

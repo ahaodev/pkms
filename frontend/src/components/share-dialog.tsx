@@ -144,7 +144,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
                             </Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            此链接7天内有效，过期后需要重新生成。
+                            -。
                         </p>
                     </div>
 
