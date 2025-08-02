@@ -1,22 +1,5 @@
 basePath: /api
 definitions:
-  controller.StorageConfig:
-    properties:
-      s3_access_key:
-        type: string
-      s3_address:
-        type: string
-      s3_bucket:
-        type: string
-      s3_secret_key:
-        type: string
-      s3_token:
-        type: string
-      storage_base_path:
-        type: string
-      storage_type:
-        type: string
-    type: object
   domain.AddPolicyRequest:
     properties:
       action:
@@ -2900,71 +2883,6 @@ paths:
       summary: Upload release
       tags:
       - Releases
-  /settings/storage:
-    get:
-      consumes:
-      - application/json
-      description: Get current storage configuration settings
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved storage configuration
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get storage configuration
-      tags:
-      - Settings
-    put:
-      consumes:
-      - application/json
-      description: Update storage configuration settings
-      parameters:
-      - description: Storage configuration
-        in: body
-        name: config
-        required: true
-        schema:
-          $ref: '#/definitions/controller.StorageConfig'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated storage configuration
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Bad request - invalid parameters
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Update storage configuration
-      tags:
-      - Settings
-  /settings/storage/test:
-    post:
-      consumes:
-      - application/json
-      description: Test the current storage configuration connectivity
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Storage connection test successful
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Unknown storage type or test failed
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Test storage configuration
-      tags:
-      - Settings
   /share/{code}/download:
     get:
       consumes:
