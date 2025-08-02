@@ -24,7 +24,7 @@ steps:
       - docker stop pkms || true
       - docker rm pkms || true
       # 清理旧镜像
-      - docker images | grep 'hao88/pkms' | awk '{print $3}' | xargs -r docker rmi -f
+      - docker images | grep 'hao88/' | awk '{print $3}' | xargs -r docker rmi -f
       - docker images | grep '52927295' | awk '{print $3}' | xargs -r docker rmi -f
       # - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
       - echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
