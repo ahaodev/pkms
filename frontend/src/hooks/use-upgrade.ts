@@ -167,16 +167,6 @@ export const useDeprecateVersion = () => {
     });
 };
 
-// Check for updates (for client applications)
-export const useCheckUpdate = () => {
-    return useMutation({
-        mutationFn: async (data: CheckUpdateRequest): Promise<CheckUpdateResponse> => {
-            const response = await apiClient.post('/api/v1/upgrade/check', data);
-            return response.data.data;
-        },
-    });
-};
-
 // Get latest version by platform
 export const useLatestVersion = (platform: string) => {
     return useQuery({

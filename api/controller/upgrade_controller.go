@@ -162,33 +162,6 @@ func (uc *UpgradeController) DeleteUpgradeTarget(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess("升级目标删除成功"))
 }
 
-// CheckUpdate 检查更新（供客户端调用）
-// @Summary      Check for updates
-// @Description  Check if there are available updates for the client
-// @Tags         Upgrades
-// @Accept       json
-// @Produce      json
-// @Param        data  body     domain.CheckUpdateRequest  true  "Update check request"
-// @Success      200   {object} domain.Response           "Successfully checked for updates"
-// @Failure      400   {object} domain.Response           "Bad request - invalid parameters"
-// @Failure      500   {object} domain.Response           "Internal server error"
-// @Router       /upgrade/check [post]
-func (uc *UpgradeController) CheckUpdate(c *gin.Context) {
-	var request domain.CheckUpdateRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
-		return
-	}
-
-	response, err := uc.UpgradeUsecase.CheckUpdate(c, &request)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
-}
-
 // GetProjectUpgradeTargets 获取项目的所有升级目标
 // @Summary      Get project upgrade targets
 // @Description  Get all upgrade targets for a specific project

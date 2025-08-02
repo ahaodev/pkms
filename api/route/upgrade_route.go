@@ -30,9 +30,6 @@ func NewUpgradeRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client,
 	group.PUT("/:id", uc.UpdateUpgradeTarget)    // PUT /api/v1/upgrades/:id
 	group.DELETE("/:id", uc.DeleteUpgradeTarget) // DELETE /api/v1/upgrades/:id
 
-	// Client update operations
-	group.POST("/check", uc.CheckUpdate) // POST /api/v1/upgrades/check
-
 	// Project specific operations
 	group.GET("/projects/:projectId", uc.GetProjectUpgradeTargets) // GET /api/v1/upgrades/projects/:projectId
 }

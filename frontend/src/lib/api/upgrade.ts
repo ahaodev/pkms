@@ -91,12 +91,6 @@ export const deleteUpgradeTarget = async (id: string): Promise<{ data: string }>
     return response.data;
 };
 
-// 检查更新 API (供客户端调用)
-export const checkUpdate = async (data: CheckUpdateRequest): Promise<{ data: CheckUpdateResponse }> => {
-    const response = await apiClient.post('/api/v1/upgrades/check', data);
-    return response.data;
-};
-
 // 获取项目的所有升级目标
 export const getProjectUpgradeTargets = async (projectId: string): Promise<{ data: UpgradeTarget[] }> => {
     const response = await apiClient.get(`/api/v1/upgrades/projects/${projectId}`);

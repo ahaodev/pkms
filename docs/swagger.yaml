@@ -1523,71 +1523,6 @@ paths:
       summary: Get all users
       tags:
       - RBAC
-  /client-access/Release:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload artifact files for GoReleaser publish process using client
-        access token (no JWT required). Project and package are determined from the
-        access token.
-      parameters:
-      - description: Client access token for GoReleaser
-        in: header
-        name: x-access-token
-        required: true
-        type: string
-      - description: Artifact file to upload
-        in: formData
-        name: file
-        required: true
-        type: file
-      - description: Version tag (required)
-        in: formData
-        name: version
-        required: true
-        type: string
-      - description: Artifact name
-        in: formData
-        name: artifact
-        type: string
-      - description: Operating system
-        in: formData
-        name: os
-        type: string
-      - description: Architecture
-        in: formData
-        name: arch
-        type: string
-      - description: Release changelog
-        in: formData
-        name: changelog
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Upload successful
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "401":
-          description: Invalid access token
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "403":
-          description: Access token disabled or expired
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      summary: Upload artifact for GoReleaser
-      tags:
-      - Client Access
   /client-access/check-update:
     post:
       consumes:
@@ -1683,6 +1618,71 @@ paths:
           schema:
             $ref: '#/definitions/domain.Response'
       summary: Download release file
+      tags:
+      - Client Access
+  /client-access/release:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload artifact files for GoReleaser publish process using client
+        access token (no JWT required). Project and package are determined from the
+        access token.
+      parameters:
+      - description: Client access token for GoReleaser
+        in: header
+        name: x-access-token
+        required: true
+        type: string
+      - description: Artifact file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Version tag (required)
+        in: formData
+        name: version
+        required: true
+        type: string
+      - description: Artifact name
+        in: formData
+        name: artifact
+        type: string
+      - description: Operating system
+        in: formData
+        name: os
+        type: string
+      - description: Architecture
+        in: formData
+        name: arch
+        type: string
+      - description: Release changelog
+        in: formData
+        name: changelog
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Upload successful
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: Access token disabled or expired
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Upload artifact for GoReleaser
       tags:
       - Client Access
   /dashboard/activities:
@@ -2625,150 +2625,6 @@ paths:
       summary: Update project
       tags:
       - Projects
-  /projects/{id}/members:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all members associated with a specific project
-      parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Project members retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items: {}
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get project members
-      tags:
-      - Projects
-    post:
-      consumes:
-      - application/json
-      description: Add a user as a member to a specific project
-      parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Member assignment data
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Member added successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Add project member
-      tags:
-      - Projects
-  /projects/{id}/members/{userId}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a user from a specific project
-      parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Member removed successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove project member
-      tags:
-      - Projects
-  /projects/{id}/packages:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all packages associated with a specific project
-      parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Project packages retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items: {}
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get project packages
-      tags:
-      - Projects
   /projects/{projectId}/packages:
     get:
       consumes:
@@ -3652,36 +3508,6 @@ paths:
       summary: Get tenant users with roles
       tags:
       - Tenants
-  /upgrade/check:
-    post:
-      consumes:
-      - application/json
-      description: Check if there are available updates for the client
-      parameters:
-      - description: Update check request
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CheckUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully checked for updates
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Bad request - invalid parameters
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      summary: Check for updates
-      tags:
-      - Upgrades
   /upgrade/project/{projectId}/targets:
     get:
       consumes:
