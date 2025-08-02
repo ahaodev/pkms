@@ -1,7 +1,8 @@
 import {useState} from 'react';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {Card, CardContent} from '@/components/ui/card';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Download, Package as PackageIcon, Plus, Share2, Trash2} from 'lucide-react';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
@@ -97,61 +98,63 @@ export function Releases({
                 </div>
 
             </div>
-            <div className="space-y-4">
-                {filteredReleases.map((release) => (
-                    <Card key={release.id}>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                    <CardTitle className="flex items-center space-x-2">
-                                        <span>{release.version_name}</span>
-                                    </CardTitle>
-                                    <CardDescription>{release.version_code || release.version_code}</CardDescription>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Button variant="outline" size="sm"
-                                            onClick={() => handleShare(release)}>
-                                        <Share2 className="h-4 w-4 mr-2"/>
-                                    </Button>
-                                    <Button variant="outline" size="sm"
-                                            onClick={() => handleDownload(release)}>
-                                        <Download className="h-4 w-4 mr-2"/>
-                                    </Button>
-                                    <Button variant="outline" size="sm"
-                                            onClick={() => handleDelete(release)}>
-                                        <Trash2 className="h-4 w-4 mr-2"/>
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <p className="text-sm text-muted-foreground">{release.changelog}</p>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                    <div>
-                                        <span className="text-muted-foreground">文件名:</span>
-                                        <div className="font-medium">{release.file_name}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">文件大小:</span>
-                                        <div className="font-medium">{formatFileSize(release.file_size)}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">下载次数:</span>
-                                        <div className="font-medium">{release.download_count.toLocaleString()}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">发布时间:</span>
-                                        <div
-                                            className="font-medium">{formatDate(release.created_at.toISOString())}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-            {filteredReleases.length === 0 && (
+            {filteredReleases.length > 0 ? (
+                <Card>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>版本</TableHead>
+                                <TableHead>文件名</TableHead>
+                                <TableHead>大小</TableHead>
+                                <TableHead>下载次数</TableHead>
+                                <TableHead>发布时间</TableHead>
+                                <TableHead>变更日志</TableHead>
+                                <TableHead className="text-right">操作</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredReleases.map((release) => (
+                                <TableRow key={release.id}>
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{release.version_name}</span>
+                                            <span className="text-sm text-muted-foreground">{release.version_code}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="font-mono text-sm">{release.file_name}</TableCell>
+                                    <TableCell>{formatFileSize(release.file_size)}</TableCell>
+                                    <TableCell>{release.download_count.toLocaleString()}</TableCell>
+                                    <TableCell>{formatDate(release.created_at.toISOString())}</TableCell>
+                                    <TableCell className="max-w-xs">
+                                        <div className="truncate text-sm text-muted-foreground" title={release.changelog}>
+                                            {release.changelog || '无变更说明'}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex items-center justify-end space-x-1">
+                                            <Button variant="ghost" size="sm"
+                                                    onClick={() => handleShare(release)}
+                                                    className="h-8 w-8 p-0">
+                                                <Share2 className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="sm"
+                                                    onClick={() => handleDownload(release)}
+                                                    className="h-8 w-8 p-0">
+                                                <Download className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="sm"
+                                                    onClick={() => handleDelete(release)}
+                                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Card>
+            ) : (
                 <Card>
                     <CardContent className="flex items-center justify-center py-8">
                         <div className="text-center space-y-2">
