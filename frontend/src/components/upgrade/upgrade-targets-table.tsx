@@ -144,7 +144,7 @@ export function UpgradeTargetsTable({
                     <TableHeader>
                         <TableRow>
                             <TableHead>项目</TableHead>
-                            <TableHead>软件包</TableHead>
+                            <TableHead>包</TableHead>
                             <TableHead>目标版本</TableHead>
                             <TableHead>升级目标</TableHead>
                             <TableHead>文件大小</TableHead>
@@ -165,7 +165,7 @@ export function UpgradeTargetsTable({
                                         </span>
                                     </div>
                                 </TableCell>
-                                {/* 2. 软件包 */}
+                                {/* 2. 包 */}
                                 <TableCell>
                                     <div className="space-y-1">
                                         <div className="flex items-center space-x-2">
@@ -174,11 +174,6 @@ export function UpgradeTargetsTable({
                                                 {target.package_name || target.package_id}
                                             </span>
                                         </div>
-                                        {target.package_type && (
-                                            <Badge variant="outline" className="text-xs">
-                                                {target.package_type}
-                                            </Badge>
-                                        )}
                                     </div>
                                 </TableCell>
                                 {/* 3. 目标版本 */}
