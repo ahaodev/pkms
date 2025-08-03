@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useRef, useState} from "react";
-import {NavLink, useLocation} from "react-router-dom";
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {NavLink} from "react-router-dom";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
@@ -22,10 +22,20 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 import {apiClient} from '@/lib/api/api';
 import {Tenant} from '@/types/user';
 
+interface NavItemWithClickProps extends NavItemProps {
+    onClick?: () => void;
+}
+
 /**
  * NavItem 组件：简化侧边栏导航项
  */
-function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () => void }) {
+const NavItem = memo<NavItemWithClickProps>(({to, icon, label, end, onClick}) => {
+    const navLinkClassName = useCallback(({isActive}: {isActive: boolean}) =>
+        cn(
+            "flex items-center space-x-3 w-full transition-all",
+            isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+        ), []);
+
     return (
         <Button
             asChild
@@ -36,43 +46,38 @@ function NavItem({to, icon, label, end, onClick}: NavItemProps & { onClick?: () 
                 to={to}
                 end={end}
                 onClick={onClick}
-                className={({isActive}) =>
-                    cn(
-                        "flex items-center space-x-3 w-full transition-all",
-                        isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                    )
-                }
+                className={navLinkClassName}
             >
                 {icon}
                 <span>{label}</span>
             </NavLink>
         </Button>
     );
+});
+
+NavItem.displayName = 'NavItem';
+
+
+interface SidebarProps extends SimpleSidebarProps {
+    tenantList?: { id: string, name: string }[];
+    currentTenant?: { id: string, name: string } | null;
+    onTenantChange?: (tenant: { id: string, name: string }) => void;
 }
 
-
 /**
- * SimpleSidebar 组件：简化版侧边栏，适用于简洁页面布局
+ * Sidebar 组件：简化版侧边栏，适用于简洁页面布局
  */
-export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & {
-    tenantList?: { id: string, name: string }[],
-    currentTenant?: { id: string, name: string } | null,
-    onTenantChange?: (tenant: { id: string, name: string }) => void
-}) {
-    const location = useLocation();
+export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) => {
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const {user} = useAuth();
+    const {user, currentTenant, tenants, selectTenant} = useAuth();
     const [sidebarPermissions, setSidebarPermissions] = useState<string[]>([]);
     const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
 
-
-    const {currentTenant, tenants, selectTenant} = useAuth()
-
     // 切换租户逻辑
-    const handleTenantChange = async (tenant: { id: string, name: string }) => {
+    const handleTenantChange = useCallback(async (tenant: { id: string, name: string }) => {
         await selectTenant(tenant);
-        if (onTenantChange) onTenantChange(tenant);
-    };
+        onTenantChange?.(tenant);
+    }, [selectTenant, onTenantChange]);
 
     // 处理移动端点击导航项关闭菜单
     const handleNavClick = useCallback(() => {
@@ -92,9 +97,8 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
             } else {
                 setSidebarPermissions([]);
             }
-        } catch (error) {
+        } catch {
             // Silently handle permission fetch failures - just hide all sidebar items
-            console.error(error)
             setSidebarPermissions([]);
         }
     }, [user, currentTenant]);
@@ -108,32 +112,107 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
         return sidebarPermissions.includes(item);
     }, [sidebarPermissions]);
 
+    // 导航项配置，避免重复渲染
+    const navigationItems = useMemo(() => [
+        {
+            permission: "dashboard",
+            to: "/",
+            icon: <BarChart3 className="h-5 w-5"/>,
+            label: "概览",
+            end: true
+        },
+        {
+            permission: ["projects", "packages"],
+            to: "/hierarchy",
+            icon: <Boxes className="h-5 w-5"/>,
+            label: "项目包管理"
+        },
+        {
+            permission: "upgrade",
+            to: "/upgrade",
+            icon: <Rocket className="h-5 w-5"/>,
+            label: "升级管理"
+        },
+        {
+            permission: "access-manager",
+            to: "/access-manager",
+            icon: <Shield className="h-5 w-5"/>,
+            label: "接入管理"
+        },
+        {
+            permission: "shares",
+            to: "/shares",
+            icon: <Share2 className="h-5 w-5"/>,
+            label: "分享管理"
+        },
+        {
+            permission: "tenants",
+            to: "/tenants",
+            icon: <Globe className="h-5 w-5"/>,
+            label: "租户管理"
+        },
+        {
+            permission: "users",
+            to: "/users",
+            icon: <Users className="h-5 w-5"/>,
+            label: "用户管理"
+        },
+        {
+            permission: "permissions",
+            to: "/permissions",
+            icon: <Lock className="h-5 w-5"/>,
+            label: "权限管理"
+        },
+        {
+            permission: "settings",
+            to: "/settings",
+            icon: <SettingsIcon className="h-5 w-5"/>,
+            label: "设置"
+        }
+    ], []);
+
+    // 检查权限的辅助函数
+    const checkPermission = useCallback((permission: string | string[]) => {
+        if (Array.isArray(permission)) {
+            return permission.some(p => hasPermission(p));
+        }
+        return hasPermission(permission);
+    }, [hasPermission]);
+
+    // 移动端点击外部关闭、滚动处理和键盘导航
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
+        const handleClickOutside = (event: MouseEvent) => {
             if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
                 onClose();
             }
-        }
+        };
 
-        // 只在移动端打开时添加点击外部关闭的监听器
-        if (isOpen && window.innerWidth < 1024) {
-            document.addEventListener("mousedown", handleClickOutside);
-            // 阻止背景滚动
-            document.body.style.overflow = 'hidden';
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+
+        const isMobile = window.innerWidth < 1024;
+        
+        if (isOpen) {
+            document.addEventListener("keydown", handleKeyDown);
+            
+            if (isMobile) {
+                document.addEventListener("mousedown", handleClickOutside);
+                document.body.style.overflow = 'hidden';
+            }
         } else {
             document.body.style.overflow = 'auto';
         }
 
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = 'auto';
         };
     }, [isOpen, onClose]);
 
-    // 移除自动关闭逻辑，让用户手动控制
-    useEffect(() => {
-        // 不再自动关闭菜单
-    }, [location, onClose]);
 
     return (
         <>
@@ -176,24 +255,27 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                 {/* 租户下拉列表 */}
                                 {tenantDropdownOpen && Array.isArray(tenants) && tenants.length > 0 && (
                                     <div
-                                        className="absolute left-12 top-14 z-50 bg-white border rounded shadow-lg min-w-[180px]"
+                                        className="absolute left-12 top-14 z-50 bg-background border rounded shadow-lg min-w-[180px]"
                                         onMouseLeave={() => setTenantDropdownOpen(false)}
                                     >
-                                        {tenants?.map((tenant: Tenant) => (
-                                            <div
-                                                key={tenant.id}
-                                                className={cn(
-                                                    "px-4 py-2 cursor-pointer hover:bg-accent",
-                                                    tenant.id === currentTenant?.id ? "bg-accent text-primary" : ""
-                                                )}
-                                                onClick={() => {
-                                                    setTenantDropdownOpen(false);
-                                                    handleTenantChange(tenant);
-                                                }}
-                                            >
-                                                {tenant.name}
-                                            </div>
-                                        ))}
+                                        {tenants.map((tenant: Tenant) => {
+                                            const isSelected = tenant.id === currentTenant?.id;
+                                            return (
+                                                <div
+                                                    key={tenant.id}
+                                                    className={cn(
+                                                        "px-4 py-2 cursor-pointer hover:bg-accent transition-colors",
+                                                        isSelected ? "bg-accent text-primary" : ""
+                                                    )}
+                                                    onClick={() => {
+                                                        setTenantDropdownOpen(false);
+                                                        handleTenantChange(tenant);
+                                                    }}
+                                                >
+                                                    {tenant.name}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -210,89 +292,22 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
 
                     {/* Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <div className="space-y-1">
-                            {hasPermission("dashboard") && (
-                                <NavItem
-                                    to="/"
-                                    icon={<BarChart3 className="h-5 w-5"/>}
-                                    label="概览"
-                                    end
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {(hasPermission("projects") || hasPermission("packages")) && (
-                                <NavItem
-                                    to="/hierarchy"
-                                    icon={<Boxes className="h-5 w-5"/>}
-                                    label="项目包管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("upgrade") && (
-                                <NavItem
-                                    to="/upgrade"
-                                    icon={<Rocket className="h-5 w-5"/>}
-                                    label="升级管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("access-manager") && (
-                                <NavItem
-                                    to="/access-manager"
-                                    icon={<Shield className="h-5 w-5"/>}
-                                    label="接入管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("shares") && (
-                                <NavItem
-                                    to="/shares"
-                                    icon={<Share2 className="h-5 w-5"/>}
-                                    label="分享管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("tenants") && (
-                                <NavItem
-                                    to="/tenants"
-                                    icon={<Globe className="h-5 w-5"/>}
-                                    label="租户管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("users") && (
-                                <NavItem
-                                    to="/users"
-                                    icon={<Users className="h-5 w-5"/>}
-                                    label="用户管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("permissions") && (
-                                <NavItem
-                                    to="/permissions"
-                                    icon={<Lock className="h-5 w-5"/>}
-                                    label="权限管理"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-
-                            {hasPermission("settings") && (
-                                <NavItem
-                                    to="/settings"
-                                    icon={<SettingsIcon className="h-5 w-5"/>}
-                                    label="设置"
-                                    onClick={handleNavClick}
-                                />
-                            )}
-                        </div>
+                        <nav className="space-y-1" role="navigation" aria-label="主导航">
+                            {navigationItems.map((item) => {
+                                if (!checkPermission(item.permission)) return null;
+                                
+                                return (
+                                    <NavItem
+                                        key={item.to}
+                                        to={item.to}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        end={item.end}
+                                        onClick={handleNavClick}
+                                    />
+                                );
+                            })}
+                        </nav>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
@@ -302,4 +317,6 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
             </div>
         </>
     );
-}
+});
+
+Sidebar.displayName = 'Sidebar';

@@ -1,3 +1,4 @@
+import React, {Suspense, useMemo} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import {Layout} from "@/components/layout";
@@ -15,7 +16,48 @@ function AppLoader() {
     );
 }
 
-// Route guard component - updated to use proper permission checking
+// Error boundary for route loading failures
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error?: Error;
+}
+
+class RouteErrorBoundary extends React.Component<
+    { children: React.ReactNode },
+    ErrorBoundaryState
+> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return { hasError: true, error };
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="flex items-center justify-center h-screen">
+                    <div className="text-center">
+                        <h2 className="text-lg font-semibold text-destructive mb-2">页面加载失败</h2>
+                        <p className="text-muted-foreground mb-4">请刷新页面重试</p>
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                        >
+                            刷新页面
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
+// Route guard component - optimized for better permission handling
 interface RouteGuardProps {
     children: React.ReactNode;
     requiresAdmin?: boolean;
@@ -23,23 +65,22 @@ interface RouteGuardProps {
 
 function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
     const {hasRole} = useAuth();
-
-    // If admin role is required but user doesn't have it, allow access but let the component handle permission display
-    // This prevents redirects and matches the sidebar permission behavior
-    if (requiresAdmin && !hasRole('admin')) {
-        // Instead of redirecting, we'll let the individual page components handle permission-based content display
-        // This allows admin users to access the routes properly
+    if(requiresAdmin && !hasRole('admin')){
         console.warn('User does not have admin role for this route, but allowing access for component-level permission handling');
     }
-
+    // Allow access for component-level permission handling
+    // Individual components will handle permission-based content display
     return <>{children}</>;
 }
 
 // Protected routes for authenticated users
 function ProtectedRoutes() {
-    const protectedRoutes = routes.filter(route => route.requiresAuth);
-    const publicRoutes = routes.filter(route => !route.requiresAuth);
-    console.log(protectedRoutes)
+    // Memoize route filtering to avoid repeated calculations
+    const {protectedRoutes, publicRoutes} = useMemo(() => ({
+        protectedRoutes: routes.filter(route => route.requiresAuth),
+        publicRoutes: routes.filter(route => !route.requiresAuth)
+    }), []);
+
     return (
         <Routes>
             {/* Public routes accessible even when authenticated */}
@@ -54,22 +95,30 @@ function ProtectedRoutes() {
             {/* Protected routes in layout */}
             <Route path="/*" element={
                 <Layout>
-                    <Routes>
-                        {protectedRoutes.map(({path, element: Component, requiresAdmin}) => (
-                            <Route
-                                key={path}
-                                path={path}
-                                element={
-                                    <RouteGuard requiresAdmin={requiresAdmin}>
-                                        <Component/>
-                                    </RouteGuard>
-                                }
-                            />
-                        ))}
+                    <Suspense fallback={
+                        <div className="flex items-center justify-center h-64">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                        </div>
+                    }>
+                        <RouteErrorBoundary>
+                            <Routes>
+                                {protectedRoutes.map(({path, element: Component, requiresAdmin}) => (
+                                    <Route
+                                        key={path}
+                                        path={path}
+                                        element={
+                                            <RouteGuard requiresAdmin={requiresAdmin}>
+                                                <Component/>
+                                            </RouteGuard>
+                                        }
+                                    />
+                                ))}
 
-                        {/* Catch all - redirect to dashboard */}
-                        <Route path="*" element={<Navigate to="/" replace/>}/>
-                    </Routes>
+                                {/* Catch all - redirect to dashboard */}
+                                <Route path="*" element={<Navigate to="/" replace/>}/>
+                            </Routes>
+                        </RouteErrorBoundary>
+                    </Suspense>
                 </Layout>
             }/>
         </Routes>
@@ -78,21 +127,32 @@ function ProtectedRoutes() {
 
 // Public routes for unauthenticated users
 function PublicRoutes() {
-    const publicRoutes = routes.filter(route => !route.requiresAuth);
+    // Memoize public routes filtering
+    const publicRoutes = useMemo(() => 
+        routes.filter(route => !route.requiresAuth), []
+    );
 
     return (
-        <Routes>
-            {publicRoutes.map(({path, element: Component}) => (
-                <Route
-                    key={path}
-                    path={path}
-                    element={<Component/>}
-                />
-            ))}
+        <Suspense fallback={
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <RouteErrorBoundary>
+                <Routes>
+                    {publicRoutes.map(({path, element: Component}) => (
+                        <Route
+                            key={path}
+                            path={path}
+                            element={<Component/>}
+                        />
+                    ))}
 
-            {/* Catch all - redirect to login */}
-            <Route path="*" element={<Navigate to="/login" replace/>}/>
-        </Routes>
+                    {/* Catch all - redirect to login */}
+                    <Route path="*" element={<Navigate to="/login" replace/>}/>
+                </Routes>
+            </RouteErrorBoundary>
+        </Suspense>
     );
 }
 
@@ -102,16 +162,9 @@ export function AppRoutes() {
 
     // Show loading screen while checking authentication
     if (isLoading) {
-        console.log('AppRoutes: showing loading screen');
         return <AppLoader/>;
     }
-    console.log(user)
+
     // Render appropriate routes based on authentication status
-    if (user) {
-        console.log('AppRoutes: user authenticated, showing protected routes');
-        return <ProtectedRoutes/>;
-    } else {
-        console.log('AppRoutes: user not authenticated, showing public routes');
-        return <PublicRoutes/>;
-    }
+    return user ? <ProtectedRoutes/> : <PublicRoutes/>;
 }

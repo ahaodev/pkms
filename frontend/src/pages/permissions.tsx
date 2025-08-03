@@ -1,25 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { Shield } from 'lucide-react';
-import { apiClient } from '@/lib/api/api';
-import { useAuth } from '@/providers/auth-provider.tsx';
-import {
-    UserPermissionsDialog,
-    PermissionsHeader,
-    PermissionsTabs
-} from '@/components/permissions';
+import React, {useEffect, useState} from 'react';
+import {toast} from 'sonner';
+import {Shield} from 'lucide-react';
+import {apiClient} from '@/lib/api/api';
+import {useAuth} from '@/providers/auth-provider.tsx';
+import {PermissionsHeader, PermissionsTabs, UserPermissionsDialog} from '@/components/permissions';
 import RoleManagement from '@/components/permissions/RoleManagement';
 import UserManagement from '@/components/permissions/UserManagement';
-import type {
-    EnhancedPolicy,
-    EnhancedRole,
-    User,
-    UserPermission
-} from '@/types';
+import type {EnhancedPolicy, EnhancedRole, User, UserPermission} from '@/types';
 
 const PermissionsPage: React.FC = () => {
-    const { hasRole } = useAuth();
-    
+    const {hasRole} = useAuth();
+
     // State for data
     const [enhancedPolicies, setEnhancedPolicies] = useState<EnhancedPolicy[]>([]);
     const [enhancedRoles, setEnhancedRoles] = useState<EnhancedRole[]>([]);
@@ -27,7 +18,7 @@ const PermissionsPage: React.FC = () => {
     const [actions, setActions] = useState<string[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [userPermissions, setUserPermissions] = useState<UserPermission[]>([]);
-    
+
     // UI state
     const [showUserPermissionsDialog, setShowUserPermissionsDialog] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
@@ -160,9 +151,9 @@ const PermissionsPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <PermissionsHeader 
-                title="权限管理" 
-                description="管理系统角色权限配置和用户权限分配" 
+            <PermissionsHeader
+                title="权限管理"
+                description="管理系统角色权限配置和用户权限分配"
             />
 
             <PermissionsTabs
