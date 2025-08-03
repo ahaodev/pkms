@@ -36,11 +36,13 @@ export function TokenDisplayDialog({
     const handleCopyExample = async () => {
         if (!clientAccess) return;
 
-        const example = `{
-  "access_token": "${clientAccess.access_token}",
-  "current_version": "1.0.0",
-  "client_info": "MyApp/1.0.0"
-}`;
+        const example = `curl -X POST /api/v1/client-access/check-update \\
+  -H "Content-Type: application/json" \\
+  -H "access-token: ${clientAccess.access_token}" \\
+  -d '{
+    "current_version": "1.0.0",
+    "client_info": "MyApp/1.0.0"
+  }'`;
 
         try {
             await navigator.clipboard.writeText(example);
@@ -187,14 +189,22 @@ export function TokenDisplayDialog({
                         </div>
 
                         <div className="bg-muted p-4 rounded-lg">
-                            <p className="text-sm font-medium mb-2">POST /api/v1/upgrade/check</p>
-                            <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            <p className="text-sm font-medium mb-2">POST /api/v1/client-access/check-update</p>
+                            <div className="space-y-2">
+                                <div>
+                                    <p className="text-xs text-muted-foreground mb-1">Headers:</p>
+                                    <pre className="text-sm text-muted-foreground">access-token: {showToken ? clientAccess.access_token : maskedToken(clientAccess.access_token)}</pre>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground mb-1">Request Body:</p>
+                                    <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
 {`{
-  "access_token": "${showToken ? clientAccess.access_token : maskedToken(clientAccess.access_token)}",
   "current_version": "1.0.0",
   "client_info": "MyApp/1.0.0"
 }`}
-              </pre>
+                                    </pre>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
