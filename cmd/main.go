@@ -23,7 +23,7 @@ import (
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
+// @host      localhost:65080
 // @BasePath  /api
 
 // @securityDefinitions.apikey BearerAuth
@@ -44,7 +44,7 @@ func main() {
 
 	apiEngine := gin.Default()
 	route.Setup(app, timeout, db, casbin, fileStorage, apiEngine)
-	err := apiEngine.Run(":8080")
+	err := apiEngine.Run(":65080")
 	if err != nil {
 		pkg.Log.Error(err)
 	}

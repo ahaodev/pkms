@@ -32,7 +32,7 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start development server (port 5173, proxies /api to localhost:8080)
+# Start development server (port 5173, proxies /api to localhost:65080)
 npm run dev
 
 # Build for production
@@ -427,7 +427,7 @@ test('renders user information correctly', () => {
 ### Development
 ```bash
 # .env.development
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:65080
 VITE_ENABLE_DEV_TOOLS=true
 ```
 
