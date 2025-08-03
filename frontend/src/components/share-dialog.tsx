@@ -18,10 +18,15 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
+    // 构建完整的分享URL
+    const fullShareUrl = shareUrl.startsWith('http') 
+        ? shareUrl 
+        : `${window.location.origin}${shareUrl}`;
+
     // 生成二维码
     useEffect(() => {
         if (shareUrl && isOpen) {
-            QRCode.toDataURL(shareUrl, {
+            QRCode.toDataURL(fullShareUrl, {
                 width: 200,
                 margin: 2,
                 color: {
@@ -32,11 +37,11 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
                 .then(url => setQrCodeUrl(url))
                 .catch(err => console.error('生成二维码失败:', err));
         }
-    }, [shareUrl, isOpen]);
+    }, [fullShareUrl, isOpen]);
 
     const handleCopyUrl = async () => {
         try {
-            await navigator.clipboard.writeText(shareUrl);
+            await navigator.clipboard.writeText(fullShareUrl);
             setCopied(true);
             toast.success('链接已复制', {
                 description: '分享链接已复制到剪贴板。',
@@ -126,7 +131,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName}: ShareDialo
                         <div className="flex space-x-2">
                             <Input
                                 id="share-url"
-                                value={shareUrl}
+                                value={fullShareUrl}
                                 readOnly
                                 className="flex-1"
                             />

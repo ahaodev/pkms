@@ -8,6 +8,8 @@ import (
 	"pkms/ent/packages"
 	"pkms/ent/project"
 	"pkms/ent/release"
+	"pkms/ent/share"
+	"pkms/ent/upgrade"
 )
 
 type entReleaseRepository struct {
@@ -110,7 +112,37 @@ func (rr *entReleaseRepository) GetByShareToken(c context.Context, token string)
 }
 
 func (rr *entReleaseRepository) Delete(c context.Context, id string) error {
-	return rr.client.Release.DeleteOneID(id).Exec(c)
+	// 使用事务来确保数据一致性
+	tx, err := rr.client.Tx(c)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+
+	// 首先删除所有相关的 shares
+	_, err = tx.Share.Delete().Where(share.ReleaseID(id)).Exec(c)
+	if err != nil {
+		return tx.Rollback()
+	}
+
+	// 然后删除所有相关的 upgrades
+	_, err = tx.Upgrade.Delete().Where(upgrade.ReleaseID(id)).Exec(c)
+	if err != nil {
+		return tx.Rollback()
+	}
+
+	// 最后删除 release 记录
+	err = tx.Release.DeleteOneID(id).Exec(c)
+	if err != nil {
+		return tx.Rollback()
+	}
+
+	return tx.Commit()
 }
 
 func (rr *entReleaseRepository) IncrementDownloadCount(c context.Context, id string) error {

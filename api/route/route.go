@@ -96,6 +96,10 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
+	shareManagementRouter := protectedRouter.Group("/shares")
+	shareManagementRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	NewShareManagementRouter(env, timeout, db, fileStorage, shareManagementRouter)
+
 	// 🔥 普通功能路由 - 登录即可访问
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问

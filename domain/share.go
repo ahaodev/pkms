@@ -33,10 +33,26 @@ type ShareResponse struct {
 	ExpiredAt   *time.Time `json:"expired_at,omitempty"`
 }
 
+// ShareListItem 分享列表项
+type ShareListItem struct {
+	ID          string     `json:"id"`
+	Code        string     `json:"code"`
+	ProjectName string     `json:"project_name"`
+	PackageName string     `json:"package_name"`
+	Version     string     `json:"version"`
+	FileName    string     `json:"file_name"`
+	ShareURL    string     `json:"share_url"`
+	StartAt     time.Time  `json:"start_at"`
+	ExpiredAt   *time.Time `json:"expired_at,omitempty"`
+	IsExpired   bool       `json:"is_expired"`
+}
+
 type ShareRepository interface {
-	Create(c context.Context, share *Share) error
+	Create(c context.Context, share *Share) (*Share, error)
 	GetByCode(c context.Context, code string) (*Share, error)
 	GetByReleaseID(c context.Context, releaseID string) ([]*Share, error)
+	GetAllByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	DeleteByID(c context.Context, id string) error
 	DeleteExpired(c context.Context) error
 }
 
@@ -44,4 +60,6 @@ type ShareUsecase interface {
 	CreateShare(c context.Context, req *CreateShareRequest) (*ShareResponse, error)
 	GetShareByCode(c context.Context, code string) (*Share, error)
 	ValidateShare(c context.Context, code string) (*Share, error)
+	GetAllSharesByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	DeleteShare(c context.Context, id string) error
 }

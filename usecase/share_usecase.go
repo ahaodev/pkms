@@ -67,22 +67,22 @@ func (su *shareUsecase) CreateShare(c context.Context, req *domain.CreateShareRe
 		ExpiredAt: expiredAt,
 	}
 
-	err = su.shareRepository.Create(ctx, share)
+	createdShare, err := su.shareRepository.Create(ctx, share)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create share: %w", err)
 	}
 
-	// Build response
+	// Build response using the returned share data (which might be existing share)
 	response := &domain.ShareResponse{
-		ID:          share.ID,
-		Code:        share.Code,
-		ShareURL:    fmt.Sprintf("/share/%s", share.Code),
+		ID:          createdShare.ID,
+		Code:        createdShare.Code,
+		ShareURL:    fmt.Sprintf("/share/%s", createdShare.Code),
 		ReleaseID:   req.ReleaseID,
 		ExpiryHours: req.ExpiryHours,
 		FileName:    release.FileName,
 		Version:     release.VersionCode,
-		StartAt:     share.StartAt,
-		ExpiredAt:   share.ExpiredAt,
+		StartAt:     createdShare.StartAt,
+		ExpiredAt:   createdShare.ExpiredAt,
 	}
 
 	return response, nil
@@ -110,4 +110,18 @@ func (su *shareUsecase) ValidateShare(c context.Context, code string) (*domain.S
 	}
 
 	return share, nil
+}
+
+func (su *shareUsecase) GetAllSharesByTenant(c context.Context, tenantID string) ([]*domain.ShareListItem, error) {
+	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
+	defer cancel()
+
+	return su.shareRepository.GetAllByTenant(ctx, tenantID)
+}
+
+func (su *shareUsecase) DeleteShare(c context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
+	defer cancel()
+
+	return su.shareRepository.DeleteByID(ctx, id)
 }

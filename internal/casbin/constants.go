@@ -19,13 +19,14 @@ const (
 	SidebarSettings    = "settings"
 	SidebarUpgrade     = "upgrade"
 	ClientAccess       = "access-manager"
+	ShareManager       = "shares"
 )
 
 //var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, SidebarUpgrade, ClientAccess}
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, SidebarSettings}
-var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
-var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess}
+var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
+var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
+var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
 var DEFAULT_SIDEBAR = []string{SidebarDashboard}
 

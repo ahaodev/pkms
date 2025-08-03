@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"pkms/bootstrap"
 	"pkms/domain"
+	"pkms/internal/constants"
 	"pkms/pkg"
 	"strconv"
 
@@ -74,4 +75,49 @@ func (sc *ShareController) DownloadSharedRelease(c *gin.Context) {
 	c.DataFromReader(http.StatusOK, release.FileSize, "application/octet-stream", reader, map[string]string{
 		"Content-Disposition": "attachment; filename=" + release.FileName,
 	})
+}
+
+// GetShares 获取分享列表
+// @Summary      Get share list
+// @Description  Get all shares for the current tenant
+// @Tags         Shares
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object} domain.Response  "Successfully retrieved shares"
+// @Failure      500  {object} domain.Response  "Failed to get shares"
+// @Router       /shares [get]
+func (sc *ShareController) GetShares(c *gin.Context) {
+	tenantID := c.GetHeader(constants.TenantID)
+
+	shares, err := sc.ShareUsecase.GetAllSharesByTenant(c, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("Failed to get shares: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(shares))
+}
+
+// DeleteShare 删除分享
+// @Summary      Delete share
+// @Description  Delete a specific share by ID
+// @Tags         Shares
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string  true  "Share ID"
+// @Success      200  {object} domain.Response  "Successfully deleted share"
+// @Failure      500  {object} domain.Response  "Delete share failed"
+// @Router       /shares/{id} [delete]
+func (sc *ShareController) DeleteShare(c *gin.Context) {
+	shareID := c.Param("id")
+
+	err := sc.ShareUsecase.DeleteShare(c, shareID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("Delete share failed: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess("Share deleted successfully"))
 }

@@ -6,6 +6,7 @@ export * from './users';
 export * from './dashboard';
 export * from './files';
 export * from './access-manager.ts';
+export * from './shares';
 
 // 为了向后兼容，可以单独导出每个模块
 export * as AuthAPI from './auth';
@@ -15,3 +16,4 @@ export * as UsersAPI from './users';
 export * as DashboardAPI from './dashboard';
 export * as FilesAPI from './files';
 export * as ClientAccessAPI from './access-manager.ts';
+export * as SharesAPI from './shares';

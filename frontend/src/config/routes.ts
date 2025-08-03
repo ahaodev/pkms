@@ -7,8 +7,9 @@ import UsersPage from "@/pages/users";
 import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
 import TenantsPage from "@/pages/tenants";
-import SharePage from "@/pages/share";
 import ClientAccessPage from "@/pages/client-access";
+import SharePage from "@/pages/share.tsx";
+import SharesManagerPage from "@/pages/shares-manager.tsx";
 
 export interface RouteConfig {
     path: string;
@@ -49,6 +50,11 @@ export const routes: RouteConfig[] = [
     }, {
         path: "/access-manager",
         element: ClientAccessPage,
+        requiresAuth: true,
+    },
+    {
+        path: "/shares",
+        element: SharesManagerPage,
         requiresAuth: true,
     },
     {

@@ -12,6 +12,7 @@ import {
     Package,
     Rocket,
     Settings as SettingsIcon,
+    Share2,
     Shield,
     Users,
     X
@@ -243,6 +244,15 @@ export function Sidebar({isOpen, onClose, onTenantChange}: SimpleSidebarProps & 
                                     to="/access-manager"
                                     icon={<Shield className="h-5 w-5"/>}
                                     label="接入管理"
+                                    onClick={handleNavClick}
+                                />
+                            )}
+
+                            {hasPermission("shares") && (
+                                <NavItem
+                                    to="/shares"
+                                    icon={<Share2 className="h-5 w-5"/>}
+                                    label="分享管理"
                                     onClick={handleNavClick}
                                 />
                             )}
