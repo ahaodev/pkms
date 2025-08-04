@@ -226,12 +226,13 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 	packageID := clientAccess.PackageID
 
 	// 构建文件路径，支持GoReleaser的文件组织方式
-	filePath := "releases/" + packageID + "/" + version + "/" + header.Filename
+	hierarchicalPrefix := "releases/" + packageID + "/" + version
 
 	// 准备上传请求
 	uploadReq := &domain.UploadRequest{
 		Bucket:      cac.Env.S3Bucket,
-		ObjectName:  filePath,
+		ObjectName:  header.Filename,
+		Prefix:      hierarchicalPrefix,
 		Reader:      file,
 		Size:        header.Size,
 		ContentType: "application/octet-stream",

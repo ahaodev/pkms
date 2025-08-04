@@ -47,6 +47,11 @@ func (dfr *diskFileRepository) Upload(c context.Context, req *domain.UploadReque
 
 	filePath := filepath.Join(bucketPath, objectName)
 
+	// 确保目标文件的目录存在
+	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+		return nil, fmt.Errorf("failed to create file directory: %v", err)
+	}
+
 	// 创建目标文件
 	file, err := os.Create(filePath)
 	if err != nil {
