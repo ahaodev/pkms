@@ -93,7 +93,7 @@ func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, 
 func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
 	// 检查是否是系统内置admin用户，如果是，在任何租户中都返回admin角色
 	if m.IsSystemAdmin(userID) {
-		return []string{domain.RoleAdmin}
+		return []string{domain.SystemRoleAdmin}
 	}
 
 	roles, _ := m.enforcer.GetRolesForUser(userID, tenantID)
@@ -253,7 +253,7 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 	// 基于角色返回权限
 	for _, role := range userRoles {
 		switch role {
-		case domain.RoleAdmin:
+		case domain.SystemRoleAdmin:
 			return ADMIN_SIDEBAR
 		case domain.TenantRoleOwner:
 			return OWNER_SIDEBAR

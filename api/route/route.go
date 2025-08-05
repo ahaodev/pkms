@@ -68,36 +68,36 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 
 	// 🔥 业务功能路由 - 认证用户都可访问项目（admin, owner, user）
 	projectRouter := protectedRouter.Group("/projects")
-	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewProjectRouter(env, timeout, db, projectRouter)
 
 	packageRouter := protectedRouter.Group("/packages")
-	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
 	releaseRouter := protectedRouter.Group("/releases")
-	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
 	// 🔥 系统管理路由 - 只有admin可访问
 	userRouter := protectedRouter.Group("/user")
-	userRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	userRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
 	NewUserRouter(app, timeout, db, userRouter)
 
 	tenantRouter := protectedRouter.Group("/tenants")
-	tenantRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	tenantRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
 	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
 
 	upgradeRouter := protectedRouter.Group("/upgrades")
-	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewUpgradeRouter(env, timeout, db, upgradeRouter)
 
 	clientAccessRouter := protectedRouter.Group("/access-manager")
-	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
 	shareManagementRouter := protectedRouter.Group("/shares")
-	shareManagementRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.RoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	shareManagementRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewShareManagementRouter(env, timeout, db, fileStorage, shareManagementRouter)
 
 	// 🔥 普通功能路由 - 登录即可访问
@@ -111,6 +111,6 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 
 	// 🔥 系统设置路由 - 只有admin可访问
 	settingsRouter := protectedRouter.Group("/settings")
-	settingsRouter.Use(casbinMiddleware.RequireRole(domain.RoleAdmin))
+	settingsRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
 	NewSettingRouter(app, timeout, db, settingsRouter)
 }
