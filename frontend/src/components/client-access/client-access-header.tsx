@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 
 interface ClientAccessHeaderProps {
   onCreateClick: () => void;
@@ -7,17 +7,14 @@ interface ClientAccessHeaderProps {
 
 export function ClientAccessHeader({ onCreateClick }: ClientAccessHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">接入管理</h1>
-        <p className="text-muted-foreground">
-          管理客户端设备的接入凭证和访问权限
-        </p>
-      </div>
-      <Button onClick={onCreateClick}>
-        <Plus className="mr-2 h-4 w-4" />
-        创建接入凭证
-      </Button>
-    </div>
+    <PageHeader
+      title="接入管理"
+      description="管理客户端设备的接入凭证和访问权限"
+      action={{
+        label: "创建接入凭证",
+        onClick: onCreateClick,
+        icon: Plus
+      }}
+    />
   );
 }
