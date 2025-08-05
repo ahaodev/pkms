@@ -57,12 +57,6 @@ func (ru *releaseUsecase) GetLatestRelease(c context.Context, packageID string) 
 	return ru.releaseRepository.GetLatestByPackageID(ctx, packageID)
 }
 
-func (ru *releaseUsecase) GetReleaseByShareToken(c context.Context, token string) (*domain.Release, error) {
-	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
-	defer cancel()
-	return ru.releaseRepository.GetByShareToken(ctx, token)
-}
-
 func (ru *releaseUsecase) DeleteRelease(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, ru.contextTimeout)
 	defer cancel()

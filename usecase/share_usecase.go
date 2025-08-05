@@ -88,13 +88,6 @@ func (su *shareUsecase) CreateShare(c context.Context, req *domain.CreateShareRe
 	return response, nil
 }
 
-func (su *shareUsecase) GetShareByCode(c context.Context, code string) (*domain.Share, error) {
-	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
-	defer cancel()
-
-	return su.shareRepository.GetByCode(ctx, code)
-}
-
 func (su *shareUsecase) ValidateShare(c context.Context, code string) (*domain.Share, error) {
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
 	defer cancel()

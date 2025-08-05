@@ -29,21 +29,17 @@ type UserRepository interface {
 	GetByID(c context.Context, id string) (User, error)
 	Update(c context.Context, user *User) error
 	Delete(c context.Context, id string) error
-	GetUserProjects(c context.Context, userID string) ([]Project, error)
 }
 
 type UserUseCase interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]User, error)
-	GetByUserName(c context.Context, userName string) (User, error)
 	GetByID(c context.Context, id string) (User, error)
 	Update(c context.Context, user *User) error
+	UpdatePartial(c context.Context, userID string, updates UserUpdateRequest) error
 	Delete(c context.Context, id string) error
-	GetUserProjects(c context.Context, userID string) ([]Project, error)
 	UpdateProfile(c context.Context, userID string, updates ProfileUpdate) error
 	UpdatePassword(c context.Context, userID string, passwordUpdate PasswordUpdate) error
-	AssignUserToProject(c context.Context, userID, projectID string) error
-	UnassignUserFromProject(c context.Context, userID, projectID string) error
 }
 
 // ProfileUpdate represents profile update data
@@ -56,4 +52,11 @@ type ProfileUpdate struct {
 type PasswordUpdate struct {
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
+}
+
+// UserUpdateRequest represents partial user update data
+type UserUpdateRequest struct {
+	Name     *string `json:"name,omitempty"`
+	Password *string `json:"password,omitempty"`
+	IsActive *bool   `json:"is_active,omitempty"`
 }

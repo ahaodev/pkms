@@ -58,7 +58,6 @@ type ShareRepository interface {
 
 type ShareUsecase interface {
 	CreateShare(c context.Context, req *CreateShareRequest) (*ShareResponse, error)
-	GetShareByCode(c context.Context, code string) (*Share, error)
 	ValidateShare(c context.Context, code string) (*Share, error)
 	GetAllSharesByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
 	DeleteShare(c context.Context, id string) error

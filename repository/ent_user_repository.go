@@ -160,31 +160,3 @@ func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) (
 
 	return result, nil
 }
-
-func (ur *entUserRepository) GetUserProjects(c context.Context, userID string) ([]domain.Project, error) {
-	// First get the user to access their created projects
-	userEntity, err := ur.client.User.
-		Query().
-		Where(user.ID(userID)).
-		WithCreatedProjects().
-		First(c)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var result []domain.Project
-	for _, p := range userEntity.Edges.CreatedProjects {
-		result = append(result, domain.Project{
-			ID:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Icon:        p.Icon,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-			CreatedBy:   p.CreatedBy,
-		})
-	}
-
-	return result, nil
-}

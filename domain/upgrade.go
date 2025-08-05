@@ -156,8 +156,6 @@ type UpgradeUsecase interface {
 	UpdateUpgradeTarget(ctx context.Context, id string, request *UpdateUpgradeTargetRequest) error
 	// 删除升级目标
 	DeleteUpgradeTarget(ctx context.Context, id string) error
-	// 检查更新（供客户端调用）
-	CheckUpdate(ctx context.Context, request *CheckUpdateRequest) (*CheckUpdateResponse, error)
 	// 通过access token检查更新
 	CheckUpdateByToken(ctx context.Context, request *CheckUpdateRequest, clientIP, accessToken string) (*CheckUpdateResponse, error)
 	// 获取项目的所有升级目标

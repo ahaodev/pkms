@@ -104,12 +104,6 @@ func (uu *userUsecase) Delete(c context.Context, id string) error {
 	return uu.userRepository.Delete(ctx, id)
 }
 
-func (uu *userUsecase) GetUserProjects(c context.Context, userID string) ([]domain.Project, error) {
-	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
-	defer cancel()
-	return uu.userRepository.GetUserProjects(ctx, userID)
-}
-
 func (uu *userUsecase) UpdateProfile(c context.Context, userID string, updates domain.ProfileUpdate) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
@@ -155,36 +149,31 @@ func (uu *userUsecase) UpdatePassword(c context.Context, userID string, password
 	return uu.userRepository.Update(ctx, &user)
 }
 
-func (uu *userUsecase) AssignUserToProject(c context.Context, userID, projectID string) error {
+func (uu *userUsecase) UpdatePartial(c context.Context, userID string, updates domain.UserUpdateRequest) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 
-	// This would typically involve creating a relationship in a join table
-	// For now, we'll just validate that both user and project exist
-	_, err := uu.userRepository.GetByID(ctx, userID)
+	// Get existing user
+	user, err := uu.userRepository.GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
 
-	// TODO: Add project existence check and create relationship
-	// This requires access to the project repository or a many-to-many table
-
-	return nil
-}
-
-func (uu *userUsecase) UnassignUserFromProject(c context.Context, userID, projectID string) error {
-	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
-	defer cancel()
-
-	// This would typically involve removing a relationship from a join table
-	// For now, we'll just validate that both user and project exist
-	_, err := uu.userRepository.GetByID(ctx, userID)
-	if err != nil {
-		return err
+	// Apply partial updates
+	if updates.Name != nil {
+		user.Name = *updates.Name
+	}
+	if updates.IsActive != nil {
+		user.IsActive = *updates.IsActive
+	}
+	if updates.Password != nil && *updates.Password != "" {
+		// 🔒 加密密码
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*updates.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
 	}
 
-	// TODO: Add project existence check and remove relationship
-	// This requires access to the project repository or a many-to-many table
-
-	return nil
+	return uu.userRepository.Update(ctx, &user)
 }

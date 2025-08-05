@@ -28,10 +28,6 @@ func NewUserRouter(app *bootstrap.Application, timeout time.Duration, db *ent.Cl
 	group.DELETE("/:id", uc.DeleteUser) // DELETE /api/v1/users/:id
 
 	// User specific operations
-	group.GET("/:id/projects", uc.GetUserProjects)                       // GET /api/v1/users/:id/projects
-	group.GET("/:id/groups", uc.GetUserGroups)                           // GET /api/v1/users/:id/groups
-	group.POST("/:id/projects", uc.AssignUserToProject)                  // POST /api/v1/users/:id/projects
-	group.DELETE("/:id/projects/:projectId", uc.UnassignUserFromProject) // DELETE /api/v1/users/:id/projects/:projectId
-	group.GET("/profile", uc.GetProfile)                                 // GET /api/v1/users/profile
-	group.PUT("/profile", uc.UpdateProfile)                              // PUT /api/v1/users/profile
+	group.GET("/profile", uc.GetProfile)    // GET /api/v1/users/profile
+	group.PUT("/profile", uc.UpdateProfile) // PUT /api/v1/users/profile
 }

@@ -155,20 +155,6 @@ func (u *upgradeUsecase) DeleteUpgradeTarget(ctx context.Context, id string) err
 	return u.upgradeRepository.DeleteUpgradeTarget(c, id)
 }
 
-func (u *upgradeUsecase) CheckUpdate(ctx context.Context, request *domain.CheckUpdateRequest) (*domain.CheckUpdateResponse, error) {
-	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
-	c.Value("key")
-	defer cancel()
-
-	// 这是旧的检查更新方法，目前保持不变但标记为废弃
-	// 新的客户端应该使用 CheckUpdateByToken 方法
-	return &domain.CheckUpdateResponse{
-		HasUpdate:      false,
-		CurrentVersion: request.CurrentVersion,
-		LatestVersion:  request.CurrentVersion,
-	}, errors.New("此方法已废弃，请使用基于token的升级检查")
-}
-
 func (u *upgradeUsecase) CheckUpdateByToken(ctx context.Context, request *domain.CheckUpdateRequest, clientIP, accessToken string) (*domain.CheckUpdateResponse, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()

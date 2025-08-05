@@ -62,35 +62,10 @@ func (pu *packageUsecase) DeletePackage(c context.Context, id string) error {
 	return pu.packageRepository.Delete(ctx, id)
 }
 
-// 发布版本相关操作
-func (pu *packageUsecase) CreateRelease(c context.Context, release *domain.Release) error {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.Create(ctx, release)
-}
-
-func (pu *packageUsecase) GetReleaseByID(c context.Context, id string) (*domain.Release, error) {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.GetByID(ctx, id)
-}
-
-func (pu *packageUsecase) GetReleasesByPackage(c context.Context, packageID string) ([]*domain.Release, error) {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.GetByPackageID(ctx, packageID)
-}
-
 func (pu *packageUsecase) GetLatestRelease(c context.Context, packageID string) (*domain.Release, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 	return pu.releaseRepository.GetLatestByPackageID(ctx, packageID)
-}
-
-func (pu *packageUsecase) DeleteRelease(c context.Context, id string) error {
-	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
-	defer cancel()
-	return pu.releaseRepository.Delete(ctx, id)
 }
 
 func (pu *packageUsecase) IncrementDownloadCount(c context.Context, releaseID string) error {

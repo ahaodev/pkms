@@ -89,22 +89,28 @@ func (uc *UserController) GetUser(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id    path      string       true  "User ID"
-// @Param        user  body      domain.User  true  "Updated user data"
+// @Param        id    path      string                  true  "User ID"
+// @Param        user  body      domain.UserUpdateRequest  true  "Updated user data"
 // @Success      200   {object}  domain.Response{data=domain.User}  "User updated successfully"
 // @Failure      400   {object}  domain.Response  "Invalid request data"
 // @Failure      500   {object}  domain.Response  "Internal server error"
 // @Router       /user/{id} [put]
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
-	var user domain.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var updateReq domain.UserUpdateRequest
+	if err := c.ShouldBindJSON(&updateReq); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 
-	user.ID = id
-	if err := uc.UserUsecase.Update(c, &user); err != nil {
+	if err := uc.UserUsecase.UpdatePartial(c, id, updateReq); err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
+		return
+	}
+
+	// 获取更新后的用户信息
+	user, err := uc.UserUsecase.GetByID(c, id)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
@@ -132,113 +138,6 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess("User deleted successfully"))
-}
-
-// GetUserProjects godoc
-// @Summary      Get user projects
-// @Description  Retrieve all projects associated with a specific user
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path      string  true  "User ID"
-// @Success      200  {object}  domain.Response{data=[]domain.Project}  "User projects retrieved successfully"
-// @Failure      500  {object}  domain.Response  "Internal server error"
-// @Router       /user/{id}/projects [get]
-func (uc *UserController) GetUserProjects(c *gin.Context) {
-	userID := c.Param("id")
-
-	projects, err := uc.UserUsecase.GetUserProjects(c, userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, domain.RespSuccess(projects))
-}
-
-// GetUserGroups godoc
-// @Summary      Get user groups
-// @Description  Retrieve all groups associated with a specific user
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path      string  true  "User ID"
-// @Success      200  {object}  domain.Response{data=[]interface{}}  "User groups retrieved successfully"
-// @Failure      500  {object}  domain.Response  "Internal server error"
-// @Router       /user/{id}/groups [get]
-func (uc *UserController) GetUserGroups(c *gin.Context) {
-	_ = c.Param("id") // userID - 待实现
-	// TODO: 这里需要实现获取用户组的逻辑
-	// 需要添加 UserGroup 相关的 domain, repository, usecase
-	c.JSON(http.StatusOK, domain.RespSuccess([]interface{}{}))
-}
-
-// AssignUserToProject godoc
-// @Summary      Assign user to project
-// @Description  Assign a user to a specific project
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id       path      string  true   "User ID"
-// @Param        request  body      object  true   "Project assignment data"
-// @Success      200      {object}  domain.Response{data=object}  "User assigned to project successfully"
-// @Failure      400      {object}  domain.Response  "Invalid request data"
-// @Failure      500      {object}  domain.Response  "Internal server error"
-// @Router       /user/{id}/projects [post]
-func (uc *UserController) AssignUserToProject(c *gin.Context) {
-	userID := c.Param("id")
-	var request struct {
-		ProjectID string `json:"project_id" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
-		return
-	}
-
-	if err := uc.UserUsecase.AssignUserToProject(c, userID, request.ProjectID); err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-
-	response := map[string]interface{}{
-		"user_id":    userID,
-		"project_id": request.ProjectID,
-		"message":    "User assigned to project successfully",
-	}
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
-}
-
-// UnassignUserFromProject godoc
-// @Summary      Unassign user from project
-// @Description  Remove a user from a specific project
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id         path      string  true  "User ID"
-// @Param        projectId  path      string  true  "Project ID"
-// @Success      200        {object}  domain.Response{data=object}  "User unassigned from project successfully"
-// @Failure      500        {object}  domain.Response  "Internal server error"
-// @Router       /user/{id}/projects/{projectId} [delete]
-func (uc *UserController) UnassignUserFromProject(c *gin.Context) {
-	userID := c.Param("id")
-	projectID := c.Param("projectId")
-
-	if err := uc.UserUsecase.UnassignUserFromProject(c, userID, projectID); err != nil {
-		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
-		return
-	}
-
-	response := map[string]interface{}{
-		"user_id":    userID,
-		"project_id": projectID,
-		"message":    "User unassigned from project successfully",
-	}
-	c.JSON(http.StatusOK, domain.RespSuccess(response))
 }
 
 // GetProfile godoc
