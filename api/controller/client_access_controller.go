@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rs/xid"
 	"io"
 	"net/http"
 	"pkms/bootstrap"
@@ -224,10 +225,10 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 	// 从clientAccess中获取project_id和package_id
 	projectID := clientAccess.ProjectID
 	packageID := clientAccess.PackageID
-
+	// 生成 release ID (在文件上传前生成，确保目录结构一致)
+	releaseID := xid.New().String()
 	// 构建文件路径，支持GoReleaser的文件组织方式
-	hierarchicalPrefix := "releases/" + packageID + "/" + version
-
+	hierarchicalPrefix := projectID + "/" + packageID + "/" + releaseID
 	// 准备上传请求
 	uploadReq := &domain.UploadRequest{
 		Bucket:      cac.Env.S3Bucket,
@@ -247,6 +248,7 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 
 	// 创建Release记录
 	release := &domain.Release{
+		ID:            releaseID, // 使用预先生成的 ID
 		PackageID:     packageID,
 		VersionCode:   version,
 		VersionName:   version,
