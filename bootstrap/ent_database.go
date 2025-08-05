@@ -109,70 +109,15 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 	log.Println("⚠️ Please change the default password after first login!")
 }
 
-// InitDefaultUser 初始化数据（如管理员用户、Casbin策略等）由外部调用以下函数
-func InitDefaultUser(client *ent.Client, userName string, password string, casbinManager *casbin.CasbinManager) {
-	ctx := context.Background()
-	// 检查是否已存在管理员用户
-	userCount, err := client.User.Query().
-		Where(user.UsernameEQ(userName)).
-		Count(ctx)
-
-	if err != nil {
-		log.Printf("⚠️ Failed to check %s users: %v", userName, err)
-		return
-	}
-
-	if userCount > 0 {
-		log.Printf("✅ %s user already exists", userName)
-		return
-	}
-	// 加密密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("❌ Failed to hash %s password: %v", userName, err)
-		return
-	}
-	// 创建系统租户(创建用户时自动创建对应的租户)
-	userTenant, err := client.Tenant.Create().SetName(userName).Save(ctx)
-	if err != nil {
-		log.Printf("❌ Failed to create user tenant: %v", err)
-		return
-	}
-
-	// 为新租户初始化角色权限
-	err = casbinManager.InitializeRolePermissionsForTenant(userTenant.ID)
-	if err != nil {
-		log.Printf("❌ Failed to initialize role permissions for tenant %s: %v", userTenant.ID, err)
-		return
-	}
-
-	// 创建用户
-	user, err := client.User.Create().
-		SetUsername(userName).
-		SetPasswordHash(string(hashedPassword)).
-		SetIsActive(true).
-		AddTenants(userTenant).
-		Save(ctx)
-
-	if err != nil {
-		log.Printf("❌ Failed to create user: %v", err)
-		return
-	}
-
-	// 为用户分配角色
-	err = casbinManager.AddDefaultRolesForUser(user.ID, domain.TenantRoleOwner, userTenant.ID)
-	if err != nil {
-		log.Printf("❌ Failed to add default roles for user %s: %v", userName, err)
-	}
-	log.Printf("✅ Default user created: %s", userName)
-	log.Println("⚠️ Please change the default password after first login!")
-}
+// getEnvOrDefault 获取环境变量值或返回默认值
 func getEnvOrDefault(value, defaultValue string) string {
 	if value == "" {
 		return defaultValue
 	}
 	return value
 }
+
+// CloseEntConnection 关闭Ent数据库连接
 func CloseEntConnection(client *ent.Client) {
 	if client == nil {
 		return
