@@ -4,7 +4,7 @@ import (
 	"embed"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	
+	"strings"
 )
 
 //go:embed dist/*
