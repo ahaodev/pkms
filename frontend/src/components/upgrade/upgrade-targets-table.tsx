@@ -9,6 +9,7 @@ import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} 
 import {toast} from 'sonner';
 import {formatFileSize} from '@/lib/utils';
 import {deleteUpgradeTarget, updateUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';
+import {CustomSkeleton} from '@/components/custom-skeleton';
 
 interface UpgradeTargetsTableProps {
     upgradeTargets: UpgradeTarget[];
@@ -104,15 +105,7 @@ export function UpgradeTargetsTable({
     };
 
     if (isLoading) {
-        return (
-            <Card>
-                <CardContent className="p-0">
-                    <div className="flex items-center justify-center py-8">
-                        <div className="text-muted-foreground">加载中...</div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
+        return <CustomSkeleton type="table" rows={5} columns={8} />;
     }
 
     if (sortedUpgradeTargets.length === 0) {

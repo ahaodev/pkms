@@ -53,7 +53,7 @@ export function ClientAccessList({
     const [selectedClientAccess, setSelectedClientAccess] = useState<ClientAccess | null>(null);
 
     if (loading) {
-        return CustomSkeleton();
+        return <CustomSkeleton type="table" rows={5} columns={7} />;
     }
 
     if (error) {

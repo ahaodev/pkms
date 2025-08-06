@@ -5,6 +5,7 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {CreateTenantRequest, Tenant, UpdateTenantRequest} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
+import {CustomSkeleton} from '@/components/custom-skeleton';
 
 /**
  * 租户管理页面：管理系统租户，分配用户权限
@@ -46,11 +47,9 @@ export default function TenantsPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-sm text-muted-foreground">加载中...</p>
-                </div>
+            <div className="space-y-6">
+                <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)}/>
+                <CustomSkeleton type="table" rows={5} columns={4} />
             </div>
         );
     }

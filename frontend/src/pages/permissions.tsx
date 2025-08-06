@@ -6,6 +6,7 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 import {PermissionsHeader, PermissionsTabs, UserPermissionsDialog} from '@/components/permissions';
 import RoleManagement from '@/components/permissions/RoleManagement';
 import UserManagement from '@/components/permissions/UserManagement';
+import {CustomSkeleton} from '@/components/custom-skeleton';
 import type {EnhancedPolicy, EnhancedRole, User, UserPermission} from '@/types';
 
 const PermissionsPage: React.FC = () => {
@@ -22,6 +23,7 @@ const PermissionsPage: React.FC = () => {
     // UI state
     const [showUserPermissionsDialog, setShowUserPermissionsDialog] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchData();
@@ -29,6 +31,7 @@ const PermissionsPage: React.FC = () => {
 
     const fetchData = async () => {
         try {
+            setIsLoading(true);
             await Promise.all([
                 fetchEnhancedPolicies(),
                 fetchEnhancedRoles(),
@@ -39,6 +42,8 @@ const PermissionsPage: React.FC = () => {
         } catch (error) {
             console.error('获取数据失败:', error);
             toast.error('获取数据失败');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -145,6 +150,18 @@ const PermissionsPage: React.FC = () => {
                         您没有权限访问权限管理页面
                     </p>
                 </div>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                <PermissionsHeader
+                    title="权限管理"
+                    description="管理系统角色权限配置和用户权限分配"
+                />
+                <CustomSkeleton type="table" rows={8} columns={4} />
             </div>
         );
     }

@@ -10,6 +10,7 @@ import {UserFilters, UserList} from '@/components/user';
 import { UserHeader } from '@/components/user/user-header';
 import { UserCreateDialog } from '@/components/user/user-create-dialog';
 import { UserEditDialog } from '@/components/user/user-edit-dialog';
+import {CustomSkeleton} from '@/components/custom-skeleton';
 
 /**
  * 用户管理页面：管理系统用户，分配项目权限
@@ -95,11 +96,16 @@ export default function UsersPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-sm text-muted-foreground">加载中...</p>
-                </div>
+            <div className="space-y-6">
+                <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)} />
+                <UserFilters
+                    searchTerm=""
+                    roleFilter="all"
+                    totalUsers={0}
+                    onSearchChange={() => {}}
+                    onRoleFilterChange={() => {}}
+                />
+                <CustomSkeleton type="table" rows={6} columns={6} />
             </div>
         );
     }
