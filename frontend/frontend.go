@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	
 )
 
 //go:embed dist/*
@@ -22,10 +23,10 @@ func Register(r *gin.Engine) {
 		// 如果请求路径以/share开头，返回404（分享路由）
 		// 如果请求路径以/swagger开头，返回404（文档路由）
 		path := c.Request.URL.Path
-		if len(path) >= 4 && path[:4] == "/api" ||
-			len(path) >= 6 && path[:6] == "/share" ||
-			len(path) >= 8 && path[:8] == "/swagger" ||
-			len(path) >= 13 && path[:13] == "/client-access" {
+		if strings.HasPrefix(path, "/api") ||
+			strings.HasPrefix(path, "/share/") ||
+			strings.HasPrefix(path, "/swagger") ||
+			strings.HasPrefix(path, "/client-access") {
 			c.JSON(404, gin.H{"error": "API endpoint not found"})
 			return
 		}
