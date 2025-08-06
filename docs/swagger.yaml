@@ -546,6 +546,15 @@ definitions:
       user_id:
         type: string
     type: object
+  domain.UserUpdateRequest:
+    properties:
+      is_active:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+    type: object
 host: localhost:65080
 info:
   contact:
@@ -1625,6 +1634,10 @@ paths:
         in: formData
         name: version
         required: true
+        type: string
+      - description: Version code (numeric version)
+        in: formData
+        name: version_code
         type: string
       - description: Artifact name
         in: formData
@@ -2912,6 +2925,54 @@ paths:
       summary: Download shared release
       tags:
       - Sharing
+  /shares:
+    get:
+      consumes:
+      - application/json
+      description: Get all shares for the current tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved shares
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Failed to get shares
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get share list
+      tags:
+      - Shares
+  /shares/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific share by ID
+      parameters:
+      - description: Share ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted share
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Delete share failed
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete share
+      tags:
+      - Shares
   /tenant/{id}/user/{userId}/role:
     delete:
       consumes:
@@ -3750,7 +3811,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/domain.UserUpdateRequest'
       produces:
       - application/json
       responses:
@@ -3774,151 +3835,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user
-      tags:
-      - Users
-  /user/{id}/groups:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all groups associated with a specific user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User groups retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items: {}
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user groups
-      tags:
-      - Users
-  /user/{id}/projects:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all projects associated with a specific user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User projects retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Project'
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user projects
-      tags:
-      - Users
-    post:
-      consumes:
-      - application/json
-      description: Assign a user to a specific project
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Project assignment data
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User assigned to project successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: object
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Assign user to project
-      tags:
-      - Users
-  /user/{id}/projects/{projectId}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a user from a specific project
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Project ID
-        in: path
-        name: projectId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User unassigned from project successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: object
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Unassign user from project
       tags:
       - Users
   /user/profile:

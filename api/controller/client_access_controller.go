@@ -164,6 +164,7 @@ func (cac *ClientAccessController) Download(c *gin.Context) {
 // @Param        x-access-token  header    string  true   "Client access token for GoReleaser"
 // @Param        file           formData  file    true   "Artifact file to upload"
 // @Param        version        formData  string  true   "Version tag (required)"
+// @Param        version_code   formData  string  false  "Version code (numeric version)"
 // @Param        artifact       formData  string  false  "Artifact name"
 // @Param        os             formData  string  false  "Operating system"
 // @Param        arch           formData  string  false  "Architecture"
@@ -211,6 +212,7 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 
 	// 获取GoReleaser相关参数
 	version := c.PostForm("version")
+	versionCode := c.PostForm("version_code")
 	artifact := c.PostForm("artifact")
 	osParam := c.PostForm("os")
 	arch := c.PostForm("arch")
@@ -250,7 +252,7 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 	release := &domain.Release{
 		ID:            releaseID, // 使用预先生成的 ID
 		PackageID:     packageID,
-		VersionCode:   version,
+		VersionCode:   versionCode,
 		VersionName:   version,
 		TagName:       version, // GoReleaser通常使用tag作为版本
 		ChangeLog:     changelog,
