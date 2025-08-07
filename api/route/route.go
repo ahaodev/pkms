@@ -42,10 +42,6 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	shareRouter := gin.Group("/share")
 	NewShareRouter(env, timeout, db, fileStorage, shareRouter)
 
-	// Public file download routes (no authentication required)
-	publicFileRouter := gin.Group(ApiUri + "/files")
-	NewPublicFileRouter(env, timeout, db, fileStorage, publicFileRouter)
-
 	// Public client access routes (no authentication required, using access_token)
 	publicClientAccessRouter := gin.Group("/client-access")
 	NewPublicClientAccessRouter(env, timeout, db, fileStorage, publicClientAccessRouter)
@@ -104,10 +100,6 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
-
-	fileRouter := protectedRouter.Group("/file")
-	// 文件操作允许所有认证用户访问
-	NewFileRouter(env, timeout, db, fileStorage, fileRouter)
 
 	// 🔥 系统设置路由 - 只有admin可访问
 	settingsRouter := protectedRouter.Group("/settings")
