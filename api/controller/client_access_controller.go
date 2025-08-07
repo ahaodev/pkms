@@ -202,14 +202,6 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 		return
 	}
 
-	// 获取上传的文件
-	file, header, err := c.Request.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.RespError("无法获取上传文件: "+err.Error()))
-		return
-	}
-	defer file.Close()
-
 	// 获取GoReleaser相关参数
 	version := c.PostForm("version")
 	versionCode := c.PostForm("version_code")
@@ -227,6 +219,32 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 	// 从clientAccess中获取project_id和package_id
 	projectID := clientAccess.ProjectID
 	packageID := clientAccess.PackageID
+
+	// 检查版本是否已经存在
+	existingReleases, err := cac.ReleaseUsecase.GetReleasesByPackage(c, packageID)
+	if err == nil {
+		for _, existingRelease := range existingReleases {
+			// 检查 version_code 和 version_name 是否都相同
+			versionCodeMatch := (versionCode == "" && existingRelease.VersionCode == "") ||
+				(versionCode != "" && existingRelease.VersionCode == versionCode)
+			versionNameMatch := (version == "" && existingRelease.VersionName == "") ||
+				(version != "" && existingRelease.VersionName == version)
+
+			if versionCodeMatch && versionNameMatch {
+				c.JSON(http.StatusBadRequest, domain.RespError("版本已存在，相同的版本号不能重复上传"))
+				return
+			}
+		}
+	}
+
+	// 获取上传的文件 (所有验证通过后再处理文件)
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("无法获取上传文件: "+err.Error()))
+		return
+	}
+	defer file.Close()
+
 	// 生成 release ID (在文件上传前生成，确保目录结构一致)
 	releaseID := xid.New().String()
 	// 构建文件路径，支持GoReleaser的文件组织方式
@@ -274,19 +292,20 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 
 	// 构建响应数据
 	response := map[string]interface{}{
-		"release_id":  release.ID,
-		"file_path":   uploadResp.ObjectName,
-		"file_size":   header.Size,
-		"filename":    header.Filename,
-		"project_id":  projectID,
-		"version":     version,
-		"package_id":  packageID,
-		"artifact":    artifact,
-		"os":          osParam,
-		"arch":        arch,
-		"changelog":   changelog,
-		"upload_time": time.Now(),
-		"created_by":  release.CreatedBy,
+		"release_id":   release.ID,
+		"file_path":    uploadResp.ObjectName,
+		"file_size":    header.Size,
+		"filename":     header.Filename,
+		"project_id":   projectID,
+		"version":      version,
+		"version_code": versionCode,
+		"package_id":   packageID,
+		"artifact":     artifact,
+		"os":           osParam,
+		"arch":         arch,
+		"changelog":    changelog,
+		"upload_time":  time.Now(),
+		"created_by":   release.CreatedBy,
 	}
 
 	c.JSON(http.StatusCreated, domain.RespSuccess(response))
