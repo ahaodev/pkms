@@ -1,8 +1,0 @@
-services:
-  pkms:
-    image: hao88/pkms:latest
-    container_name: pkms
-    ports:
-      - "65080:65080"
-    environment:
-      - NODE_ENV=production
