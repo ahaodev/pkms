@@ -1,4 +1,5 @@
 import {CheckCircle, Trash2, Users, XCircle} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
@@ -81,17 +82,12 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
 
     if (!tenantUsers || tenantUsers.length === 0) {
         return (
-            <div className="border rounded-lg">
-                <div className="text-center py-8">
-                    <Users className="mx-auto h-12 w-12 text-muted-foreground"/>
-                    <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-                        暂无用户
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        该租户还没有分配任何用户
-                    </p>
-                </div>
-            </div>
+            <EmptyList
+                icon={Users}
+                title="暂无用户"
+                description="该租户还没有分配任何用户"
+                className="border rounded-lg"
+            />
         );
     }
 

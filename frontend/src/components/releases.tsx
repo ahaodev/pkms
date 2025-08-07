@@ -4,6 +4,7 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Download, Package as PackageIcon, Plus, Share2, Trash2} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {formatDate, formatFileSize} from '@/lib/utils';
 import {Release} from '@/types/release.ts';
 import {ShareDialog} from '@/components/share-dialog';
@@ -155,22 +156,18 @@ export function Releases({
                     </Table>
                 </Card>
             ) : (
-                <Card>
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center space-y-2">
-                            <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
-                            <div className="text-muted-foreground">
-                                {searchTerm ? '未找到匹配的发布版本' : '该包暂无版本发布'}
-                            </div>
-                            {!searchTerm && (
-                                <Button onClick={handleCreateRelease}>
-                                    <Plus className="mr-2 h-4 w-4"/>
-                                    创建首个发布
-                                </Button>
-                            )}
+                <EmptyList
+                    icon={PackageIcon}
+                    title={searchTerm ? '未找到匹配的发布版本' : '该包暂无版本发布'}
+                    actionText={!searchTerm ? (
+                        <div className="flex items-center">
+                            <Plus className="mr-2 h-4 w-4"/>
+                            创建首个发布
                         </div>
-                    </CardContent>
-                </Card>
+                    ) : undefined}
+                    onAction={!searchTerm ? handleCreateRelease : undefined}
+                    showAction={!searchTerm}
+                />
             )}
 
             <ShareDialog

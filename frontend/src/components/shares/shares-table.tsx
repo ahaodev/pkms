@@ -3,7 +3,8 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
 import {Skeleton} from '@/components/ui/skeleton';
-import {AlertCircle, Eye, Trash2} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
+import {AlertCircle, Eye, Share2, Trash2} from 'lucide-react';
 import {format} from 'date-fns';
 import {ShareListItem} from '@/lib/api/shares';
 
@@ -62,18 +63,12 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
 
   if (!shares || shares.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-0">
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center space-y-2">
-              <div className="text-muted-foreground">暂无分享链接</div>
-              <div className="text-sm text-muted-foreground">
-                在发布版本页面创建分享链接后，会显示在这里
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyList
+        icon={Share2}
+        title="暂无分享链接"
+        description="在发布版本页面创建分享链接后，会显示在这里"
+        className="p-0"
+      />
     );
   }
 

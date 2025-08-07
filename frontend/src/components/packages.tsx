@@ -1,6 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {EmptyList} from '@/components/ui/empty-list';
 import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone} from 'lucide-react';
 
 interface PackagesViewProps {
@@ -89,20 +90,18 @@ export function Packages({
             </div>
 
             {filteredPackages.length === 0 && (
-                <Card>
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center space-y-2">
-                            <PackageIcon className="h-12 w-12 text-muted-foreground mx-auto"/>
-                            <div className="text-muted-foreground">
-                                {searchTerm ? '未找到匹配的包' : '该项目暂无包'}
-                            </div>
-                            <Button onClick={onCreatePackage}>
-                                <Plus className="mr-2 h-4 w-4"/>
-                                创建首个包
-                            </Button>
+                <EmptyList
+                    icon={PackageIcon}
+                    title={searchTerm ? '未找到匹配的包' : '该项目暂无包'}
+                    actionText={
+                        <div className="flex items-center">
+                            <Plus className="mr-2 h-4 w-4"/>
+                            创建首个包
                         </div>
-                    </CardContent>
-                </Card>
+                    }
+                    onAction={onCreatePackage}
+                    showAction={true}
+                />
             )}
         </div>
     );

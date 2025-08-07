@@ -1,6 +1,7 @@
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {EmptyList} from '@/components/ui/empty-list';
 import {Building2, ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
 
 
@@ -90,16 +91,10 @@ export function Projects({
             </div>
 
             {filteredProjects.length === 0 && (
-                <Card>
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center space-y-2">
-                            <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto"/>
-                            <div className="text-muted-foreground">
-                                {searchTerm ? '未找到匹配的项目' : '暂无项目'}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <EmptyList
+                    icon={FolderOpen}
+                    title={searchTerm ? '未找到匹配的项目' : '暂无项目'}
+                />
             )}
         </div>
     );

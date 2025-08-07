@@ -5,7 +5,8 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/c
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Switch} from '@/components/ui/switch';
-import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle} from 'lucide-react';
+import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle, Target} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {toast} from 'sonner';
 import {formatFileSize} from '@/lib/utils';
 import {deleteUpgradeTarget, updateUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';
@@ -110,23 +111,14 @@ export function UpgradeTargetsTable({
 
     if (sortedUpgradeTargets.length === 0) {
         return (
-            <Card>
-                <CardContent className="p-0">
-                    <div className="flex items-center justify-center py-8">
-                        <div className="text-center space-y-2">
-                            <div className="text-muted-foreground">
-                                {upgradeTargets.length === 0 ? '暂无升级目标' : '没有符合筛选条件的升级目标'}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                                {upgradeTargets.length === 0 
-                                    ? '点击"创建升级目标"开始配置软件包升级'
-                                    : '尝试调整筛选条件或创建新的升级目标'
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            <EmptyList
+                icon={Target}
+                title={upgradeTargets.length === 0 ? '暂无升级目标' : '没有符合筛选条件的升级目标'}
+                description={upgradeTargets.length === 0 
+                    ? '点击"创建升级目标"开始配置软件包升级'
+                    : '尝试调整筛选条件或创建新的升级目标'
+                }
+            />
         );
     }
 

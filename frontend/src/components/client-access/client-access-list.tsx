@@ -25,6 +25,7 @@ import {formatDistanceToNow} from 'date-fns';
 import {zhCN} from 'date-fns/locale';
 import type {ClientAccess} from '@/types/client-access';
 import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
+import {EmptyList} from '@/components/ui/empty-list';
 import {toast} from 'sonner';
 
 interface ClientAccessListProps {
@@ -68,13 +69,11 @@ export function ClientAccessList({
     // 处理 null/undefined 或空数组的情况
     if (!clientAccesses || clientAccesses.length === 0) {
         return (
-            <div className="text-center py-12">
-                <Package className="mx-auto h-12 w-12 text-muted-foreground"/>
-                <h3 className="mt-4 text-lg font-semibold">暂无设备接入凭证</h3>
-                <p className="mt-2 text-muted-foreground">
-                    创建第一个接入凭证来允许客户端设备访问升级服务
-                </p>
-            </div>
+            <EmptyList
+                icon={Package}
+                title="暂无设备接入凭证"
+                description="创建第一个接入凭证来允许客户端设备访问升级服务"
+            />
         );
     }
 

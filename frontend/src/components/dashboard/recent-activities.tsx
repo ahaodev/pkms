@@ -1,4 +1,5 @@
 import { Clock, Package, FolderPlus, UserPlus } from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -106,10 +107,11 @@ export function RecentActivities({ activities, isLoading }: RecentActivitiesProp
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>暂无活动记录</p>
-          </div>
+          <EmptyList
+            icon={Clock}
+            title="暂无活动记录"
+            description="最近没有任何系统活动"
+          />
         </CardContent>
       </Card>
     );

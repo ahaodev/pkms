@@ -3,6 +3,7 @@ import { User } from '@/types/user';
 import { Project } from '@/types/project';
 import { Group } from '@/types/group';
 import { UserCard } from './user-card';
+import { EmptyList } from '@/components/ui/empty-list';
 
 interface UserListProps {
   users: User[];
@@ -25,15 +26,11 @@ export function UserList({
 }: UserListProps) {
   if (users.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-          暂无用户
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          开始创建第一个用户
-        </p>
-      </div>
+      <EmptyList
+        icon={Users}
+        title="暂无用户"
+        description="开始创建第一个用户"
+      />
     );
   }
 

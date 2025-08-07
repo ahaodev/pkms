@@ -7,6 +7,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
 import {Key, Plus, Trash2} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {useTenants} from '@/hooks/use-tenants';
 import {usePermissionOperations} from '@/hooks/use-permission-operations';
 import {validateRolePermissionForm} from '@/utils/permission-validation';
@@ -219,9 +220,11 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                 <CardContent>
                     <div className="space-y-6">
                         {Object.keys(groupedPolicies).length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                暂无角色权限配置
-                            </div>
+                            <EmptyList
+                                icon={Key}
+                                title="暂无角色权限配置"
+                                description="开始为角色分配权限来管理系统访问控制"
+                            />
                         ) : (
                             Object.entries(groupedPolicies).map(([tenantId, policies]) => {
                                 const tenant = tenants.find(t => t.id === tenantId);

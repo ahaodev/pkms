@@ -7,6 +7,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
 import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {useTenants} from '@/hooks/use-tenants';
 import {usePermissionOperations} from '@/hooks/use-permission-operations';
 import {validateUserRoleForm} from '@/utils/permission-validation';
@@ -182,9 +183,11 @@ const UserManagement: React.FC<UserManagementProps> = ({
                 <CardContent>
                     <div className="space-y-6">
                         {Object.keys(groupedRoles).length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                暂无用户角色分配
-                            </div>
+                            <EmptyList
+                                icon={Users}
+                                title="暂无用户角色分配"
+                                description="开始为用户分配角色来管理系统访问权限"
+                            />
                         ) : (
                             Object.entries(groupedRoles).map(([tenantId, roles]) => {
                                 const tenant = tenants.find(t => t.id === tenantId);

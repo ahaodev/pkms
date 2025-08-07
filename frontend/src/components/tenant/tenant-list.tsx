@@ -1,5 +1,7 @@
 import {TenantCard} from './tenant-card';
 import {Tenant} from '@/types/tenant';
+import {EmptyList} from '@/components/ui/empty-list';
+import {Building} from 'lucide-react';
 
 interface TenantListProps {
     tenants: Tenant[];
@@ -16,16 +18,11 @@ export function TenantList({
                            }: TenantListProps) {
     if (tenants.length === 0) {
         return (
-            <div className="text-center py-12">
-                <div className="mx-auto max-w-sm">
-                    <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-                        暂无租户
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        开始创建第一个租户来管理用户和权限。
-                    </p>
-                </div>
-            </div>
+            <EmptyList
+                icon={Building}
+                title="暂无租户"
+                description="开始创建第一个租户来管理用户和权限。"
+            />
         );
     }
 

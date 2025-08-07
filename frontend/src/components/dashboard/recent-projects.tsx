@@ -1,4 +1,5 @@
 import {FolderOpen} from 'lucide-react';
+import {EmptyList} from '@/components/ui/empty-list';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Project} from '@/types/project.ts';
@@ -56,18 +57,15 @@ export function RecentProjects({
                         </Button>
                     </div>
                 ) : (
-                    <div className="text-center py-6">
-                        <FolderOpen className="mx-auto h-8 w-8 text-muted-foreground mb-2"/>
-                        <p className="text-sm text-muted-foreground">暂无项目</p>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={onViewAllProjects}
-                        >
-                            创建项目
-                        </Button>
-                    </div>
+                    <EmptyList
+                        icon={FolderOpen}
+                        title="暂无项目"
+                        description="开始创建第一个项目"
+                        actionText="创建项目"
+                        onAction={onViewAllProjects}
+                        showAction={true}
+                        className="py-6"
+                    />
                 )}
             </CardContent>
         </Card>
