@@ -127,12 +127,6 @@ export async function getPackageVersionsByNameAndType(packageName: string, packa
     return resp.data;
 }
 
-// 创建发布版本分享链接（移动到 releases.ts）
-// export async function createShareLink - 已移动到 releases.ts
-
-// 通过分享令牌获取发布版本（移动到 releases.ts）  
-// export async function getSharedRelease - 已移动到 releases.ts
-
 // 获取项目的所有包
 export async function getPackagesByProject(projectId: string): Promise<ApiResponse<Package[]>> {
     const resp = await apiClient.get(`/api/v1/packages/project/${projectId}`);

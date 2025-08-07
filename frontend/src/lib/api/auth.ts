@@ -34,12 +34,6 @@ export async function login(credentials: LoginRequest): Promise<ApiResponse<Logi
     return resp.data;
 }
 
-// 用户注册
-export async function signup(userData: SignupRequest): Promise<ApiResponse<User>> {
-    const resp = await apiClient.post("/api/v1/signup", userData);
-    return resp.data;
-}
-
 // 刷新访问令牌
 export async function refreshToken(refreshToken: string): Promise<ApiResponse<RefreshTokenResponse>> {
     const resp = await apiClient.post("/api/v1/refresh", {

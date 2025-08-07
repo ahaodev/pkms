@@ -19,12 +19,6 @@ export async function createProject(project: Omit<Project, 'id' | 'createdAt' | 
     return resp.data;
 }
 
-// 获取特定项目
-export async function getProject(id: string): Promise<ApiResponse<Project>> {
-    const resp = await apiClient.get(`/api/v1/projects/${id}`);
-    return resp.data;
-}
-
 // 更新项目
 export async function updateProject(id: string, update: Partial<Project>): Promise<ApiResponse<Project>> {
     // 转换前端字段名到后端字段名
@@ -40,32 +34,6 @@ export async function updateProject(id: string, update: Partial<Project>): Promi
 // 删除项目
 export async function deleteProject(id: string): Promise<ApiResponse<void>> {
     const resp = await apiClient.delete(`/api/v1/projects/${id}`);
-    return resp.data;
-}
-
-// 获取项目包列表
-export async function getProjectPackages(projectId: string): Promise<ApiResponse<any[]>> {
-    const resp = await apiClient.get(`/api/v1/projects/${projectId}/packages`);
-    return resp.data;
-}
-
-// 获取项目成员
-export async function getProjectMembers(projectId: string): Promise<ApiResponse<any[]>> {
-    const resp = await apiClient.get(`/api/v1/projects/${projectId}/members`);
-    return resp.data;
-}
-
-// 添加项目成员
-export async function addProjectMember(projectId: string, userId: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.post(`/api/v1/projects/${projectId}/members`, {
-        user_id: userId
-    });
-    return resp.data;
-}
-
-// 移除项目成员
-export async function removeProjectMember(projectId: string, userId: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.delete(`/api/v1/projects/${projectId}/members/${userId}`);
     return resp.data;
 }
 
