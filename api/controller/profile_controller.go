@@ -32,6 +32,7 @@ func (uc *ProfileController) GetProfile(c *gin.Context) {
 		c.JSON(http.StatusNotFound, domain.RespError("User not found"))
 		return
 	}
+	user.Password = "" // 不返回密码字段
 	c.JSON(http.StatusOK, domain.RespSuccess(user))
 }
 
