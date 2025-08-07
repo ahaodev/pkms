@@ -87,6 +87,37 @@ goreleaser release --clean
 
 ## Architecture
 
+### Database Support
+
+The system supports multiple database backends:
+
+- **SQLite** (default): File-based database, suitable for development and small deployments
+- **PostgreSQL**: Production-grade database for scalable deployments
+
+#### Database Configuration
+
+Configure the database using environment variables:
+
+```bash
+# SQLite (default)
+DB_TYPE=sqlite
+DB_PATH=./data.db
+
+# PostgreSQL
+DB_TYPE=postgres
+DB_DSN=postgres://username:password@host:port/database?sslmode=disable
+```
+
+#### Usage Examples
+
+```bash
+# Development with SQLite (default)
+go run ./cmd/main.go
+
+# Production with PostgreSQL
+DB_TYPE=postgres DB_DSN=postgres://hao88:Hao88.cloud!@192.168.99.17:5432/pkms?sslmode=disable go run ./cmd/main.go
+```
+
 ### Backend Structure (Go Clean Architecture)
 
 - **Router**: Router（路由层） 负责 API 路由注册和分发

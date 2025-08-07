@@ -6,7 +6,8 @@
       "Bash(swag init:*)",
       "Bash(sqlite3:*)",
       "Bash(pkill:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(DB_TYPE=postgres go run ./cmd/main.go)"
     ],
     "deny": []
   },

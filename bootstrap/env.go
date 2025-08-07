@@ -11,7 +11,11 @@ import (
 type Env struct {
 	AppEnv         string `mapstructure:"APP_ENV"`
 	ContextTimeout int    `mapstructure:"CONTEXT_TIMEOUT"`
-	DBPath         string `mapstructure:"DB_PATH"`
+
+	// Database configuration
+	DBType string `mapstructure:"DB_TYPE"` // "sqlite" or "postgres"
+	DBPath string `mapstructure:"DB_PATH"` // SQLite database path
+	DBDSN  string `mapstructure:"DB_DSN"`  // PostgreSQL connection string
 	// 令牌配置
 	AccessTokenExpiryHour  int    `mapstructure:"ACCESS_TOKEN_EXPIRY_HOUR"`
 	RefreshTokenExpiryHour int    `mapstructure:"REFRESH_TOKEN_EXPIRY_HOUR"`
@@ -37,7 +41,11 @@ type Env struct {
 func setDefaults() {
 	viper.SetDefault("APP_ENV", "development")
 	viper.SetDefault("CONTEXT_TIMEOUT", 60)
+
+	// Database defaults
+	viper.SetDefault("DB_TYPE", "sqlite")
 	viper.SetDefault("DB_PATH", "./data.db")
+	viper.SetDefault("DB_DSN", "postgres://hao88:Hao88.cloud!@192.168.99.17:5432/pkms?sslmode=disable")
 
 	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 3)
 	viper.SetDefault("REFRESH_TOKEN_EXPIRY_HOUR", 24) // 7 days
