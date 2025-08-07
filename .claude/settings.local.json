@@ -7,7 +7,8 @@
       "Bash(sqlite3:*)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(DB_TYPE=postgres go run ./cmd/main.go)"
+      "Bash(DB_TYPE=postgres go run ./cmd/main.go)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   },
