@@ -21,13 +21,13 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o kpms-runn
 FROM backplane/upx AS compressor
 WORKDIR /app
 COPY --from=builder_go /app/.env.example .
-COPY --from=builder_go /app/runner .
-RUN upx --best --lzma runner
+COPY --from=builder_go /app/kpms-runner .
+RUN upx --best --lzma kpms-runner
 
 #-------------------runner on debian (sqlite)--------------------------
 FROM debian:bookworm-slim AS runner
 WORKDIR /app
-COPY --from=builder_go /app/kpms-runner .
+COPY --from=compressor /app/kpms-runner .
 COPY --from=builder_go /app/.env.example .
 COPY --from=builder_go /app/config ./config
 RUN apt-get update && \
