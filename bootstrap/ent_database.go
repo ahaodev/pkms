@@ -35,7 +35,7 @@ func NewEntDatabase(env *Env) *ent.Client {
 	case "postgres", "postgresql":
 		client, err = connectPostgreSQL(env)
 	case "sqlite", "sqlite3":
-		client, err = connectSQLite(env)
+		client, err = connectSQLite()
 	default:
 		log.Fatalf("❌ Unsupported database type: %s. Supported types: sqlite, postgres", dbType)
 	}
@@ -59,8 +59,8 @@ func NewEntDatabase(env *Env) *ent.Client {
 	return client
 }
 
-func connectSQLite(env *Env) (*ent.Client, error) {
-	dbPath := "./database/data"
+func connectSQLite() (*ent.Client, error) {
+	dbPath := "./database/data.db"
 
 	log.Printf("📄 SQLite Config:")
 	log.Printf("  - Database Path: %s", dbPath)

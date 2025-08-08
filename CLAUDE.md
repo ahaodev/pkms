@@ -99,7 +99,7 @@ The system supports multiple database backends:
 Configure the database using environment variables:
 
 ```bash
-# SQLite (default) - uses fixed ./database/data database file
+# SQLite (default) - uses fixed ./database/data.db database file
 DB_TYPE=sqlite
 
 # PostgreSQL
@@ -371,7 +371,7 @@ npm audit
 - Default admin user created on startup: admin/admin123
 - Default test users: ahao/123, test/123
 - Logs written to `logs/` directory with rotation
-- SQLite database file: `./database/data` (created automatically in database/ directory)
+- SQLite database file: `./database/data.db` (created automatically in database/ directory)
 - Frontend development server runs on port 5173 with API proxy to port 65080
 - **Swagger UI**: Available at `http://localhost:65080/swagger/index.html` when backend is running
 
@@ -379,7 +379,7 @@ npm audit
 
 ### Backend Issues
 - **"Failed to generate Ent code"**: Run `go install entgo.io/ent/cmd/ent@latest` first
-- **Database migration errors**: Delete `./database/data` file and restart backend for clean database
+- **Database migration errors**: Delete `./database/data.db` file and restart backend for clean database
 - **Port 65080 already in use**: Kill existing Go processes or change port in `bootstrap/env.go`
 
 ### Frontend Issues
