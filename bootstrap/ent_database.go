@@ -60,12 +60,13 @@ func NewEntDatabase(env *Env) *ent.Client {
 }
 
 func connectSQLite() (*ent.Client, error) {
+	// 修改这里：确保路径指向 .db 文件
 	dbPath := "./database/data.db"
 
 	log.Printf("📄 SQLite Config:")
 	log.Printf("  - Database Path: %s", dbPath)
 
-	// Ensure the directory exists
+	// 确保目录存在
 	dir := filepath.Dir(dbPath)
 	if dir != "" && dir != "." {
 		if err := os.MkdirAll(dir, 0755); err != nil {
@@ -74,7 +75,7 @@ func connectSQLite() (*ent.Client, error) {
 		log.Printf("✅ Database directory ensured: %s", dir)
 	}
 
-	// Enable SQLite foreign keys via connection string
+	// 启用 SQLite 外键约束
 	dsn := fmt.Sprintf("file:%s?_fk=1", dbPath)
 	log.Printf("📡 Connecting to SQLite database...")
 	return ent.Open("sqlite3", dsn)

@@ -1,0 +1,14 @@
+services:
+  pkms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pkms
+    ports:
+      - "65080:65080"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /root/pkms/database:/app/database
+      - /root/pkms/logs:/app/logs
+      - /root/pkms/uploads:/app/uploads
