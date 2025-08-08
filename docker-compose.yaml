@@ -1,12 +1,12 @@
 services:
   pkms:
-    image: hao88/pkms:latest
+    image: hao88/pkms:amd64
     container_name: pkms
     ports:
       - "65080:65080"
     environment:
       - NODE_ENV=production
     volumes:
-      - /mnt/user/appdata/database/data.db:/app/data.db
+      - /mnt/user/appdata/database:/app/database
       - /mnt/user/appdata/logs:/app/logs
       - /mnt/user/appdata/uploads:/app/uploads
