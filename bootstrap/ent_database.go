@@ -60,10 +60,7 @@ func NewEntDatabase(env *Env) *ent.Client {
 }
 
 func connectSQLite(env *Env) (*ent.Client, error) {
-	dbPath := env.DBPath
-	if dbPath == "" {
-		dbPath = "./data.db"
-	}
+	dbPath := "./database/data"
 
 	log.Printf("📄 SQLite Config:")
 	log.Printf("  - Database Path: %s", dbPath)

@@ -6,3 +6,7 @@ services:
       - "65080:65080"
     environment:
       - NODE_ENV=production
+    volumes:
+      - /mnt/user/appdata/data.db:/app/data.db
+      - /mnt/user/appdata/logs:/app/logs
+      - /mnt/user/appdata/uploads:/app/uploads

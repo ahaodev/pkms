@@ -426,14 +426,14 @@ test('renders user information correctly', () => {
 
 ### Development
 ```bash
-# .env.development
+# .env.backup.development
 VITE_API_BASE_URL=http://localhost:65080
 VITE_ENABLE_DEV_TOOLS=true
 ```
 
 ### Production
 ```bash
-# .env.production
+# .env.backup.production
 VITE_API_BASE_URL=https://your-api-domain.com
 VITE_ENABLE_DEV_TOOLS=false
 ```

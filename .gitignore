@@ -2,7 +2,7 @@
 bin/
 /.idea
 .idea
-.env
+.env.backup
 .vscode
 
 logs
@@ -22,3 +22,4 @@ dist/
 .cursor/
 nul
 main.exe
+database
