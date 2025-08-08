@@ -7,6 +7,6 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - /mnt/user/appdata/data.db:/app/data.db
+      - /mnt/user/appdata/database/data.db:/app/data.db
       - /mnt/user/appdata/logs:/app/logs
       - /mnt/user/appdata/uploads:/app/uploads
