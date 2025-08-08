@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"pkms/domain"
@@ -59,6 +60,18 @@ func (pu *packageUsecase) UpdatePackage(c context.Context, pkg *domain.Package) 
 func (pu *packageUsecase) DeletePackage(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
+
+	// 检查包是否存在releases
+	releases, err := pu.releaseRepository.GetByPackageID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// 如果包有releases，则不允许删除
+	if len(releases) > 0 {
+		return errors.New("release is not empty")
+	}
+
 	return pu.packageRepository.Delete(ctx, id)
 }
 
