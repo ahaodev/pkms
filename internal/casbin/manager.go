@@ -70,13 +70,13 @@ func (m *CasbinManager) CheckPermission(userID, tenantID, object, action string)
 }
 
 // AddPolicy 添加权限策略
-func (m *CasbinManager) AddPolicy(userID, tenantID, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(userID, tenantID, object, action)
+func (m *CasbinManager) AddPolicy(subject, tenantID, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(subject, tenantID, object, action)
 }
 
 // RemovePolicy 移除权限策略
-func (m *CasbinManager) RemovePolicy(userID, tenantID, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(userID, tenantID, object, action)
+func (m *CasbinManager) RemovePolicy(subject, tenantID, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(subject, tenantID, object, action)
 }
 
 // AddRoleForUser 为用户添加角色
@@ -96,25 +96,42 @@ func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
 		return []string{domain.SystemRoleAdmin}
 	}
 
-	roles, _ := m.enforcer.GetRolesForUser(userID, tenantID)
+	roles, err := m.enforcer.GetRolesForUser(userID, tenantID)
+	if err != nil {
+		log.Printf("获取用户角色失败: %v", err)
+		return []string{}
+	}
 	return roles
 }
 
 // GetUsersForRole 获取角色下的用户
 func (m *CasbinManager) GetUsersForRole(role, tenantID string) []string {
-	users, _ := m.enforcer.GetUsersForRole(role, tenantID)
+	users, err := m.enforcer.GetUsersForRole(role, tenantID)
+	if err != nil {
+		log.Printf("获取角色用户失败: %v", err)
+		return []string{}
+	}
 	return users
 }
 
 // GetPermissionsForUser 获取用户权限
 func (m *CasbinManager) GetPermissionsForUser(userID, tenantID string) [][]string {
-	permissions, _ := m.enforcer.GetPermissionsForUser(userID, tenantID)
+	permissions, err := m.enforcer.GetPermissionsForUser(userID, tenantID)
+	if err != nil {
+		log.Printf("获取用户权限失败: %v", err)
+		return [][]string{}
+	}
 	return permissions
 }
 
 // GetPermissionsForRole 获取角色权限
 func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string {
-	permissions, _ := m.enforcer.GetPermissionsForUser(role, tenantID)
+	// 使用GetImplicitPermissionsForUser获取角色的隐式权限
+	permissions, err := m.enforcer.GetImplicitPermissionsForUser(role, tenantID)
+	if err != nil {
+		log.Printf("获取角色权限失败: %v", err)
+		return [][]string{}
+	}
 	return permissions
 }
 
@@ -140,71 +157,40 @@ func (m *CasbinManager) LoadPolicy() error {
 	return m.enforcer.LoadPolicy()
 }
 
-// GetAllRoleNames 获取所有角色名称
-func (m *CasbinManager) GetAllRoleNames() []string {
-	allRoles := m.GetAllRoles()
-	roleMap := make(map[string]bool)
-	var roles []string
+// extractUniqueValues 提取唯一值的通用函数
+func extractUniqueValues(data [][]string, index int) []string {
+	valueMap := make(map[string]bool)
+	var values []string
 
-	for _, role := range allRoles {
-		if len(role) >= 2 {
-			roleName := role[1]
-			if !roleMap[roleName] {
-				roleMap[roleName] = true
-				roles = append(roles, roleName)
+	for _, row := range data {
+		if len(row) > index {
+			value := row[index]
+			if !valueMap[value] {
+				valueMap[value] = true
+				values = append(values, value)
 			}
 		}
 	}
 
-	return roles
+	return values
+}
+
+// GetAllRoleNames 获取所有角色名称
+func (m *CasbinManager) GetAllRoleNames() []string {
+	allRoles := m.GetAllRoles()
+	return extractUniqueValues(allRoles, 1)
 }
 
 // GetAllObjects 获取所有对象名称
 func (m *CasbinManager) GetAllObjects() []string {
 	allPolicies := m.GetAllPolicies()
-	objectMap := make(map[string]bool)
-	var objects []string
-
-	for _, policy := range allPolicies {
-		if len(policy) >= 2 {
-			objectName := policy[1]
-			if !objectMap[objectName] {
-				objectMap[objectName] = true
-				objects = append(objects, objectName)
-			}
-		}
-	}
-
-	return objects
+	return extractUniqueValues(allPolicies, 1)
 }
 
 // GetAllActions 获取所有操作名称
 func (m *CasbinManager) GetAllActions() []string {
 	allPolicies := m.GetAllPolicies()
-	actionMap := make(map[string]bool)
-	var actions []string
-
-	for _, policy := range allPolicies {
-		if len(policy) >= 3 {
-			actionName := policy[2]
-			if !actionMap[actionName] {
-				actionMap[actionName] = true
-				actions = append(actions, actionName)
-			}
-		}
-	}
-
-	return actions
-}
-
-// AddPolicyForRole 为角色添加权限策略 (支持多租户)
-func (m *CasbinManager) AddPolicyForRole(role, tenantID, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(role, tenantID, object, action)
-}
-
-// RemovePolicyForRole 移除角色权限策略 (支持多租户)
-func (m *CasbinManager) RemovePolicyForRole(role, tenantID, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(role, tenantID, object, action)
+	return extractUniqueValues(allPolicies, 2)
 }
 
 // GetSidebarPermissions 直接基于角色返回权限
@@ -272,18 +258,16 @@ func (m *CasbinManager) GetUsersForRoleInTenant(role, tenantID string) []string 
 
 // HasRoleInTenant 检查用户在指定租户中是否具有特定角色
 func (m *CasbinManager) HasRoleInTenant(userID, role, tenantID string) bool {
-	has, _ := m.enforcer.HasRoleForUser(userID, role)
 	// 检查域级别的角色 - 通过GetRolesForUserInDomain检查
 	roles := m.enforcer.GetRolesForUserInDomain(userID, tenantID)
-	hasDomain := false
 	for _, r := range roles {
 		if r == role {
-			hasDomain = true
-			break
+			log.Printf("用户 %s 在租户 %s 中具有角色 %s", userID, tenantID, role)
+			return true
 		}
 	}
-	log.Printf("检查用户 %s 在租户 %s 中是否具有角色 %s: global=%t, domain=%t", userID, tenantID, role, has, hasDomain)
-	return hasDomain
+	log.Printf("用户 %s 在租户 %s 中不具有角色 %s", userID, tenantID, role)
+	return false
 }
 
 // DeleteAllRolesForUserInTenant 移除用户在指定租户中的所有角色
@@ -307,18 +291,6 @@ func (m *CasbinManager) InitializeSystemAdminPermissions() error {
 		log.Printf("添加系统管理员全局权限失败: %v", err)
 		return err
 	}
-
-	return m.enforcer.SavePolicy()
-}
-
-// AddDefaultPermissionsForUser  为用户添加默认权限
-func (m *CasbinManager) AddDefaultPermissionsForUser(userID, role, tenantID string) error {
-	_, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
-	if err != nil {
-		return fmt.Errorf("添加用户角色失败: %v", err)
-	}
-
-	log.Printf("为用户 %s 在租户 %s 分配角色 %s", userID, tenantID, role)
 
 	return m.enforcer.SavePolicy()
 }

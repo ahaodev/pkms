@@ -410,7 +410,7 @@ func (cc *CasbinController) AddRolePolicy(c *gin.Context) {
 		return
 	}
 
-	added, err := cc.casbinManager.AddPolicyForRole(req.Role, req.Tenant, req.Object, req.Action)
+	added, err := cc.casbinManager.AddPolicy(req.Role, req.Tenant, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("添加角色权限失败: "+err.Error()))
 		return
@@ -444,7 +444,7 @@ func (cc *CasbinController) RemoveRolePolicy(c *gin.Context) {
 		return
 	}
 
-	removed, err := cc.casbinManager.RemovePolicyForRole(req.Role, req.Tenant, req.Object, req.Action)
+	removed, err := cc.casbinManager.RemovePolicy(req.Role, req.Tenant, req.Object, req.Action)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("移除角色权限失败: "+err.Error()))
 		return
