@@ -146,8 +146,9 @@ export function AuthProvider({children}: { children: ReactNode }) {
 
             return false;
         } catch (e) {
-            console.log(e)
-            return false;
+            console.log(e);
+            // 重新抛出错误，让上层能够获取具体的错误信息
+            throw e;
         } finally {
             setIsLoading(false);
         }

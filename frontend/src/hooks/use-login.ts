@@ -44,16 +44,43 @@ export function useLogin(options: UseLoginOptions = {}) {
     const login = useCallback(async () => {
         if (!validateForm()) return false;
 
-        const success = await authLogin(formData.username, formData.password);
+        try {
+            const success = await authLogin(formData.username, formData.password);
 
-        if (success) {
-            toast.success('欢迎使用 PKMS 包管理系统');
-            onSuccess?.();
-            navigate(redirectTo, {replace: true});
-            return true;
-        } else {
-            const errorMessage = '用户名或密码错误。';
-            toast.error(errorMessage);
+            if (success) {
+                toast.success('欢迎使用 PKMS 包管理系统');
+                onSuccess?.();
+                navigate(redirectTo, {replace: true});
+                return true;
+            } else {
+                const errorMessage = '用户名或密码错误。';
+                toast.error(errorMessage);
+                onError?.(errorMessage);
+                return false;
+            }
+        } catch (error: any) {
+            // 处理特定的错误状态
+            let errorMessage = '登录失败，请重试。';
+            
+            if (error?.response?.status === 423) {
+                // 账户被锁定
+                errorMessage = error.response.data?.message || '账户已被锁定，请稍后重试。';
+                toast.error(errorMessage, {
+                    duration: 5000, // 显示5秒
+                });
+            } else if (error?.response?.status === 401) {
+                // 用户名或密码错误（包含剩余尝试次数信息）
+                errorMessage = error.response.data?.message || '用户名或密码错误。';
+                toast.error(errorMessage);
+            } else if (error?.response?.data?.message) {
+                // 其他后端返回的错误信息
+                errorMessage = error.response.data.message;
+                toast.error(errorMessage);
+            } else {
+                // 网络错误或其他错误
+                toast.error(errorMessage);
+            }
+            
             onError?.(errorMessage);
             return false;
         }
