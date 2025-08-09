@@ -873,31 +873,6 @@ paths:
       summary: Get all policies
       tags:
       - RBAC
-  /casbin/policies/clear:
-    delete:
-      consumes:
-      - application/json
-      description: Clear all permission policies from the system (admin only)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: All policies cleared successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "403":
-          description: Insufficient permissions
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Clear all policies
-      tags:
-      - RBAC
   /casbin/policies/enhanced:
     get:
       consumes:
@@ -1304,31 +1279,6 @@ paths:
       summary: Get all roles
       tags:
       - RBAC
-  /casbin/roles/clear:
-    delete:
-      consumes:
-      - application/json
-      description: Clear all role assignments from the system (admin only)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: All roles cleared successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "403":
-          description: Insufficient permissions
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Clear all roles
-      tags:
-      - RBAC
   /casbin/roles/enhanced:
     get:
       consumes:
@@ -1721,7 +1671,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate user and return JWT tokens
+      description: Authenticate user and return JWT tokens with brute force protection
       parameters:
       - description: Login credentials
         in: body
@@ -1747,6 +1697,10 @@ paths:
             $ref: '#/definitions/domain.Response'
         "401":
           description: Invalid credentials
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "423":
+          description: Account temporarily locked due to too many failed attempts
           schema:
             $ref: '#/definitions/domain.Response'
         "500":
@@ -2712,143 +2666,6 @@ paths:
       summary: Delete share
       tags:
       - Shares
-  /tenant/{id}/user/{userId}/role:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a user's role in a specific tenant
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      - description: Role information to remove
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully removed user tenant role
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Bad request - invalid parameters
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove user tenant role
-      tags:
-      - Tenant Users
-    get:
-      consumes:
-      - application/json
-      description: Get a user's role in a specific tenant
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved user tenant role
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user tenant role
-      tags:
-      - Tenant Users
-  /tenant/{id}/user/role:
-    post:
-      consumes:
-      - application/json
-      description: Set a user's role in a specific tenant through Casbin
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User ID and role information
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully set user tenant role
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Bad request - invalid parameters or role
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Set user tenant role
-      tags:
-      - Tenant Users
-  /tenant/{id}/users/roles:
-    get:
-      consumes:
-      - application/json
-      description: Get all users in a tenant with their role information from Casbin
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved tenant users with roles
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get tenant users with roles
-      tags:
-      - Tenant Users
   /tenants:
     get:
       consumes:
@@ -3574,69 +3391,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user
-      tags:
-      - Users
-  /user/profile:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve the profile information of the currently authenticated
-        user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Profile retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.User'
-              type: object
-        "404":
-          description: User not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get current user profile
-      tags:
-      - Users
-    put:
-      consumes:
-      - application/json
-      description: Update the profile information of the currently authenticated user
-      parameters:
-      - description: Profile update data
-        in: body
-        name: profile
-        required: true
-        schema:
-          $ref: '#/definitions/domain.ProfileUpdate'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Profile updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.User'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Update current user profile
       tags:
       - Users
   /users/{userId}/tenants:

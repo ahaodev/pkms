@@ -27,7 +27,4 @@ func NewUserRouter(app *bootstrap.Application, timeout time.Duration, db *ent.Cl
 	group.PUT("/:id", uc.UpdateUser)    // PUT /api/v1/users/:id
 	group.DELETE("/:id", uc.DeleteUser) // DELETE /api/v1/users/:id
 
-	// User specific operations
-	group.GET("/profile", uc.GetProfile)    // GET /api/v1/users/profile
-	group.PUT("/profile", uc.UpdateProfile) // PUT /api/v1/users/profile
 }
