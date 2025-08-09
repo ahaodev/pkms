@@ -359,15 +359,14 @@ func (m *CasbinManager) InitializeSystemAdminPermissions() error {
 	return m.enforcer.SavePolicy()
 }
 
-// AddDefaultPermissionsForUser DEMO版本：只分配角色，不需要复杂权限
+// AddDefaultPermissionsForUser  为用户添加默认权限
 func (m *CasbinManager) AddDefaultPermissionsForUser(userID, role, tenantID string) error {
-	// DEMO阶段：只需要为用户分配角色即可
 	_, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
 	if err != nil {
 		return fmt.Errorf("添加用户角色失败: %v", err)
 	}
 
-	log.Printf("DEMO版本：为用户 %s 在租户 %s 分配角色 %s", userID, tenantID, role)
+	log.Printf("为用户 %s 在租户 %s 分配角色 %s", userID, tenantID, role)
 
 	return m.enforcer.SavePolicy()
 }
