@@ -25,13 +25,13 @@ func (pu *projectUsecase) Create(c context.Context, project *domain.Project) err
 	return pu.projectRepository.Create(ctx, project)
 }
 
-func (pu *projectUsecase) Fetch(c context.Context, tenantID string) ([]domain.Project, error) {
+func (pu *projectUsecase) Fetch(c context.Context, tenantID string) ([]*domain.Project, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 	return pu.projectRepository.Fetch(ctx, tenantID)
 }
 
-func (pu *projectUsecase) GetByID(c context.Context, id string) (domain.Project, error) {
+func (pu *projectUsecase) GetByID(c context.Context, id string) (*domain.Project, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 	return pu.projectRepository.GetByID(ctx, id)
@@ -49,7 +49,7 @@ func (pu *projectUsecase) Delete(c context.Context, id string) error {
 	return pu.projectRepository.Delete(ctx, id)
 }
 
-func (pu *projectUsecase) GetByUserID(c context.Context, userID string) ([]domain.Project, error) {
+func (pu *projectUsecase) GetByUserID(c context.Context, userID string) ([]*domain.Project, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
 	return pu.projectRepository.GetByUserID(ctx, userID)

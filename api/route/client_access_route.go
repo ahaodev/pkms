@@ -22,7 +22,7 @@ func NewPublicClientAccessRouter(env *bootstrap.Env, timeout time.Duration, db *
 	releaseRepo := repository.NewReleaseRepository(db)
 
 	clientAccessUsecase := usecase.NewClientAccessUsecase(clientAccessRepo, projectRepo, packageRepo, timeout)
-	upgradeUsecase := usecase.NewUpgradeUsecaseWithClientAccess(upgradeRepo, projectRepo, packageRepo, releaseRepo, clientAccessRepo, timeout)
+	upgradeUsecase := usecase.NewUpgradeUsecase(upgradeRepo, projectRepo, packageRepo, releaseRepo, timeout, usecase.WithClientAccessRepository(clientAccessRepo))
 	fileUsecase := usecase.NewFileUsecase(fileStorage, timeout)
 	releaseUsecase := usecase.NewReleaseUsecase(releaseRepo, packageRepo, fileStorage, env, timeout)
 

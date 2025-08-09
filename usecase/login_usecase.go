@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"pkms/domain"
-	"pkms/internal/tokenutil"
 )
 
 type loginUsecase struct {
@@ -20,16 +19,8 @@ func NewLoginUsecase(userRepository domain.UserRepository, timeout time.Duration
 	}
 }
 
-func (lu *loginUsecase) GetUserByUserName(c context.Context, email string) (domain.User, error) {
+func (lu *loginUsecase) GetUserByUserName(c context.Context, name string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, lu.contextTimeout)
 	defer cancel()
-	return lu.userRepository.GetByUserName(ctx, email)
-}
-
-func (lu *loginUsecase) CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
-	return tokenutil.CreateAccessToken(user, secret, expiry)
-}
-
-func (lu *loginUsecase) CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshToken string, err error) {
-	return tokenutil.CreateRefreshToken(user, secret, expiry)
+	return lu.userRepository.GetByUserName(ctx, name)
 }

@@ -37,7 +37,7 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 	return nil
 }
 
-func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
+func (ur *entUserRepository) Fetch(c context.Context) ([]*domain.User, error) {
 	users, err := ur.client.User.
 		Query().
 		Select(user.FieldID, user.FieldUsername, user.FieldIsActive, user.FieldCreatedAt, user.FieldUpdatedAt).
@@ -47,9 +47,9 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 		return nil, err
 	}
 
-	var result []domain.User
+	var result []*domain.User
 	for _, u := range users {
-		result = append(result, domain.User{
+		result = append(result, &domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
 			IsActive:  u.IsActive,
@@ -61,17 +61,17 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]domain.User, error) {
 	return result, nil
 }
 
-func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (domain.User, error) {
+func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (*domain.User, error) {
 	u, err := ur.client.User.
 		Query().
 		Where(user.Username(userName)).
 		First(c)
 
 	if err != nil {
-		return domain.User{}, err
+		return nil, err
 	}
 
-	return domain.User{
+	return &domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
 		Password:  u.PasswordHash,
@@ -80,24 +80,24 @@ func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (
 	}, nil
 }
 
-func (ur *entUserRepository) GetByID(c context.Context, id string) (domain.User, error) {
+func (ur *entUserRepository) GetByID(c context.Context, id string) (*domain.User, error) {
 	u, err := ur.client.User.
 		Query().
 		Where(user.ID(id)).
 		First(c)
 
 	if err != nil {
-		return domain.User{}, err
+		return nil, err
 	}
 	t, err := u.QueryTenants().All(c)
 	if err != nil {
-		return domain.User{}, err
+		return nil, err
 	}
 	tenant := make([]*domain.Tenant, len(t))
 	for i := range t {
 		tenant[i] = &domain.Tenant{ID: t[i].ID, Name: t[i].Name}
 	}
-	return domain.User{
+	return &domain.User{
 		ID:        u.ID,
 		Name:      u.Username,
 		Password:  u.PasswordHash,
@@ -135,7 +135,7 @@ func (ur *entUserRepository) Delete(c context.Context, id string) error {
 		Exec(c)
 }
 
-func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) ([]domain.User, error) {
+func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) ([]*domain.User, error) {
 	// Query users that belong to the specified tenant
 	users, err := ur.client.User.
 		Query().
@@ -147,9 +147,9 @@ func (ur *entUserRepository) FetchByTenant(c context.Context, tenantID string) (
 		return nil, err
 	}
 
-	var result []domain.User
+	var result []*domain.User
 	for _, u := range users {
-		result = append(result, domain.User{
+		result = append(result, &domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
 			IsActive:  u.IsActive,

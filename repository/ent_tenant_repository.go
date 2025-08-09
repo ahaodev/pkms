@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"pkms/domain"
 	"pkms/ent"
 	"pkms/ent/tenant"
@@ -34,7 +35,7 @@ func (tr *entTenantRepository) Create(c context.Context, t *domain.Tenant) error
 	return nil
 }
 
-func (tr *entTenantRepository) Fetch(c context.Context) ([]domain.Tenant, error) {
+func (tr *entTenantRepository) Fetch(c context.Context) ([]*domain.Tenant, error) {
 	tenants, err := tr.client.Tenant.
 		Query().
 		Select(tenant.FieldID, tenant.FieldName, tenant.FieldCreatedAt, tenant.FieldUpdatedAt).
@@ -44,9 +45,9 @@ func (tr *entTenantRepository) Fetch(c context.Context) ([]domain.Tenant, error)
 		return nil, err
 	}
 
-	var result []domain.Tenant
+	var result []*domain.Tenant
 	for _, t := range tenants {
-		result = append(result, domain.Tenant{
+		result = append(result, &domain.Tenant{
 			ID:        t.ID,
 			Name:      t.Name,
 			CreatedAt: t.CreatedAt,
@@ -57,17 +58,17 @@ func (tr *entTenantRepository) Fetch(c context.Context) ([]domain.Tenant, error)
 	return result, nil
 }
 
-func (tr *entTenantRepository) GetByID(c context.Context, id string) (domain.Tenant, error) {
+func (tr *entTenantRepository) GetByID(c context.Context, id string) (*domain.Tenant, error) {
 	t, err := tr.client.Tenant.
 		Query().
 		Where(tenant.ID(id)).
 		First(c)
 
 	if err != nil {
-		return domain.Tenant{}, err
+		return nil, err
 	}
 
-	return domain.Tenant{
+	return &domain.Tenant{
 		ID:        t.ID,
 		Name:      t.Name,
 		CreatedAt: t.CreatedAt,
@@ -95,7 +96,7 @@ func (tr *entTenantRepository) Delete(c context.Context, id string) error {
 		Exec(c)
 }
 
-func (tr *entTenantRepository) GetTenantsByUserID(c context.Context, userID string) ([]domain.Tenant, error) {
+func (tr *entTenantRepository) GetTenantsByUserID(c context.Context, userID string) ([]*domain.Tenant, error) {
 	userEntity, err := tr.client.User.
 		Query().
 		Where(user.ID(userID)).
@@ -106,9 +107,9 @@ func (tr *entTenantRepository) GetTenantsByUserID(c context.Context, userID stri
 		return nil, err
 	}
 
-	var result []domain.Tenant
+	var result []*domain.Tenant
 	for _, t := range userEntity.Edges.Tenants {
-		result = append(result, domain.Tenant{
+		result = append(result, &domain.Tenant{
 			ID:        t.ID,
 			Name:      t.Name,
 			CreatedAt: t.CreatedAt,
@@ -119,7 +120,7 @@ func (tr *entTenantRepository) GetTenantsByUserID(c context.Context, userID stri
 	return result, nil
 }
 
-func (tr *entTenantRepository) GetTenantUsers(c context.Context, tenantID string) ([]domain.User, error) {
+func (tr *entTenantRepository) GetTenantUsers(c context.Context, tenantID string) ([]*domain.User, error) {
 	tenantEntity, err := tr.client.Tenant.
 		Query().
 		Where(tenant.ID(tenantID)).
@@ -130,19 +131,15 @@ func (tr *entTenantRepository) GetTenantUsers(c context.Context, tenantID string
 		return nil, err
 	}
 
-	var result []domain.User
+	var result []*domain.User
 	for _, u := range tenantEntity.Edges.Users {
 		// Get user tenants
 		userTenants, _ := tr.GetTenantsByUserID(c, u.ID)
-		var tenants []*domain.Tenant
-		for i := range userTenants {
-			tenants = append(tenants, &userTenants[i])
-		}
 
-		result = append(result, domain.User{
+		result = append(result, &domain.User{
 			ID:        u.ID,
 			Name:      u.Username,
-			Tenants:   tenants,
+			Tenants:   userTenants,
 			IsActive:  u.IsActive,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
@@ -171,7 +168,7 @@ func (tr *entTenantRepository) RemoveUserFromTenant(c context.Context, userID, t
 }
 
 // GetTenantUsersWithRole 获取租户用户及其角色信息
-func (tr *entTenantRepository) GetTenantUsersWithRole(c context.Context, tenantID string) ([]domain.TenantUser, error) {
+func (tr *entTenantRepository) GetTenantUsersWithRole(c context.Context, tenantID string) ([]*domain.TenantUser, error) {
 	// 首先获取租户下的所有用户
 	tenantEntity, err := tr.client.Tenant.
 		Query().
@@ -183,9 +180,9 @@ func (tr *entTenantRepository) GetTenantUsersWithRole(c context.Context, tenantI
 		return nil, err
 	}
 
-	var result []domain.TenantUser
+	var result []*domain.TenantUser
 	for _, u := range tenantEntity.Edges.Users {
-		result = append(result, domain.TenantUser{
+		result = append(result, &domain.TenantUser{
 			TenantID:   tenantID,
 			UserID:     u.ID,
 			Username:   u.Username,
@@ -211,16 +208,117 @@ func (tr *entTenantRepository) AddUserToTenantWithRole(c context.Context, userID
 }
 
 func (tr *entTenantRepository) UpdateTenantUserRole(c context.Context, userID, tenantID, role string, isActive *bool) error {
-	// 角色更新通过 Casbin 处理
+	// 验证用户是否在租户中
+	userEntity, err := tr.client.User.
+		Query().
+		Where(user.ID(userID)).
+		WithTenants(func(tq *ent.TenantQuery) {
+			tq.Where(tenant.ID(tenantID))
+		}).
+		First(c)
+
+	if err != nil {
+		return err
+	}
+
+	// 检查用户是否属于该租户
+	found := false
+	for _, t := range userEntity.Edges.Tenants {
+		if t.ID == tenantID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return errors.New("user is not a member of this tenant")
+	}
+
+	// 更新用户状态（如果提供）
+	if isActive != nil {
+		_, err = tr.client.User.
+			UpdateOneID(userID).
+			SetIsActive(*isActive).
+			Save(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	// 角色更新需要在上层通过 Casbin 处理
 	return nil
 }
 
-func (tr *entTenantRepository) GetTenantUserRole(c context.Context, userID, tenantID string) (domain.TenantUser, error) {
-	// 角色获取通过 Casbin 处理
-	return domain.TenantUser{}, nil
+func (tr *entTenantRepository) GetTenantUserRole(c context.Context, userID, tenantID string) (*domain.TenantUser, error) {
+	// 获取用户基本信息
+	userEntity, err := tr.client.User.
+		Query().
+		Where(user.ID(userID)).
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取租户信息
+	tenantEntity, err := tr.client.Tenant.
+		Query().
+		Where(tenant.ID(tenantID)).
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 验证用户是否在租户中
+	exists, err := tr.client.User.
+		Query().
+		Where(user.ID(userID)).
+		QueryTenants().
+		Where(tenant.ID(tenantID)).
+		Exist(c)
+
+	if err != nil || !exists {
+		return nil, errors.New("user is not a member of this tenant")
+	}
+
+	return &domain.TenantUser{
+		TenantID:   tenantID,
+		UserID:     userID,
+		Username:   userEntity.Username,
+		IsActive:   userEntity.IsActive,
+		CreatedAt:  userEntity.CreatedAt,
+		UpdatedAt:  userEntity.UpdatedAt,
+		Role:       "user", // 默认角色，实际角色需要在控制器层通过 Casbin 获取
+		TenantName: tenantEntity.Name,
+	}, nil
 }
 
-func (tr *entTenantRepository) GetUserTenants(c context.Context, userID string) ([]domain.TenantUser, error) {
-	// 这个方法现在通过 Casbin 在控制器层实现
-	return []domain.TenantUser{}, nil
+func (tr *entTenantRepository) GetUserTenants(c context.Context, userID string) ([]*domain.TenantUser, error) {
+	// 获取用户及其所有租户
+	userEntity, err := tr.client.User.
+		Query().
+		Where(user.ID(userID)).
+		WithTenants().
+		First(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.TenantUser
+	for _, t := range userEntity.Edges.Tenants {
+		result = append(result, &domain.TenantUser{
+			TenantID:   t.ID,
+			UserID:     userID,
+			Username:   userEntity.Username,
+			IsActive:   userEntity.IsActive,
+			CreatedAt:  userEntity.CreatedAt,
+			UpdatedAt:  userEntity.UpdatedAt,
+			Role:       "user", // 默认角色，实际角色需要在控制器层通过 Casbin 获取
+			TenantName: t.Name,
+		})
+	}
+
+	return result, nil
 }

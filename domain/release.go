@@ -2,24 +2,8 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 )
-
-// CreateReleaseRequest 创建发布请求
-type CreateReleaseRequest struct {
-	PackageID   string `json:"package_id" form:"package_id" binding:"required"`
-	VersionCode string `json:"version_code" form:"version_code" binding:"required"`
-	VersionName string `json:"version_name" form:"version_name" binding:"required"`
-	TagName     string `json:"tag_name" form:"tag_name"`
-	Changelog   string `json:"changelog" form:"changelog"` // Release notes
-
-	// 文件相关字段（不通过JSON传输）
-	File       io.Reader `json:"-"`
-	FileName   string    `json:"-"`
-	FileSize   int64     `json:"-"`
-	FileHeader string    `json:"-"`
-}
 
 // Release represents a package release/version - 发布版本
 type Release struct {

@@ -9,29 +9,20 @@ import (
 )
 
 type dashboardUsecase struct {
-	projectRepository domain.ProjectRepository
-	packageRepository domain.PackageRepository
-	userRepository    domain.UserRepository
-	releaseRepository domain.ReleaseRepository
-	casbinManager     *casbin.CasbinManager
-	contextTimeout    time.Duration
+	dashboardRepository domain.DashboardRepository
+	casbinManager       *casbin.CasbinManager
+	contextTimeout      time.Duration
 }
 
 func NewDashboardUsecase(
-	projectRepository domain.ProjectRepository,
-	packageRepository domain.PackageRepository,
-	userRepository domain.UserRepository,
-	releaseRepository domain.ReleaseRepository,
+	dashboardRepository domain.DashboardRepository,
 	casbinManager *casbin.CasbinManager,
 	timeout time.Duration,
 ) domain.DashboardUsecase {
 	return &dashboardUsecase{
-		projectRepository: projectRepository,
-		packageRepository: packageRepository,
-		userRepository:    userRepository,
-		releaseRepository: releaseRepository,
-		casbinManager:     casbinManager,
-		contextTimeout:    timeout,
+		dashboardRepository: dashboardRepository,
+		casbinManager:       casbinManager,
+		contextTimeout:      timeout,
 	}
 }
 
@@ -39,131 +30,13 @@ func (du *dashboardUsecase) GetStats(c context.Context, tenantID string) (domain
 	ctx, cancel := context.WithTimeout(c, du.contextTimeout)
 	defer cancel()
 
-	// Get all entities to count them
-	projects, err := du.projectRepository.Fetch(ctx, tenantID)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-
-	// Get package count (we'll get all projects and sum their packages)
-	totalPackages := 0
-	for _, project := range projects {
-		packages, _, err := du.packageRepository.FetchByProject(ctx, project.ID, 1, 1000) // Get all packages for counting
-		if err == nil {
-			totalPackages += len(packages)
-		}
-	}
-
-	// Get tenant-specific users
-	users, err := du.userRepository.FetchByTenant(ctx, tenantID)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-
-	// Get total downloads for the tenant
-	totalDownloads, err := du.releaseRepository.GetTotalDownloadsByTenant(ctx, tenantID)
-	if err != nil {
-		// Log error but don't fail the entire stats request
-		totalDownloads = 0
-	}
-
-	return domain.DashboardStats{
-		TotalProjects:  len(projects),
-		TotalPackages:  totalPackages,
-		TotalUsers:     len(users),
-		TotalDownloads: totalDownloads,
-	}, nil
+	return du.dashboardRepository.GetStats(ctx, tenantID)
 }
 
 func (du *dashboardUsecase) GetRecentActivities(c context.Context, tenantID string, userID string, limit int) ([]domain.RecentActivity, error) {
 	ctx, cancel := context.WithTimeout(c, du.contextTimeout)
 	defer cancel()
 
-	var activities []domain.RecentActivity
-
-	// Check if the user has admin role - admin sees all activities across all tenants
-	// Use Casbin to check if user has admin role in any tenant
-	isAdmin := du.casbinManager.IsSystemAdmin(userID)
-
-	var projects []*domain.Project
-	var err error
-
-	if isAdmin {
-		// Admin gets all projects across all tenants
-		projects, err = du.projectRepository.FetchAll(ctx)
-	} else {
-		// Regular users get only tenant-specific projects
-		tenantProjects, err := du.projectRepository.Fetch(ctx, tenantID)
-		if err == nil {
-			// Convert []domain.Project to []*domain.Project
-			for i := range tenantProjects {
-				projects = append(projects, &tenantProjects[i])
-			}
-		}
-	}
-
-	if err == nil {
-		for i, project := range projects {
-			if i >= limit/3 { // Limit to 1/3 of total limit
-				break
-			}
-			activities = append(activities, domain.RecentActivity{
-				ID:          project.ID,
-				Type:        "project_created",
-				Description: "Project " + project.Name + " was created",
-				UserID:      project.CreatedBy,
-				CreatedAt:   project.CreatedAt,
-			})
-		}
-	}
-
-	// Get recent packages from all projects
-	var recentPackages []*domain.Package
-	for _, project := range projects {
-		packages, _, err := du.packageRepository.FetchByProject(ctx, project.ID, 1, limit/3)
-		if err == nil {
-			recentPackages = append(recentPackages, packages...)
-			if len(recentPackages) >= limit/3 {
-				break
-			}
-		}
-	}
-
-	for _, pkg := range recentPackages {
-		activities = append(activities, domain.RecentActivity{
-			ID:          pkg.ID,
-			Type:        "package_created",
-			Description: "Package " + pkg.Name + " was created",
-			UserID:      pkg.CreatedBy,
-			CreatedAt:   pkg.CreatedAt,
-		})
-	}
-
-	// Get recent users
-	var users []domain.User
-	if isAdmin {
-		// Admin gets all users across all tenants
-		users, err = du.userRepository.Fetch(ctx)
-	} else {
-		// Regular users get only tenant-specific users
-		users, err = du.userRepository.FetchByTenant(ctx, tenantID)
-	}
-
-	if err == nil {
-		for i, user := range users {
-			if i >= limit/3 { // Limit to 1/3 of total limit
-				break
-			}
-			activities = append(activities, domain.RecentActivity{
-				ID:          user.ID,
-				Type:        "user_joined",
-				Description: "User " + user.Name + " joined the system",
-				UserID:      user.ID,
-				CreatedAt:   user.CreatedAt,
-			})
-		}
-	}
-	// Sort activities by created_at (newest first)
-	// For simplicity, we'll return as is, but in production you'd want to sort
-	return activities, nil
+	// 使用专门的dashboard repository处理复杂的统计查询
+	return du.dashboardRepository.GetRecentActivities(ctx, tenantID, userID, limit)
 }

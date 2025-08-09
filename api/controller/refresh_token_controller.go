@@ -5,6 +5,7 @@ import (
 
 	"pkms/bootstrap"
 	"pkms/domain"
+	"pkms/internal/tokenservice"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,7 @@ import (
 type RefreshTokenController struct {
 	RefreshTokenUsecase domain.RefreshTokenUsecase
 	Env                 *bootstrap.Env
+	TokenService        *tokenservice.TokenService
 }
 
 // RefreshToken 刷新访问令牌
@@ -47,13 +49,13 @@ func (rtc *RefreshTokenController) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := rtc.RefreshTokenUsecase.CreateAccessToken(&user, rtc.Env.AccessTokenSecret, rtc.Env.AccessTokenExpiryHour)
+	accessToken, err := rtc.TokenService.CreateAccessToken(user, rtc.Env.AccessTokenSecret, rtc.Env.AccessTokenExpiryHour)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
 
-	refreshToken, err := rtc.RefreshTokenUsecase.CreateRefreshToken(&user, rtc.Env.RefreshTokenSecret, rtc.Env.RefreshTokenExpiryHour)
+	refreshToken, err := rtc.TokenService.CreateRefreshToken(user, rtc.Env.RefreshTokenSecret, rtc.Env.RefreshTokenExpiryHour)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

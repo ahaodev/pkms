@@ -14,17 +14,14 @@ import (
 )
 
 func NewDashboardRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, group *gin.RouterGroup) {
-	// Dashboard needs multiple repositories
-	ur := repository.NewUserRepository(db)
-	pr := repository.NewProjectRepository(db)
-	pkgRepo := repository.NewPackageRepository(db)
-	releaseRepo := repository.NewReleaseRepository(db)
+	// Create dashboard repository
+	dashboardRepo := repository.NewDashboardRepository(db)
 
 	// Create Casbin manager for permission checking
 	casbinManager := casbin.NewCasbinManager(db)
 
 	dc := &controller.DashboardController{
-		DashboardUsecase: usecase.NewDashboardUsecase(pr, pkgRepo, ur, releaseRepo, casbinManager, timeout),
+		DashboardUsecase: usecase.NewDashboardUsecase(dashboardRepo, casbinManager, timeout),
 		Env:              env,
 	}
 

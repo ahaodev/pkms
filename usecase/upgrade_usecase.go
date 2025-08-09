@@ -18,36 +18,42 @@ type upgradeUsecase struct {
 	contextTimeout         time.Duration
 }
 
+// UpgradeUsecaseConfig 升级用例配置选项
+type UpgradeUsecaseConfig struct {
+	ClientAccessRepository domain.ClientAccessRepository
+}
+
+// UpgradeUsecaseOption 升级用例配置选项函数类型
+type UpgradeUsecaseOption func(*UpgradeUsecaseConfig)
+
+// WithClientAccessRepository 配置客户端接入仓库
+func WithClientAccessRepository(repo domain.ClientAccessRepository) UpgradeUsecaseOption {
+	return func(config *UpgradeUsecaseConfig) {
+		config.ClientAccessRepository = repo
+	}
+}
+
+// NewUpgradeUsecase 创建升级用例（支持可选配置）
 func NewUpgradeUsecase(
 	upgradeRepository domain.UpgradeRepository,
 	projectRepository domain.ProjectRepository,
 	packageRepository domain.PackageRepository,
 	releaseRepository domain.ReleaseRepository,
 	timeout time.Duration,
+	opts ...UpgradeUsecaseOption,
 ) domain.UpgradeUsecase {
-	return &upgradeUsecase{
-		upgradeRepository: upgradeRepository,
-		projectRepository: projectRepository,
-		packageRepository: packageRepository,
-		releaseRepository: releaseRepository,
-		contextTimeout:    timeout,
+	// 应用配置选项
+	config := &UpgradeUsecaseConfig{}
+	for _, opt := range opts {
+		opt(config)
 	}
-}
 
-func NewUpgradeUsecaseWithClientAccess(
-	upgradeRepository domain.UpgradeRepository,
-	projectRepository domain.ProjectRepository,
-	packageRepository domain.PackageRepository,
-	releaseRepository domain.ReleaseRepository,
-	clientAccessRepository domain.ClientAccessRepository,
-	timeout time.Duration,
-) domain.UpgradeUsecase {
 	return &upgradeUsecase{
 		upgradeRepository:      upgradeRepository,
 		projectRepository:      projectRepository,
 		packageRepository:      packageRepository,
 		releaseRepository:      releaseRepository,
-		clientAccessRepository: clientAccessRepository,
+		clientAccessRepository: config.ClientAccessRepository,
 		contextTimeout:         timeout,
 	}
 }

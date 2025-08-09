@@ -21,6 +21,11 @@ type RecentActivity struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type DashboardRepository interface {
+	GetStats(c context.Context, tenantID string) (DashboardStats, error)
+	GetRecentActivities(c context.Context, tenantID string, userID string, limit int) ([]RecentActivity, error)
+}
+
 type DashboardUsecase interface {
 	GetStats(c context.Context, tenantID string) (DashboardStats, error)
 	GetRecentActivities(c context.Context, tenantID string, userID string, limit int) ([]RecentActivity, error)

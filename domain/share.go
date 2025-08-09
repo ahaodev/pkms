@@ -5,15 +5,6 @@ import (
 	"time"
 )
 
-// Share 结构体定义了分享信息
-type Share struct {
-	ID        string     `json:"id"`
-	Code      string     `json:"code"`
-	ReleaseID string     `json:"release_id"`
-	StartAt   time.Time  `json:"start_at"`
-	ExpiredAt *time.Time `json:"expired_at,omitempty"`
-}
-
 // CreateShareRequest 创建分享链接的请求
 type CreateShareRequest struct {
 	ReleaseID   string `json:"release_id"`
@@ -31,6 +22,15 @@ type ShareResponse struct {
 	Version     string     `json:"version"`
 	StartAt     time.Time  `json:"start_at"`
 	ExpiredAt   *time.Time `json:"expired_at,omitempty"`
+}
+
+// Share 结构体定义了分享信息
+type Share struct {
+	ID        string     `json:"id"`
+	Code      string     `json:"code"`
+	ReleaseID string     `json:"release_id"`
+	StartAt   time.Time  `json:"start_at"`
+	ExpiredAt *time.Time `json:"expired_at,omitempty"`
 }
 
 // ShareListItem 分享列表项

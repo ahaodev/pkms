@@ -40,7 +40,7 @@ func (pr *entProjectRepository) Create(c context.Context, p *domain.Project) err
 	return nil
 }
 
-func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]domain.Project, error) {
+func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]*domain.Project, error) {
 	projects, err := pr.client.Project.
 		Query().
 		Where(project.TenantID(tenantID)).
@@ -51,9 +51,9 @@ func (pr *entProjectRepository) Fetch(c context.Context, tenantID string) ([]dom
 		return nil, err
 	}
 
-	var result []domain.Project
+	var result []*domain.Project
 	for _, p := range projects {
-		result = append(result, domain.Project{
+		result = append(result, &domain.Project{
 			ID:           p.ID,
 			Name:         p.Name,
 			Description:  p.Description,
@@ -97,7 +97,7 @@ func (pr *entProjectRepository) FetchAll(c context.Context) ([]*domain.Project, 
 	return result, nil
 }
 
-func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Project, error) {
+func (pr *entProjectRepository) GetByID(c context.Context, id string) (*domain.Project, error) {
 	p, err := pr.client.Project.
 		Query().
 		Where(project.ID(id)).
@@ -105,10 +105,10 @@ func (pr *entProjectRepository) GetByID(c context.Context, id string) (domain.Pr
 		First(c)
 
 	if err != nil {
-		return domain.Project{}, err
+		return nil, err
 	}
 
-	return domain.Project{
+	return &domain.Project{
 		ID:           p.ID,
 		Name:         p.Name,
 		Description:  p.Description,
@@ -138,7 +138,7 @@ func (pr *entProjectRepository) Delete(c context.Context, id string) error {
 		Exec(c)
 }
 
-func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([]domain.Project, error) {
+func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([]*domain.Project, error) {
 	projects, err := pr.client.Project.
 		Query().
 		Where(project.CreatedBy(userID)).
@@ -149,9 +149,9 @@ func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([
 		return nil, err
 	}
 
-	var result []domain.Project
+	var result []*domain.Project
 	for _, p := range projects {
-		result = append(result, domain.Project{
+		result = append(result, &domain.Project{
 			ID:           p.ID,
 			Name:         p.Name,
 			Description:  p.Description,

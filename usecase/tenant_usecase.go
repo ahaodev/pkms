@@ -35,13 +35,13 @@ func (tu *tenantUsecase) Create(c context.Context, tenant *domain.Tenant) error 
 	return nil
 }
 
-func (tu *tenantUsecase) Fetch(c context.Context) ([]domain.Tenant, error) {
+func (tu *tenantUsecase) Fetch(c context.Context) ([]*domain.Tenant, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.Fetch(ctx)
 }
 
-func (tu *tenantUsecase) GetByID(c context.Context, id string) (domain.Tenant, error) {
+func (tu *tenantUsecase) GetByID(c context.Context, id string) (*domain.Tenant, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetByID(ctx, id)
@@ -59,13 +59,13 @@ func (tu *tenantUsecase) Delete(c context.Context, id string) error {
 	return tu.tenantRepository.Delete(ctx, id)
 }
 
-func (tu *tenantUsecase) GetTenantsByUserID(c context.Context, userID string) ([]domain.Tenant, error) {
+func (tu *tenantUsecase) GetTenantsByUserID(c context.Context, userID string) ([]*domain.Tenant, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetTenantsByUserID(ctx, userID)
 }
 
-func (tu *tenantUsecase) GetTenantUsers(c context.Context, tenantID string) ([]domain.User, error) {
+func (tu *tenantUsecase) GetTenantUsers(c context.Context, tenantID string) ([]*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetTenantUsers(ctx, tenantID)
@@ -92,7 +92,7 @@ func (tu *tenantUsecase) RemoveUserFromTenant(c context.Context, userID, tenantI
 }
 
 // GetTenantUsersWithRole 获取租户用户及其角色信息
-func (tu *tenantUsecase) GetTenantUsersWithRole(c context.Context, tenantID string) ([]domain.TenantUser, error) {
+func (tu *tenantUsecase) GetTenantUsersWithRole(c context.Context, tenantID string) ([]*domain.TenantUser, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetTenantUsersWithRole(ctx, tenantID)
@@ -165,14 +165,14 @@ func (tu *tenantUsecase) UpdateTenantUserRole(c context.Context, userID, tenantI
 }
 
 // GetTenantUserRole 获取用户在特定租户中的角色
-func (tu *tenantUsecase) GetTenantUserRole(c context.Context, userID, tenantID string) (domain.TenantUser, error) {
+func (tu *tenantUsecase) GetTenantUserRole(c context.Context, userID, tenantID string) (*domain.TenantUser, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetTenantUserRole(ctx, userID, tenantID)
 }
 
 // GetUserTenants 获取用户所属的所有租户及角色信息
-func (tu *tenantUsecase) GetUserTenants(c context.Context, userID string) ([]domain.TenantUser, error) {
+func (tu *tenantUsecase) GetUserTenants(c context.Context, userID string) ([]*domain.TenantUser, error) {
 	ctx, cancel := context.WithTimeout(c, tu.contextTimeout)
 	defer cancel()
 	return tu.tenantRepository.GetUserTenants(ctx, userID)

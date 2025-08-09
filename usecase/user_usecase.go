@@ -64,19 +64,19 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	return nil
 }
 
-func (uu *userUsecase) Fetch(c context.Context) ([]domain.User, error) {
+func (uu *userUsecase) Fetch(c context.Context) ([]*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 	return uu.userRepository.Fetch(ctx)
 }
 
-func (uu *userUsecase) GetByUserName(c context.Context, userName string) (domain.User, error) {
+func (uu *userUsecase) GetByUserName(c context.Context, userName string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 	return uu.userRepository.GetByUserName(ctx, userName)
 }
 
-func (uu *userUsecase) GetByID(c context.Context, id string) (domain.User, error) {
+func (uu *userUsecase) GetByID(c context.Context, id string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 	return uu.userRepository.GetByID(ctx, id)
@@ -120,7 +120,7 @@ func (uu *userUsecase) UpdateProfile(c context.Context, userID string, updates d
 	}
 	// Note: Avatar field is not in the current User struct, but can be added later
 
-	return uu.userRepository.Update(ctx, &user)
+	return uu.userRepository.Update(ctx, user)
 }
 
 func (uu *userUsecase) UpdatePassword(c context.Context, userID string, passwordUpdate domain.PasswordUpdate) error {
@@ -146,7 +146,7 @@ func (uu *userUsecase) UpdatePassword(c context.Context, userID string, password
 
 	// Update password
 	user.Password = string(hashedPassword)
-	return uu.userRepository.Update(ctx, &user)
+	return uu.userRepository.Update(ctx, user)
 }
 
 func (uu *userUsecase) UpdatePartial(c context.Context, userID string, updates domain.UserUpdateRequest) error {
@@ -175,5 +175,5 @@ func (uu *userUsecase) UpdatePartial(c context.Context, userID string, updates d
 		user.Password = string(hashedPassword)
 	}
 
-	return uu.userRepository.Update(ctx, &user)
+	return uu.userRepository.Update(ctx, user)
 }

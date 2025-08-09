@@ -85,7 +85,15 @@ func (pr *entPackageRepository) FetchAll(c context.Context, page, pageSize int) 
 	for _, p := range pkgs {
 		// 统计每个包的发布版本数量和下载量
 		versionCount, _ := pr.client.Release.Query().Where(release.PackageID(p.ID)).Count(c)
-		downloadCount, _ := pr.client.Release.Query().Where(release.PackageID(p.ID)).Count(c)
+
+		// 计算总下载数：获取所有release并累加下载数
+		releases, err := pr.client.Release.Query().Where(release.PackageID(p.ID)).All(c)
+		downloadCount := 0
+		if err == nil {
+			for _, rel := range releases {
+				downloadCount += rel.DownloadCount
+			}
+		}
 		result = append(result, &domain.Package{
 			ID:             p.ID,
 			ProjectID:      p.ProjectID,
@@ -130,8 +138,16 @@ func (pr *entPackageRepository) FetchByProject(c context.Context, projectID stri
 	var result []*domain.Package
 	for _, p := range pkgs {
 		// 统计每个包的发布版本数量和下载量
-		versionCount, _ := pr.client.Release.Query().Where(release.ID(p.ID)).Count(c)
-		downloadCount, _ := pr.client.Release.Query().Where(release.ID(p.ID)).Count(c)
+		versionCount, _ := pr.client.Release.Query().Where(release.PackageID(p.ID)).Count(c)
+
+		// 计算总下载数：获取所有release并累加下载数
+		releases, err := pr.client.Release.Query().Where(release.PackageID(p.ID)).All(c)
+		downloadCount := 0
+		if err == nil {
+			for _, rel := range releases {
+				downloadCount += rel.DownloadCount
+			}
+		}
 		result = append(result, &domain.Package{
 			ID:             p.ID,
 			ProjectID:      p.ProjectID,

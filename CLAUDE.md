@@ -136,7 +136,6 @@ DB_TYPE=postgres DB_DSN=postgres://hao88:Hao88.cloud!@192.168.99.17:5432/pkms?ss
 ├── cmd/main.go             # 项目入口
 ├── domain                  # 领域模型
 ├── internal/               # Token 工具
-├── mongo                   # MongoDB 相关实现
 ├── repository              # 数据仓库
 └── usecase                 # 用例/业务逻辑
 ```

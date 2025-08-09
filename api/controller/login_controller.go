@@ -10,12 +10,14 @@ import (
 	"pkms/bootstrap"
 	"pkms/domain"
 	"pkms/internal"
+	"pkms/internal/tokenservice"
 )
 
 type LoginController struct {
 	LoginUsecase    domain.LoginUsecase
 	Env             *bootstrap.Env
 	SecurityManager *internal.LoginSecurityManager
+	TokenService    *tokenservice.TokenService
 }
 
 // Login godoc
@@ -99,13 +101,13 @@ func (lc *LoginController) Login(c *gin.Context) {
 	// 登录成功，清除失败记录
 	lc.SecurityManager.RecordSuccessfulLogin(request.UserName)
 
-	accessToken, err := lc.LoginUsecase.CreateAccessToken(&user, lc.Env.AccessTokenSecret, lc.Env.AccessTokenExpiryHour)
+	accessToken, err := lc.TokenService.CreateAccessToken(user, lc.Env.AccessTokenSecret, lc.Env.AccessTokenExpiryHour)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
 
-	refreshToken, err := lc.LoginUsecase.CreateRefreshToken(&user, lc.Env.RefreshTokenSecret, lc.Env.RefreshTokenExpiryHour)
+	refreshToken, err := lc.TokenService.CreateRefreshToken(user, lc.Env.RefreshTokenSecret, lc.Env.RefreshTokenExpiryHour)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 )
 
@@ -19,34 +18,6 @@ type Package struct {
 	LatestRelease  *Release  `json:"latest_release,omitempty"`
 	ReleaseCount   int       `json:"release_count"`
 	TotalDownloads int       `json:"total_downloads"`
-}
-
-// CreatePackageRequest 创建包请求
-type CreatePackageRequest struct {
-	ProjectID   string `json:"project_id" form:"project_id" binding:"required"`
-	Name        string `json:"name" form:"name" binding:"required"`
-	Type        string `json:"type" form:"type" binding:"required"`
-	Description string `json:"description" form:"description"`
-}
-
-// PackageUploadRequest 上传包文件创建发布版本的请求
-type ReleaseUploadRequest struct {
-	PackageID    string `form:"package_id"`
-	Name         string `form:"name"`
-	Version      string `form:"version" binding:"required"`
-	Type         string `form:"type"`
-	TagName      string `form:"tag_name"`
-	Title        string `form:"title"`
-	Changelog    string `form:"changelog"`
-	IsPrerelease bool   `form:"is_prerelease"`
-	IsLatest     bool   `form:"is_latest"`
-	IsDraft      bool   `form:"is_draft"`
-
-	// 文件相关字段（不通过JSON传输）
-	File       io.Reader `json:"-"`
-	FileName   string    `json:"-"`
-	FileSize   int64     `json:"-"`
-	FileHeader string    `json:"-"`
 }
 
 // PackageRepository interface for package basic information
