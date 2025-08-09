@@ -43,7 +43,7 @@ func setDefaults() {
 
 	// Database defaults
 	viper.SetDefault("DB_TYPE", "sqlite")
-	viper.SetDefault("DB_DSN", "postgres://hao88:Hao88.cloud!@192.168.99.17:5432/pkms?sslmode=disable")
+	viper.SetDefault("DB_DSN", "")
 
 	viper.SetDefault("ACCESS_TOKEN_EXPIRY_HOUR", 3)
 	viper.SetDefault("REFRESH_TOKEN_EXPIRY_HOUR", 24) // 7 days
