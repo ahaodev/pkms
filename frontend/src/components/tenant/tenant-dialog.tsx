@@ -41,7 +41,7 @@ export function TenantDialog({
     }, [onClose]);
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>

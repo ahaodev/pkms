@@ -2,11 +2,11 @@ import {useQueryClient} from '@tanstack/react-query';
 import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
-import {Skeleton} from '@/components/ui/skeleton';
 import {EmptyList} from '@/components/ui/empty-list';
 import {AlertCircle, Eye, Share2, Trash2} from 'lucide-react';
 import {format} from 'date-fns';
 import {ShareListItem} from '@/lib/api/shares';
+import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
 
 interface SharesTableProps {
   shares: ShareListItem[] | undefined;
@@ -42,23 +42,7 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
   }
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-0">
-          <div className="space-y-4 p-6">
-            {[...Array(5)].map((_, index) => (
-              <div key={index} className="flex space-x-4">
-                <Skeleton className="h-4 w-[100px]" />
-                <Skeleton className="h-4 w-[150px]" />
-                <Skeleton className="h-4 w-[100px]" />
-                <Skeleton className="h-4 w-[120px]" />
-                <Skeleton className="h-4 w-[80px]" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return (<CustomSkeleton type="table" rows={6} columns={6} />);
   }
 
   if (!shares || shares.length === 0) {

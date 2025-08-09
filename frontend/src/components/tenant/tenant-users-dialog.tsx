@@ -81,7 +81,7 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
     if (!tenant) return null;
 
     return (
-        <Dialog open={open} onOpenChange={onClose}>
+        <Dialog open={open} onOpenChange={onClose} modal={true}>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
