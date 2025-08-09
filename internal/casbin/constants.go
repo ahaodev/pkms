@@ -29,30 +29,3 @@ var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, 
 var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
 var DEFAULT_SIDEBAR = []string{SidebarDashboard}
-
-// 简化的侧边栏访问权限
-func GetSidebarPermissions(role string) []string {
-	switch role {
-	case RoleAdmin:
-		return ADMIN_SIDEBAR
-	case RoleOwner:
-		return OWNER_SIDEBAR
-	case RoleViewer:
-		return VIEWER_SIDEBAR
-	default:
-		return DEFAULT_SIDEBAR
-	}
-}
-
-// 简化的角色检查函数
-func IsSystemAdmin(role string) bool {
-	return role == RoleAdmin
-}
-
-func IsBusinessManager(role string) bool {
-	return role == RoleAdmin || role == RoleOwner
-}
-
-func IsValidRole(role string) bool {
-	return role == RoleAdmin || role == RoleOwner || role == RoleViewer
-}
