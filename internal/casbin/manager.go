@@ -118,19 +118,6 @@ func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string 
 	return permissions
 }
 
-// AddDefaultRolesForUser 为用户添加默认角色 (支持多租户)
-func (m *CasbinManager) AddDefaultRolesForUser(userID, role, tenantID string) error {
-	added, err := m.enforcer.AddRoleForUser(userID, role, tenantID)
-	if err != nil {
-		return fmt.Errorf("failed to add role %s for user %s in tenant %s: %v", role, userID, tenantID, err)
-	}
-	if added {
-		log.Printf("为用户 %s 在租户 %s 中添加角色 %s", userID, tenantID, role)
-	}
-
-	return m.enforcer.SavePolicy()
-}
-
 // GetAllPolicies 获取所有策略
 func (m *CasbinManager) GetAllPolicies() [][]string {
 	policies, _ := m.enforcer.GetPolicy()
