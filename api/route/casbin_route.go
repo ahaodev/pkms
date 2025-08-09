@@ -26,7 +26,6 @@ func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	group.DELETE("/policies", casbinController.RemovePolicy)
 	group.GET("/policies", casbinController.GetAllPolicies)
 	group.POST("/policies/check", casbinController.CheckPermission)
-	group.DELETE("/policies/clear", casbinController.ClearAllPolicies)
 
 	// 角色管理路由
 	group.POST("/roles", casbinController.AddRole)
@@ -35,7 +34,6 @@ func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, 
 	group.GET("/roles/names", casbinController.GetAllRoleNames)
 	group.GET("/roles/:role/users", casbinController.GetRoleUsers)
 	group.GET("/roles/:role/permissions", casbinController.GetRolePermissions)
-	group.DELETE("/roles/clear", casbinController.ClearAllRoles)
 
 	// 角色权限管理路由
 	group.POST("/role-policies", casbinController.AddRolePolicy)

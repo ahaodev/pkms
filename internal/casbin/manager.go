@@ -220,23 +220,6 @@ func (m *CasbinManager) RemovePolicyForRole(role, tenantID, object, action strin
 	return m.enforcer.RemovePolicy(role, tenantID, object, action)
 }
 
-// ClearAllPolicies 清空所有策略
-func (m *CasbinManager) ClearAllPolicies() error {
-	m.enforcer.ClearPolicy()
-	return m.enforcer.SavePolicy()
-}
-
-// ClearAllRoles 清空所有角色
-func (m *CasbinManager) ClearAllRoles() error {
-	allRoles := m.GetAllRoles()
-	for _, role := range allRoles {
-		if len(role) >= 2 {
-			m.enforcer.DeleteRoleForUser(role[0], role[1])
-		}
-	}
-	return m.enforcer.SavePolicy()
-}
-
 // GetSidebarPermissions 直接基于角色返回权限
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
 	// 系统admin全权限
@@ -264,24 +247,6 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 
 	return DEFAULT_SIDEBAR
 }
-
-// DEMO版本：删除复杂的权限初始化函数
-
-// InitializeRolePermissionsForTenant DEMO阶段简化版 - 只需要角色分配，不需要复杂权限
-func (m *CasbinManager) InitializeRolePermissionsForTenant(tenantID string) error {
-	if tenantID == "" {
-		return fmt.Errorf("租户ID不能为空")
-	}
-
-	log.Printf("DEMO版本：为租户 %s 跳过复杂权限初始化，只依赖角色检查", tenantID)
-
-	// DEMO阶段：不需要复杂的权限策略，只需要角色分配
-	// 权限检查主要通过角色实现：admin、manager、viewer
-
-	return nil
-}
-
-// 租户级别的角色管理方法
 
 // AddRoleForUserInTenant 为用户在指定租户中添加角色
 func (m *CasbinManager) AddRoleForUserInTenant(userID, role, tenantID string) error {

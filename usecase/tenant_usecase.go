@@ -32,16 +32,6 @@ func (tu *tenantUsecase) Create(c context.Context, tenant *domain.Tenant) error 
 	if err != nil {
 		return err
 	}
-
-	// 为新租户初始化角色权限
-	err = tu.casbinManager.InitializeRolePermissionsForTenant(tenant.ID)
-	if err != nil {
-		// 如果权限初始化失败，记录日志但不阻止租户创建
-		// 可以在后续手动修复权限
-		// 这里可以考虑是否要回滚租户创建
-		return err
-	}
-
 	return nil
 }
 
