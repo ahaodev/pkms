@@ -1,7 +1,8 @@
 import {useCallback} from "react";
 import {toast} from "sonner";
 import {updateUserPassword} from "@/lib/api/users";
-import {type AccountConfig, AccountSettings, SettingsHeader, SettingsTabs,} from "@/components/settings";
+import {type AccountConfig, AccountSettings, SettingsTabs,} from "@/components/settings";
+import {PageHeader} from "@/components/ui";
 
 export default function Settings() {
     // 账户设置保存处理
@@ -24,7 +25,7 @@ export default function Settings() {
 
     return (
         <div className="space-y-6">
-            <SettingsHeader
+            <PageHeader
                 title="设置"
                 description="管理您的应用程序设置和偏好"
             />

@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeHeader, UpgradeTargetsTable} from '@/components/upgrade';
+import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeTargetsTable} from '@/components/upgrade';
 import {ProjectPackageFilters} from '@/components/shared';
 import {toast} from 'sonner';
 import {useProjects} from '@/hooks/use-projects';
@@ -13,6 +13,8 @@ import {
     UpdateUpgradeTargetRequest,
     UpgradeTarget
 } from '@/lib/api/upgrade';
+import {PageHeader} from "@/components/ui";
+import {Plus} from "lucide-react";
 
 export default function UpgradePage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -26,7 +28,7 @@ export default function UpgradePage() {
         description: ''
     });
     const [editFormData, setEditFormData] = useState<UpdateUpgradeTargetRequest>({});
-    
+
     // Filter states
     const [projectFilter, setProjectFilter] = useState<string>('all');
     const [packageFilter, setPackageFilter] = useState<string>('all');
@@ -68,15 +70,15 @@ export default function UpgradePage() {
     // Filter upgrade targets based on selected filters
     const filteredUpgradeTargets = useMemo(() => {
         let filtered: UpgradeTarget[] = upgradeTargets;
-        
+
         if (projectFilter !== 'all') {
             filtered = filtered.filter((target: UpgradeTarget) => target.project_id === projectFilter);
         }
-        
+
         if (packageFilter !== 'all') {
             filtered = filtered.filter((target: UpgradeTarget) => target.package_id === packageFilter);
         }
-        
+
         return filtered;
     }, [upgradeTargets, projectFilter, packageFilter]);
 
@@ -161,7 +163,17 @@ export default function UpgradePage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <UpgradeHeader onCreateClick={() => setIsCreateDialogOpen(true)} />
+            <PageHeader
+                title="升级管理"
+                description="管理软件包的升级目标，为客户端提供版本检查和下载服务"
+                action={{
+                    label: "创建升级目标",
+                    onClick: () => {
+                        setIsCreateDialogOpen(false)
+                    },
+                    icon: Plus
+                }}
+            />
 
             {/* Filters */}
             <ProjectPackageFilters

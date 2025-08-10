@@ -2,7 +2,9 @@ import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDashboardData} from '@/hooks/use-dashboard';
 import {useProjects} from '@/hooks/use-projects';
-import {DashboardHeader, DashboardLoadingView, RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
+import {RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
+import {PageHeader} from "@/components/ui";
+import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
 
 /**
  * 仪表板页：展示项目、包、上传、下载等核心统计信息和最近动态
@@ -27,7 +29,7 @@ export default function Dashboard() {
     }, [navigateToHierarchy]);
 
     if (projectsLoading || dashboardLoading) {
-        return <DashboardLoadingView/>;
+        return <CustomSkeleton type="dashboard" />;
     }
 
     // 如果仪表板数据加载失败，显示错误信息但仍然显示项目数据
@@ -38,7 +40,7 @@ export default function Dashboard() {
     return (
         <div className="space-y-6">
             {/* 页面头部 */}
-            <DashboardHeader
+            <PageHeader
                 title="概览"
                 description="包管理系统概览"
             />

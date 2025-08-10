@@ -1,11 +1,12 @@
-import {useCallback, memo} from 'react';
+import {memo, useCallback} from 'react';
 import {ProjectPackageFilters} from '@/components/shared';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {useShares, useShareFilters, useShareDialogs} from '@/hooks/use-shares';
-import {SharesHeader, SharesTable, DeleteShareDialog} from '@/components/shares';
+import {useShareDialogs, useShareFilters, useShares} from '@/hooks/use-shares';
+import {DeleteShareDialog, SharesTable} from '@/components/shares';
 import {ShareDialog} from '@/components/share-dialog';
 import {ErrorBoundary} from '@/components/ui/error-boundary';
+import {PageHeader} from "@/components/ui";
 
 function SharesManagerPage() {
     // 基础数据
@@ -43,7 +44,10 @@ function SharesManagerPage() {
         <ErrorBoundary>
             <div className="space-y-6">
                 {/* Header */}
-                <SharesHeader/>
+                <PageHeader
+                    title="分享管理"
+                    description="管理所有的文件分享链接，可以查看分享状态和删除不需要的分享"
+                />
 
                 {/* Filters */}
                 <ProjectPackageFilters
