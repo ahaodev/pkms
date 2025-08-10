@@ -113,8 +113,6 @@ DB_DSN=postgres://username:password@host:port/database?sslmode=disable
 # Development with SQLite (default)
 go run ./cmd/main.go
 
-# Production with PostgreSQL
-DB_TYPE=postgres DB_DSN=postgres://hao88:Hao88.cloud!@192.168.99.17:5432/pkms?sslmode=disable go run ./cmd/main.go
 ```
 
 ### Backend Structure (Go Clean Architecture)
