@@ -13,7 +13,6 @@ interface AuthContextType {
     logout: () => void;
     selectTenant: (tenant: Tenant | null) => Promise<void>;
     isLoading: boolean;
-    hasRole: (role: string) => boolean;
     isAdmin: () => boolean;
 }
 
@@ -31,7 +30,6 @@ const AuthContext = createContext<AuthContextType>({
 
     },
     isLoading: false,
-    hasRole: () => false,
     isAdmin: () => false,
 });
 
@@ -50,7 +48,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
             setUserPermissions(null);
             return;
         }
-        
+
         console.log('Loading permissions for user:', user.id, 'name:', user.name);
         try {
             const permissionsResp = await authAPI.getUserPermissions(user.id);
@@ -110,7 +108,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
         };
         initializeAuth();
     }, []);
-    
+
     // Load user permissions when user or tenant changes
     useEffect(() => {
         if (user?.id && currentTenant?.id) {
@@ -167,21 +165,13 @@ export function AuthProvider({children}: { children: ReactNode }) {
         const previousTenantId = currentTenant?.id;
         setCurrentTenant(tenant);
         localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
-        
+
         // 如果租户发生了变化，清除所有查询缓存以强制刷新页面数据
         if (previousTenantId !== tenant?.id) {
             await queryClient.invalidateQueries();
         }
     };
-    
-    const hasRole = (role: string): boolean => {
-        const hasRoleResult = userPermissions?.roles?.includes(role) ?? false;
-        console.log(`Checking role '${role}' for user ${user?.name}:`, hasRoleResult);
-        console.log('Current userPermissions:', userPermissions);
-        return hasRoleResult;
-    };
-    
-    const isAdmin = (): boolean => hasRole('admin');
+    const isAdmin = (): boolean => userPermissions?.roles?.includes("admin") ?? false;
     const contextValue = {
         user,
         tenants,
@@ -191,7 +181,6 @@ export function AuthProvider({children}: { children: ReactNode }) {
         logout,
         selectTenant,
         isLoading,
-        hasRole,
         isAdmin,
     };
 
