@@ -1,10 +1,7 @@
 package route
 
 import (
-	"time"
-
 	"pkms/api/controller"
-	"pkms/bootstrap"
 	"pkms/ent"
 	"pkms/internal/casbin"
 	"pkms/repository"
@@ -13,7 +10,7 @@ import (
 )
 
 // NewCasbinRouter 创建 Casbin 权限管理路由
-func NewCasbinRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, group *gin.RouterGroup) {
+func NewCasbinRouter(db *ent.Client, casbinManager *casbin.CasbinManager, group *gin.RouterGroup) {
 	// 创建仓储
 	userRepository := repository.NewUserRepository(db)
 	tenantRepository := repository.NewTenantRepository(db)

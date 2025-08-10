@@ -38,9 +38,11 @@ func (ur *entUserRepository) Create(c context.Context, u *domain.User) error {
 }
 
 func (ur *entUserRepository) Fetch(c context.Context) ([]*domain.User, error) {
+	// 查询所有用户，排除 admin 用户
 	users, err := ur.client.User.
 		Query().
 		Select(user.FieldID, user.FieldUsername, user.FieldIsActive, user.FieldCreatedAt, user.FieldUpdatedAt).
+		Where(user.Not(user.Username("admin"))).
 		All(c)
 
 	if err != nil {

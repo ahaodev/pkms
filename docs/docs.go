@@ -3328,7 +3328,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/share/{code}/download": {
+        "/share/{code}": {
             "get": {
                 "description": "Download a release file using a share code without authentication",
                 "consumes": [
@@ -3338,7 +3338,7 @@ const docTemplate = `{
                     "application/octet-stream"
                 ],
                 "tags": [
-                    "Sharing"
+                    "share(public)"
                 ],
                 "summary": "Download shared release",
                 "parameters": [
@@ -3387,7 +3387,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Shares"
+                    "Shares(management)"
                 ],
                 "summary": "Get share list",
                 "responses": {
@@ -3421,7 +3421,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Shares"
+                    "Shares(management)"
                 ],
                 "summary": "Delete share",
                 "parameters": [

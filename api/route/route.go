@@ -26,6 +26,7 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	if err := gin.SetTrustedProxies(trustedProxies); err != nil {
 		fmt.Printf("server: %s", err)
 	}
+
 	gin.MaxMultipartMemory = 1000 << 20 // 1000 MB
 
 	frontend.Register(gin)
@@ -34,69 +35,79 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	// Swagger documentation
 	gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// 公开访问的路由组
 	publicRouter := gin.Group(ApiUri)
-	// All Public APIs
+
+	// 登录路由
 	NewLoginRouter(env, timeout, db, publicRouter)
 
-	// Public share routes (no authentication required)
+	// 公共访问路由
 	shareRouter := gin.Group("/share")
 	NewShareRouter(env, timeout, db, fileStorage, shareRouter)
 
-	// Public client access routes (no authentication required, using access_token)
+	// 客户端接入路由,需要验证 access token
 	publicClientAccessRouter := gin.Group("/client-access")
 	NewPublicClientAccessRouter(env, timeout, db, fileStorage, publicClientAccessRouter)
 
+	// 受保护的路由组
 	protectedRouter := gin.Group(ApiUri)
+
 	// 安全的路由组，所有路由都需要认证
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
+
 	// 个人资料路由，允许所有认证用户访问
 	profileRouter := protectedRouter.Group("/profile")
 	NewProfileRouter(app, timeout, db, profileRouter)
 
-	// 再通过casbin中间件进行权限控制
-	// Casbin 权限管理路由（需要认证但不需要特定权限）
+	// casbin 权限管理路由
 	casbinRouter := protectedRouter.Group("/casbin")
-	NewCasbinRouter(env, timeout, db, casbinManager, casbinRouter)
+	NewCasbinRouter(db, casbinManager, casbinRouter)
 
-	// DEMO阶段大胆简化：只保留核心权限检查！
+	// Casbin 中间件，用于权限验证
 	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
 
-	// 🔥 业务功能路由 - 认证用户都可访问项目（admin, owner, user）
+	// 项目管理路由
 	projectRouter := protectedRouter.Group("/projects")
 	projectRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewProjectRouter(env, timeout, db, projectRouter)
 
+	// 包管理路由
 	packageRouter := protectedRouter.Group("/packages")
 	packageRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewPackageRouter(env, timeout, db, fileStorage, packageRouter)
 
+	// 版本发布管理路由
 	releaseRouter := protectedRouter.Group("/releases")
 	releaseRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewReleaseRouter(env, timeout, db, fileStorage, releaseRouter)
 
-	// 🔥 系统管理路由 - 只有admin可访问
-	userRouter := protectedRouter.Group("/user")
-	userRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
-	NewUserRouter(app, timeout, db, userRouter)
-
-	tenantRouter := protectedRouter.Group("/tenants")
-	tenantRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
-	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
-
-	upgradeRouter := protectedRouter.Group("/upgrades")
-	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
-	NewUpgradeRouter(env, timeout, db, upgradeRouter)
-
+	// 接入管理路由
 	clientAccessRouter := protectedRouter.Group("/access-manager")
 	clientAccessRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewAccessManagerRouter(env, timeout, db, clientAccessRouter)
 
+	// 分享管理路由
 	shareManagementRouter := protectedRouter.Group("/shares")
 	shareManagementRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
 	NewShareManagementRouter(env, timeout, db, fileStorage, shareManagementRouter)
 
-	// 🔥 普通功能路由 - 登录即可访问
+	// 跟新和升级路由
+	upgradeRouter := protectedRouter.Group("/upgrades")
+	upgradeRouter.Use(casbinMiddleware.RequireAnyRole([]string{domain.SystemRoleAdmin, domain.TenantRoleOwner, domain.TenantRoleUser, domain.TenantRoleViewer}))
+	NewUpgradeRouter(env, timeout, db, upgradeRouter)
+
+	// 用户管理路由，只有管理员可以访问
+	userRouter := protectedRouter.Group("/user")
+	userRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
+	NewUserRouter(app, timeout, db, userRouter)
+
+	// 系统用户管理路由，只有管理员可以访问
+	tenantRouter := protectedRouter.Group("/tenants")
+	tenantRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
+	NewTenantRouter(env, timeout, db, casbinManager, tenantRouter)
+
+	// 普通功能路由 - 登录即可访问
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)

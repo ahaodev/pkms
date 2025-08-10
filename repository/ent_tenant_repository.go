@@ -36,9 +36,11 @@ func (tr *entTenantRepository) Create(c context.Context, t *domain.Tenant) error
 }
 
 func (tr *entTenantRepository) Fetch(c context.Context) ([]*domain.Tenant, error) {
+	// 查询所有租户，排除 admin 租户
 	tenants, err := tr.client.Tenant.
 		Query().
 		Select(tenant.FieldID, tenant.FieldName, tenant.FieldCreatedAt, tenant.FieldUpdatedAt).
+		Where(tenant.Not(tenant.Name("admin"))).
 		All(c)
 
 	if err != nil {
