@@ -169,7 +169,7 @@ export default function UpgradePage() {
                 action={{
                     label: "创建升级目标",
                     onClick: () => {
-                        setIsCreateDialogOpen(false)
+                        setIsCreateDialogOpen(true)
                     },
                     icon: Plus
                 }}

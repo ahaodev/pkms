@@ -25,7 +25,7 @@ const (
 var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, ShareManager, SidebarUpgrade, ClientAccess}
 
 // var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
-var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
-var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
+var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
+var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
-var DEFAULT_SIDEBAR = []string{SidebarDashboard}
+var DEFAULT_SIDEBAR = []string{}
