@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
@@ -11,9 +11,62 @@ import {EmptyList} from '@/components/ui/empty-list';
 import {useTenants} from '@/hooks/use-tenants';
 import {usePermissionOperations} from '@/hooks/use-permission-operations';
 import {validateRolePermissionForm} from '@/utils/permission-validation';
+import {useFormState} from '@/hooks/use-form-state';
 import {getActionDisplayName, getObjectDisplayName, getRoleDisplayName} from '@/lib/utils/permission-utils';
 import type {EnhancedPolicy, RolePolicyForm} from '@/types';
 import {ASSIGNABLE_ROLES} from '@/types';
+
+// PolicyRow component for better performance and reusability
+const PolicyRow = React.memo(({ 
+    policy, 
+    isLoading, 
+    onRemove 
+}: { 
+    policy: EnhancedPolicy; 
+    isLoading: boolean;
+    onRemove: (role: string, domain: string, object: string, action: string) => void;
+}) => {
+    const handleRemove = useCallback(() => {
+        onRemove(policy.subject, policy.domain, policy.object, policy.action);
+    }, [onRemove, policy.subject, policy.domain, policy.object, policy.action]);
+
+    return (
+        <TableRow key={`${policy.subject}-${policy.domain}-${policy.object}-${policy.action}`}>
+            <TableCell>
+                <Badge variant="secondary">
+                    {getRoleDisplayName(policy.subject)}
+                </Badge>
+            </TableCell>
+            <TableCell>
+                <div className="flex flex-col">
+                    <span className="font-medium">
+                        {getObjectDisplayName(policy.object)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                        ({policy.object})
+                    </span>
+                </div>
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline">
+                    {getActionDisplayName(policy.action)}
+                </Badge>
+            </TableCell>
+            <TableCell>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemove}
+                    disabled={isLoading}
+                >
+                    <Trash2 className="w-4 h-4"/>
+                </Button>
+            </TableCell>
+        </TableRow>
+    );
+});
+
+PolicyRow.displayName = 'PolicyRow';
 
 interface RoleManagementProps {
     enhancedPolicies: EnhancedPolicy[];
@@ -22,7 +75,7 @@ interface RoleManagementProps {
     onRefresh: () => Promise<void>;
 }
 
-const RoleManagement: React.FC<RoleManagementProps> = ({
+const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
     enhancedPolicies,
     objects,
     actions,
@@ -30,52 +83,85 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
 }) => {
     const {data: tenants = []} = useTenants();
     const {rolePermissions} = usePermissionOperations();
-    const [showAddDialog, setShowAddDialog] = useState(false);
-    const [formData, setFormData] = useState<RolePolicyForm>({
+    const [showAddDialog, setShowAddDialog] = React.useState(false);
+    
+    const initialFormData: RolePolicyForm = useMemo(() => ({
         role: '',
         tenant: '',
         object: '',
         action: ''
-    });
+    }), []);
+    
+    const {
+        formData,
+        error,
+        isLoading,
+        resetForm,
+        updateField,
+        setFormError,
+        setFormLoading
+    } = useFormState(initialFormData);
 
-    const assignableRoles = [...ASSIGNABLE_ROLES];
+    const assignableRoles = useMemo(() => [...ASSIGNABLE_ROLES], []);
 
     // 过滤出角色权限策略（排除admin和直接用户权限）
-    const rolePolicies = enhancedPolicies.filter(policy =>
-        (assignableRoles as readonly string[]).includes(policy.subject) && policy.subject !== 'admin'
+    const rolePolicies = useMemo(() => 
+        enhancedPolicies.filter(policy =>
+            (assignableRoles as readonly string[]).includes(policy.subject) && policy.subject !== 'admin'
+        ),
+        [enhancedPolicies, assignableRoles]
     );
 
-    const handleAdd = async () => {
+    const handleAdd = useCallback(async () => {
         const validation = validateRolePermissionForm(formData);
         if (!validation.isValid) {
+            setFormError('请填写所有必填字段');
             return;
         }
 
-        const success = await rolePermissions.add(formData, onRefresh);
-        if (success) {
-            setShowAddDialog(false);
-            setFormData({
-                role: '',
-                tenant: '',
-                object: '',
-                action: ''
-            });
+        setFormLoading(true);
+        setFormError(null);
+        try {
+            const success = await rolePermissions.add(formData, onRefresh);
+            if (success) {
+                setShowAddDialog(false);
+                resetForm();
+            } else {
+                setFormError('分配权限失败，请重试');
+            }
+        } catch (error) {
+            console.error('Failed to add role permission:', error);
+            setFormError('分配权限失败，请检查网络连接');
+        } finally {
+            setFormLoading(false);
         }
-    };
+    }, [formData, rolePermissions, onRefresh, resetForm, setFormError, setFormLoading]);
 
-    const handleRemove = async (role: string, domain: string, object: string, action: string) => {
-        await rolePermissions.remove(role, domain, object, action, onRefresh);
-    };
+    const handleRemove = useCallback(async (role: string, domain: string, object: string, action: string) => {
+        setFormLoading(true);
+        setFormError(null);
+        try {
+            await rolePermissions.remove(role, domain, object, action, onRefresh);
+        } catch (error) {
+            console.error('Failed to remove role permission:', error);
+            setFormError('删除权限失败，请重试');
+        } finally {
+            setFormLoading(false);
+        }
+    }, [rolePermissions, onRefresh, setFormError, setFormLoading]);
 
     // 按租户分组显示角色权限
-    const groupedPolicies = rolePolicies.reduce((acc, policy) => {
-        const tenantKey = policy.domain;
-        if (!acc[tenantKey]) {
-            acc[tenantKey] = [];
-        }
-        acc[tenantKey].push(policy);
-        return acc;
-    }, {} as Record<string, EnhancedPolicy[]>);
+    const groupedPolicies = useMemo(() => 
+        rolePolicies.reduce((acc, policy) => {
+            const tenantKey = policy.domain;
+            if (!acc[tenantKey]) {
+                acc[tenantKey] = [];
+            }
+            acc[tenantKey].push(policy);
+            return acc;
+        }, {} as Record<string, EnhancedPolicy[]>),
+        [rolePolicies]
+    );
 
     return (
         <div className="space-y-6">
@@ -102,10 +188,9 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                         <Label htmlFor="tenant">租户 *</Label>
                                         <Select
                                             value={formData.tenant}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                tenant: value
-                                            })}
+                                            onValueChange={useCallback((value: string) => {
+                                                updateField('tenant', value);
+                                            }, [updateField])}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择租户"/>
@@ -123,10 +208,9 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                         <Label htmlFor="role">角色 *</Label>
                                         <Select
                                             value={formData.role}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                role: value
-                                            })}
+                                            onValueChange={useCallback((value: string) => {
+                                                updateField('role', value);
+                                            }, [updateField])}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择角色">
@@ -150,10 +234,9 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                         <Label htmlFor="object">资源对象 *</Label>
                                         <Select
                                             value={formData.object}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                object: value
-                                            })}
+                                            onValueChange={useCallback((value: string) => {
+                                                updateField('object', value);
+                                            }, [updateField])}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择资源对象">
@@ -177,10 +260,9 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                         <Label htmlFor="action">操作权限 *</Label>
                                         <Select
                                             value={formData.action}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                action: value
-                                            })}
+                                            onValueChange={useCallback((value: string) => {
+                                                updateField('action', value);
+                                            }, [updateField])}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择操作权限">
@@ -200,14 +282,27 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    {error && (
+                                        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                                            {error}
+                                        </div>
+                                    )}
                                     <div className="flex gap-2">
-                                        <Button onClick={handleAdd} className="flex-1">
-                                            分配权限
+                                        <Button 
+                                            onClick={handleAdd} 
+                                            className="flex-1"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? '分配中...' : '分配权限'}
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            onClick={() => setShowAddDialog(false)}
+                                            onClick={useCallback(() => {
+                                                setShowAddDialog(false);
+                                                resetForm();
+                                            }, [resetForm])}
                                             className="flex-1"
+                                            disabled={isLoading}
                                         >
                                             取消
                                         </Button>
@@ -246,43 +341,13 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {policies.map((policy, index) => (
-                                                    <TableRow key={index}>
-                                                        <TableCell>
-                                                            <Badge variant="secondary">
-                                                                {getRoleDisplayName(policy.subject)}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex flex-col">
-                                                                <span className="font-medium">
-                                                                    {getObjectDisplayName(policy.object)}
-                                                                </span>
-                                                                <span className="text-xs text-muted-foreground">
-                                                                    ({policy.object})
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Badge variant="outline">
-                                                                {getActionDisplayName(policy.action)}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleRemove(
-                                                                    policy.subject,
-                                                                    policy.domain,
-                                                                    policy.object,
-                                                                    policy.action
-                                                                )}
-                                                            >
-                                                                <Trash2 className="w-4 h-4"/>
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
+                                                {policies.map((policy) => (
+                                                    <PolicyRow
+                                                        key={`${policy.subject}-${policy.domain}-${policy.object}-${policy.action}`}
+                                                        policy={policy}
+                                                        isLoading={isLoading}
+                                                        onRemove={handleRemove}
+                                                    />
                                                 ))}
                                             </TableBody>
                                         </Table>
@@ -295,6 +360,8 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
             </Card>
         </div>
     );
-};
+});
+
+RoleManagement.displayName = 'RoleManagement';
 
 export default RoleManagement;

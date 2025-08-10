@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
@@ -6,7 +6,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
-import {Eye, Trash2, UserPlus, Users} from 'lucide-react';
+import {Alert, AlertDescription} from '@/components/ui/alert';
+import {Input} from '@/components/ui/input';
+import {Eye, Trash2, UserPlus, Users, Loader2, Search} from 'lucide-react';
 import {EmptyList} from '@/components/ui/empty-list';
 import {useTenants} from '@/hooks/use-tenants';
 import {usePermissionOperations} from '@/hooks/use-permission-operations';
@@ -22,7 +24,11 @@ interface UserManagementProps {
     onShowUserPermissions: (userId: string) => Promise<void>;
 }
 
-const UserManagement: React.FC<UserManagementProps> = ({
+interface TenantInfo {
+    id: string;
+    name: string;
+}
+const UserManagement: React.FC<UserManagementProps> = React.memo(({
     enhancedRoles,
     users,
     onRefresh,
@@ -37,38 +43,112 @@ const UserManagement: React.FC<UserManagementProps> = ({
         tenant: ''
     });
 
-    const assignableRoles = [...ASSIGNABLE_ROLES];
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [selectedTenant, setSelectedTenant] = useState<string>('all');
 
-    const handleAdd = async () => {
+    const assignableRoles = useMemo(() => [...ASSIGNABLE_ROLES], []);
+
+    const handleAdd = useCallback(async () => {
         const validation = validateUserRoleForm(formData);
         if (!validation.isValid) {
+            setError('请填写所有必填字段');
             return;
         }
 
-        const success = await userRoles.add(formData, onRefresh);
-        if (success) {
-            setShowAddDialog(false);
-            setFormData({
-                user_id: '',
-                role: '',
-                tenant: ''
-            });
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            const success = await userRoles.add(formData, onRefresh);
+            if (success) {
+                setShowAddDialog(false);
+                setFormData({
+                    user_id: '',
+                    role: '',
+                    tenant: ''
+                });
+            }
+        } catch {
+            setError('分配角色失败，请重试');
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [formData, userRoles, onRefresh]);
 
-    const handleRemove = async (userId: string, role: string, domain: string) => {
-        await userRoles.remove(userId, role, domain, onRefresh);
-    };
+    const handleRemove = useCallback(async (userId: string, role: string, domain: string) => {
+        if (!confirm('确定要移除此角色分配吗？')) {
+            return;
+        }
+        
+        setIsLoading(true);
+        try {
+            await userRoles.remove(userId, role, domain, onRefresh);
+        } catch {
+            setError('移除角色失败，请重试');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [userRoles, onRefresh]);
 
+    const handleFormChange = useCallback((field: keyof UserRoleForm, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        setError(null);
+    }, []);
+
+    const resetForm = useCallback(() => {
+        setFormData({ user_id: '', role: '', tenant: '' });
+        setError(null);
+        setShowAddDialog(false);
+    }, []);
+
+    // 筛选和搜索逻辑
+    const filteredRoles = useMemo(() => {
+        let filtered = enhancedRoles;
+        
+        // 按租户筛选
+        if (selectedTenant !== 'all') {
+            filtered = filtered.filter(role => role.domain === selectedTenant);
+        }
+        
+        // 按搜索词筛选（用户名或角色）
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(role => 
+                role.user_name?.toLowerCase().includes(term) ||
+                role.user?.toLowerCase().includes(term) ||
+                getRoleDisplayName(role.role).toLowerCase().includes(term) ||
+                role.role.toLowerCase().includes(term)
+            );
+        }
+        
+        return filtered;
+    }, [enhancedRoles, selectedTenant, searchTerm]);
+    
     // 按租户分组显示用户角色分配
-    const groupedRoles = enhancedRoles.reduce((acc, role) => {
-        const tenantKey = role.domain;
-        if (!acc[tenantKey]) {
-            acc[tenantKey] = [];
-        }
-        acc[tenantKey].push(role);
-        return acc;
-    }, {} as Record<string, EnhancedRole[]>);
+    const groupedRoles = useMemo(() => {
+        return filteredRoles.reduce((acc, role) => {
+            const tenantKey = role.domain;
+            if (!acc[tenantKey]) {
+                acc[tenantKey] = [];
+            }
+            acc[tenantKey].push(role);
+            return acc;
+        }, {} as Record<string, EnhancedRole[]>);
+    }, [filteredRoles]);
+    
+    // 获取唯一租户列表
+    const uniqueTenants = useMemo<TenantInfo[]>(() => {
+        const tenantSet = new Set(enhancedRoles.map(role => role.domain));
+        return Array.from(tenantSet).map(tenantId => {
+            const tenant = tenants.find(t => t.id === tenantId);
+            return {
+                id: tenantId,
+                name: tenant?.name || tenantId
+            };
+        });
+    }, [enhancedRoles, tenants]);
 
     return (
         <div className="space-y-6">
@@ -91,14 +171,17 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                     <DialogTitle>为用户分配角色</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
+                                    {error && (
+                                        <Alert variant="destructive">
+                                            <AlertDescription>{error}</AlertDescription>
+                                        </Alert>
+                                    )}
                                     <div>
                                         <Label htmlFor="tenant">租户 *</Label>
                                         <Select
                                             value={formData.tenant}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                tenant: value
-                                            })}
+                                            onValueChange={(value) => handleFormChange('tenant', value)}
+                                            disabled={isLoading}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择租户"/>
@@ -116,10 +199,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                         <Label htmlFor="user_id">用户 *</Label>
                                         <Select
                                             value={formData.user_id}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                user_id: value
-                                            })}
+                                            onValueChange={(value) => handleFormChange('user_id', value)}
+                                            disabled={isLoading}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择用户"/>
@@ -137,10 +218,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                         <Label htmlFor="role">角色 *</Label>
                                         <Select
                                             value={formData.role}
-                                            onValueChange={(value) => setFormData({
-                                                ...formData,
-                                                role: value
-                                            })}
+                                            onValueChange={(value) => handleFormChange('role', value)}
+                                            disabled={isLoading}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="选择角色">
@@ -164,13 +243,19 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                         <strong>说明：</strong>用户在指定租户下将获得所选角色的所有权限。
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button onClick={handleAdd} className="flex-1">
+                                        <Button 
+                                            onClick={handleAdd} 
+                                            className="flex-1" 
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                             分配角色
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            onClick={() => setShowAddDialog(false)}
+                                            onClick={resetForm}
                                             className="flex-1"
+                                            disabled={isLoading}
                                         >
                                             取消
                                         </Button>
@@ -182,11 +267,57 @@ const UserManagement: React.FC<UserManagementProps> = ({
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
+                        {/* 搜索和筛选区域 */}
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                <Input
+                                    placeholder="搜索用户名或角色..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <Select
+                                value={selectedTenant}
+                                onValueChange={setSelectedTenant}
+                            >
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="筛选租户" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">所有租户</SelectItem>
+                                    {uniqueTenants.map(tenant => (
+                                        <SelectItem key={tenant.id} value={tenant.id}>
+                                            {tenant.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        {/* 结果统计 */}
+                        {(searchTerm || selectedTenant !== 'all') && (
+                            <div className="text-sm text-muted-foreground">
+                                找到 {filteredRoles.length} 条记录
+                                {searchTerm && <span> 包含 "{searchTerm}"</span>}
+                                {selectedTenant !== 'all' && <span> 在租户 "{uniqueTenants.find(t => t.id === selectedTenant)?.name}"</span>}
+                            </div>
+                        )}
+                        
                         {Object.keys(groupedRoles).length === 0 ? (
                             <EmptyList
                                 icon={Users}
-                                title="暂无用户角色分配"
-                                description="开始为用户分配角色来管理系统访问权限"
+                                title={
+                                    searchTerm || selectedTenant !== 'all'
+                                        ? "未找到匹配的角色分配"
+                                        : "暂无用户角色分配"
+                                }
+                                description={
+                                    searchTerm || selectedTenant !== 'all'
+                                        ? "尝试调整搜索条件或筛选器"
+                                        : "开始为用户分配角色来管理系统访问权限"
+                                }
                             />
                         ) : (
                             Object.entries(groupedRoles).map(([tenantId, roles]) => {
@@ -209,7 +340,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                             </TableHeader>
                                             <TableBody>
                                                 {roles.map((role, index) => (
-                                                    <TableRow key={index}>
+                                                    <TableRow key={`${role.user}-${role.role}-${role.domain}-${index}`}>
                                                         <TableCell>
                                                             <div className="flex flex-col">
                                                                 <span className="font-medium">{role.user_name}</span>
@@ -232,6 +363,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                                                     size="sm"
                                                                     onClick={() => onShowUserPermissions(role.user)}
                                                                     title="查看用户权限"
+                                                                    disabled={isLoading}
                                                                 >
                                                                     <Eye className="w-4 h-4"/>
                                                                 </Button>
@@ -244,8 +376,10 @@ const UserManagement: React.FC<UserManagementProps> = ({
                                                                         role.domain
                                                                     )}
                                                                     title="移除角色"
+                                                                    disabled={isLoading}
+                                                                    className="text-destructive hover:text-destructive"
                                                                 >
-                                                                    <Trash2 className="w-4 h-4"/>
+                                                                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4"/>}
                                                                 </Button>
                                                             </div>
                                                         </TableCell>
@@ -262,6 +396,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
             </Card>
         </div>
     );
-};
+});
+
+UserManagement.displayName = 'UserManagement';
 
 export default UserManagement;

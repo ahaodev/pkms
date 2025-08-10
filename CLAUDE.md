@@ -419,3 +419,4 @@ requested by the User.
 
 ### Development Reminders
 - 不用启动后端,前端服务,我已经启动
+- 遵循KISS原则

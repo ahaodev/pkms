@@ -3,7 +3,9 @@ import {toast} from 'sonner';
 import {Shield} from 'lucide-react';
 import {apiClient} from '@/lib/api/api';
 import {useAuth} from '@/providers/auth-provider.tsx';
-import {PermissionsHeader, PermissionsTabs, UserPermissionsDialog} from '@/components/permissions';
+import {UserPermissionsDialog} from '@/components/permissions';
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {PageHeader} from '@/components/ui/page-header';
 import RoleManagement from '@/components/permissions/RoleManagement';
 import UserManagement from '@/components/permissions/UserManagement';
 import {CustomSkeleton} from '@/components/custom-skeleton';
@@ -157,7 +159,7 @@ const PermissionsPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="space-y-6">
-                <PermissionsHeader
+                <PageHeader
                     title="权限管理"
                     description="管理系统角色权限配置和用户权限分配"
                 />
@@ -168,30 +170,35 @@ const PermissionsPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <PermissionsHeader
+            <PageHeader
                 title="权限管理"
                 description="管理系统角色权限配置和用户权限分配"
             />
 
-            <PermissionsTabs
-                defaultValue="role-management"
-                roleManagementContent={
+            <Tabs defaultValue="role-management" className="space-y-4">
+                <TabsList className="grid grid-cols-2">
+                    <TabsTrigger value="role-management">角色管理</TabsTrigger>
+                    <TabsTrigger value="user-management">用户管理</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="role-management" className="space-y-4">
                     <RoleManagement
                         enhancedPolicies={enhancedPolicies}
                         objects={objects}
                         actions={actions}
                         onRefresh={handleRefreshPolicies}
                     />
-                }
-                userManagementContent={
+                </TabsContent>
+
+                <TabsContent value="user-management" className="space-y-4">
                     <UserManagement
                         enhancedRoles={enhancedRoles}
                         users={users}
                         onRefresh={handleRefreshRoles}
                         onShowUserPermissions={handleShowUserPermissions}
                     />
-                }
-            />
+                </TabsContent>
+            </Tabs>
 
             <UserPermissionsDialog
                 isOpen={showUserPermissionsDialog}
