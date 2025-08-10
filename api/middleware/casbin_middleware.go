@@ -22,69 +22,6 @@ func NewCasbinMiddleware(casbinManager *casbin.CasbinManager) *CasbinMiddleware 
 	}
 }
 
-// RequirePermission 要求特定权限的中间件
-func (m *CasbinMiddleware) RequirePermission(object, action string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetHeader(constants.TenantID)
-
-		// 检查权限
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
-}
-
-// RequireAnyPermission 要求任一权限的中间件
-func (m *CasbinMiddleware) RequireAnyPermission(permissions [][]string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户ID
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetHeader(constants.TenantID)
-
-		// 检查是否有任一权限
-		hasAnyPermission := false
-		for _, permission := range permissions {
-			if len(permission) >= 2 {
-				object := permission[0]
-				action := permission[1]
-
-				hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-					c.Abort()
-					return
-				}
-
-				if hasPermission {
-					hasAnyPermission = true
-					break
-				}
-			}
-		}
-
-		if !hasAnyPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
-}
-
 // RequireRole 要求特定角色的中间件
 func (m *CasbinMiddleware) RequireRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -121,7 +58,7 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 		userID := c.GetString(constants.UserID)
 		tenantID := c.GetHeader(constants.TenantID)
 
-		// DEMO调试：打印权限检查信息
+		// 调试：打印权限检查信息
 		fmt.Printf("🔍 权限检查 - UserID: %s, TenantID: %s, 需要角色: %v\n", userID, tenantID, roles)
 
 		// 获取用户角色
@@ -146,76 +83,6 @@ func (m *CasbinMiddleware) RequireAnyRole(roles []string) gin.HandlerFunc {
 
 		if !hasAnyRole {
 			c.JSON(http.StatusForbidden, domain.RespError("角色权限不足"))
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
-}
-
-// GetUserPermissions 获取用户权限信息的辅助函数
-func (m *CasbinMiddleware) GetUserPermissions(userID, tenantID string) ([][]string, []string) {
-	permissions := m.casbinManager.GetPermissionsForUser(userID, tenantID)
-	roles := m.casbinManager.GetRolesForUser(userID, tenantID)
-	return permissions, roles
-}
-
-// HasPermission 检查用户是否有特定权限的辅助函数
-func (m *CasbinMiddleware) HasPermission(userID, tenantID, object, action string) bool {
-	hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, object, action)
-	if err != nil {
-		return false
-	}
-	return hasPermission
-}
-
-// RequireResourcePermission 通用资源权限校验中间件
-func (m *CasbinMiddleware) RequireResourcePermission(resourceType, action string, paramKey ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetHeader(constants.TenantID)
-
-		// 可选参数（如 project_id、package_name）
-		var resourceID string
-		if len(paramKey) > 0 {
-			resourceID = c.Param(paramKey[0])
-			if resourceID == "" {
-				resourceID = c.Query(paramKey[0])
-			}
-		}
-
-		// 权限校验
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, resourceType, action)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError(resourceType+"权限不足"))
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
-// RequireSpecificPermission 要求特定资源和动作权限的中间件（使用常量）
-func (m *CasbinMiddleware) RequireSpecificPermission(resource, action string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userID := c.GetString(constants.UserID)
-		tenantID := c.GetHeader(constants.TenantID)
-
-		hasPermission, err := m.casbinManager.CheckPermission(userID, tenantID, resource, action)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, domain.RespError("权限检查失败: "+err.Error()))
-			c.Abort()
-			return
-		}
-
-		if !hasPermission {
-			c.JSON(http.StatusForbidden, domain.RespError("权限不足: 需要"+resource+"的"+action+"权限"))
 			c.Abort()
 			return
 		}
