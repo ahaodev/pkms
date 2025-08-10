@@ -1,7 +1,6 @@
 package casbin
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"pkms/domain"
@@ -40,7 +39,6 @@ func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 			err = fmt.Errorf("failed to create casbin enforcer: %v", err)
 			return
 		}
-
 		enforcer.EnableLog(true)
 		enforcer.EnableAutoSave(true)
 
@@ -91,11 +89,6 @@ func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, 
 
 // GetRolesForUser 获取用户角色
 func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
-	// 检查是否是系统内置admin用户，如果是，在任何租户中都返回admin角色
-	if m.IsSystemAdmin(userID) {
-		return []string{domain.SystemRoleAdmin}
-	}
-
 	roles, err := m.enforcer.GetRolesForUser(userID, tenantID)
 	if err != nil {
 		log.Printf("获取用户角色失败: %v", err)
@@ -195,11 +188,6 @@ func (m *CasbinManager) GetAllActions() []string {
 
 // GetSidebarPermissions 直接基于角色返回权限
 func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
-	// 系统admin全权限
-	if m.IsSystemAdmin(userID) {
-		return ADMIN_SIDEBAR
-	}
-
 	// 获取用户角色
 	userRoles := m.GetRolesForUser(userID, tenantID)
 	if len(userRoles) == 0 {
@@ -278,33 +266,4 @@ func (m *CasbinManager) DeleteAllRolesForUserInTenant(userID, tenantID string) e
 		return fmt.Errorf("移除租户中所有角色失败: %v", err)
 	}
 	return m.enforcer.SavePolicy()
-}
-
-// InitializeSystemAdminPermissions 初始化系统管理员权限（可跨租户）
-func (m *CasbinManager) InitializeSystemAdminPermissions() error {
-	log.Printf("初始化系统管理员权限")
-
-	// admin作为系统管理员，拥有所有资源的所有权限
-	// 使用通配符简化策略：域名、资源、操作都使用通配符
-	_, err := m.enforcer.AddPolicy("admin", "*", "*", "*")
-	if err != nil {
-		log.Printf("添加系统管理员全局权限失败: %v", err)
-		return err
-	}
-
-	return m.enforcer.SavePolicy()
-}
-
-// IsSystemAdmin 检查用户是否是系统内置的admin用户
-func (m *CasbinManager) IsSystemAdmin(userID string) bool {
-	if m.entClient == nil {
-		return false
-	}
-
-	user, err := m.entClient.User.Get(context.Background(), userID)
-	if err != nil {
-		return false
-	}
-
-	return user.Username == RoleAdmin
 }

@@ -175,12 +175,17 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 		log.Printf("❌ Failed to create admin user: %v", err)
 		return
 	}
-	// 使用新的默认权限系统
-	ok, err := casbinManager.AddRoleForUser(adminUser.ID, domain.TenantRoleOwner, "*")
+	ok, err := casbinManager.AddPolicy(domain.TenantRoleOwner, systemTenant.ID, "*", "*")
 	if err != nil {
-		log.Printf("❌ Failed to add default permissions for admin user: %v", err)
+		log.Printf("❌ add policy error: %v", err)
 	}
-	log.Printf("✅: %v", ok)
+	log.Printf("✅ Add Policy: %v", ok)
+	// 使用新的默认权限系统
+	ok, err = casbinManager.AddRoleForUser(adminUser.ID, domain.TenantRoleOwner, systemTenant.ID)
+	if err != nil {
+		log.Printf("❌ add role for user error: %v", err)
+	}
+	log.Printf("✅ Add Role For User: %v", ok)
 	log.Printf("✅ Default admin user created: %s", adminUsername)
 	log.Println("⚠️ Please change the default password after first login!")
 }
