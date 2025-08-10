@@ -170,6 +170,21 @@ definitions:
     - project_id
     - release_id
     type: object
+  domain.CreateUserRequest:
+    properties:
+      create_tenant:
+        description: 是否同时创建对应的租户
+        type: boolean
+      is_active:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - name
+    - password
+    type: object
   domain.DashboardStats:
     properties:
       total_downloads:
@@ -3256,14 +3271,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user (admin only)
+      description: Create a new user with optional tenant creation (admin only)
       parameters:
-      - description: User data
+      - description: User creation data
         in: body
-        name: user
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/domain.CreateUserRequest'
       produces:
       - application/json
       responses:

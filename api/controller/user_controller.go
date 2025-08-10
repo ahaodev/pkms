@@ -35,24 +35,25 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 
 // CreateUser godoc
 // @Summary      Create a new user
-// @Description  Create a new user (admin only)
+// @Description  Create a new user with optional tenant creation (admin only)
 // @Tags         Users
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        user  body      domain.User  true  "User data"
-// @Success      201   {object}  domain.Response{data=domain.User}  "User created successfully"
-// @Failure      400   {object}  domain.Response  "Invalid request data"
-// @Failure      500   {object}  domain.Response  "Internal server error"
+// @Param        request  body      domain.CreateUserRequest  true  "User creation data"
+// @Success      201      {object}  domain.Response{data=domain.User}  "User created successfully"
+// @Failure      400      {object}  domain.Response  "Invalid request data"
+// @Failure      500      {object}  domain.Response  "Internal server error"
 // @Router       /user [post]
 func (uc *UserController) CreateUser(c *gin.Context) {
-	var user domain.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var request domain.CreateUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
 		return
 	}
 
-	if err := uc.UserUsecase.Create(c, &user); err != nil {
+	user, err := uc.UserUsecase.CreateWithOptions(c, &request)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}

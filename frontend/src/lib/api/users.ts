@@ -29,7 +29,8 @@ export async function createUser(user: CreateUserRequest): Promise<ApiResponse<U
     const resp = await apiClient.post("/api/v1/user/", {
         name: user.name,
         password: user.password,
-        is_active: user.is_active ?? true
+        is_active: user.is_active ?? true,
+        create_tenant: user.create_tenant ?? true
     });
     const transformedData = {
         ...resp.data,

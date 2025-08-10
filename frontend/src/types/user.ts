@@ -39,6 +39,7 @@ export interface CreateUserRequest {
     name: string;
     password: string;
     is_active?: boolean;
+    create_tenant?: boolean;
 }
 
 export interface UpdateUserRequest {

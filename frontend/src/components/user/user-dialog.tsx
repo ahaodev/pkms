@@ -18,6 +18,7 @@ interface UserFormData {
     name: string;
     password: string;
     is_active: boolean;
+    create_tenant: boolean;
 }
 
 export interface UserDialogProps {
@@ -102,6 +103,17 @@ export function UserDialog({
                         />
                         <Label htmlFor="is_active">启用用户</Label>
                     </div>
+
+                    {!isEdit && (
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id="create_tenant"
+                                checked={userForm.create_tenant}
+                                onCheckedChange={(checked) => updateUserForm({create_tenant: checked})}
+                            />
+                            <Label htmlFor="create_tenant">同时创建对应租户</Label>
+                        </div>
+                    )}
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>

@@ -14,12 +14,14 @@ interface UserFormData {
     name: string;
     password: string;
     is_active: boolean;
+    create_tenant: boolean;
 }
 
 const initialFormData: UserFormData = {
     name: '',
     password: '',
     is_active: true,
+    create_tenant: true, // 默认选中创建租户
 };
 
 export default function UsersPage() {
@@ -79,6 +81,7 @@ export default function UsersPage() {
                 name: userForm.name,
                 password: userForm.password,
                 is_active: userForm.is_active,
+                create_tenant: userForm.create_tenant,
             };
 
             await createUserMutation.mutateAsync(createRequest);
@@ -98,6 +101,7 @@ export default function UsersPage() {
             name: user.name,
             password: '',
             is_active: user.is_active,
+            create_tenant: false, // 编辑时不显示此选项
         });
         setIsEditDialogOpen(true);
     };

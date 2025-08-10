@@ -64,6 +64,54 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 	return nil
 }
 
+func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.CreateUserRequest) (*domain.User, error) {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+
+	// 创建用户对象
+	user := &domain.User{
+		Name:     request.Name,
+		Password: request.Password,
+		IsActive: request.IsActive,
+	}
+
+	// 🔒 加密密码
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	// 创建用户
+	if err := uu.userRepository.Create(ctx, user); err != nil {
+		return nil, err
+	}
+
+	// 根据选项决定是否创建租户
+	if request.CreateTenant {
+		// 创建对应的默认租户
+		tenant := &domain.Tenant{
+			Name: user.Name,
+		}
+
+		if err := uu.tenantRepository.Create(ctx, tenant); err != nil {
+			// 如果租户创建失败，不影响用户创建的结果
+			return user, err
+		}
+
+		// 将用户添加到新创建的租户中，并设置为管理员权限
+		if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, tenant.ID); err != nil {
+			return user, err
+		}
+		uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
+		uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
+	}
+
+	return user, nil
+}
+
 func (uu *userUsecase) Fetch(c context.Context) ([]*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()

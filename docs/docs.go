@@ -4383,7 +4383,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new user (admin only)",
+                "description": "Create a new user with optional tenant creation (admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -4396,12 +4396,12 @@ const docTemplate = `{
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "User data",
-                        "name": "user",
+                        "description": "User creation data",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/domain.CreateUserRequest"
                         }
                     }
                 ],
@@ -4907,6 +4907,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "password"
+            ],
+            "properties": {
+                "create_tenant": {
+                    "description": "是否同时创建对应的租户",
+                    "type": "boolean"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }
