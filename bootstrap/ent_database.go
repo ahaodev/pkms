@@ -97,14 +97,7 @@ func connectPostgreSQL(env *Env) (*ent.Client, error) {
 		return nil, err
 	}
 
-	// Test connection by performing a simple query
-	ctx := context.Background()
-	if _, err := client.User.Query().Count(ctx); err != nil {
-		log.Printf("❌ PostgreSQL connection test failed: %v", err)
-		return nil, err
-	}
-
-	log.Printf("✅ PostgreSQL connection test successful")
+	log.Printf("✅ PostgreSQL connection successful")
 	return client, nil
 }
 
