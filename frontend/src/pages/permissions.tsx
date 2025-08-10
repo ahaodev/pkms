@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {toast} from 'sonner';
-import {Shield} from 'lucide-react';
 import {apiClient} from '@/lib/api/api';
-import {useAuth} from '@/providers/auth-provider.tsx';
 import {UserPermissionsDialog} from '@/components/permissions';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {PageHeader} from '@/components/ui/page-header';
@@ -12,7 +10,6 @@ import {CustomSkeleton} from '@/components/custom-skeleton';
 import type {EnhancedPolicy, EnhancedRole, User, UserPermission} from '@/types';
 
 const PermissionsPage: React.FC = () => {
-    const {hasRole} = useAuth();
 
     // State for data
     const [enhancedPolicies, setEnhancedPolicies] = useState<EnhancedPolicy[]>([]);
@@ -138,23 +135,6 @@ const PermissionsPage: React.FC = () => {
         setUserPermissions([]);
         setSelectedUserId('');
     };
-
-    // 检查权限 - 只有管理员可以访问
-    if (!hasRole('admin')) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <Shield className="mx-auto h-12 w-12 text-muted-foreground"/>
-                    <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-                        访问被拒绝
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        您没有权限访问权限管理页面
-                    </p>
-                </div>
-            </div>
-        );
-    }
 
     if (isLoading) {
         return (

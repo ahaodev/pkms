@@ -1,5 +1,4 @@
 import {useCallback, useMemo, useState} from 'react';
-import {Shield} from 'lucide-react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
@@ -7,9 +6,9 @@ import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use
 import {CreateUserRequest, UpdateUserRequest, User, UserRole} from '@/types/user';
 import {Group} from '@/types/group';
 import {UserFilters, UserList} from '@/components/user';
-import { UserHeader } from '@/components/user/user-header';
-import { UserCreateDialog } from '@/components/user/user-create-dialog';
-import { UserEditDialog } from '@/components/user/user-edit-dialog';
+import {UserHeader} from '@/components/user/user-header';
+import {UserCreateDialog} from '@/components/user/user-create-dialog';
+import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {CustomSkeleton} from '@/components/custom-skeleton';
 
 /**
@@ -23,7 +22,7 @@ interface UserFormData {
 }
 
 export default function UsersPage() {
-    const {user: currentUser, hasRole} = useAuth();
+    const {user: currentUser} = useAuth();
     const {data: projects} = useProjects();
 
     const {data: users, isLoading} = useUsers();
@@ -106,23 +105,6 @@ export default function UsersPage() {
                     onRoleFilterChange={() => {}}
                 />
                 <CustomSkeleton type="table" rows={6} columns={6} />
-            </div>
-        );
-    }
-
-    // 检查权限 - 只有管理员可以访问
-    if (!hasRole('admin')) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <Shield className="mx-auto h-12 w-12 text-muted-foreground"/>
-                    <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-                        访问被拒绝
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        您没有权限访问用户管理页面
-                    </p>
-                </div>
             </div>
         );
     }

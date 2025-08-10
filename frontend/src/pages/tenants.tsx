@@ -1,14 +1,11 @@
 import {useState} from 'react';
-import {Shield} from 'lucide-react';
 import {toast} from 'sonner';
-import {useAuth} from '@/providers/auth-provider.tsx';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 import {CustomSkeleton} from '@/components/custom-skeleton';
 
 export default function TenantsPage() {
-    const {hasRole} = useAuth();
     const {data: tenants, isLoading} = useTenants();
     const createTenantMutation = useCreateTenant();
     const updateTenantMutation = useUpdateTenant();
@@ -26,23 +23,6 @@ export default function TenantsPage() {
             <div className="space-y-6">
                 <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)}/>
                 <CustomSkeleton type="table" rows={5} columns={4} />
-            </div>
-        );
-    }
-
-    // 检查权限 - 只有管理员可以访问
-    if (!hasRole('admin')) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <Shield className="mx-auto h-12 w-12 text-muted-foreground"/>
-                    <h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-                        访问被拒绝
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        您没有权限访问租户管理页面
-                    </p>
-                </div>
             </div>
         );
     }
