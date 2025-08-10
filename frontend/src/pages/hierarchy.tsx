@@ -17,6 +17,7 @@ import {PackageCreateDialog} from "@/components/package-create-dialog.tsx";
 import {iconOptions} from '@/lib/utils';
 import {useHierarchyDialogs} from '@/hooks/use-hierarchy-dialogs';
 import {useHierarchyNavigation} from '@/hooks/use-hierarchy-navigation';
+import {PageHeader} from "@/components/ui";
 
 export default function HierarchyPage() {
     const navigation = useHierarchyNavigation();
@@ -24,8 +25,7 @@ export default function HierarchyPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold tracking-tight">项目包管理</h1>
-
+            <PageHeader title="项目&包管理" description="管理项目和包发布资源"></PageHeader>
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                 <Input
