@@ -1,7 +1,7 @@
-import {Package as PackageIcon, Users, Download, FolderOpen} from 'lucide-react';
+import {Download, FolderOpen, Package as PackageIcon, Users} from 'lucide-react';
 import {StatCard} from './stat-card';
 
-import type { DashboardStats } from '@/lib/api/dashboard';
+import type {DashboardStats} from '@/lib/api/dashboard';
 
 interface StatsGridProps {
     stats?: DashboardStats;
