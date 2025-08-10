@@ -1,5 +1,5 @@
 import {memo, useCallback} from 'react';
-import {ProjectPackageFilters} from '@/components/shared';
+import {ProjectPackageFilters} from '@/components/project-package-filters';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {useShareDialogs, useShareFilters, useShares} from '@/hooks/use-shares';

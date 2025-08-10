@@ -1,8 +1,8 @@
 import {useMemo} from 'react';
 import {Activity, FolderOpen, Package as PackageIcon} from 'lucide-react';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Project} from '@/types/project';
-import {ExtendedPackage} from '@/types/package';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
+import {Project} from '@/types/project.ts';
+import {ExtendedPackage} from '@/types/package.ts';
 
 interface ProjectPackageFiltersProps {
     projectFilter: string;

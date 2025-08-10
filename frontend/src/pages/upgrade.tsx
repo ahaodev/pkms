@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeTargetsTable} from '@/components/upgrade';
-import {ProjectPackageFilters} from '@/components/shared';
+import {ProjectPackageFilters} from '@/components/project-package-filters';
 import {toast} from 'sonner';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';

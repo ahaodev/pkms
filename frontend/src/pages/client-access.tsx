@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {ClientAccessDialog, ClientAccessHeader, ClientAccessList, TokenDisplayDialog} from '@/components/client-access';
-import {ProjectPackageFilters} from '@/components/shared';
+import {ProjectPackageFilters} from '@/components/project-package-filters';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {AlertTriangle} from 'lucide-react';
 import {
