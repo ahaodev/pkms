@@ -1,23 +1,14 @@
-import {useCallback, useState} from 'react';
+import {useState} from 'react';
 import {Shield} from 'lucide-react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
-import {CreateTenantRequest, Tenant, UpdateTenantRequest} from '@/types/tenant';
+import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 import {CustomSkeleton} from '@/components/custom-skeleton';
 
-/**
- * 租户管理页面：管理系统租户，分配用户权限
- */
-
-interface TenantFormData {
-    name: string;
-}
-
 export default function TenantsPage() {
     const {hasRole} = useAuth();
-
     const {data: tenants, isLoading} = useTenants();
     const createTenantMutation = useCreateTenant();
     const updateTenantMutation = useUpdateTenant();
@@ -28,22 +19,7 @@ export default function TenantsPage() {
     const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
     const [viewingTenant, setViewingTenant] = useState<Tenant | null>(null);
-
-    const [tenantForm, setTenantForm] = useState<TenantFormData>({
-        name: '',
-    });
-
-    // 表单状态更新函数
-    const updateTenantForm = useCallback((updates: Partial<TenantFormData>) => {
-        setTenantForm(prev => ({...prev, ...updates}));
-    }, []);
-
-    // 重置表单
-    const resetForm = useCallback(() => {
-        setTenantForm({
-            name: '',
-        });
-    }, []);
+    const [tenantName, setTenantName] = useState('');
 
     if (isLoading) {
         return (
@@ -72,146 +48,103 @@ export default function TenantsPage() {
     }
 
     const handleCreateTenant = async () => {
-        if (!tenantForm.name) {
-            toast.error('请填写必填字段', {
-                description: '租户名称为必填项。',
-            });
+        if (!tenantName.trim()) {
+            toast.error('租户名称为必填项');
             return;
         }
 
         try {
-            const createRequest: CreateTenantRequest = {
-                name: tenantForm.name,
-            };
-
-            await createTenantMutation.mutateAsync(createRequest);
-
-            toast.success('租户创建成功', {
-                description: `租户 "${tenantForm.name}" 已创建。`,
-            });
-
+            await createTenantMutation.mutateAsync({ name: tenantName });
+            toast.success(`租户 "${tenantName}" 已创建`);
             setIsCreateDialogOpen(false);
-            resetForm();
-        } catch (error) {
-            console.error(error)
-            toast.error('创建失败', {
-                description: '租户创建失败，请重试。',
-            });
+            setTenantName('');
+        } catch {
+            toast.error('租户创建失败，请重试');
         }
     };
 
     const handleEditTenant = (tenant: Tenant) => {
         setEditingTenant(tenant);
-        setTenantForm({
-            name: tenant.name,
-        });
+        setTenantName(tenant.name);
         setIsEditDialogOpen(true);
     };
 
     const handleUpdateTenant = async () => {
-        if (!editingTenant || !tenantForm.name) {
-            toast.error('请填写必填字段', {
-                description: '租户名称为必填项。',
-            });
+        if (!editingTenant || !tenantName.trim()) {
+            toast.error('租户名称为必填项');
             return;
         }
 
         try {
-            const updateRequest: UpdateTenantRequest = {
-                name: tenantForm.name,
-            };
-
             await updateTenantMutation.mutateAsync({
                 id: editingTenant.id,
-                update: updateRequest
+                update: { name: tenantName }
             });
-
-            toast.success('租户更新成功', {
-                description: `租户 "${tenantForm.name}" 已更新。`,
-            });
-
+            toast.success(`租户 "${tenantName}" 已更新`);
             setIsEditDialogOpen(false);
             setEditingTenant(null);
-            resetForm();
-        } catch (error) {
-            console.error(error);
-            toast.error('更新失败', {
-                description: '租户更新失败，请重试。',
-            });
+            setTenantName('');
+        } catch {
+            toast.error('租户更新失败，请重试');
         }
     };
 
     const handleDeleteTenant = async (tenant: Tenant) => {
-        if (!confirm(`确定要删除租户 "${tenant.name}" 吗？此操作无法撤销。`)) {
-            return;
-        }
+        if (!confirm(`确定要删除租户 "${tenant.name}" 吗？此操作无法撤销。`)) return;
 
         try {
             await deleteTenantMutation.mutateAsync(tenant.id);
-            toast.success('租户删除成功', {
-                description: `租户 "${tenant.name}" 已删除。`,
-            });
-        } catch (error) {
-            console.error(error);
-            toast.error('删除失败', {
-                description: '租户删除失败，请重试。',
-            });
+            toast.success(`租户 "${tenant.name}" 已删除`);
+        } catch {
+            toast.error('租户删除失败，请重试');
         }
     };
 
-    const handleViewUsers = (tenant: Tenant) => {
-        setViewingTenant(tenant);
-        setIsUsersDialogOpen(true);
+    const closeDialogs = () => {
+        setIsCreateDialogOpen(false);
+        setIsEditDialogOpen(false);
+        setIsUsersDialogOpen(false);
+        setEditingTenant(null);
+        setViewingTenant(null);
+        setTenantName('');
     };
 
     return (
         <div className="space-y-6">
-            {/* 页面头部 */}
-            <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)}/>
+            <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)} />
 
-            {/* 租户列表 */}
             <TenantList
                 tenants={tenants || []}
                 onEdit={handleEditTenant}
                 onDelete={handleDeleteTenant}
-                onViewUsers={handleViewUsers}
+                onViewUsers={(tenant) => {
+                    setViewingTenant(tenant);
+                    setIsUsersDialogOpen(true);
+                }}
             />
 
-            {/* 创建租户对话框 */}
             <TenantDialog
                 open={isCreateDialogOpen}
-                onClose={() => {
-                    setIsCreateDialogOpen(false);
-                    resetForm();
-                }}
+                onClose={closeDialogs}
                 onSubmit={handleCreateTenant}
                 title="创建新租户"
-                tenantForm={tenantForm}
-                updateTenantForm={updateTenantForm}
+                tenantForm={{ name: tenantName }}
+                updateTenantForm={(updates) => setTenantName(updates.name || '')}
             />
 
-            {/* 编辑租户对话框 */}
             <TenantDialog
                 open={isEditDialogOpen}
-                onClose={() => {
-                    setIsEditDialogOpen(false);
-                    setEditingTenant(null);
-                    resetForm();
-                }}
+                onClose={closeDialogs}
                 onSubmit={handleUpdateTenant}
                 title="编辑租户"
                 isEdit={true}
-                tenantForm={tenantForm}
-                updateTenantForm={updateTenantForm}
+                tenantForm={{ name: tenantName }}
+                updateTenantForm={(updates) => setTenantName(updates.name || '')}
             />
 
-            {/* 租户用户管理对话框 */}
             <TenantUsersDialog
                 open={isUsersDialogOpen}
-                onClose={() => {
-                    setIsUsersDialogOpen(false);
-                    setViewingTenant(null);
-                }}
+                onClose={closeDialogs}
                 tenant={viewingTenant}
             />
         </div>

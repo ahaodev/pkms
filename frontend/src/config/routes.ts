@@ -8,7 +8,6 @@ import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
 import TenantsPage from "@/pages/tenants";
 import ClientAccessPage from "@/pages/client-access";
-import SharePage from "@/pages/share.tsx";
 import SharesManagerPage from "@/pages/shares-manager.tsx";
 
 export interface RouteConfig {
@@ -25,12 +24,6 @@ export const routes: RouteConfig[] = [
         element: LoginPage,
         requiresAuth: false,
     },
-    {
-        path: "/share/:code",
-        element: SharePage,
-        requiresAuth: false,
-    },
-
     // Main dashboard
     {
         path: "/",

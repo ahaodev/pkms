@@ -27,13 +27,3 @@ export interface TenantUser {
     username: string;
     tenant_name?: string;
 }
-
-export interface TenantUserRequest {
-    user_id: string;
-    role: string;
-}
-
-export interface UpdateTenantUserRoleRequest {
-    role: string;
-    is_active: boolean;
-}
