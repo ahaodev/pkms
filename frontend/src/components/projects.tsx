@@ -3,6 +3,8 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {EmptyList} from '@/components/ui/empty-list';
 import {Building2, ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
+import {useDeleteProject} from '@/hooks/use-projects';
+import {toast} from 'sonner';
 
 
 interface ProjectsViewProps {
@@ -20,11 +22,35 @@ export function Projects({
                              onCreateProject,
                              onEditProject
                          }: ProjectsViewProps) {
+    const deleteProject = useDeleteProject();
+
     // Filter projects based on search term
     const filteredProjects = projects?.filter(project =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
+
+    const handleDeleteProject = async (project: any) => {
+        if (project.packageCount > 0) {
+            toast.error('删除失败', {
+                description: '项目下还有包，无法删除项目。请先删除所有包。',
+            });
+            return;
+        }
+
+        if (window.confirm(`确定要删除项目「${project.name}」吗？此操作不可撤销。`)) {
+            try {
+                await deleteProject.mutateAsync(project.id);
+                toast.success('删除成功', {
+                    description: `项目「${project.name}」已成功删除。`,
+                });
+            } catch (error) {
+                toast.error('删除失败', {
+                    description: '项目删除失败，请重试。',
+                });
+            }
+        }
+    };
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -78,12 +104,12 @@ export function Projects({
                                 size="sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (window.confirm("确定要删除该项目吗？")) {
-                                        console.log(`删除项目: ${project.id}`);
-                                    }
+                                    handleDeleteProject(project);
                                 }}
+                                disabled={deleteProject.isPending}
                             >
-                                {project.packageCount == 0 ? <Trash className="h-4 w-4 text-red-500"/> : null}
+                                <Trash
+                                    className={`h-4 w-4 ${project.packageCount > 0 ? 'text-gray-400' : 'text-red-500'}`}/>
                             </Button>
                         </div>
                     </Card>
