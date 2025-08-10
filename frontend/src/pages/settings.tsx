@@ -14,7 +14,6 @@ export default function Settings() {
                     new_password: config.newPassword,
                 });
             }
-
             toast.success("账户设置已成功更新");
         } catch (error: any) {
             console.error('Failed to save account settings:', error);
@@ -22,9 +21,6 @@ export default function Settings() {
             toast.error(errorMessage);
         }
     }, []);
-
-
-
 
     return (
         <div className="space-y-6">

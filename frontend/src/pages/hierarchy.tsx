@@ -62,7 +62,7 @@ export default function HierarchyPage() {
     const selectedPackage = packages.find(p => p.id === selectedPackageId);
 
     // Fetch releases data from API
-    const { data: releasesData } = useReleases(selectedPackageId || undefined);
+    const {data: releasesData} = useReleases(selectedPackageId || undefined);
     const releases: Release[] = releasesData?.data || [];
 
     const handleProjectSelect = (projectId: string) => {
@@ -89,7 +89,7 @@ export default function HierarchyPage() {
             });
 
             const blob = await downloadRelease(release.id);
-            
+
             // Create download link
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -97,11 +97,11 @@ export default function HierarchyPage() {
             link.download = release.file_name;
             document.body.appendChild(link);
             link.click();
-            
+
             // Cleanup
             link.remove();
             window.URL.revokeObjectURL(url);
-            
+
             toast.success('下载完成', {
                 description: `${release.file_name} 下载完成`,
             });
@@ -185,7 +185,7 @@ export default function HierarchyPage() {
 
     const handleReleaseUploadSuccess = () => {
         // Invalidate releases queries to refresh the list
-        queryClient.invalidateQueries({ queryKey: ['releases'] });
+        queryClient.invalidateQueries({queryKey: ['releases']});
         console.log('Release uploaded successfully');
     };
 
@@ -298,7 +298,7 @@ export default function HierarchyPage() {
                         handleDownload={handleDownload}
                         onReleaseDeleted={() => {
                             // Invalidate releases queries to refresh the list
-                            queryClient.invalidateQueries({ queryKey: ['releases'] });
+                            queryClient.invalidateQueries({queryKey: ['releases']});
                         }}
                     />
                 )}
