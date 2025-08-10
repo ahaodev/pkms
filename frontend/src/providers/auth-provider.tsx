@@ -3,6 +3,7 @@ import {useQueryClient} from '@tanstack/react-query';
 import * as authAPI from '@/lib/api/auth.ts';
 import {ACCESS_TOKEN, CURRENT_TENANT, REFRESH_TOKEN} from '@/types/constants.ts';
 import {Tenant, User, UserPermissions} from '@/types/user';
+import NoPermissionsPage from '@/pages/no-permissions';
 
 interface AuthContextType {
     user: User | null;
@@ -183,6 +184,29 @@ export function AuthProvider({children}: { children: ReactNode }) {
         isLoading,
         isAdmin,
     };
+
+    // Show loading while initializing
+    if (isLoading) {
+        return (
+            <AuthContext.Provider value={contextValue}>
+                <div className="flex items-center justify-center h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-2 text-muted-foreground">加载中...</p>
+                    </div>
+                </div>
+            </AuthContext.Provider>
+        );
+    }
+
+    // Show no permissions page if user is authenticated but has no tenants
+    if (user && (!tenants || tenants.length === 0)) {
+        return (
+            <AuthContext.Provider value={contextValue}>
+                <NoPermissionsPage />
+            </AuthContext.Provider>
+        );
+    }
 
     return (
         <AuthContext.Provider value={contextValue}>
