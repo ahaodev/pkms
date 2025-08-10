@@ -1,19 +1,14 @@
-import {useCallback, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
 import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
-import {CreateUserRequest, UpdateUserRequest, User, UserRole} from '@/types/user';
-import {Group} from '@/types/group';
+import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
 import {UserFilters, UserList} from '@/components/user';
 import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
 import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {CustomSkeleton} from '@/components/custom-skeleton';
-
-/**
- * 用户管理页面：管理系统用户，分配项目权限
- */
 
 interface UserFormData {
     name: string;
@@ -21,10 +16,15 @@ interface UserFormData {
     is_active: boolean;
 }
 
+const initialFormData: UserFormData = {
+    name: '',
+    password: '',
+    is_active: true,
+};
+
 export default function UsersPage() {
     const {user: currentUser} = useAuth();
     const {data: projects} = useProjects();
-
     const {data: users, isLoading} = useUsers();
     const createUserMutation = useCreateUser();
     const updateUserMutation = useUpdateUser();
@@ -34,64 +34,23 @@ export default function UsersPage() {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
+    const [userForm, setUserForm] = useState<UserFormData>(initialFormData);
 
-    const [userForm, setUserForm] = useState<UserFormData>({
-        name: '',
-        password: '',
-        is_active: true,
-    });
-
-    // 表单状态更新函数
-    const updateUserForm = useCallback((updates: Partial<UserFormData>) => {
+    const updateUserForm = (updates: Partial<UserFormData>) => {
         setUserForm(prev => ({...prev, ...updates}));
-    }, []);
+    };
 
-    // 重置表单
-    const resetForm = useCallback(() => {
-        setUserForm({
-            name: '',
-            password: '',
-            is_active: true,
-        });
-    }, []);
+    const resetForm = () => {
+        setUserForm(initialFormData);
+    };
 
-    // 过滤用户
     const filteredUsers = useMemo(() => {
         if (!users) return [];
-        return users.filter((user: User) => {
-            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesRole = roleFilter === 'all';
-            return matchesSearch && matchesRole;
-        });
-    }, [users, searchTerm, roleFilter]);
+        return users.filter((user: User) => 
+            user.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [users, searchTerm]);
 
-    const getAllGroups = (): Group[] => [
-        {
-            id: 'g1',
-            name: '开发组',
-            description: '开发相关成员',
-            color: '#2196f3',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            memberCount: 5,
-            createdBy: 'u1',
-            permissions: [],
-        },
-        {
-            id: 'g2',
-            name: '测试组',
-            description: '测试相关成员',
-            color: '#4caf50',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            memberCount: 3,
-            createdBy: 'u2',
-            permissions: [],
-        },
-    ];
-
-    const groups = getAllGroups();
 
     if (isLoading) {
         return (
@@ -213,10 +172,10 @@ export default function UsersPage() {
             {/* 筛选器 */}
             <UserFilters
                 searchTerm={searchTerm}
-                roleFilter={roleFilter}
+                roleFilter="all"
                 totalUsers={filteredUsers.length}
                 onSearchChange={setSearchTerm}
-                onRoleFilterChange={setRoleFilter}
+                onRoleFilterChange={() => {}}
             />
 
             {/* 用户列表 */}
@@ -239,7 +198,7 @@ export default function UsersPage() {
                 onSubmit={handleCreateUser}
                 userForm={userForm}
                 projects={projects}
-                groups={groups}
+                groups={[]}
                 updateUserForm={updateUserForm}
             />
 
@@ -254,7 +213,7 @@ export default function UsersPage() {
                 onSubmit={handleUpdateUser}
                 userForm={userForm}
                 projects={projects}
-                groups={groups}
+                groups={[]}
                 updateUserForm={updateUserForm}
             />
         </div>

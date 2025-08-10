@@ -23,7 +23,7 @@ export const useProjects = () => {
 
 export const useCreateProject = () => {
     const queryClient = useQueryClient();
-    const {user, hasRole} = useAuth();
+    const {user} = useAuth();
 
     function assignProjectToUser(userId: string, projectId: string) {
         console.log(userId, projectId);
@@ -41,9 +41,7 @@ export const useCreateProject = () => {
         },
         onSuccess: async (project) => {
             // 如果是普通用户创建的项目，自动分配给自己
-            if (user && !hasRole('admin') && project.id) {
-                await assignProjectToUser(user.id, project.id);
-            }
+            assignProjectToUser(`${user?.id}`, project.id);
             queryClient.invalidateQueries({queryKey: ['projects']});
         },
     });

@@ -64,10 +64,7 @@ interface RouteGuardProps {
 }
 
 function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
-    const {hasRole} = useAuth();
-    if(requiresAdmin && !hasRole('admin')){
-        console.warn('User does not have admin role for this route, but allowing access for component-level permission handling');
-    }
+    console.log(requiresAdmin);
     // Allow access for component-level permission handling
     // Individual components will handle permission-based content display
     return <>{children}</>;
