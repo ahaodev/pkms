@@ -220,17 +220,18 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 	projectID := clientAccess.ProjectID
 	packageID := clientAccess.PackageID
 
-	// 检查版本是否已经存在
+	// 检查版本是否已经存在,如果不同的包下面的releases 有相同的versionCode和versionName是允许的
 	existingReleases, err := cac.ReleaseUsecase.GetReleasesByPackage(c, packageID)
 	if err == nil {
 		for _, existingRelease := range existingReleases {
-			// 检查 version_code 和 version_name 是否都相同
+			// 检查 package_id、version_code 和 version_name 是否都相同
+			packageIDMatch := existingRelease.PackageID == packageID
 			versionCodeMatch := (versionCode == "" && existingRelease.VersionCode == "") ||
 				(versionCode != "" && existingRelease.VersionCode == versionCode)
 			versionNameMatch := (version == "" && existingRelease.VersionName == "") ||
 				(version != "" && existingRelease.VersionName == version)
 
-			if versionCodeMatch && versionNameMatch {
+			if packageIDMatch && versionCodeMatch && versionNameMatch {
 				c.JSON(http.StatusBadRequest, domain.RespError("版本已存在，相同的版本号不能重复上传"))
 				return
 			}
