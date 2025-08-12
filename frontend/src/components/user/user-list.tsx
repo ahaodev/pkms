@@ -54,7 +54,6 @@ export function UserList({
           <TableRow>
             <TableHead>用户名</TableHead>
             <TableHead>状态</TableHead>
-            <TableHead>租户</TableHead>
             <TableHead>创建时间</TableHead>
             <TableHead>更新时间</TableHead>
             <TableHead className="text-right">操作</TableHead>
@@ -88,19 +87,6 @@ export function UserList({
                     {user.is_active ? '活跃' : '禁用'}
                   </div>
                 </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {user.tenants && user.tenants.length > 0 ? (
-                    user.tenants.map((tenant) => (
-                      <Badge key={tenant.id} variant="outline" className="text-xs">
-                        {tenant.name}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-sm">无</span>
-                  )}
-                </div>
               </TableCell>
               <TableCell>
                 {new Date(user.created_at).toLocaleString('zh-CN')}
