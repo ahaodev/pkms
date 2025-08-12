@@ -8,6 +8,8 @@ trigger:
     - rbac-domains
     - Single
     - pgsql
+node:
+  runner: msa2
 steps:
   - name: all_in_docker
     image: docker:dind
