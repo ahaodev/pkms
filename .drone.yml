@@ -9,7 +9,7 @@ trigger:
     - Single
     - pgsql
 node:
-  runner: msa2
+  runner: n305
 steps:
   - name: all_in_docker
     image: docker:dind
