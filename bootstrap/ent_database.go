@@ -142,8 +142,6 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 	adminUsername := getEnvOrDefault(env.AdminUsername, "admin")
 	adminPassword := getEnvOrDefault(env.AdminPassword, "123")
 
-	log.Printf("📝 Creating admin user with password: %s", adminPassword)
-
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 	if err != nil {
