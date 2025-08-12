@@ -97,10 +97,10 @@ func (su *shareUsecase) ValidateShare(c context.Context, code string) (*domain.S
 		return nil, fmt.Errorf("share not found: %w", err)
 	}
 
-	// Check if share has expired
-	if share.ExpiredAt != nil && time.Now().After(*share.ExpiredAt) {
-		return nil, fmt.Errorf("share has expired")
-	}
+	// Check if share has expired  暂不处理过期
+	//if share.ExpiredAt != nil && time.Now().After(*share.ExpiredAt) {
+	//	return nil, fmt.Errorf("share has expired")
+	//}
 
 	return share, nil
 }
