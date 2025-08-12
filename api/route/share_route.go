@@ -38,6 +38,7 @@ func NewShareManagementRouter(env *bootstrap.Env, timeout time.Duration, db *ent
 	}
 
 	// Share management endpoints (requires authentication)
-	group.GET("/", sc.GetShares)         // GET /api/v1/shares
-	group.DELETE("/:id", sc.DeleteShare) // DELETE /api/v1/shares/:id
+	group.GET("/", sc.GetShares)                   // GET /api/v1/shares
+	group.PUT("/:id/expiry", sc.UpdateShareExpiry) // PUT /api/v1/shares/:id/expiry
+	group.DELETE("/:id", sc.DeleteShare)           // DELETE /api/v1/shares/:id
 }

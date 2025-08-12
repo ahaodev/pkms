@@ -1,4 +1,4 @@
-import {memo, useCallback} from 'react';
+import {memo, useCallback, useRef} from 'react';
 import {ProjectPackageFilters} from '@/components/project-package-filters';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
@@ -13,6 +13,7 @@ function SharesManagerPage() {
     const {data: projects = []} = useProjects();
     const {data: packagesData} = usePackages();
     const packages = packagesData?.data || [];
+    const lastFocusRef = useRef<HTMLElement | null>(null);
 
     // 自定义 hooks
     const {shares, isLoading, error, deleteMutation} = useShares();
@@ -38,6 +39,29 @@ function SharesManagerPage() {
             });
         }
     }, [deleteMutation, dialogState.shareToDelete, closeDeleteDialog]);
+
+
+    const handleCloseViewDialog = useCallback(() => {
+        closeViewDialog();
+        // Restore focus after a brief delay to allow DOM to update
+        setTimeout(() => {
+            if (lastFocusRef.current && document.body.contains(lastFocusRef.current)) {
+                lastFocusRef.current.focus();
+            } else {
+                // Fallback: focus on the first button in the page
+                const firstButton = document.querySelector('button');
+                if (firstButton) {
+                    firstButton.focus();
+                }
+            }
+            lastFocusRef.current = null;
+        }, 100);
+    }, [closeViewDialog]);
+
+    const handleViewClickWithFocus = useCallback((share: any) => {
+        lastFocusRef.current = document.activeElement as HTMLElement;
+        handleViewClick(share);
+    }, [handleViewClick]);
 
 
     return (
@@ -67,7 +91,7 @@ function SharesManagerPage() {
                     isLoading={isLoading}
                     error={error}
                     onDeleteClick={handleDeleteClick}
-                    onViewClick={handleViewClick}
+                    onViewClick={handleViewClickWithFocus}
                 />
 
                 {/* Delete Confirmation Dialog */}
@@ -83,7 +107,7 @@ function SharesManagerPage() {
                 {dialogState.shareToView && (
                     <ShareDialog
                         isOpen={dialogState.viewOpen}
-                        onClose={closeViewDialog}
+                        onClose={handleCloseViewDialog}
                         shareUrl={dialogState.shareToView.share_url}
                         packageName={`${dialogState.shareToView.package_name} (${dialogState.shareToView.version})`}
                     />

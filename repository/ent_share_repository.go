@@ -185,6 +185,38 @@ func (esr *entShareRepository) GetAllByTenant(c context.Context, tenantID string
 	return result, nil
 }
 
+func (esr *entShareRepository) UpdateExpiry(c context.Context, id string, expiryHours int) (*domain.Share, error) {
+	// Create the update builder
+	updateBuilder := esr.database.Share.UpdateOneID(id)
+
+	// Set expiry time based on hours
+	if expiryHours > 0 {
+		expiryTime := time.Now().Add(time.Duration(expiryHours) * time.Hour)
+		updateBuilder = updateBuilder.SetExpiredAt(expiryTime)
+	} else {
+		// For permanent shares (expiryHours <= 0), clear the expiry date
+		updateBuilder = updateBuilder.ClearExpiredAt()
+	}
+
+	shareEntity, err := updateBuilder.Save(c)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultExpiredAt *time.Time
+	if !shareEntity.ExpiredAt.IsZero() {
+		resultExpiredAt = &shareEntity.ExpiredAt
+	}
+
+	return &domain.Share{
+		ID:        shareEntity.ID,
+		Code:      shareEntity.Code,
+		ReleaseID: shareEntity.ReleaseID,
+		StartAt:   shareEntity.StartAt,
+		ExpiredAt: resultExpiredAt,
+	}, nil
+}
+
 func (esr *entShareRepository) DeleteByID(c context.Context, id string) error {
 	return esr.database.Share.DeleteOneID(id).Exec(c)
 }

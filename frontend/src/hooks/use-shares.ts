@@ -3,6 +3,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShareListItem, sharesApi } from '@/lib/api/shares';
 import { useToast } from '@/hooks/use-toast';
 
+// Helper function to calculate expiry hours from ShareListItem
+export function getExpiryHoursFromShare(share: ShareListItem): number {
+  if (!share.expired_at) {
+    return -1; // 永久
+  }
+  
+  const startAt = new Date(share.start_at);
+  const expiredAt = new Date(share.expired_at);
+  const diffMs = expiredAt.getTime() - startAt.getTime();
+  const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+  
+  return diffHours;
+}
+
 interface ShareFilters {
   project: string;
   package: string;
@@ -11,8 +25,10 @@ interface ShareFilters {
 interface DialogState {
   deleteOpen: boolean;
   viewOpen: boolean;
+  editOpen: boolean;
   shareToDelete: ShareListItem | null;
   shareToView: ShareListItem | null;
+  shareToEdit: ShareListItem | null;
 }
 
 interface Project {
@@ -32,7 +48,9 @@ export function useShares() {
   const { data: shares, isLoading, error } = useQuery({
     queryKey: ['shares'],
     queryFn: sharesApi.getAll,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // 立即标记为过期，确保数据实时更新
+    gcTime: 5 * 60 * 1000, // 保持5分钟缓存用于后退导航
+    refetchOnWindowFocus: true, // 窗口重新获得焦点时刷新
   });
 
   const deleteMutation = useMutation({
@@ -117,8 +135,10 @@ export function useShareDialogs() {
   const [dialogState, setDialogState] = useState<DialogState>({
     deleteOpen: false,
     viewOpen: false,
+    editOpen: false,
     shareToDelete: null,
     shareToView: null,
+    shareToEdit: null,
   });
 
   const handleDeleteClick = useCallback((share: ShareListItem) => {
@@ -134,6 +154,14 @@ export function useShareDialogs() {
       ...prev,
       viewOpen: true,
       shareToView: share,
+    }));
+  }, []);
+
+  const handleEditClick = useCallback((share: ShareListItem) => {
+    setDialogState(prev => ({
+      ...prev,
+      editOpen: true,
+      shareToEdit: share,
     }));
   }, []);
 
@@ -153,11 +181,21 @@ export function useShareDialogs() {
     }));
   }, []);
 
+  const closeEditDialog = useCallback(() => {
+    setDialogState(prev => ({
+      ...prev,
+      editOpen: false,
+      shareToEdit: null,
+    }));
+  }, []);
+
   return {
     dialogState,
     handleDeleteClick,
     handleViewClick,
+    handleEditClick,
     closeDeleteDialog,
     closeViewDialog,
+    closeEditDialog,
   };
 }

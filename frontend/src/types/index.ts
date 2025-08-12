@@ -31,12 +31,18 @@ export interface NavItemProps {
  * @param onClose 关闭对话框回调
  * @param shareUrl 分享链接
  * @param packageName 包名
+ * @param shareId 分享ID，用于更新过期时间
+ * @param currentExpiryHours 当前过期时间(小时)，可选
+ * @param onExpiryUpdated 过期时间更新成功回调，可选
  */
 export interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
   shareUrl: string;
   packageName: string;
+  shareId?: string;
+  currentExpiryHours?: number;
+  onExpiryUpdated?: () => void;
 }
 
 /**

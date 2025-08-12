@@ -11,6 +11,11 @@ type CreateShareRequest struct {
 	ExpiryHours int    `json:"expiry_hours"`
 }
 
+// UpdateShareExpiryRequest 更新分享过期时间的请求
+type UpdateShareExpiryRequest struct {
+	ExpiryHours int `json:"expiry_hours"`
+}
+
 // ShareResponse 分享链接响应
 type ShareResponse struct {
 	ID          string     `json:"id"`
@@ -52,6 +57,7 @@ type ShareRepository interface {
 	GetByCode(c context.Context, code string) (*Share, error)
 	GetByReleaseID(c context.Context, releaseID string) ([]*Share, error)
 	GetAllByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	UpdateExpiry(c context.Context, id string, expiryHours int) (*Share, error)
 	DeleteByID(c context.Context, id string) error
 	DeleteExpired(c context.Context) error
 }
@@ -60,5 +66,6 @@ type ShareUsecase interface {
 	CreateShare(c context.Context, req *CreateShareRequest) (*ShareResponse, error)
 	ValidateShare(c context.Context, code string) (*Share, error)
 	GetAllSharesByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	UpdateShareExpiry(c context.Context, id string, req *UpdateShareExpiryRequest) (*ShareResponse, error)
 	DeleteShare(c context.Context, id string) error
 }

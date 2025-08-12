@@ -32,17 +32,21 @@ export function Releases({
         isOpen: boolean;
         shareUrl: string;
         packageName: string;
+        shareId?: string;
+        currentExpiryHours?: number;
     }>({isOpen: false, shareUrl: '', packageName: ''});
 
     const handleShare = async (release: Release) => {
         try {
-            const result = await createShareLink(release.id, {expiryHours: 24});
-            const shareCode = result.data.code;
-            const fullUrl = `${window.location.origin}/share/${shareCode}`;
+            const result = await createShareLink(release.id, {expiryHours: -1}); // 默认永久
+            const shareResponse = result.data;
+            const fullUrl = `${window.location.origin}/share/${shareResponse.code}`;
             setShareDialog({
                 isOpen: true,
                 shareUrl: fullUrl,
-                packageName: `${selectedPackage?.name} v${release.version_code}`
+                packageName: `${selectedPackage?.name} v${release.version_code}`,
+                shareId: shareResponse.id,
+                currentExpiryHours: shareResponse.expiry_hours
             });
             toast.success('分享链接已创建', {
                 description: '分享链接已生成。',
@@ -175,6 +179,8 @@ export function Releases({
                 onClose={closeShareDialog}
                 shareUrl={shareDialog.shareUrl}
                 packageName={shareDialog.packageName}
+                shareId={shareDialog.shareId}
+                currentExpiryHours={shareDialog.currentExpiryHours}
             />
         </div>
     );

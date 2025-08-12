@@ -99,6 +99,37 @@ func (sc *ShareController) GetShares(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.RespSuccess(shares))
 }
 
+// UpdateShareExpiry 更新分享过期时间
+// @Summary      Update share expiry
+// @Description  Update the expiry time of a specific share
+// @Tags         Shares(management)
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path     string                        true  "Share ID"
+// @Param        request body  domain.UpdateShareExpiryRequest true  "Update share expiry request"
+// @Success      200  {object} domain.Response               "Successfully updated share expiry"
+// @Failure      400  {object} domain.Response               "Invalid request parameters"
+// @Failure      500  {object} domain.Response               "Update share expiry failed"
+// @Router       /shares/{id}/expiry [put]
+func (sc *ShareController) UpdateShareExpiry(c *gin.Context) {
+	shareID := c.Param("id")
+
+	var req domain.UpdateShareExpiryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("Invalid request parameters: "+err.Error()))
+		return
+	}
+
+	shareResponse, err := sc.ShareUsecase.UpdateShareExpiry(c, shareID, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.RespError("Update share expiry failed: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(shareResponse))
+}
+
 // DeleteShare 删除分享
 // @Summary      Delete share
 // @Description  Delete a specific share by ID

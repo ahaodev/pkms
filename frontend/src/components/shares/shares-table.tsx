@@ -23,6 +23,20 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
     return format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss');
   };
 
+  const getExpiryDisplay = (share: ShareListItem) => {
+    if (!share.expired_at) {
+      return ''; // 永久显示空
+    }
+    
+    if (share.is_expired) {
+      return '已过期';
+    }
+    
+    // 显示过期日期
+    const expiryDate = new Date(share.expired_at);
+    return expiryDate.toISOString().split('T')[0]; // YYYY-MM-DD 格式
+  };
+
 
   if (error) {
     return (
@@ -67,53 +81,66 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
               <TableHead>版本</TableHead>
               <TableHead>分享码</TableHead>
               <TableHead>创建时间</TableHead>
+              <TableHead>过期时间</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {shares.map((share) => (
-              <TableRow key={share.id}>
-                <TableCell className="font-medium">
-                  {share.project_name}
-                </TableCell>
-                <TableCell>{share.package_name}</TableCell>
-                <TableCell>
-                  <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                    {share.version}
-                  </code>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
+            {shares.map((share) => {
+              const expiryDisplay = getExpiryDisplay(share);
+              return (
+                <TableRow key={share.id}>
+                  <TableCell className="font-medium">
+                    {share.project_name}
+                  </TableCell>
+                  <TableCell>{share.package_name}</TableCell>
+                  <TableCell>
                     <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                      {share.code}
+                      {share.version}
                     </code>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(share.start_at)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewClick(share)}
-                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteClick(share)}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+                        {share.code}
+                      </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(share.start_at)}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {expiryDisplay && (
+                      <span className={expiryDisplay === '已过期' ? 'text-destructive' : 'text-muted-foreground'}>
+                        {expiryDisplay}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onViewClick(share)}
+                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        title="查看分享"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteClick(share)}
+                        className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                        title="删除分享"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

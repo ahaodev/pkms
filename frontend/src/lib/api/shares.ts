@@ -18,6 +18,10 @@ export interface CreateShareRequest {
   expiry_hours: number;
 }
 
+export interface UpdateShareExpiryRequest {
+  expiry_hours: number;
+}
+
 export interface ShareResponse {
   id: string;
   code: string;
@@ -42,6 +46,12 @@ export const sharesApi = {
     const response = await apiClient.post(`/api/v1/releases/${request.release_id}/share`, {
       expiry_hours: request.expiry_hours
     });
+    return response.data.data;
+  },
+
+  // Update share expiry
+  updateExpiry: async (id: string, request: UpdateShareExpiryRequest): Promise<ShareResponse> => {
+    const response = await apiClient.put(`/api/v1/shares/${id}/expiry`, request);
     return response.data.data;
   },
 

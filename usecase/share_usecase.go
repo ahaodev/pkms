@@ -97,10 +97,10 @@ func (su *shareUsecase) ValidateShare(c context.Context, code string) (*domain.S
 		return nil, fmt.Errorf("share not found: %w", err)
 	}
 
-	// Check if share has expired  暂不处理过期
-	//if share.ExpiredAt != nil && time.Now().After(*share.ExpiredAt) {
-	//	return nil, fmt.Errorf("share has expired")
-	//}
+	// Check if share has expired
+	if share.ExpiredAt != nil && time.Now().After(*share.ExpiredAt) {
+		return nil, fmt.Errorf("share has expired")
+	}
 
 	return share, nil
 }
@@ -110,6 +110,38 @@ func (su *shareUsecase) GetAllSharesByTenant(c context.Context, tenantID string)
 	defer cancel()
 
 	return su.shareRepository.GetAllByTenant(ctx, tenantID)
+}
+
+func (su *shareUsecase) UpdateShareExpiry(c context.Context, id string, req *domain.UpdateShareExpiryRequest) (*domain.ShareResponse, error) {
+	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
+	defer cancel()
+
+	// Update share expiry
+	updatedShare, err := su.shareRepository.UpdateExpiry(ctx, id, req.ExpiryHours)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update share expiry: %w", err)
+	}
+
+	// Get release information for response
+	release, err := su.releaseRepository.GetByID(ctx, updatedShare.ReleaseID)
+	if err != nil {
+		return nil, fmt.Errorf("release not found: %w", err)
+	}
+
+	// Build response
+	response := &domain.ShareResponse{
+		ID:          updatedShare.ID,
+		Code:        updatedShare.Code,
+		ShareURL:    fmt.Sprintf("/share/%s", updatedShare.Code),
+		ReleaseID:   updatedShare.ReleaseID,
+		ExpiryHours: req.ExpiryHours,
+		FileName:    release.FileName,
+		Version:     release.VersionCode,
+		StartAt:     updatedShare.StartAt,
+		ExpiredAt:   updatedShare.ExpiredAt,
+	}
+
+	return response, nil
 }
 
 func (su *shareUsecase) DeleteShare(c context.Context, id string) error {
