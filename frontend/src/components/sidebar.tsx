@@ -7,11 +7,12 @@ import {
     BarChart3,
     Boxes,
     ChevronDown,
+    ChevronRight,
     Globe,
     Lock,
     Package,
     Rocket,
-    Settings as SettingsIcon,
+    Settings,
     Share2,
     Shield,
     Users,
@@ -56,6 +57,65 @@ const NavItem = memo<NavItemWithClickProps>(({to, icon, label, end, onClick}) =>
 });
 
 NavItem.displayName = 'NavItem';
+
+/**
+ * CollapsibleGroup 组件：可折叠的菜单组
+ */
+interface CollapsibleGroupProps {
+    icon: React.ReactNode;
+    label: string;
+    children: React.ReactNode;
+    defaultOpen?: boolean;
+    storageKey: string;
+}
+
+const CollapsibleGroup = memo<CollapsibleGroupProps>(({
+    icon,
+    label,
+    children,
+    defaultOpen = false,
+    storageKey
+}) => {
+    const [isOpen, setIsOpen] = useState(() => {
+        const stored = localStorage.getItem(storageKey);
+        return stored ? JSON.parse(stored) : defaultOpen;
+    });
+
+    const toggleOpen = useCallback(() => {
+        setIsOpen(prev => {
+            const newValue = !prev;
+            localStorage.setItem(storageKey, JSON.stringify(newValue));
+            return newValue;
+        });
+    }, [storageKey]);
+
+    return (
+        <div className="space-y-1">
+            <Button
+                variant="ghost"
+                className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md hover:text-foreground"
+                onClick={toggleOpen}
+            >
+                <div className="flex items-center space-x-3 w-full">
+                    {icon}
+                    <span className="flex-1 text-left">{label}</span>
+                    {isOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                    ) : (
+                        <ChevronRight className="h-4 w-4" />
+                    )}
+                </div>
+            </Button>
+            {isOpen && (
+                <div className="ml-4 space-y-1">
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+});
+
+CollapsibleGroup.displayName = 'CollapsibleGroup';
 
 
 interface SidebarProps extends SimpleSidebarProps {
@@ -144,7 +204,11 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             to: "/shares",
             icon: <Share2 className="h-5 w-5"/>,
             label: "分享管理"
-        },
+        }
+    ], []);
+
+    // 系统管理菜单项配置
+    const systemManagementItems = useMemo(() => [
         {
             permission: "tenants",
             to: "/tenants",
@@ -162,12 +226,6 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             to: "/permissions",
             icon: <Lock className="h-5 w-5"/>,
             label: "权限管理"
-        },
-        {
-            permission: "settings",
-            to: "/settings",
-            icon: <SettingsIcon className="h-5 w-5"/>,
-            label: "设置"
         }
     ], []);
 
@@ -178,6 +236,11 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
         }
         return hasPermission(permission);
     }, [hasPermission]);
+
+    // 检查是否有系统管理权限
+    const hasSystemManagementPermission = useMemo(() => {
+        return systemManagementItems.some(item => checkPermission(item.permission));
+    }, [systemManagementItems, checkPermission]);
 
     // 移动端点击外部关闭、滚动处理和键盘导航
     useEffect(() => {
@@ -293,6 +356,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                     {/* Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
                         <nav className="space-y-1" role="navigation" aria-label="主导航">
+                            {/* 普通导航项 */}
                             {navigationItems.map((item) => {
                                 if (!checkPermission(item.permission)) return null;
                                 
@@ -307,6 +371,30 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                                     />
                                 );
                             })}
+
+                            {/* 系统管理分组 */}
+                            {hasSystemManagementPermission && (
+                                <CollapsibleGroup
+                                    icon={<Settings className="h-5 w-5" />}
+                                    label="系统管理"
+                                    defaultOpen={false}
+                                    storageKey="sidebar-system-management-expanded"
+                                >
+                                    {systemManagementItems.map((item) => {
+                                        if (!checkPermission(item.permission)) return null;
+                                        
+                                        return (
+                                            <NavItem
+                                                key={item.to}
+                                                to={item.to}
+                                                icon={item.icon}
+                                                label={item.label}
+                                                onClick={handleNavClick}
+                                            />
+                                        );
+                                    })}
+                                </CollapsibleGroup>
+                            )}
                         </nav>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}

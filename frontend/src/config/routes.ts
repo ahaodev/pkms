@@ -2,7 +2,6 @@
 import Dashboard from "@/pages/dashboard";
 import HierarchyPage from "@/pages/hierarchy";
 import LoginPage from "@/pages/login";
-import Settings from "@/pages/settings";
 import UsersPage from "@/pages/users";
 import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
@@ -48,11 +47,6 @@ export const routes: RouteConfig[] = [
     {
         path: "/shares",
         element: SharesManagerPage,
-        requiresAuth: true,
-    },
-    {
-        path: "/settings",
-        element: Settings,
         requiresAuth: true,
     },
 

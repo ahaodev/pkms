@@ -9,7 +9,8 @@
       "Bash(true)",
       "Bash(DB_TYPE=postgres go run ./cmd/main.go)",
       "Bash(npm run lint)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   },

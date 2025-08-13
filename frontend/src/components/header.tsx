@@ -1,3 +1,4 @@
+import {useState, useRef, useCallback} from "react";
 import {Button} from "@/components/ui/button";
 import {ModeToggle} from "@/components/mode-toggle";
 import {
@@ -8,8 +9,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {LogOut, Menu} from "lucide-react";
+import {LogOut, Menu, KeyRound, User} from "lucide-react";
 import {useAuth} from "@/providers/auth-provider.tsx";
+import {ChangePasswordDialog} from "@/components/change-password-dialog";
 import type {HeaderProps} from '@/types';
 
 /**
@@ -18,6 +20,24 @@ import type {HeaderProps} from '@/types';
 
 export function Header({onMenuClick, isMobile}: HeaderProps) {
     const {user, logout} = useAuth();
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+
+    const handleChangePasswordClick = useCallback(() => {
+        setDropdownOpen(false);
+        setChangePasswordOpen(true);
+    }, []);
+
+    const handlePasswordDialogChange = useCallback((open: boolean) => {
+        setChangePasswordOpen(open);
+        if (!open) {
+            // 延迟恢复焦点，确保弹窗完全关闭
+            setTimeout(() => {
+                triggerRef.current?.focus();
+            }, 100);
+        }
+    }, []);
 
     return (
         <header
@@ -34,17 +54,23 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
             <div className="flex items-center space-x-2">
                 <ModeToggle/>
 
-                <DropdownMenu>
+                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost"
-                                className="relative flex items-center space-x-2 h-8 hover:bg-accent focus:bg-accent rounded-full pr-2 pl-1">
-
+                        <Button 
+                            ref={triggerRef}
+                            variant="ghost"
+                            className="relative flex items-center space-x-2 h-8 hover:bg-accent focus:bg-accent rounded-full pr-2 pl-1"
+                        >
                             {!isMobile && <span className="max-w-[100px] truncate">{user?.name || '用户'}</span>}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>{user?.name || '用户'}</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
+                        <DropdownMenuItem onClick={handleChangePasswordClick}>
+                            <KeyRound className="mr-2 h-4 w-4"/>
+                            <span>更改密码</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem onClick={logout}>
                             <LogOut className="mr-2 h-4 w-4"/>
@@ -53,6 +79,11 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+            
+            <ChangePasswordDialog
+                open={changePasswordOpen}
+                onOpenChange={handlePasswordDialogChange}
+            />
         </header>
     );
 }
