@@ -82,7 +82,7 @@ const CollapsibleGroup = memo<CollapsibleGroupProps>(({
     });
 
     const toggleOpen = useCallback(() => {
-        setIsOpen(prev => {
+        setIsOpen((prev: boolean) => {
             const newValue = !prev;
             localStorage.setItem(storageKey, JSON.stringify(newValue));
             return newValue;

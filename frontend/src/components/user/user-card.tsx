@@ -28,13 +28,13 @@ export function UserCard({
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center space-x-3 min-w-0 flex-1">
-                        <div className="text-2xl flex-shrink-0">{user.name.charAt(0).toUpperCase()}</div>
+                        <div className="text-2xl shrink-0">{user.name.charAt(0).toUpperCase()}</div>
                         <div className="min-w-0 flex-1">
                             <CardTitle className="text-lg truncate">{user.name}</CardTitle>
                             <CardDescription className="truncate">ID: {user.id}</CardDescription>
                         </div>
                     </div>
-                    <div className="flex space-x-1 flex-shrink-0">
+                    <div className="flex space-x-1 shrink-0">
                         <Button
                             variant="ghost"
                             size="sm"

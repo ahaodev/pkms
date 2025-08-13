@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {LogOut, Menu, KeyRound, User} from "lucide-react";
+import {LogOut, Menu, KeyRound} from "lucide-react";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import {ChangePasswordDialog} from "@/components/change-password-dialog";
 import type {HeaderProps} from '@/types';
@@ -41,7 +41,7 @@ export function Header({onMenuClick, isMobile}: HeaderProps) {
 
     return (
         <header
-            className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-3 px-4 flex items-center justify-between h-16">
+            className="border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 z-10 py-3 px-4 flex items-center justify-between h-16">
             {isMobile && (
                 <Button variant="ghost" size="icon" onClick={onMenuClick}>
                     <Menu className="h-5 w-5"/>

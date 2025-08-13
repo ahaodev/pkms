@@ -5,7 +5,15 @@
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(npx:*)",
+      "Bash(npm remove:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(true)",
+      "Bash(npm audit:*)"
     ],
     "deny": []
   }
