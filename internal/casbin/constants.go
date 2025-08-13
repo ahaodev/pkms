@@ -13,15 +13,16 @@ const (
 const (
 	SidebarDashboard = "dashboard"
 	SidebarProjects  = "projects"
-	SidebarSettings  = "settings"
 	SidebarUpgrade   = "upgrade"
 	ClientAccess     = "access-manager"
 	ShareManager     = "shares"
+	SidebarSystems   = "systems"
 )
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarSettings, ShareManager, SidebarUpgrade, ClientAccess}
+var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess, SidebarSystems}
 
-// var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
+// var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess}
+
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
