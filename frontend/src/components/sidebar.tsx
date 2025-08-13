@@ -182,7 +182,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             end: true
         },
         {
-            permission: ["projects", "packages"],
+            permission: "projects",
             to: "/hierarchy",
             icon: <Boxes className="h-5 w-5"/>,
             label: "项目包管理"
@@ -210,19 +210,19 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
     // 系统管理菜单项配置
     const systemManagementItems = useMemo(() => [
         {
-            permission: "tenants",
+            permission: "system", // 统一使用 system 权限
             to: "/tenants",
             icon: <Globe className="h-5 w-5"/>,
             label: "租户管理"
         },
         {
-            permission: "users",
+            permission: "system", // 统一使用 systems 权限
             to: "/users",
             icon: <Users className="h-5 w-5"/>,
             label: "用户管理"
         },
         {
-            permission: "permissions",
+            permission: "system", // 统一使用 systems 权限
             to: "/permissions",
             icon: <Lock className="h-5 w-5"/>,
             label: "权限管理"
@@ -239,8 +239,8 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
 
     // 检查是否有系统管理权限
     const hasSystemManagementPermission = useMemo(() => {
-        return systemManagementItems.some(item => checkPermission(item.permission));
-    }, [systemManagementItems, checkPermission]);
+        return hasPermission("system");
+    }, [hasPermission]);
 
     // 移动端点击外部关闭、滚动处理和键盘导航
     useEffect(() => {
@@ -380,19 +380,15 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                                     defaultOpen={false}
                                     storageKey="sidebar-system-management-expanded"
                                 >
-                                    {systemManagementItems.map((item) => {
-                                        if (!checkPermission(item.permission)) return null;
-                                        
-                                        return (
-                                            <NavItem
-                                                key={item.to}
-                                                to={item.to}
-                                                icon={item.icon}
-                                                label={item.label}
-                                                onClick={handleNavClick}
-                                            />
-                                        );
-                                    })}
+                                    {systemManagementItems.map((item) => (
+                                        <NavItem
+                                            key={item.to}
+                                            to={item.to}
+                                            icon={item.icon}
+                                            label={item.label}
+                                            onClick={handleNavClick}
+                                        />
+                                    ))}
                                 </CollapsibleGroup>
                             )}
                         </nav>

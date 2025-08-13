@@ -16,10 +16,10 @@ const (
 	SidebarUpgrade   = "upgrade"
 	ClientAccess     = "access-manager"
 	ShareManager     = "shares"
-	SidebarSystems   = "systems"
+	SidebarSystem    = "system"
 )
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess, SidebarSystems}
+var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess, SidebarSystem}
 
 // var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess}
 
