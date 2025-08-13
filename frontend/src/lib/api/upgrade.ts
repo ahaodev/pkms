@@ -39,23 +39,6 @@ export interface UpdateUpgradeTargetRequest {
     is_active?: boolean;
 }
 
-export interface CheckUpdateRequest {
-    project_id: string;
-    package_id: string;
-    current_version: string;
-}
-
-export interface CheckUpdateResponse {
-    has_update: boolean;
-    current_version: string;
-    latest_version: string;
-    download_url?: string;
-    file_size?: number;
-    file_hash?: string;
-    changelog?: string;
-    release_notes?: string;
-}
-
 // 升级目标 CRUD API
 export const getUpgradeTargets = async (filters?: {
     project_id?: string;
@@ -71,11 +54,6 @@ export const getUpgradeTargets = async (filters?: {
     return response.data;
 };
 
-export const getUpgradeTarget = async (id: string): Promise<{ data: UpgradeTarget }> => {
-    const response = await apiClient.get(`/api/v1/upgrades/${id}`);
-    return response.data;
-};
-
 export const createUpgradeTarget = async (data: CreateUpgradeTargetRequest): Promise<{ data: UpgradeTarget }> => {
     const response = await apiClient.post('/api/v1/upgrades', data);
     return response.data;
@@ -88,11 +66,5 @@ export const updateUpgradeTarget = async (id: string, data: UpdateUpgradeTargetR
 
 export const deleteUpgradeTarget = async (id: string): Promise<{ data: string }> => {
     const response = await apiClient.delete(`/api/v1/upgrades/${id}`);
-    return response.data;
-};
-
-// 获取项目的所有升级目标
-export const getProjectUpgradeTargets = async (projectId: string): Promise<{ data: UpgradeTarget[] }> => {
-    const response = await apiClient.get(`/api/v1/upgrades/projects/${projectId}`);
     return response.data;
 };

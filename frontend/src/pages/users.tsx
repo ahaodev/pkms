@@ -14,12 +14,14 @@ interface UserFormData {
     name: string;
     password: string;
     is_active: boolean;
+    create_tenant: boolean;
 }
 
 const initialFormData: UserFormData = {
     name: '',
     password: '',
     is_active: true,
+    create_tenant: false,
 };
 
 export default function UsersPage() {
@@ -98,6 +100,7 @@ export default function UsersPage() {
             name: user.name,
             password: '',
             is_active: user.is_active,
+            create_tenant: false,
         });
         setIsEditDialogOpen(true);
     };

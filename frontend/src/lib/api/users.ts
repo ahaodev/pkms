@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse} from "@/types/api-response";
-import { User, CreateUserRequest, UpdateUserRequest, ProfileUpdateRequest } from '@/types/user';
+import { User, CreateUserRequest, UpdateUserRequest } from '@/types/user';
 
 // Transform backend user data to frontend format
 function transformUserFromBackend(backendUser: any): User {
@@ -71,12 +71,6 @@ export async function getUserProjects(userId: string): Promise<ApiResponse<any[]
     return resp.data;
 }
 
-// 获取用户的组
-export async function getUserGroups(userId: string): Promise<ApiResponse<any[]>> {
-    const resp = await apiClient.get(`/api/v1/user/${userId}/groups`);
-    return resp.data;
-}
-
 // 分配用户到项目
 export async function assignUserToProject(userId: string, projectId: string): Promise<ApiResponse<void>> {
     const resp = await apiClient.post(`/api/v1/user/${userId}/projects`, {
@@ -88,22 +82,6 @@ export async function assignUserToProject(userId: string, projectId: string): Pr
 // 从项目中移除用户
 export async function unassignUserFromProject(userId: string, projectId: string): Promise<ApiResponse<void>> {
     const resp = await apiClient.delete(`/api/v1/user/${userId}/projects/${projectId}`);
-    return resp.data;
-}
-
-// 获取用户资料
-export async function getUserProfile(): Promise<ApiResponse<User>> {
-    const resp = await apiClient.get("/api/v1/user/profile");
-    const transformedData = {
-        ...resp.data,
-        data: transformUserFromBackend(resp.data.data)
-    };
-    return transformedData;
-}
-
-// 更新用户资料
-export async function updateUserProfile(update: ProfileUpdateRequest): Promise<ApiResponse<any>> {
-    const resp = await apiClient.put("/api/v1/profile", update);
     return resp.data;
 }
 
