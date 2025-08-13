@@ -19,8 +19,10 @@ import type {
     CreateClientAccessRequest,
     UpdateClientAccessRequest
 } from '@/types/client-access';
+import {useI18n} from '@/contexts/i18n-context';
 
 export default function ClientAccessPage() {
+    const {t} = useI18n();
     const [projectFilter, setProjectFilter] = useState<string>('all');
     const [packageFilter, setPackageFilter] = useState<string>('all');
     const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -105,7 +107,7 @@ export default function ClientAccessPage() {
                 <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4"/>
                     <AlertDescription>
-                        加载接入管理数据时出错: {String(error) || '未知错误'}
+                        {t('clientAccess.loadError')}: {String(error) || t('clientAccess.unknownError')}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -122,7 +124,7 @@ export default function ClientAccessPage() {
                 projectFilter={projectFilter}
                 packageFilter={packageFilter}
                 totalCount={totalCount}
-                countLabel="个接入配置"
+                countLabel={t('clientAccess.accessCount')}
                 projects={projects}
                 packages={packages}
                 onProjectFilterChange={setProjectFilter}

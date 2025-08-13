@@ -22,6 +22,7 @@ import type {NavItemProps, SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {apiClient} from '@/lib/api/api';
 import {Tenant} from '@/types/user';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface NavItemWithClickProps extends NavItemProps {
     onClick?: () => void;
@@ -130,6 +131,7 @@ interface SidebarProps extends SimpleSidebarProps {
 export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) => {
     const sidebarRef = useRef<HTMLDivElement>(null);
     const {user, currentTenant, tenants, selectTenant} = useAuth();
+    const {t} = useI18n();
     const [sidebarPermissions, setSidebarPermissions] = useState<string[]>([]);
     const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
 
@@ -178,34 +180,34 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             permission: "dashboard",
             to: "/",
             icon: <BarChart3 className="h-5 w-5"/>,
-            label: "概览",
+            label: t("nav.overview"),
             end: true
         },
         {
             permission: "projects",
             to: "/hierarchy",
             icon: <Boxes className="h-5 w-5"/>,
-            label: "项目包管理"
+            label: t("nav.projectManagement")
         },
         {
             permission: "upgrade",
             to: "/upgrade",
             icon: <Rocket className="h-5 w-5"/>,
-            label: "升级管理"
+            label: t("nav.upgradeManagement")
         },
         {
             permission: "access-manager",
             to: "/access-manager",
             icon: <Shield className="h-5 w-5"/>,
-            label: "接入管理"
+            label: t("nav.accessManagement")
         },
         {
             permission: "shares",
             to: "/shares",
             icon: <Share2 className="h-5 w-5"/>,
-            label: "分享管理"
+            label: t("nav.shareManagement")
         }
-    ], []);
+    ], [t]);
 
     // 系统管理菜单项配置
     const systemManagementItems = useMemo(() => [
@@ -213,21 +215,21 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             permission: "system", // 统一使用 system 权限
             to: "/tenants",
             icon: <Globe className="h-5 w-5"/>,
-            label: "租户管理"
+            label: t("nav.tenantManagement")
         },
         {
             permission: "system", // 统一使用 systems 权限
             to: "/users",
             icon: <Users className="h-5 w-5"/>,
-            label: "用户管理"
+            label: t("nav.userManagement")
         },
         {
             permission: "system", // 统一使用 systems 权限
             to: "/permissions",
             icon: <Lock className="h-5 w-5"/>,
-            label: "权限管理"
+            label: t("nav.permissionManagement")
         }
-    ], []);
+    ], [t]);
 
     // 检查权限的辅助函数
     const checkPermission = useCallback((permission: string | string[]) => {
@@ -355,7 +357,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
 
                     {/* Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <nav className="space-y-1" role="navigation" aria-label="主导航">
+                        <nav className="space-y-1" role="navigation" aria-label={t("nav.mainNavigation")}>
                             {/* 普通导航项 */}
                             {navigationItems.map((item) => {
                                 if (!checkPermission(item.permission)) return null;
@@ -376,7 +378,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                             {hasSystemManagementPermission && (
                                 <CollapsibleGroup
                                     icon={<Settings className="h-5 w-5" />}
-                                    label="系统管理"
+                                    label={t("nav.systemManagement")}
                                     defaultOpen={false}
                                     storageKey="sidebar-system-management-expanded"
                                 >

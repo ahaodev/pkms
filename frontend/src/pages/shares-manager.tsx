@@ -7,8 +7,10 @@ import {DeleteShareDialog, SharesTable} from '@/components/shares';
 import {ShareDialog} from '@/components/share-dialog';
 import {ErrorBoundary} from '@/components/ui/error-boundary';
 import {PageHeader} from "@/components/ui";
+import {useI18n} from '@/contexts/i18n-context';
 
 function SharesManagerPage() {
+    const {t} = useI18n();
     // 基础数据
     const {data: projects = []} = useProjects();
     const {data: packagesData} = usePackages();
@@ -69,8 +71,8 @@ function SharesManagerPage() {
             <div className="space-y-6">
                 {/* Header */}
                 <PageHeader
-                    title="分享管理"
-                    description="管理所有的文件分享链接，可以查看分享状态和删除不需要的分享"
+                    title={t('share.title')}
+                    description={t('share.description')}
                 />
 
                 {/* Filters */}
@@ -78,7 +80,7 @@ function SharesManagerPage() {
                     projectFilter={filters.project}
                     packageFilter={filters.package}
                     totalCount={totalCount}
-                    countLabel="个分享"
+                    countLabel={t('share.sharesCount')}
                     projects={projects}
                     packages={packages}
                     onProjectFilterChange={updateProjectFilter}

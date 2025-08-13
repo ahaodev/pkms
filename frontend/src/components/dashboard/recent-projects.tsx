@@ -4,6 +4,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Button} from '@/components/ui/button';
 import {Project} from '@/types/project.ts';
 import {getProjectIcon} from '@/lib/utils';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface RecentProjectsProps {
     projects?: Project[];
@@ -16,11 +17,13 @@ export function RecentProjects({
                                    onViewProject,
                                    onViewAllProjects
                                }: RecentProjectsProps) {
+    const {t} = useI18n();
+    
     return (
         <Card>
             <CardHeader>
-                <CardTitle>最近项目</CardTitle>
-                <CardDescription>最新创建或更新的项目</CardDescription>
+                <CardTitle>{t("dashboard.recentProjects")}</CardTitle>
+                <CardDescription>{t("dashboard.recentProjectsDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
                 {projects && projects.length > 0 ? (
@@ -35,7 +38,7 @@ export function RecentProjects({
                                     <div>
                                         <p className="font-medium">{project.name}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {project.packageCount} 个包
+                                            {project.packageCount} {t("dashboard.packagesCount")}
                                         </p>
                                     </div>
                                 </div>
@@ -44,7 +47,7 @@ export function RecentProjects({
                                     size="sm"
                                     onClick={() => onViewProject(project.id)}
                                 >
-                                    查看
+                                    {t("dashboard.viewProject")}
                                 </Button>
                             </div>
                         ))}
@@ -53,15 +56,15 @@ export function RecentProjects({
                             className="w-full"
                             onClick={onViewAllProjects}
                         >
-                            查看所有项目
+                            {t("dashboard.viewAllProjects")}
                         </Button>
                     </div>
                 ) : (
                     <EmptyList
                         icon={FolderOpen}
-                        title="暂无项目"
-                        description="开始创建第一个项目"
-                        actionText="创建项目"
+                        title={t("dashboard.noProjectsTitle")}
+                        description={t("dashboard.noProjectsDesc")}
+                        actionText={t("dashboard.createProject")}
                         onAction={onViewAllProjects}
                         showAction={true}
                         className="py-6"

@@ -8,8 +8,10 @@ import RoleManagement from '@/components/permissions/RoleManagement';
 import UserManagement from '@/components/permissions/UserManagement';
 import {CustomSkeleton} from '@/components/custom-skeleton';
 import type {EnhancedPolicy, EnhancedRole, User, UserPermission} from '@/types';
+import {useI18n} from '@/contexts/i18n-context';
 
 const PermissionsPage: React.FC = () => {
+    const {t} = useI18n();
 
     // State for data
     const [enhancedPolicies, setEnhancedPolicies] = useState<EnhancedPolicy[]>([]);
@@ -39,8 +41,8 @@ const PermissionsPage: React.FC = () => {
                 fetchUsers(),
             ]);
         } catch (error) {
-            console.error('获取数据失败:', error);
-            toast.error('获取数据失败');
+            console.error(error)
+            toast.error(t('permission.fetchError'));
         } finally {
             setIsLoading(false);
         }
@@ -53,7 +55,7 @@ const PermissionsPage: React.FC = () => {
                 setEnhancedPolicies(response.data.data.policies || []);
             }
         } catch (error) {
-            console.error('获取增强策略失败:', error);
+            console.error( error);
         }
     };
 
@@ -64,7 +66,7 @@ const PermissionsPage: React.FC = () => {
                 setEnhancedRoles(response.data.data.roles || []);
             }
         } catch (error) {
-            console.error('获取增强角色失败:', error);
+            console.error(error);
         }
     };
 
@@ -75,7 +77,7 @@ const PermissionsPage: React.FC = () => {
                 setObjects(response.data.data.objects || []);
             }
         } catch (error) {
-            console.error('获取对象失败:', error);
+            console.error( error);
         }
     };
 
@@ -86,7 +88,7 @@ const PermissionsPage: React.FC = () => {
                 setActions(response.data.data.actions || []);
             }
         } catch (error) {
-            console.error('获取操作失败:', error);
+            console.error(error);
         }
     };
 
@@ -97,7 +99,7 @@ const PermissionsPage: React.FC = () => {
                 setUsers(response.data.data.users || []);
             }
         } catch (error) {
-            console.error('获取用户失败:', error);
+            console.error( error);
         }
     };
 
@@ -108,7 +110,7 @@ const PermissionsPage: React.FC = () => {
                 return response.data.data;
             }
         } catch (error) {
-            console.error('获取用户权限失败:', error);
+            console.error(error);
         }
         return null;
     };
@@ -140,8 +142,8 @@ const PermissionsPage: React.FC = () => {
         return (
             <div className="space-y-6">
                 <PageHeader
-                    title="权限管理"
-                    description="管理系统角色权限配置和用户权限分配"
+                    title={t('permission.title')}
+                    description={t('permission.description')}
                 />
                 <CustomSkeleton type="table" rows={8} columns={4} />
             </div>
@@ -157,8 +159,8 @@ const PermissionsPage: React.FC = () => {
 
             <Tabs defaultValue="role-management" className="space-y-4">
                 <TabsList className="grid grid-cols-2">
-                    <TabsTrigger value="role-management">角色管理</TabsTrigger>
-                    <TabsTrigger value="user-management">用户管理</TabsTrigger>
+                    <TabsTrigger value="role-management">{t('permission.roleManagement')}</TabsTrigger>
+                    <TabsTrigger value="user-management">{t('permission.userManagement')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="role-management" className="space-y-4">

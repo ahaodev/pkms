@@ -9,6 +9,7 @@ import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
 import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {CustomSkeleton} from '@/components/custom-skeleton';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface UserFormData {
     name: string;
@@ -25,6 +26,7 @@ const initialFormData: UserFormData = {
 };
 
 export default function UsersPage() {
+    const {t} = useI18n();
     const {user: currentUser} = useAuth();
     const {data: projects} = useProjects();
     const {data: users, isLoading} = useUsers();
@@ -72,7 +74,7 @@ export default function UsersPage() {
 
     const handleCreateUser = async () => {
         if (!userForm.name || !userForm.password) {
-            toast.error('请填写必填字段：用户名和密码为必填项');
+            toast.error(t('user.requiredFieldsError'));
             return;
         }
 
@@ -85,12 +87,12 @@ export default function UsersPage() {
 
             await createUserMutation.mutateAsync(createRequest);
 
-            toast.success(`用户 "${userForm.name}" 已创建`);
+            toast.success(t('user.createSuccess', { name: userForm.name }));
 
             setIsCreateDialogOpen(false);
             resetForm();
         } catch (error: any) {
-            toast.error(error.response?.data?.message || '用户创建失败，请重试');
+            toast.error(error.response?.data?.message || t('user.createError'));
         }
     };
 
@@ -107,7 +109,7 @@ export default function UsersPage() {
 
     const handleUpdateUser = async () => {
         if (!editingUser || !userForm.name) {
-            toast.error('请填写必填字段：用户名为必填项');
+            toast.error(t('user.requiredNameError'));
             return;
         }
 
@@ -122,31 +124,31 @@ export default function UsersPage() {
                 update: updateRequest
             });
 
-            toast.success(`用户 "${userForm.name}" 已更新`);
+            toast.success(t('user.updateSuccess', { name: userForm.name }));
 
             setIsEditDialogOpen(false);
             setEditingUser(null);
             resetForm();
         } catch (error: any) {
-            toast.error(error.response?.data?.message || '用户更新失败，请重试');
+            toast.error(error.response?.data?.message || t('user.updateError'));
         }
     };
 
     const handleDeleteUser = async (user: User) => {
         if (user.id === currentUser?.id) {
-            toast.error('不能删除自己：您不能删除自己的账户');
+            toast.error(t('user.cannotDeleteSelf'));
             return;
         }
 
-        if (!confirm(`确定要删除用户 "${user.name}" 吗？此操作无法撤销。`)) {
+        if (!confirm(t('user.deleteConfirm', { name: user.name }))) {
             return;
         }
 
         try {
             await deleteUserMutation.mutateAsync(user.id);
-            toast.success(`用户 "${user.name}" 已删除`);
+            toast.success(t('user.deleteSuccess', { name: user.name }));
         } catch (error: any) {
-            toast.error(error.response?.data?.message || '用户删除失败，请重试');
+            toast.error(error.response?.data?.message || t('user.deleteError'));
         }
     };
 
@@ -161,9 +163,10 @@ export default function UsersPage() {
                 update: updateRequest
             });
 
-            toast.success(`用户 "${user.name}" 已${user.is_active ? '禁用' : '启用'}`);
+            const statusText = user.is_active ? t('user.disabled') : t('user.enabled');
+            toast.success(t('user.statusUpdateSuccess', { name: user.name, status: statusText }));
         } catch (error: any) {
-            toast.error(error.response?.data?.message || '用户状态更新失败，请重试');
+            toast.error(error.response?.data?.message || t('user.statusUpdateError'));
         }
     };
 

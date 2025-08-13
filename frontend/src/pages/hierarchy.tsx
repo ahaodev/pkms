@@ -18,14 +18,16 @@ import {iconOptions} from '@/lib/utils';
 import {useHierarchyDialogs} from '@/hooks/use-hierarchy-dialogs';
 import {useHierarchyNavigation} from '@/hooks/use-hierarchy-navigation';
 import {PageHeader} from "@/components/ui";
+import {useI18n} from "@/contexts/i18n-context";
 
 export default function HierarchyPage() {
+    const {t} = useI18n();
     const navigation = useHierarchyNavigation();
     const dialogs = useHierarchyDialogs();
 
     return (
         <div className="space-y-6">
-            <PageHeader title="项目&包管理" description="管理项目和包发布资源"></PageHeader>
+            <PageHeader title={t("project.management")} description={t("project.managementDescription")}></PageHeader>
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                 <Input
@@ -40,7 +42,7 @@ export default function HierarchyPage() {
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <BreadcrumbLink href="#" onClick={navigation.resetToProjects}>
-                            项目
+                            {t("project.title")}
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     {navigation.selectedProject && (
@@ -97,7 +99,7 @@ export default function HierarchyPage() {
                 open={dialogs.dialogs.createProject}
                 onClose={() => dialogs.closeDialog('createProject')}
                 onSubmit={dialogs.handleCreateProject}
-                title="创建新项目"
+                title={t("project.createNew")}
                 formData={dialogs.projectFormData}
                 setFormData={dialogs.setProjectFormData}
                 iconOptions={iconOptions}
@@ -108,7 +110,7 @@ export default function HierarchyPage() {
                 open={dialogs.dialogs.editProject}
                 onClose={() => dialogs.closeDialog('editProject')}
                 onSubmit={dialogs.handleUpdateProject}
-                title="编辑项目"
+                title={t("project.editProject")}
                 isEdit={true}
                 formData={dialogs.projectFormData}
                 setFormData={dialogs.setProjectFormData}

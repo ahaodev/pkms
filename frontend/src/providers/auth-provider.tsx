@@ -45,24 +45,19 @@ export function AuthProvider({children}: { children: ReactNode }) {
 
     const loadUserPermissions = async () => {
         if (!user?.id) {
-            console.log('No user ID, clearing permissions');
             setUserPermissions(null);
             return;
         }
 
-        console.log('Loading permissions for user:', user.id, 'name:', user.name);
         try {
             const permissionsResp = await authAPI.getUserPermissions(user.id);
-            console.log('Permissions API response:', permissionsResp);
             if (permissionsResp.code === 0) {
-                console.log('Setting user permissions:', permissionsResp.data);
                 setUserPermissions(permissionsResp.data);
             } else {
-                console.error('Permissions API returned error code:', permissionsResp.code);
                 setUserPermissions(null);
             }
         } catch (error) {
-            console.error('Failed to load user permissions:', error);
+            console.error(error)
             setUserPermissions(null);
         }
     };
@@ -80,7 +75,6 @@ export function AuthProvider({children}: { children: ReactNode }) {
             }
             try {
                 const resp = await authAPI.validateToken();
-                console.log('validateToken resp:', resp);
                 if (resp.code === 0 && resp.data) {
                     // profile data should contain user info
                     const user: User = {
@@ -100,7 +94,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     await selectTenant(null);
                 }
             } catch (e) {
-                console.log('validateToken error:', e);
+                console.error(e);
                 setUser(null);
                 setTenants(null);
                 await selectTenant(null);
@@ -145,7 +139,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
 
             return false;
         } catch (e) {
-            console.log(e);
+            console.error(e);
             // 重新抛出错误，让上层能够获取具体的错误信息
             throw e;
         } finally {
@@ -192,7 +186,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
                 <div className="flex items-center justify-center h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-2 text-muted-foreground">加载中...</p>
+                        <p className="mt-2 text-muted-foreground">Loading...</p>
                     </div>
                 </div>
             </AuthContext.Provider>

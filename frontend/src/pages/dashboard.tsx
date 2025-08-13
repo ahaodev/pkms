@@ -5,6 +5,7 @@ import {useProjects} from '@/hooks/use-projects';
 import {RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
 import {PageHeader} from "@/components/ui";
 import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
+import {useI18n} from "@/contexts/i18n-context";
 
 /**
  * 仪表板页：展示项目、包、上传、下载等核心统计信息和最近动态
@@ -12,6 +13,7 @@ import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const {t} = useI18n();
     const {data: projects, isLoading: projectsLoading} = useProjects();
     const {stats, activities, isLoading: dashboardLoading, error: dashboardError} = useDashboardData();
 
@@ -41,8 +43,8 @@ export default function Dashboard() {
         <div className="space-y-6">
             {/* 页面头部 */}
             <PageHeader
-                title="概览"
-                description="包管理系统概览"
+                title={t("dashboard.title")}
+                description={t("dashboard.description")}
             />
 
             {/* 统计卡片 */}

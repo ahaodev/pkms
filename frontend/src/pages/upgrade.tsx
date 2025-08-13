@@ -15,8 +15,10 @@ import {
 } from '@/lib/api/upgrade';
 import {PageHeader} from "@/components/ui";
 import {Plus} from "lucide-react";
+import {useI18n} from '@/contexts/i18n-context';
 
 export default function UpgradePage() {
+    const {t} = useI18n();
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedTarget, setSelectedTarget] = useState<UpgradeTarget | null>(null);
@@ -59,8 +61,8 @@ export default function UpgradePage() {
     // Handle query error
     useEffect(() => {
         if (error) {
-            console.error('获取升级目标失败:', error);
-            const errorMessage = (error as any)?.response?.data?.msg || (error as any)?.message || '获取升级目标失败';
+            console.error(error);
+            const errorMessage = (error as any)?.response?.data?.msg || (error as any)?.message || t('upgrade.fetchError');
             toast.error(errorMessage);
         }
     }, [error]);
@@ -96,11 +98,11 @@ export default function UpgradePage() {
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
             setIsCreateDialogOpen(false);
             resetForm();
-            toast.success('升级目标创建成功');
+            toast.success(t('upgrade.createSuccess'));
         },
         onError: (err: any) => {
             console.error(err);
-            const errorMessage = err?.response?.data?.msg || err?.message || '创建失败';
+            const errorMessage = err?.response?.data?.msg || err?.message || t('upgrade.createError');
             toast.error(errorMessage);
         }
     });
@@ -114,11 +116,11 @@ export default function UpgradePage() {
             setIsEditDialogOpen(false);
             setSelectedTarget(null);
             resetEditForm();
-            toast.success('升级目标更新成功');
+            toast.success(t('upgrade.updateSuccess'));
         },
         onError: (error: any) => {
             console.error(error);
-            const errorMessage = error?.response?.data?.msg || error?.message || '更新失败';
+            const errorMessage = error?.response?.data?.msg || error?.message || t('upgrade.updateError');
             toast.error(errorMessage);
         }
     });
@@ -164,10 +166,10 @@ export default function UpgradePage() {
         <div className="space-y-6">
             {/* Header */}
             <PageHeader
-                title="升级管理"
-                description="管理软件包的升级目标，为客户端提供版本检查和下载服务"
+                title={t('upgrade.title')}
+                description={t('upgrade.description')}
                 action={{
-                    label: "创建升级目标",
+                    label: t('upgrade.createTarget'),
                     onClick: () => {
                         setIsCreateDialogOpen(true)
                     },
@@ -180,7 +182,7 @@ export default function UpgradePage() {
                 projectFilter={projectFilter}
                 packageFilter={packageFilter}
                 totalCount={totalTargets}
-                countLabel="个升级目标"
+                countLabel={t('upgrade.targetsCount')}
                 projects={projects}
                 packages={packages}
                 onProjectFilterChange={setProjectFilter}

@@ -4,6 +4,7 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback} from '@/components/ui/avatar';
 import {RecentActivity} from '@/lib/api/dashboard';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface RecentActivitiesProps {
     activities?: RecentActivity[];
@@ -49,7 +50,7 @@ const formatActivityType = (type: string) => {
     }
 };
 
-const formatRelativeTime = (dateString: string) => {
+const formatRelativeTime = (dateString: string, t: (key: string) => string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
@@ -58,26 +59,27 @@ const formatRelativeTime = (dateString: string) => {
     const diffInDays = Math.floor(diffInHours / 24);
 
     if (diffInMinutes < 1) {
-        return '刚刚';
+        return t('dashboard.justNow');
     } else if (diffInMinutes < 60) {
-        return `${diffInMinutes}分钟前`;
+        return `${diffInMinutes}${t('dashboard.minutesAgo')}`;
     } else if (diffInHours < 24) {
-        return `${diffInHours}小时前`;
+        return `${diffInHours}${t('dashboard.hoursAgo')}`;
     } else if (diffInDays < 7) {
-        return `${diffInDays}天前`;
+        return `${diffInDays}${t('dashboard.daysAgo')}`;
     } else {
-        return date.toLocaleDateString('zh-CN');
+        return date.toLocaleDateString();
     }
 };
 
 export function RecentActivities({activities, isLoading}: RecentActivitiesProps) {
+    const {t} = useI18n();
     if (isLoading) {
         return (
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="h-5 w-5"/>
-                        最近活动
+                        {t("dashboard.recentActivities")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -103,14 +105,14 @@ export function RecentActivities({activities, isLoading}: RecentActivitiesProps)
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="h-5 w-5"/>
-                        最近活动
+                        {t("dashboard.recentActivities")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <EmptyList
                         icon={Clock}
-                        title="暂无活动记录"
-                        description="最近没有任何系统活动"
+                        title={t("dashboard.noActivitiesTitle")}
+                        description={t("dashboard.noActivitiesDesc")}
                     />
                 </CardContent>
             </Card>
@@ -140,7 +142,7 @@ export function RecentActivities({activities, isLoading}: RecentActivitiesProps)
                                         {formatActivityType(activity.type)}
                                     </Badge>
                                     <span className="text-xs text-muted-foreground">
-                    {formatRelativeTime(activity.created_at)}
+                    {formatRelativeTime(activity.created_at, t)}
                   </span>
                                 </div>
 

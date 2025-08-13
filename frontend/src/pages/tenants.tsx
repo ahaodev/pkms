@@ -4,8 +4,10 @@ import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/h
 import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 import {CustomSkeleton} from '@/components/custom-skeleton';
+import {useI18n} from '@/contexts/i18n-context';
 
 export default function TenantsPage() {
+    const {t} = useI18n();
     const {data: tenants, isLoading} = useTenants();
     const createTenantMutation = useCreateTenant();
     const updateTenantMutation = useUpdateTenant();
@@ -29,17 +31,17 @@ export default function TenantsPage() {
 
     const handleCreateTenant = async () => {
         if (!tenantName.trim()) {
-            toast.error('租户名称为必填项');
+            toast.error(t('tenant.nameRequired'));
             return;
         }
 
         try {
             await createTenantMutation.mutateAsync({ name: tenantName });
-            toast.success(`租户 "${tenantName}" 已创建`);
+            toast.success(t('tenant.createSuccess', { name: tenantName }));
             setIsCreateDialogOpen(false);
             setTenantName('');
         } catch {
-            toast.error('租户创建失败，请重试');
+            toast.error(t('tenant.createError'));
         }
     };
 
@@ -51,7 +53,7 @@ export default function TenantsPage() {
 
     const handleUpdateTenant = async () => {
         if (!editingTenant || !tenantName.trim()) {
-            toast.error('租户名称为必填项');
+            toast.error(t('tenant.nameRequired'));
             return;
         }
 
@@ -60,23 +62,23 @@ export default function TenantsPage() {
                 id: editingTenant.id,
                 update: { name: tenantName }
             });
-            toast.success(`租户 "${tenantName}" 已更新`);
+            toast.success(t('tenant.updateSuccess', { name: tenantName }));
             setIsEditDialogOpen(false);
             setEditingTenant(null);
             setTenantName('');
         } catch {
-            toast.error('租户更新失败，请重试');
+            toast.error(t('tenant.updateError'));
         }
     };
 
     const handleDeleteTenant = async (tenant: Tenant) => {
-        if (!confirm(`确定要删除租户 "${tenant.name}" 吗？此操作无法撤销。`)) return;
+        if (!confirm(t('tenant.deleteConfirm', { name: tenant.name }))) return;
 
         try {
             await deleteTenantMutation.mutateAsync(tenant.id);
-            toast.success(`租户 "${tenant.name}" 已删除`);
+            toast.success(t('tenant.deleteSuccess', { name: tenant.name }));
         } catch {
-            toast.error('租户删除失败，请重试');
+            toast.error(t('tenant.deleteError'));
         }
     };
 
@@ -107,7 +109,7 @@ export default function TenantsPage() {
                 open={isCreateDialogOpen}
                 onClose={closeDialogs}
                 onSubmit={handleCreateTenant}
-                title="创建新租户"
+                title={t('tenant.create')}
                 tenantForm={{ name: tenantName }}
                 updateTenantForm={(updates) => setTenantName(updates.name || '')}
             />
@@ -116,7 +118,7 @@ export default function TenantsPage() {
                 open={isEditDialogOpen}
                 onClose={closeDialogs}
                 onSubmit={handleUpdateTenant}
-                title="编辑租户"
+                title={t('tenant.edit')}
                 isEdit={true}
                 tenantForm={{ name: tenantName }}
                 updateTenantForm={(updates) => setTenantName(updates.name || '')}
