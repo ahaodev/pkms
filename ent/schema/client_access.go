@@ -34,7 +34,7 @@ func (ClientAccess) Fields() []ent.Field {
 			Comment("关联的包ID"),
 		field.String("access_token").
 			Unique().
-			Comment("客户端访问令牌，64字符十六进制字符串"),
+			Comment("客户端访问令牌"),
 		field.String("name").
 			MaxLen(255).
 			Comment("客户端名称/描述"),

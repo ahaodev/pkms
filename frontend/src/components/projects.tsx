@@ -2,9 +2,10 @@ import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {EmptyList} from '@/components/ui/empty-list';
-import {Building2, ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
+import {ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
 import {useDeleteProject} from '@/hooks/use-projects';
 import {toast} from 'sonner';
+import {getProjectIcon} from '@/lib/utils';
 
 
 interface ProjectsViewProps {
@@ -74,7 +75,7 @@ export function Projects({
                         <div onClick={() => handleProjectSelect(project.id)}>
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-3">
-                                    <Building2 className="h-5 w-5"/>
+                                    {getProjectIcon(project.icon || 'package2', "h-5 w-5")}
                                     <span>{project.name}</span>
                                     <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
                                 </CardTitle>
