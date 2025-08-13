@@ -11,21 +11,18 @@ const (
 
 // 侧边栏权限（保持原有，但简化检查逻辑）
 const (
-	SidebarDashboard   = "dashboard"
-	SidebarProjects    = "projects"
-	SidebarTenants     = "tenants"
-	SidebarUsers       = "users"
-	SidebarPermissions = "permissions"
-	SidebarSettings    = "settings"
-	SidebarUpgrade     = "upgrade"
-	ClientAccess       = "access-manager"
-	ShareManager       = "shares"
+	SidebarDashboard = "dashboard"
+	SidebarProjects  = "projects"
+	SidebarSettings  = "settings"
+	SidebarUpgrade   = "upgrade"
+	ClientAccess     = "access-manager"
+	ShareManager     = "shares"
 )
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarTenants, SidebarUsers, SidebarPermissions, SidebarSettings, ShareManager, SidebarUpgrade, ClientAccess}
+var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarSettings, ShareManager, SidebarUpgrade, ClientAccess}
 
 // var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
-var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
-var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarSettings}
+var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
+var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var VIEWER_SIDEBAR = []string{SidebarDashboard, SidebarProjects}
 var DEFAULT_SIDEBAR = []string{}
