@@ -1,4 +1,5 @@
 import React from 'react';
+import { useI18n } from '@/contexts/i18n-context';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Badge} from '@/components/ui/badge';
@@ -18,17 +19,19 @@ const UserPermissionsDialog: React.FC<UserPermissionsDialogProps> = ({
                                                                          userPermissions,
                                                                          selectedUserId
                                                                      }) => {
+    const { t } = useI18n();
+    
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
-                    <DialogTitle>用户权限详情 - {selectedUserId}</DialogTitle>
+                    <DialogTitle>{t('user.permissionDetails')} - {selectedUserId}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                     {userPermissions.map((permission, index) => (
                         <div key={index} className="space-y-4">
                             <div>
-                                <h4 className="font-semibold mb-2">用户角色</h4>
+                                <h4 className="font-semibold mb-2">{t('user.userRoles')}</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {permission.roles.map((role, roleIndex) => (
                                         <Badge key={roleIndex} variant="secondary">
@@ -39,13 +42,13 @@ const UserPermissionsDialog: React.FC<UserPermissionsDialogProps> = ({
                             </div>
                             <Separator/>
                             <div>
-                                <h4 className="font-semibold mb-2">权限列表</h4>
+                                <h4 className="font-semibold mb-2">{t('permission.permissionList')}</h4>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>主体</TableHead>
-                                            <TableHead>对象</TableHead>
-                                            <TableHead>操作</TableHead>
+                                            <TableHead>{t('permission.subject')}</TableHead>
+                                            <TableHead>{t('permission.object')}</TableHead>
+                                            <TableHead>{t('permission.action')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>

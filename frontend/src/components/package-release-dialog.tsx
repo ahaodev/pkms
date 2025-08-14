@@ -18,6 +18,7 @@ import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
 import {formatFileSize} from '@/lib/utils';
 import {uploadRelease} from '@/lib/api/packages';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface PackageReleaseDialogProps {
     open: boolean;
@@ -35,6 +36,7 @@ export function PackageReleaseDialog({
                                          packageId,
                                          packageType
                                      }: PackageReleaseDialogProps) {
+    const { t } = useI18n();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -94,7 +96,7 @@ export function PackageReleaseDialog({
                 setUploadProgress(progress);
             });
 
-            toast.success(`版本 "${formData.version_name}" 已成功发布`);
+            toast.success(t('release.publishSuccess', { version: formData.version_name }));
 
             // 重置表单
             resetForm();
@@ -102,7 +104,7 @@ export function PackageReleaseDialog({
             onClose();
         } catch (error: any) {
             console.error('Upload failed:', error);
-            toast.error(error.response?.data?.message || error.message || '发布失败，请重试');
+            toast.error(error.response?.data?.message || error.message || t('release.publishError'));
         } finally {
             setIsUploading(false);
             setUploadProgress(null);
@@ -131,14 +133,14 @@ export function PackageReleaseDialog({
         <Dialog open={open} onOpenChange={handleClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>发布新版本</DialogTitle>
+                    <DialogTitle>{t('release.title')}</DialogTitle>
                     <DialogDescription>
-                        上传一个新的软件包版本。
+                        {t('release.description')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label htmlFor="file">文件</Label>
+                        <Label htmlFor="file">{t('release.file')}</Label>
                         <Input
                             id="file"
                             type="file"
@@ -185,7 +187,7 @@ export function PackageReleaseDialog({
                         </Select>
                     </div>
                     <div>
-                        <Label htmlFor="versionName">版本名称</Label>
+                        <Label htmlFor="versionName">{t('release.versionName')}</Label>
                         <Input
                             id="versionName"
                             value={formData.version_name}
@@ -195,7 +197,7 @@ export function PackageReleaseDialog({
                         />
                     </div>
                     <div>
-                        <Label htmlFor="versionCode">版本号</Label>
+                        <Label htmlFor="versionCode">{t('release.versionCode')}</Label>
                         <Input
                             id="versionCode"
                             value={formData.version_code}
@@ -206,19 +208,19 @@ export function PackageReleaseDialog({
                     </div>
 
                     <div>
-                        <Label htmlFor="changelog">更新日志</Label>
+                        <Label htmlFor="changelog">{t('release.changelog')}</Label>
                         <Textarea
                             id="changelog"
                             value={formData.changelog}
                             onChange={(e) => setFormData({...formData, changelog: e.target.value})}
-                            placeholder="此版本的更新内容"
+                            placeholder={t('release.changelogPlaceholder')}
                             disabled={isUploading}
                         />
                     </div>
 
                     {uploadProgress && (
                         <div>
-                            <Label>上传进度</Label>
+                            <Label>{t('release.uploadProgress')}</Label>
                             <Progress value={uploadProgress.percentage} className="mt-2"/>
                             <p className="text-sm text-muted-foreground mt-1">
                                 {uploadProgress.percentage.toFixed(1)}%
@@ -229,13 +231,13 @@ export function PackageReleaseDialog({
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose} disabled={isUploading}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         onClick={handleUpload}
                         disabled={!selectedFile || !formData.version_code || !formData.version_name || isUploading}
                     >
-                        {isUploading ? '上传中...' : '发布'}
+                        {isUploading ? t('release.uploading') : t('release.publish')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

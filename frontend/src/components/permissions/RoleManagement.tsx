@@ -1,4 +1,5 @@
 import React, {useCallback, useMemo} from 'react';
+import { useI18n } from '@/contexts/i18n-context';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
@@ -81,6 +82,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
     actions,
     onRefresh
 }) => {
+    const { t } = useI18n();
     const {data: tenants = []} = useTenants();
     const {rolePermissions} = usePermissionOperations();
     const [showAddDialog, setShowAddDialog] = React.useState(false);
@@ -115,7 +117,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
     const handleAdd = useCallback(async () => {
         const validation = validateRolePermissionForm(formData);
         if (!validation.isValid) {
-            setFormError('请填写所有必填字段');
+            setFormError(t('validation.required'));
             return;
         }
 
@@ -127,11 +129,11 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                 setShowAddDialog(false);
                 resetForm();
             } else {
-                setFormError('分配权限失败，请重试');
+                setFormError(t('permission.assignFailed'));
             }
         } catch (error) {
             console.error('Failed to add role permission:', error);
-            setFormError('分配权限失败，请检查网络连接');
+            setFormError(t('permission.assignNetworkError'));
         } finally {
             setFormLoading(false);
         }
@@ -144,7 +146,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
             await rolePermissions.remove(role, domain, object, action, onRefresh);
         } catch (error) {
             console.error('Failed to remove role permission:', error);
-            setFormError('删除权限失败，请重试');
+            setFormError(t('permission.removeFailed'));
         } finally {
             setFormLoading(false);
         }
@@ -170,22 +172,22 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                     <div className="flex justify-between items-center">
                         <CardTitle className="flex items-center gap-2">
                             <Key className="w-5 h-5"/>
-                            角色权限管理
+                            {t('permission.roleManagement')}
                         </CardTitle>
                         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                             <DialogTrigger asChild>
                                 <Button>
                                     <Plus className="w-4 h-4 mr-2"/>
-                                    为角色分配权限
+                                    {t('permission.assignToRole')}
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>为角色分配权限</DialogTitle>
+                                    <DialogTitle>{t('permission.assignToRole')}</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="tenant">租户 *</Label>
+                                        <Label htmlFor="tenant">{t('tenant.name')} *</Label>
                                         <Select
                                             value={formData.tenant}
                                             onValueChange={useCallback((value: string) => {
@@ -193,7 +195,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                             }, [updateField])}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="选择租户"/>
+                                                <SelectValue placeholder={t('permission.selectTenant')}/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {tenants.map(tenant => (
@@ -205,7 +207,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="role">角色 *</Label>
+                                        <Label htmlFor="role">{t('user.role')} *</Label>
                                         <Select
                                             value={formData.role}
                                             onValueChange={useCallback((value: string) => {
@@ -217,7 +219,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                                     {formData.role ? (
                                                         <span>{getRoleDisplayName(formData.role)} ({formData.role})</span>
                                                     ) : (
-                                                        "选择角色"
+                                                        t('permission.selectRole')
                                                     )}
                                                 </SelectValue>
                                             </SelectTrigger>
@@ -231,7 +233,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="object">资源对象 *</Label>
+                                        <Label htmlFor="object">{t('permission.resourceObject')} *</Label>
                                         <Select
                                             value={formData.object}
                                             onValueChange={useCallback((value: string) => {
@@ -243,7 +245,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                                     {formData.object ? (
                                                         <span>{getObjectDisplayName(formData.object)} ({formData.object})</span>
                                                     ) : (
-                                                        "选择资源对象"
+                                                        t('permission.selectResource')
                                                     )}
                                                 </SelectValue>
                                             </SelectTrigger>
@@ -257,7 +259,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="action">操作权限 *</Label>
+                                        <Label htmlFor="action">{t('permission.actionPermission')} *</Label>
                                         <Select
                                             value={formData.action}
                                             onValueChange={useCallback((value: string) => {
@@ -269,7 +271,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                                     {formData.action ? (
                                                         <span>{getActionDisplayName(formData.action)} ({formData.action})</span>
                                                     ) : (
-                                                        "选择操作权限"
+                                                        t('permission.selectAction')
                                                     )}
                                                 </SelectValue>
                                             </SelectTrigger>
@@ -293,7 +295,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                             className="flex-1"
                                             disabled={isLoading}
                                         >
-                                            {isLoading ? '分配中...' : '分配权限'}
+                                            {isLoading ? t('permission.assigning') : t('permission.assignPermission')}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -304,7 +306,7 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                             className="flex-1"
                                             disabled={isLoading}
                                         >
-                                            取消
+                                            {t('common.cancel')}
                                         </Button>
                                     </div>
                                 </div>
@@ -317,8 +319,8 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                         {Object.keys(groupedPolicies).length === 0 ? (
                             <EmptyList
                                 icon={Key}
-                                title="暂无角色权限配置"
-                                description="开始为角色分配权限来管理系统访问控制"
+                                title={t('permission.noRolePermissions')}
+                                description={t('permission.noRolePermissionsDescription')}
                             />
                         ) : (
                             Object.entries(groupedPolicies).map(([tenantId, policies]) => {
@@ -327,17 +329,17 @@ const RoleManagement: React.FC<RoleManagementProps> = React.memo(({
                                     <div key={tenantId} className="space-y-4">
                                         <div className="flex items-center gap-2">
                                             <Badge variant="outline" className="text-sm font-medium">
-                                                租户: {tenant?.name || tenantId}
+                                                {t('tenant.name')}: {tenant?.name || tenantId}
                                             </Badge>
                                             <div className="h-px bg-border flex-1"></div>
                                         </div>
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead>角色</TableHead>
-                                                    <TableHead>资源对象</TableHead>
-                                                    <TableHead>操作权限</TableHead>
-                                                    <TableHead>操作</TableHead>
+                                                    <TableHead>{t('user.role')}</TableHead>
+                                                    <TableHead>{t('permission.resourceObject')}</TableHead>
+                                                    <TableHead>{t('permission.actionPermission')}</TableHead>
+                                                    <TableHead>{t('common.actions')}</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>

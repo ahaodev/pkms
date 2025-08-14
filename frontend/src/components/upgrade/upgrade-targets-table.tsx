@@ -11,6 +11,7 @@ import {toast} from 'sonner';
 import {formatFileSize} from '@/lib/utils';
 import {deleteUpgradeTarget, updateUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';
 import {CustomSkeleton} from '@/components/custom-skeleton';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface UpgradeTargetsTableProps {
     upgradeTargets: UpgradeTarget[];
@@ -23,6 +24,7 @@ export function UpgradeTargetsTable({
     isLoading,
     onEdit
 }: UpgradeTargetsTableProps) {
+    const { t } = useI18n();
     const queryClient = useQueryClient();
 
     // Backend now handles sorting by created_at DESC, no need for client-side sorting
@@ -33,13 +35,13 @@ export function UpgradeTargetsTable({
         mutationFn: deleteUpgradeTarget,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
-            toast.success('升级目标删除成功');
+            toast.success(t('upgrade.deleteSuccess'));
         },
         onError: (error: any) => {
             console.error(error);
             // 提取后端返回的具体错误消息
-            const errorMessage = error?.response?.data?.msg || error?.message || '未知错误';
-            toast.error(`删除失败: ${errorMessage}`);
+            const errorMessage = error?.response?.data?.msg || error?.message || t('common.error');
+            toast.error(`${t('common.deleteError')}: ${errorMessage}`);
         }
     });
 
@@ -49,13 +51,13 @@ export function UpgradeTargetsTable({
             updateUpgradeTarget(id, { is_active }),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['upgrade-targets']});
-            toast.success('状态更新成功');
+            toast.success(t('upgrade.statusUpdateSuccess'));
         },
         onError: (error: any) => {
             console.error(error);
             // 提取后端返回的具体错误消息
-            const errorMessage = error?.response?.data?.msg || error?.message || '未知错误';
-            toast.error(`状态更新失败: ${errorMessage}`);
+            const errorMessage = error?.response?.data?.msg || error?.message || t('common.error');
+            toast.error(`${t('upgrade.statusUpdateError')}: ${errorMessage}`);
         }
     });
 
@@ -96,10 +98,10 @@ export function UpgradeTargetsTable({
     }, [upgradeTargets, toggleActiveMutation]);
 
     const handleDelete = useCallback((id: string) => {
-        if (confirm('确定要删除此升级目标吗？')) {
+        if (confirm(t('upgrade.deleteConfirm'))) {
             deleteUpgradeTargetMutation.mutate(id);
         }
-    }, [deleteUpgradeTargetMutation]);
+    }, [deleteUpgradeTargetMutation, t]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString('zh-CN');
@@ -113,10 +115,10 @@ export function UpgradeTargetsTable({
         return (
             <EmptyList
                 icon={Target}
-                title={upgradeTargets.length === 0 ? '暂无升级目标' : '没有符合筛选条件的升级目标'}
+                title={upgradeTargets.length === 0 ? t('upgrade.noTargets') : t('upgrade.noFilteredTargets')}
                 description={upgradeTargets.length === 0 
-                    ? '点击"创建升级目标"开始配置软件包升级'
-                    : '尝试调整筛选条件或创建新的升级目标'
+                    ? t('upgrade.createFirstTarget')
+                    : t('upgrade.adjustFilters')
                 }
             />
         );
@@ -128,14 +130,14 @@ export function UpgradeTargetsTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>项目</TableHead>
-                            <TableHead>包</TableHead>
-                            <TableHead>目标版本</TableHead>
-                            <TableHead>升级目标</TableHead>
-                            <TableHead>文件大小</TableHead>
-                            <TableHead>创建时间</TableHead>
-                            <TableHead>状态</TableHead>
-                            <TableHead className="text-right">操作</TableHead>
+                            <TableHead>{t('project.title')}</TableHead>
+                            <TableHead>{t('package.title')}</TableHead>
+                            <TableHead>{t('upgrade.targetVersion')}</TableHead>
+                            <TableHead>{t('upgrade.target')}</TableHead>
+                            <TableHead>{t('release.size')}</TableHead>
+                            <TableHead>{t('common.createdAt')}</TableHead>
+                            <TableHead>{t('common.status')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -205,7 +207,7 @@ export function UpgradeTargetsTable({
                                             ) : (
                                                 <XCircle className="h-3 w-3"/>
                                             )}
-                                            <span>{target.is_active ? '激活' : '未激活'}</span>
+                                            <span>{target.is_active ? t('upgrade.active') : t('upgrade.inactive')}</span>
                                         </Badge>
                                         <Switch
                                             checked={target.is_active}
@@ -229,7 +231,7 @@ export function UpgradeTargetsTable({
                                             size="sm"
                                             onClick={() => handleDelete(target.id)}
                                             disabled={target.is_active}
-                                            title={target.is_active ? '激活状态的升级目标不能删除' : '删除升级目标'}
+                                            title={target.is_active ? t('upgrade.cannotDeleteActive') : t('upgrade.deleteTarget')}
                                         >
                                             <Trash2 className="h-4 w-4"/>
                                         </Button>

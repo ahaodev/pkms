@@ -3,6 +3,7 @@ import { User } from '@/types/user';
 import { Project } from '@/types/project';
 import { Group } from '@/types/group';
 import { EmptyList } from '@/components/ui/empty-list';
+import { useI18n } from '@/contexts/i18n-context';
 import {
     Table,
     TableBody,
@@ -37,12 +38,14 @@ export function UserList({
   onDelete, 
   onToggleStatus 
 }: UserListProps) {
+  const { t } = useI18n();
+  
   if (users.length === 0) {
     return (
       <EmptyList
         icon={Users}
-        title="暂无用户"
-        description="开始创建第一个用户"
+        title={t('user.noUsers')}
+        description={t('user.createFirstUser')}
       />
     );
   }
@@ -52,11 +55,11 @@ export function UserList({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>用户名</TableHead>
-            <TableHead>状态</TableHead>
-            <TableHead>创建时间</TableHead>
-            <TableHead>更新时间</TableHead>
-            <TableHead className="text-right">操作</TableHead>
+            <TableHead>{t('user.name')}</TableHead>
+            <TableHead>{t('common.status')}</TableHead>
+            <TableHead>{t('common.createdAt')}</TableHead>
+            <TableHead>{t('common.updatedAt')}</TableHead>
+            <TableHead className="text-right">{t('common.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -68,7 +71,7 @@ export function UserList({
                   {user.name}
                   {user.id === currentUser?.id && (
                     <Badge variant="outline" className="text-xs">
-                      当前用户
+                      {t('user.currentUser')}
                     </Badge>
                   )}
                 </div>
@@ -84,7 +87,7 @@ export function UserList({
                     ) : (
                       <Ban className="h-3 w-3" />
                     )}
-                    {user.is_active ? '活跃' : '禁用'}
+                    {user.is_active ? t('user.active') : t('user.disabled')}
                   </div>
                 </Badge>
               </TableCell>
@@ -98,25 +101,25 @@ export function UserList({
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">打开菜单</span>
+                      <span className="sr-only">{t('common.openMenu')}</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onEdit(user)}>
                       <Edit className="mr-2 h-4 w-4" />
-                      编辑
+                      {t('common.edit')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onToggleStatus(user)}>
                       {user.is_active ? (
                         <>
                           <Ban className="mr-2 h-4 w-4" />
-                          禁用
+                          {t('user.disable')}
                         </>
                       ) : (
                         <>
                           <CheckCircle className="mr-2 h-4 w-4" />
-                          启用
+                          {t('user.enable')}
                         </>
                       )}
                     </DropdownMenuItem>
@@ -126,7 +129,7 @@ export function UserList({
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        删除
+                        {t('common.delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

@@ -9,6 +9,7 @@ import {useUsers} from '@/hooks/use-users';
 import {Tenant, TenantUser} from '@/types/tenant';
 import {User} from '@/types/user';
 import {TenantUsersList} from './tenant-users-list';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface TenantUsersDialogProps {
     open: boolean;
@@ -17,11 +18,12 @@ interface TenantUsersDialogProps {
 }
 
 const ROLES = [
-    {value: 'user', label: '读写', color: 'bg-green-100 text-green-800'},
-    {value: 'viewer', label: '只读', color: 'bg-gray-100 text-gray-800'},
+    {value: 'user', label: 'tenant.readWrite', color: 'bg-green-100 text-green-800'},
+    {value: 'viewer', label: 'tenant.readOnly', color: 'bg-gray-100 text-gray-800'},
 ];
 
 export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProps) {
+    const { t } = useI18n();
     const [showAddUser, setShowAddUser] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [selectedRole, setSelectedRole] = useState('user');
@@ -51,8 +53,8 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
 
     const handleAddUser = async () => {
         if (!tenant?.id || !selectedUserId) {
-            toast.error('请选择用户', {
-                description: '请选择要添加的用户。',
+            toast.error(t('tenant.selectUser'), {
+                description: t('tenant.selectUserDescription'),
             });
             return;
         }
@@ -64,15 +66,15 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                 role: selectedRole,
             });
 
-            toast.success('用户添加成功', {
-                description: '用户已成功添加到租户。',
+            toast.success(t('tenant.userAddedSuccess'), {
+                description: t('tenant.userAddedSuccessDescription'),
             });
 
             resetAddForm();
         } catch (error) {
             console.error(error);
-            toast.error('添加失败', {
-                description: '用户添加失败，请重试。',
+            toast.error(t('tenant.addFailed'), {
+                description: t('tenant.addFailedDescription'),
             });
         }
     };
@@ -86,10 +88,10 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Users className="h-5 w-5"/>
-                        租户用户管理 - {tenant.name}
+                        {t('tenant.userManagement')} - {tenant.name}
                     </DialogTitle>
                     <DialogDescription>
-                        管理租户中的用户及其角色权限
+                        {t('tenant.userManagementDescription')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -103,16 +105,16 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                                 variant="outline"
                             >
                                 <UserPlus className="h-4 w-4 mr-2"/>
-                                添加用户到租户
+                                {t('tenant.addUserToTenant')}
                             </Button>
                         ) : (
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm font-medium mb-2 block">选择用户</label>
+                                        <label className="text-sm font-medium mb-2 block">{t('tenant.selectUser')}</label>
                                         <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="请选择用户"/>
+                                                <SelectValue placeholder={t('tenant.selectUserPlaceholder')}/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {availableUsers.map((user: User) => (
@@ -124,7 +126,7 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                                         </Select>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium mb-2 block">选择角色</label>
+                                        <label className="text-sm font-medium mb-2 block">{t('tenant.selectRole')}</label>
                                         <Select value={selectedRole} onValueChange={setSelectedRole}>
                                             <SelectTrigger>
                                                 <SelectValue/>
@@ -132,7 +134,7 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                                             <SelectContent>
                                                 {ROLES.map((role) => (
                                                     <SelectItem key={role.value} value={role.value}>
-                                                        {role.label}
+                                                        {t(role.label)}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -144,10 +146,10 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
                                         onClick={handleAddUser}
                                         disabled={!selectedUserId || addUserMutation.isPending}
                                     >
-                                        {addUserMutation.isPending ? '添加中...' : '确认添加'}
+                                        {addUserMutation.isPending ? t('tenant.adding') : t('tenant.confirmAdd')}
                                     </Button>
                                     <Button variant="outline" onClick={resetAddForm}>
-                                        取消
+                                        {t('common.cancel')}
                                     </Button>
                                 </div>
                             </div>

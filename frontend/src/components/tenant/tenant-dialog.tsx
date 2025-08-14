@@ -10,6 +10,7 @@ import {
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Button} from '@/components/ui/button';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface TenantFormData {
     name: string;
@@ -34,6 +35,8 @@ export function TenantDialog({
                                  tenantForm,
                                  updateTenantForm
                              }: TenantDialogProps) {
+    const { t } = useI18n();
+    
     const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!isOpen) {
             onClose();
@@ -46,26 +49,26 @@ export function TenantDialog({
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>
-                        {isEdit ? '编辑租户信息' : '创建新租户'}
+                        {isEdit ? t('tenant.editTenantInfo') : t('tenant.createNewTenant')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label htmlFor="name">租户名称</Label>
+                        <Label htmlFor="name">{t('tenant.name')}</Label>
                         <Input
                             id="name"
                             value={tenantForm.name}
                             onChange={(e) => updateTenantForm({name: e.target.value})}
-                            placeholder="输入租户名称"
+                            placeholder={t('tenant.namePlaceholder')}
                         />
                     </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={onSubmit}>
-                        {isEdit ? '更新' : '创建'}
+                        {isEdit ? t('common.update') : t('common.create')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

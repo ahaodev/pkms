@@ -1,4 +1,5 @@
 import {memo} from 'react';
+import { useI18n } from '@/contexts/i18n-context';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -26,31 +27,33 @@ export const DeleteShareDialog = memo(function DeleteShareDialog({
     onClose,
     onConfirm,
 }: DeleteShareDialogProps) {
+    const { t } = useI18n();
+    
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>确认删除</AlertDialogTitle>
+                    <AlertDialogTitle>{t('share.confirmDelete')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        确定要删除这个分享链接吗？删除后，使用此链接的用户将无法再下载文件。
+                        {t('share.deleteShareWarning')}
                         {shareToDelete && (
                             <div className="mt-2 p-2 bg-muted rounded text-sm">
-                                <p><strong>项目:</strong> {shareToDelete.project_name}</p>
-                                <p><strong>包:</strong> {shareToDelete.package_name}</p>
-                                <p><strong>版本:</strong> {shareToDelete.version}</p>
-                                <p><strong>分享码:</strong> {shareToDelete.code}</p>
+                                <p><strong>{t('project.name')}:</strong> {shareToDelete.project_name}</p>
+                                <p><strong>{t('package.name')}:</strong> {shareToDelete.package_name}</p>
+                                <p><strong>{t('release.version')}:</strong> {shareToDelete.version}</p>
+                                <p><strong>{t('share.shareCode')}:</strong> {shareToDelete.code}</p>
                             </div>
                         )}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>取消</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isDeleting}>{t('common.cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         className="bg-red-600 hover:bg-red-700"
                         disabled={isDeleting}
                     >
-                        {isDeleting ? '删除中...' : '确认删除'}
+                        {isDeleting ? t('common.deleting') : t('share.confirmDelete')}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

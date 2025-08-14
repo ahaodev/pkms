@@ -5,6 +5,7 @@ import {Badge} from '@/components/ui/badge';
 import {Group} from '@/types/group';
 import {Project} from '@/types/project';
 import {User} from '@/types/user';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface UserCardProps {
     user: User;
@@ -23,6 +24,7 @@ export function UserCard({
                              onDelete,
                              onToggleStatus
                          }: UserCardProps) {
+    const { t } = useI18n();
     return (
         <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
@@ -40,7 +42,7 @@ export function UserCard({
                             size="sm"
                             onClick={() => onToggleStatus(user)}
                             disabled={user.id === currentUser?.id}
-                            title={user.is_active ? '禁用用户' : '启用用户'}
+                            title={user.is_active ? t('user.disableUser') : t('user.enableUser')}
                         >
                             {user.is_active ? <Eye className="h-4 w-4"/> : <EyeOff className="h-4 w-4"/>}
                         </Button>
@@ -48,7 +50,7 @@ export function UserCard({
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(user)}
-                            title="编辑用户"
+                            title={t('user.editUser')}
                         >
                             <Pencil className="h-4 w-4"/>
                         </Button>
@@ -57,7 +59,7 @@ export function UserCard({
                             size="sm"
                             onClick={() => onDelete(user)}
                             disabled={user.id === currentUser?.id}
-                            title="删除用户"
+                            title={t('user.deleteUser')}
                         >
                             <Trash2 className="h-4 w-4"/>
                         </Button>
@@ -67,17 +69,17 @@ export function UserCard({
             <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-2 mb-3">
                     <Badge variant="outline">
-                        用户
+                        {t('user.user')}
                     </Badge>
                     <Badge variant={user.is_active ? 'outline' : 'destructive'}>
-                        {user.is_active ? '启用' : '禁用'}
+                        {user.is_active ? t('user.enabled') : t('user.disabled')}
                     </Badge>
                     {user.id === currentUser?.id && (
-                        <Badge variant="secondary">当前用户</Badge>
+                        <Badge variant="secondary">{t('user.currentUser')}</Badge>
                     )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-2">
-                    创建于：{user.created_at.toLocaleDateString()}
+                    {t('user.createdAt')}：{user.created_at.toLocaleDateString()}
                 </div>
             </CardContent>
         </Card>

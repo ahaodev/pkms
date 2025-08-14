@@ -1,6 +1,7 @@
 import {Tenant} from '@/types/tenant';
 import {EmptyList} from '@/components/ui/empty-list';
 import {Building, Edit, Trash2, Users, MoreHorizontal} from 'lucide-react';
+import {useI18n} from '@/contexts/i18n-context';
 import {
     Table,
     TableBody,
@@ -30,12 +31,14 @@ export function TenantList({
                                onDelete,
                                onViewUsers
                            }: TenantListProps) {
+    const { t } = useI18n();
+    
     if (tenants.length === 0) {
         return (
             <EmptyList
                 icon={Building}
-                title="暂无租户"
-                description="开始创建第一个租户来管理用户和权限。"
+                title={t('tenant.noTenants')}
+                description={t('tenant.createFirstTenant')}
             />
         );
     }
@@ -45,10 +48,10 @@ export function TenantList({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>租户名称</TableHead>
-                        <TableHead>创建时间</TableHead>
-                        <TableHead>更新时间</TableHead>
-                        <TableHead className="text-right">操作</TableHead>
+                        <TableHead>{t('tenant.name')}</TableHead>
+                        <TableHead>{t('common.createdAt')}</TableHead>
+                        <TableHead>{t('common.updatedAt')}</TableHead>
+                        <TableHead className="text-right">{t('common.actions')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -70,25 +73,25 @@ export function TenantList({
                                 <DropdownMenu modal={false}>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <span className="sr-only">打开菜单</span>
+                                            <span className="sr-only">{t('common.openMenu')}</span>
                                             <MoreHorizontal className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem onClick={() => onViewUsers(tenant)}>
                                             <Users className="mr-2 h-4 w-4" />
-                                            查看用户
+                                            {t('tenant.viewUsers')}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => onEdit(tenant)}>
                                             <Edit className="mr-2 h-4 w-4" />
-                                            编辑
+                                            {t('common.edit')}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem 
                                             onClick={() => onDelete(tenant)}
                                             className="text-destructive focus:text-destructive"
                                         >
                                             <Trash2 className="mr-2 h-4 w-4" />
-                                            删除
+                                            {t('common.delete')}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

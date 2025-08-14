@@ -11,6 +11,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Textarea} from '@/components/ui/textarea';
 import {UpdateUpgradeTargetRequest} from '@/lib/api/upgrade';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface EditUpgradeTargetDialogProps {
     isOpen: boolean;
@@ -29,23 +30,24 @@ export function EditUpgradeTargetDialog({
                                             setFormData,
                                             isLoading
                                         }: EditUpgradeTargetDialogProps) {
+    const { t } = useI18n();
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>编辑升级目标</DialogTitle>
+                    <DialogTitle>{t('upgrade.editTarget')}</DialogTitle>
                     <DialogDescription>
-                        修改升级目标的名称和描述信息
+                        {t('upgrade.editTargetDescription')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     {/* Name */}
                     <div className="space-y-2">
-                        <Label htmlFor="name">升级目标名称</Label>
+                        <Label htmlFor="name">{t('upgrade.targetName')}</Label>
                         <Input
                             id="name"
-                            placeholder="输入升级目标名称"
+                            placeholder={t('upgrade.targetNamePlaceholder')}
                             value={formData.name || ''}
                             onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
                         />
@@ -53,10 +55,10 @@ export function EditUpgradeTargetDialog({
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <Label htmlFor="description">描述</Label>
+                        <Label htmlFor="description">{t('common.description')}</Label>
                         <Textarea
                             id="description"
-                            placeholder="描述此升级目标的用途..."
+                            placeholder={t('upgrade.descriptionPlaceholder')}
                             value={formData.description || ''}
                             onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                             rows={3}
@@ -67,10 +69,10 @@ export function EditUpgradeTargetDialog({
 
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={onSubmit} disabled={isLoading}>
-                        {isLoading ? '保存中...' : '保存'}
+                        {isLoading ? t('common.saving') : t('common.save')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -16,6 +16,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Package} from '@/types/package.ts';
 import {createPackage} from "@/lib/api";
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface PackageCreateDialogProps {
     open: boolean;
@@ -30,6 +31,7 @@ export function PackageCreateDialog({
                                         projectID,
                                         onSuccess
                                     }: PackageCreateDialogProps) {
+    const { t } = useI18n();
     const [formData, setFormData] = useState<{
         projectId: string;
         name: string;
@@ -65,16 +67,16 @@ export function PackageCreateDialog({
         createPackage(formData)
             .then(response => {
                 if (response.code == 0) {
-                    toast.success(`包 "${formData.name}" 已成功创建`);
+                    toast.success(t('package.createSuccess', { name: formData.name }));
                     handleClose();
                     // Call onSuccess callback to refresh the packages list
                     onSuccess?.();
                 } else {
-                    toast.error(response.msg || '创建失败，请稍后再试');
+                    toast.error(response.msg || t('package.createError'));
                 }
             }).catch(error => {
-            console.error('创建包失败:', error);
-            toast.error('包创建失败，请稍后再试');
+            console.error(t('package.createFailedLog'), error);
+            toast.error(t('package.createFailedError'));
         })
     }
 
@@ -82,24 +84,24 @@ export function PackageCreateDialog({
         <Dialog open={open} onOpenChange={handleClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>创建新包</DialogTitle>
+                    <DialogTitle>{t('package.create')}</DialogTitle>
                     <DialogDescription>
-                        上传一个新的软件包版本。
+                        {t('package.createDescription')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label htmlFor="name">包名称</Label>
+                        <Label htmlFor="name">{t('package.name')}</Label>
                         <Input
                             id="name"
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            placeholder="输入包名称"
+                            placeholder={t('package.namePlaceholder')}
                         />
                     </div>
 
                     <div>
-                        <Label htmlFor="type">程序类型</Label>
+                        <Label htmlFor="type">{t('package.type')}</Label>
                         <Select
                             value={formData.type}
                             onValueChange={(value: Package['type']) => setFormData({...formData, type: value})}
@@ -142,22 +144,22 @@ export function PackageCreateDialog({
                         </Select>
                     </div>
                     <div>
-                        <Label htmlFor="description">描述</Label>
+                        <Label htmlFor="description">{t('package.description')}</Label>
                         <Textarea
                             id="description"
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            placeholder="包描述"
+                            placeholder={t('package.descriptionPlaceholder')}
                         />
                     </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose} disabled={false}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={!formData.name || !formData.projectId || !formData.type}
                             onClick={handleCreate}>
-                        {'创建'}
+                        {t('common.create')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

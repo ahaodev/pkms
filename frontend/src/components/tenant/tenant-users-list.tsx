@@ -7,6 +7,7 @@ import {Badge} from '@/components/ui/badge';
 import {toast} from 'sonner';
 import {useRemoveUserFromTenant, useUpdateTenantUserRole} from '@/hooks/use-tenants';
 import {TenantUser} from '@/types/tenant';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface TenantUsersListProps {
     tenantId: string;
@@ -15,13 +16,14 @@ interface TenantUsersListProps {
 }
 
 const ROLES = [
-    {value: 'admin', label: '系统管理员', color: 'bg-red-100 text-red-800'},
-    {value: 'owner', label: '所有者', color: 'bg-blue-100 text-blue-800'},
-    {value: 'user', label: '读写', color: 'bg-green-100 text-green-800'},
-    {value: 'viewer', label: '只读', color: 'bg-gray-100 text-gray-800'},
+    {value: 'admin', label: 'user.admin', color: 'bg-red-100 text-red-800'},
+    {value: 'owner', label: 'tenant.owner', color: 'bg-blue-100 text-blue-800'},
+    {value: 'user', label: 'tenant.readWrite', color: 'bg-green-100 text-green-800'},
+    {value: 'viewer', label: 'tenant.readOnly', color: 'bg-gray-100 text-gray-800'},
 ];
 
 export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersListProps) {
+    const { t } = useI18n();
     const updateRoleMutation = useUpdateTenantUserRole();
     const removeUserMutation = useRemoveUserFromTenant();
 
@@ -34,19 +36,19 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                 isActive: true,
             });
 
-            toast.success('角色更新成功', {
-                description: '用户角色已更新。',
+            toast.success(t('tenant.roleUpdateSuccess'), {
+                description: t('tenant.roleUpdateSuccessDescription'),
             });
         } catch (error) {
             console.error(error);
-            toast.error('更新失败', {
-                description: '角色更新失败，请重试。',
+            toast.error(t('tenant.updateFailed'), {
+                description: t('tenant.roleUpdateFailedDescription'),
             });
         }
     };
 
     const handleRemoveUser = async (userId: string, userName: string) => {
-        if (!confirm(`确定要从租户中移除用户 "${userName}" 吗？`)) {
+        if (!confirm(t('tenant.removeUserConfirm', { userName }))) {
             return;
         }
 
@@ -56,13 +58,13 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                 userId,
             });
 
-            toast.success('用户移除成功', {
-                description: '用户已从租户中移除。',
+            toast.success(t('tenant.userRemoveSuccess'), {
+                description: t('tenant.userRemoveSuccessDescription'),
             });
         } catch (error) {
             console.error(error);
-            toast.error('移除失败', {
-                description: '用户移除失败，请重试。',
+            toast.error(t('tenant.removeFailed'), {
+                description: t('tenant.userRemoveFailedDescription'),
             });
         }
     };
@@ -73,7 +75,7 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                 <div className="flex items-center justify-center h-32">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-2 text-sm text-muted-foreground">加载用户列表...</p>
+                        <p className="mt-2 text-sm text-muted-foreground">{t('tenant.loadingUserList')}</p>
                     </div>
                 </div>
             </div>
@@ -84,8 +86,8 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
         return (
             <EmptyList
                 icon={Users}
-                title="暂无用户"
-                description="该租户还没有分配任何用户"
+                title={t('tenant.noUsers')}
+                description={t('tenant.noUsersDescription')}
                 className="border rounded-lg"
             />
         );
@@ -104,11 +106,11 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>用户名</TableHead>
-                        <TableHead>角色</TableHead>
-                        <TableHead>状态</TableHead>
-                        <TableHead>创建时间</TableHead>
-                        <TableHead className="text-right">操作</TableHead>
+                        <TableHead>{t('user.name')}</TableHead>
+                        <TableHead>{t('user.role')}</TableHead>
+                        <TableHead>{t('common.status')}</TableHead>
+                        <TableHead>{t('common.createdAt')}</TableHead>
+                        <TableHead className="text-right">{t('common.actions')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -123,7 +125,7 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                                     {isProtectedUser ? (
                                         <Badge
                                             className={isAdmin ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"}>
-                                            {isAdmin ? '系统管理员' : '所有者'}
+                                            {isAdmin ? t('user.admin') : t('tenant.owner')}
                                         </Badge>
                                     ) : (
                                         <Select
@@ -137,7 +139,7 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                                             <SelectContent>
                                                 {ROLES.filter(role => role.value !== 'admin' && role.value !== 'owner').map((role) => (
                                                     <SelectItem key={role.value} value={role.value}>
-                                                        {role.label}
+                                                        {t(role.label)}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -148,12 +150,12 @@ export function TenantUsersList({tenantId, tenantUsers, isLoading}: TenantUsersL
                                     {user.is_active ? (
                                         <Badge className="bg-green-100 text-green-800">
                                             <CheckCircle className="h-3 w-3 mr-1"/>
-                                            活跃
+                                            {t('tenant.active')}
                                         </Badge>
                                     ) : (
                                         <Badge className="bg-gray-100 text-gray-800">
                                             <XCircle className="h-3 w-3 mr-1"/>
-                                            禁用
+                                            {t('tenant.disabled')}
                                         </Badge>
                                     )}
                                 </TableCell>

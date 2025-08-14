@@ -9,12 +9,14 @@ import QRCode from 'qrcode';
 import type {ShareDialogProps} from '@/types';
 import {apiClient} from '@/lib/api/api';
 import {sharesApi} from '@/lib/api/shares';
+import {useI18n} from '@/contexts/i18n-context';
 
 /**
  * ShareDialog 组件：用于展示包的分享链接和二维码，支持复制和下载操作
  */
 
 export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, currentExpiryHours, onExpiryUpdated}: ShareDialogProps) {
+    const { t } = useI18n();
     const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
@@ -52,7 +54,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                 }
             })
                 .then(url => setQrCodeUrl(url))
-                .catch(err => console.error('生成二维码失败:', err));
+                .catch(err => console.error(t('share.qrCodeGenerateError'), err));
         }
     }, [fullShareUrl, isOpen]);
 
@@ -60,15 +62,15 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
         try {
             await navigator.clipboard.writeText(fullShareUrl);
             setCopied(true);
-            toast.success('链接已复制', {
-                description: '分享链接已复制到剪贴板。',
+            toast.success(t('share.copySuccess'), {
+                description: t('share.copySuccessDescription'),
             });
 
             // 2秒后重置复制状态
             setTimeout(() => setCopied(false), 2000);
         } catch {
-            toast.error('复制失败', {
-                description: '无法复制到剪贴板，请手动复制链接。',
+            toast.error(t('share.copyError'), {
+                description: t('share.copyErrorDescription'),
             });
         }
     };
@@ -106,8 +108,8 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                 expiry_hours: expiryHours
             });
 
-            const description = dateString ? `已设置为${dateString}到期` : '已设置为永久';
-            toast.success('过期时间已更新', {
+            const description = dateString ? t('share.expirySetTo', { date: dateString }) : t('share.expirySetToPermanent');
+            toast.success(t('share.expiryUpdated'), {
                 description,
             });
             
@@ -123,8 +125,8 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                 setSelectedExpiryDate('');
             }
             
-            const errorMessage = err.response?.data?.message || '更新失败，请稍后重试';
-            toast.error('更新过期时间失败', {
+            const errorMessage = err.response?.data?.message || t('share.updateError');
+            toast.error(t('share.expiryUpdateError'), {
                 description: errorMessage,
             });
         } finally {
@@ -147,7 +149,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
 
             // Check if response is actually HTML (indicates error)
             if (response.data.type === 'text/html') {
-                throw new Error('服务器返回了错误的内容类型，请检查分享链接是否有效');
+                throw new Error(t('share.invalidContentType'));
             }
 
             // Get filename from Content-Disposition header
@@ -174,12 +176,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
             link.remove();
             window.URL.revokeObjectURL(url);
 
-            toast.success('下载成功', {
-                description: '文件已开始下载',
+            toast.success(t('share.downloadSuccess'), {
+                description: t('share.downloadStarted'),
             });
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || '下载失败，请稍后重试';
-            toast.error('下载失败', {
+            const errorMessage = err.response?.data?.message || t('share.downloadError');
+            toast.error(t('share.downloadFailed'), {
                 description: errorMessage,
             });
         } finally {
@@ -197,17 +199,17 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                 <DialogHeader>
                     <DialogTitle className="flex items-center space-x-2">
                         <ExternalLink className="h-5 w-5"/>
-                        <span>分享包</span>
+                        <span>{t('share.sharePackage')}</span>
                     </DialogTitle>
                     <DialogDescription>
-                        分享 "{packageName}" 的下载链接
+                        {t('share.sharePackageDescription', { packageName })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-6">
                     {/* 下载链接 */}
                     <div className="space-y-2">
-                        <Label htmlFor="share-url">下载链接</Label>
+                        <Label htmlFor="share-url">{t('share.downloadLink')}</Label>
                         <div className="flex space-x-2">
                             <Input
                                 id="share-url"
@@ -242,12 +244,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                                 {showAdvanced ? (
                                     <>
                                         <ChevronUp className="h-4 w-4" />
-                                        收起高级设置
+                                        {t('share.hideAdvancedSettings')}
                                     </>
                                 ) : (
                                     <>
                                         <ChevronDown className="h-4 w-4" />
-                                        高级设置
+                                        {t('share.advancedSettings')}
                                     </>
                                 )}
                             </Button>
@@ -276,7 +278,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                                                 className="h-4 w-4"
                                             />
                                             <Label htmlFor="custom-date" className="text-sm">
-                                                指定过期日期
+                                                {t('share.setExpiryDate')}
                                             </Label>
                                         </div>
                                         
@@ -296,12 +298,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                                         {updatingExpiry && (
                                             <div className="flex items-center text-sm text-muted-foreground">
                                                 <Clock className="h-3 w-3 mr-1 animate-spin" />
-                                                正在更新过期时间...
+                                                {t('share.updatingExpiry')}
                                             </div>
                                         )}
                                         
                                         <p className="text-xs text-muted-foreground">
-                                            默认为永久分享，勾选可设置具体过期日期
+                                            {t('share.permanentShareNote')}
                                         </p>
                                     </div>
                                 </div>
@@ -310,7 +312,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                     )}
                     {/* 二维码 */}
                     <div className="space-y-2">
-                        <Label>二维码</Label>
+                        <Label>{t('share.qrCode')}</Label>
                         <div className="flex justify-center p-4 bg-white rounded-lg border">
                             {qrCodeUrl ? (
                                 <img
@@ -320,12 +322,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                                 />
                             ) : (
                                 <div className="w-40 h-40 flex items-center justify-center bg-gray-100 rounded">
-                                    <span className="text-gray-500">生成中...</span>
+                                    <span className="text-gray-500">{t('share.generating')}</span>
                                 </div>
                             )}
                         </div>
                         <p className="text-xs text-muted-foreground text-center">
-                            扫描二维码即可下载
+                            {t('share.scanToDownload')}
                         </p>
                     </div>
 
@@ -339,7 +341,7 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                             className="flex-1"
                         >
                             <Download className="mr-2 h-4 w-4"/>
-                            {downloading ? '下载中...' : '立即下载'}
+                            {downloading ? t('share.downloading') : t('share.downloadNow')}
                         </Button>
                         <Button
                             onClick={handleCopyUrl}
@@ -348,12 +350,12 @@ export function ShareDialog({isOpen, onClose, shareUrl, packageName, shareId, cu
                             {copied ? (
                                 <>
                                     <Check className="mr-2 h-4 w-4"/>
-                                    已复制
+                                    {t('share.copied')}
                                 </>
                             ) : (
                                 <>
                                     <Copy className="mr-2 h-4 w-4"/>
-                                    复制链接
+                                    {t('share.copyLink')}
                                 </>
                             )}
                         </Button>

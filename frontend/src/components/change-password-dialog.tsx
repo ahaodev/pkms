@@ -12,6 +12,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {toast} from 'sonner';
 import {updateUserPassword} from '@/lib/api/users';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface ChangePasswordDialogProps {
     open: boolean;
@@ -19,6 +20,7 @@ interface ChangePasswordDialogProps {
 }
 
 export function ChangePasswordDialog({open, onOpenChange}: ChangePasswordDialogProps) {
+    const { t } = useI18n();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -43,17 +45,17 @@ export function ChangePasswordDialog({open, onOpenChange}: ChangePasswordDialogP
 
     const handleSubmit = async () => {
         if (!currentPassword || !newPassword || !confirmPassword) {
-            toast.error("请填写所有字段");
+            toast.error(t('auth.allFieldsRequired'));
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            toast.error("新密码和确认密码不匹配");
+            toast.error(t('auth.passwordMismatch'));
             return;
         }
 
         if (newPassword.length < 6) {
-            toast.error("新密码长度至少为6位");
+            toast.error(t('auth.passwordMinLength'));
             return;
         }
 
@@ -64,11 +66,11 @@ export function ChangePasswordDialog({open, onOpenChange}: ChangePasswordDialogP
                 new_password: newPassword,
             });
             
-            toast.success("密码修改成功");
+            toast.success(t('auth.passwordChangeSuccess'));
             onOpenChange(false);
             // 表单将通过useEffect自动清除
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || "密码修改失败，请稍后重试";
+            const errorMessage = error?.response?.data?.message || t('auth.passwordChangeError');
             toast.error(errorMessage);
         } finally {
             setLoading(false);
@@ -88,41 +90,41 @@ export function ChangePasswordDialog({open, onOpenChange}: ChangePasswordDialogP
                 onPointerDownOutside={() => onOpenChange(false)}
             >
                 <DialogHeader>
-                    <DialogTitle>更改密码</DialogTitle>
+                    <DialogTitle>{t('auth.changePassword')}</DialogTitle>
                     <DialogDescription>
-                        请输入当前密码和新密码来更改您的登录密码
+                        {t('auth.changePasswordDescription')}
                     </DialogDescription>
                 </DialogHeader>
                 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="current-password">当前密码</Label>
+                        <Label htmlFor="current-password">{t('auth.currentPassword')}</Label>
                         <Input
                             id="current-password"
                             type="password"
-                            placeholder="请输入当前密码"
+                            placeholder={t('auth.currentPasswordPlaceholder')}
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                         />
                     </div>
                     
                     <div className="grid gap-2">
-                        <Label htmlFor="new-password">新密码</Label>
+                        <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
                         <Input
                             id="new-password"
                             type="password"
-                            placeholder="请输入新密码（至少6位）"
+                            placeholder={t('auth.newPasswordPlaceholder')}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                         />
                     </div>
                     
                     <div className="grid gap-2">
-                        <Label htmlFor="confirm-password">确认新密码</Label>
+                        <Label htmlFor="confirm-password">{t('auth.confirmNewPassword')}</Label>
                         <Input
                             id="confirm-password"
                             type="password"
-                            placeholder="请再次输入新密码"
+                            placeholder={t('auth.confirmPasswordPlaceholder')}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
@@ -131,10 +133,10 @@ export function ChangePasswordDialog({open, onOpenChange}: ChangePasswordDialogP
                 
                 <DialogFooter>
                     <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={handleSubmit} disabled={loading}>
-                        {loading ? "正在修改..." : "确认修改"}
+                        {loading ? t('auth.changing') : t('auth.confirmModify')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

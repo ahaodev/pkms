@@ -16,5 +16,11 @@
       "Bash(npm audit:*)"
     ],
     "deny": []
+  },
+  "mcpServers": {
+    "browsermcp": {
+      "command": "npx",
+      "args": ["@browsermcp/mcp@latest"]
+    }
   }
 }

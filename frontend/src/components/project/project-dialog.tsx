@@ -6,6 +6,7 @@ import {
     DialogHeader,
     DialogTitle
 } from '@/components/ui/dialog';
+import { useI18n } from '@/contexts/i18n-context';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Textarea} from '@/components/ui/textarea';
@@ -47,6 +48,7 @@ export function ProjectDialog({
                                   onDelete,
                                   isDeleting = false
                               }: ProjectDialogProps) {
+    const { t } = useI18n();
     const canDelete = isEdit && project && (project.packageCount === 0 || project.packageCount === undefined);
     return (
         <Dialog open={open} onOpenChange={(isOpen) => {
@@ -58,30 +60,30 @@ export function ProjectDialog({
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>
-                        {isEdit ? '修改项目信息。' : '创建一个新的项目来组织您的软件包。'}
+                        {isEdit ? t('project.editDescription') : t('project.createDescription')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label htmlFor={isEdit ? "edit-name" : "name"}>项目名称</Label>
+                        <Label htmlFor={isEdit ? "edit-name" : "name"}>{t('project.name')}</Label>
                         <Input
                             id={isEdit ? "edit-name" : "name"}
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            placeholder="输入项目名称"
+                            placeholder={t('project.namePlaceholder')}
                         />
                     </div>
                     <div>
-                        <Label htmlFor={isEdit ? "edit-description" : "description"}>项目描述</Label>
+                        <Label htmlFor={isEdit ? "edit-description" : "description"}>{t('project.description')}</Label>
                         <Textarea
                             id={isEdit ? "edit-description" : "description"}
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            placeholder="输入项目描述"
+                            placeholder={t('project.descriptionPlaceholder')}
                         />
                     </div>
                     <div>
-                        <Label>项目图标</Label>
+                        <Label>{t('project.icon')}</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {iconOptions.map((iconOption) => (
                                 <Button
@@ -106,19 +108,19 @@ export function ProjectDialog({
                                 onClick={onDelete}
                                 disabled={isDeleting || isLoading}
                             >
-                                {isDeleting ? '删除中...' : '删除项目'}
+                                {isDeleting ? t('common.deleting') : t('project.delete')}
                             </Button>
                         )}
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={onClose}>
-                            取消
+                            {t('common.cancel')}
                         </Button>
                         <Button
                             onClick={onSubmit}
                             disabled={!formData.name || isLoading}
                         >
-                            {isLoading ? (isEdit ? '更新中...' : '创建中...') : (isEdit ? '更新项目' : '创建项目')}
+                            {isLoading ? (isEdit ? t('common.updating') : t('common.creating')) : (isEdit ? t('project.update') : t('project.create'))}
                         </Button>
                     </div>
                 </DialogFooter>

@@ -1,4 +1,5 @@
 import React, {useState, useCallback, useMemo} from 'react';
+import { useI18n } from '@/contexts/i18n-context';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
@@ -34,6 +35,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
     onRefresh,
     onShowUserPermissions
 }) => {
+    const { t } = useI18n();
     const {data: tenants = []} = useTenants();
     const {userRoles} = usePermissionOperations();
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -53,7 +55,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
     const handleAdd = useCallback(async () => {
         const validation = validateUserRoleForm(formData);
         if (!validation.isValid) {
-            setError('请填写所有必填字段');
+            setError(t('validation.required'));
             return;
         }
 
@@ -71,14 +73,14 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                 });
             }
         } catch {
-            setError('分配角色失败，请重试');
+            setError(t('user.assignRoleFailed'));
         } finally {
             setIsLoading(false);
         }
     }, [formData, userRoles, onRefresh]);
 
     const handleRemove = useCallback(async (userId: string, role: string, domain: string) => {
-        if (!confirm('确定要移除此角色分配吗？')) {
+        if (!confirm(t('user.removeRoleConfirm'))) {
             return;
         }
         
@@ -86,7 +88,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
         try {
             await userRoles.remove(userId, role, domain, onRefresh);
         } catch {
-            setError('移除角色失败，请重试');
+            setError(t('user.removeRoleFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -157,18 +159,18 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                     <div className="flex justify-between items-center">
                         <CardTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5"/>
-                            用户角色管理
+                            {t('user.roleManagement')}
                         </CardTitle>
                         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                             <DialogTrigger asChild>
                                 <Button>
                                     <UserPlus className="w-4 h-4 mr-2"/>
-                                    为用户分配角色
+                                    {t('user.assignRole')}
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>为用户分配角色</DialogTitle>
+                                    <DialogTitle>{t('user.assignRole')}</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
                                     {error && (
@@ -177,14 +179,14 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                         </Alert>
                                     )}
                                     <div>
-                                        <Label htmlFor="tenant">租户 *</Label>
+                                        <Label htmlFor="tenant">{t('tenant.name')} *</Label>
                                         <Select
                                             value={formData.tenant}
                                             onValueChange={(value) => handleFormChange('tenant', value)}
                                             disabled={isLoading}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="选择租户"/>
+                                                <SelectValue placeholder={t('permission.selectTenant')}/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {tenants.map(tenant => (
@@ -196,14 +198,14 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="user_id">用户 *</Label>
+                                        <Label htmlFor="user_id">{t('user.name')} *</Label>
                                         <Select
                                             value={formData.user_id}
                                             onValueChange={(value) => handleFormChange('user_id', value)}
                                             disabled={isLoading}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="选择用户"/>
+                                                <SelectValue placeholder={t('user.selectUser')}/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {users.map(user => (
@@ -215,7 +217,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="role">角色 *</Label>
+                                        <Label htmlFor="role">{t('user.role')} *</Label>
                                         <Select
                                             value={formData.role}
                                             onValueChange={(value) => handleFormChange('role', value)}
@@ -226,7 +228,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                                     {formData.role ? (
                                                         <span>{getRoleDisplayName(formData.role)} ({formData.role})</span>
                                                     ) : (
-                                                        "选择角色"
+                                                        t('permission.selectRole')
                                                     )}
                                                 </SelectValue>
                                             </SelectTrigger>
@@ -240,7 +242,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                         </Select>
                                     </div>
                                     <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                                        <strong>说明：</strong>用户在指定租户下将获得所选角色的所有权限。
+                                        <strong>{t('user.assignRoleDescription')}:</strong> {t('user.assignRoleNote')}
                                     </div>
                                     <div className="flex gap-2">
                                         <Button 
@@ -249,7 +251,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                             disabled={isLoading}
                                         >
                                             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                            分配角色
+                                            {t('user.assignRole')}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -257,7 +259,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                             className="flex-1"
                                             disabled={isLoading}
                                         >
-                                            取消
+                                            {t('common.cancel')}
                                         </Button>
                                     </div>
                                 </div>
@@ -272,7 +274,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                             <div className="flex-1 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                 <Input
-                                    placeholder="搜索用户名或角色..."
+                                    placeholder={t('user.searchPlaceholder')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-10"
@@ -283,10 +285,10 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                 onValueChange={setSelectedTenant}
                             >
                                 <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="筛选租户" />
+                                    <SelectValue placeholder={t('user.filterTenant')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">所有租户</SelectItem>
+                                    <SelectItem value="all">{t('user.allTenants')}</SelectItem>
                                     {uniqueTenants.map(tenant => (
                                         <SelectItem key={tenant.id} value={tenant.id}>
                                             {tenant.name}
@@ -299,9 +301,9 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                         {/* 结果统计 */}
                         {(searchTerm || selectedTenant !== 'all') && (
                             <div className="text-sm text-muted-foreground">
-                                找到 {filteredRoles.length} 条记录
-                                {searchTerm && <span> 包含 "{searchTerm}"</span>}
-                                {selectedTenant !== 'all' && <span> 在租户 "{uniqueTenants.find(t => t.id === selectedTenant)?.name}"</span>}
+                                {t('user.foundRecords', { count: filteredRoles.length })}
+                                {searchTerm && <span> {t('user.containing', { term: searchTerm })}</span>}
+                                {selectedTenant !== 'all' && <span> {t('user.inTenant', { tenant: uniqueTenants.find(t => t.id === selectedTenant)?.name })}</span>}
                             </div>
                         )}
                         
@@ -310,13 +312,13 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                 icon={Users}
                                 title={
                                     searchTerm || selectedTenant !== 'all'
-                                        ? "未找到匹配的角色分配"
-                                        : "暂无用户角色分配"
+                                        ? t('user.noMatchingRoles')
+                                        : t('user.noUserRoles')
                                 }
                                 description={
                                     searchTerm || selectedTenant !== 'all'
-                                        ? "尝试调整搜索条件或筛选器"
-                                        : "开始为用户分配角色来管理系统访问权限"
+                                        ? t('user.adjustSearchFilters')
+                                        : t('user.noUserRolesDescription')
                                 }
                             />
                         ) : (
@@ -326,16 +328,16 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                     <div key={tenantId} className="space-y-4">
                                         <div className="flex items-center gap-2">
                                             <Badge variant="outline" className="text-sm font-medium">
-                                                租户: {tenant?.name || tenantId}
+                                                {t('tenant.name')}: {tenant?.name || tenantId}
                                             </Badge>
                                             <div className="h-px bg-border flex-1"></div>
                                         </div>
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead>用户</TableHead>
-                                                    <TableHead>角色</TableHead>
-                                                    <TableHead>操作</TableHead>
+                                                    <TableHead>{t('user.name')}</TableHead>
+                                                    <TableHead>{t('user.role')}</TableHead>
+                                                    <TableHead>{t('common.actions')}</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -362,7 +364,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     onClick={() => onShowUserPermissions(role.user)}
-                                                                    title="查看用户权限"
+                                                                    title={t('user.viewPermissions')}
                                                                     disabled={isLoading}
                                                                 >
                                                                     <Eye className="w-4 h-4"/>
@@ -375,7 +377,7 @@ const UserManagement: React.FC<UserManagementProps> = React.memo(({
                                                                         role.role,
                                                                         role.domain
                                                                     )}
-                                                                    title="移除角色"
+                                                                    title={t('user.removeRole')}
                                                                     disabled={isLoading}
                                                                     className="text-destructive hover:text-destructive"
                                                                 >

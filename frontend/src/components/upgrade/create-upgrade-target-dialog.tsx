@@ -18,6 +18,7 @@ import { getReleases } from '@/lib/api/releases';
 import { CreateUpgradeTargetRequest } from '@/lib/api/upgrade';
 import { ExtendedPackage } from '@/types/package';
 import { Project } from '@/types/project';
+import { useI18n } from '@/contexts/i18n-context';
 
 interface CreateUpgradeTargetDialogProps {
     isOpen: boolean;
@@ -40,6 +41,7 @@ export function CreateUpgradeTargetDialog({
     packages,
     isLoading
 }: CreateUpgradeTargetDialogProps) {
+    const { t } = useI18n();
     const [releases, setReleases] = useState<any[]>([]);
     const [loadingReleases, setLoadingReleases] = useState(false);
 
@@ -96,19 +98,19 @@ export function CreateUpgradeTargetDialog({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>创建升级目标</DialogTitle>
+                    <DialogTitle>{t('upgrade.createTarget')}</DialogTitle>
                     <DialogDescription>
-                        选择项目、软件包和版本，创建升级目标供客户端检查更新
+                        {t('upgrade.createTargetDescription')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     {/* Project Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="project">选择项目</Label>
+                        <Label htmlFor="project">{t('upgrade.selectProject')}</Label>
                         <Select value={formData.project_id} onValueChange={handleProjectChange}>
                             <SelectTrigger>
-                                <SelectValue placeholder="请选择项目" />
+                                <SelectValue placeholder={t('upgrade.selectProjectPlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {projects.map(project => (
@@ -125,14 +127,14 @@ export function CreateUpgradeTargetDialog({
 
                     {/* Package Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="package">选择软件包</Label>
+                        <Label htmlFor="package">{t('upgrade.selectPackage')}</Label>
                         <Select
                             value={formData.package_id}
                             onValueChange={handlePackageChange}
                             disabled={!formData.project_id}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={formData.project_id ? "请选择软件包" : "请先选择项目"} />
+                                <SelectValue placeholder={formData.project_id ? t('upgrade.selectPackagePlaceholder') : t('upgrade.selectProjectFirst')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {filteredPackages.map(pkg => (
@@ -152,7 +154,7 @@ export function CreateUpgradeTargetDialog({
 
                     {/* Release Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="release">选择版本</Label>
+                        <Label htmlFor="release">{t('upgrade.selectVersion')}</Label>
                         <Select
                             value={formData.release_id}
                             onValueChange={(value) => setFormData(prev => ({ ...prev, release_id: value }))}
@@ -160,8 +162,8 @@ export function CreateUpgradeTargetDialog({
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder={
-                                    loadingReleases ? "加载版本中..." :
-                                        formData.package_id ? "请选择版本" : "请先选择软件包"
+                                    loadingReleases ? t('upgrade.loadingVersions') :
+                                        formData.package_id ? t('upgrade.selectVersionPlaceholder') : t('upgrade.selectPackageFirst')
                                 } />
                             </SelectTrigger>
                             <SelectContent>
@@ -184,10 +186,10 @@ export function CreateUpgradeTargetDialog({
 
                     {/* Name */}
                     <div className="space-y-2">
-                        <Label htmlFor="name">升级目标名称</Label>
+                        <Label htmlFor="name">{t('upgrade.targetName')}</Label>
                         <Input
                             id="name"
-                            placeholder="输入升级目标名称"
+                            placeholder={t('upgrade.targetNamePlaceholder')}
                             value={formData.name}
                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         />
@@ -195,10 +197,10 @@ export function CreateUpgradeTargetDialog({
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <Label htmlFor="description">描述（可选）</Label>
+                        <Label htmlFor="description">{t('upgrade.descriptionOptional')}</Label>
                         <Textarea
                             id="description"
-                            placeholder="描述此升级目标的用途..."
+                            placeholder={t('upgrade.descriptionPlaceholder')}
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             rows={3}
@@ -208,10 +210,10 @@ export function CreateUpgradeTargetDialog({
 
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
-                        取消
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={onSubmit} disabled={isLoading || !isFormValid}>
-                        {isLoading ? '创建中...' : '创建'}
+                        {isLoading ? t('upgrade.creating') : t('common.create')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

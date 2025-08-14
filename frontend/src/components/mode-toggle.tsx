@@ -2,9 +2,11 @@ import {Moon, Sun} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import {useTheme} from "@/components/theme-provider";
+import {useI18n} from "@/contexts/i18n-context";
 
 export function ModeToggle() {
     const {setTheme} = useTheme();
+    const { t } = useI18n();
 
     return (
         <DropdownMenu>
@@ -19,13 +21,13 @@ export function ModeToggle() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                    Light
+                    {t('settings.light')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    Dark
+                    {t('settings.dark')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                    System
+                    {t('settings.system')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

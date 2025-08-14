@@ -15,14 +15,9 @@
     "deny": []
   },
   "mcpServers": {
-    "playwright": {
+    "browsermcp": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest",
-        "--headless",
-        "--port",
-        "8931"
-      ]
+      "args": ["@browsermcp/mcp@latest"]
     }
   }
 }

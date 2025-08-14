@@ -6,6 +6,7 @@ import {ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
 import {useDeleteProject} from '@/hooks/use-projects';
 import {toast} from 'sonner';
 import {getProjectIcon} from '@/lib/utils';
+import {useI18n} from '@/contexts/i18n-context';
 
 
 interface ProjectsViewProps {
@@ -23,6 +24,7 @@ export function Projects({
                              onCreateProject,
                              onEditProject
                          }: ProjectsViewProps) {
+    const { t } = useI18n();
     const deleteProject = useDeleteProject();
 
     // Filter projects based on search term
@@ -33,21 +35,21 @@ export function Projects({
 
     const handleDeleteProject = async (project: any) => {
         if (project.packageCount > 0) {
-            toast.error('删除失败', {
-                description: '项目下还有包，无法删除项目。请先删除所有包。',
+            toast.error(t('project.deleteError'), {
+                description: t('project.deleteErrorDescription'),
             });
             return;
         }
 
-        if (window.confirm(`确定要删除项目「${project.name}」吗？此操作不可撤销。`)) {
+        if (window.confirm(t('project.deleteConfirm', { name: project.name }))) {
             try {
                 await deleteProject.mutateAsync(project.id);
-                toast.success('删除成功', {
-                    description: `项目「${project.name}」已成功删除。`,
+                toast.success(t('project.deleteSuccess'), {
+                    description: t('project.deleteSuccessDescription', { name: project.name }),
                 });
             } catch (error) {
-                toast.error('删除失败', {
-                    description: '项目删除失败，请重试。',
+                toast.error(t('project.deleteError'), {
+                    description: t('project.deleteFailedDescription'),
                 });
             }
         }
@@ -56,13 +58,13 @@ export function Projects({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
-                    项目列表
+                    {t('project.list')}
                 </h2>
                 <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">{filteredProjects.length} 个项目</Badge>
+                    <Badge variant="secondary">{filteredProjects.length} {t('project.count')}</Badge>
                     <Button onClick={onCreateProject}>
                         <Plus className="mr-2 h-4 w-4"/>
-                        新建项目
+                        {t('project.newProject')}
                     </Button>
                 </div>
             </div>
@@ -83,7 +85,7 @@ export function Projects({
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">包数量</span>
+                                    <span className="text-muted-foreground">{t('project.packageCount')}</span>
                                     <Badge variant="outline">{project.packageCount || 0}</Badge>
                                 </div>
                             </CardContent>
@@ -120,7 +122,7 @@ export function Projects({
             {filteredProjects.length === 0 && (
                 <EmptyList
                     icon={FolderOpen}
-                    title={searchTerm ? '未找到匹配的项目' : '暂无项目'}
+                    title={searchTerm ? t('project.noProjectsFound') : t('project.noProjects')}
                 />
             )}
         </div>

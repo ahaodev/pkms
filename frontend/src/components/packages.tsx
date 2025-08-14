@@ -16,6 +16,7 @@ import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Se
 import {useState} from 'react';
 import {useDeletePackage} from '@/hooks/use-packages';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface PackagesViewProps {
     selectedProject: any;
@@ -32,6 +33,7 @@ export function Packages({
                              handlePackageSelect,
                              onCreatePackage
                          }: PackagesViewProps) {
+    const { t } = useI18n();
     const [deletePackageId, setDeletePackageId] = useState<string | null>(null);
     const deletePackageMutation = useDeletePackage();
     
@@ -46,11 +48,11 @@ export function Packages({
         
         try {
             await deletePackageMutation.mutateAsync(deletePackageId);
-            toast.success('包删除成功');
+            toast.success(t('package.deleteSuccess'));
             setDeletePackageId(null);
         } catch (error: any) {
-            toast.error('删除失败', {
-                description: error.message || '请确保包内没有发布版本'
+            toast.error(t('package.deleteError'), {
+                description: error.message || t('package.deleteErrorDescription')
             });
         }
     };
@@ -63,13 +65,13 @@ export function Packages({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
-                    {selectedProject?.name} - 包列表
+                    {selectedProject?.name} - {t('package.list')}
                 </h2>
                 <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">{filteredPackages.length} 个包</Badge>
+                    <Badge variant="secondary">{filteredPackages.length} {t('package.count')}</Badge>
                     <Button onClick={onCreatePackage}>
                         <Plus className="mr-2 h-4 w-4"/>
-                        新建包
+                        {t('package.newPackage')}
                     </Button>
                 </div>
             </div>
@@ -109,12 +111,12 @@ export function Packages({
                             <CardContent>
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">类型</span>
+                                        <span className="text-muted-foreground">{t('package.type')}</span>
                                         <Badge variant="outline" className="capitalize">{pkg.type}</Badge>
                                     </div>
                                     {pkg.version && (
                                         <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">最新版本</span>
+                                            <span className="text-muted-foreground">{t('package.latestVersion')}</span>
                                             <Badge variant="default">v{pkg.version}</Badge>
                                         </div>
                                     )}
@@ -142,11 +144,11 @@ export function Packages({
             {filteredPackages.length === 0 && (
                 <EmptyList
                     icon={PackageIcon}
-                    title={searchTerm ? '未找到匹配的包' : '该项目暂无包'}
+                    title={searchTerm ? t('package.noPackagesFound') : t('package.noPackagesInProject')}
                     actionText={
                         <div className="flex items-center">
                             <Plus className="mr-2 h-4 w-4"/>
-                            创建首个包
+                            {t('package.createFirstPackage')}
                         </div>
                     }
                     onAction={onCreatePackage}
@@ -158,18 +160,18 @@ export function Packages({
             <AlertDialog open={!!deletePackageId} onOpenChange={() => setDeletePackageId(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认删除包</AlertDialogTitle>
+                        <AlertDialogTitle>{t('package.deleteConfirmTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作无法撤销。确定要删除此包吗？只有没有发布版本的包才能被删除。
+                            {t('package.deleteConfirmDescription')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleDeletePackage}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            删除
+                            {t('common.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

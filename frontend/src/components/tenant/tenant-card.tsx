@@ -3,6 +3,7 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Tenant} from '@/types/tenant';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface TenantCardProps {
     tenant: Tenant;
@@ -17,6 +18,8 @@ export function TenantCard({
                                onDelete,
                                onViewUsers
                            }: TenantCardProps) {
+    const { t } = useI18n();
+    
     return (
         <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
@@ -33,7 +36,7 @@ export function TenantCard({
                             variant="ghost"
                             size="sm"
                             onClick={() => onViewUsers(tenant)}
-                            title="查看用户"
+                            title={t('tenant.viewUsers')}
                         >
                             <Users className="h-4 w-4"/>
                         </Button>
@@ -41,7 +44,7 @@ export function TenantCard({
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(tenant)}
-                            title="编辑租户"
+                            title={t('tenant.editTenant')}
                         >
                             <Pencil className="h-4 w-4"/>
                         </Button>
@@ -49,7 +52,7 @@ export function TenantCard({
                             variant="ghost"
                             size="sm"
                             onClick={() => onDelete(tenant)}
-                            title="删除租户"
+                            title={t('tenant.deleteTenant')}
                         >
                             <Trash2 className="h-4 w-4"/>
                         </Button>
@@ -59,11 +62,11 @@ export function TenantCard({
             <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-2 mb-3">
                     <Badge variant="outline">
-                        租户
+                        {t('tenant.title')}
                     </Badge>
                 </div>
                 <div className="text-xs text-muted-foreground mt-2">
-                    创建于：{tenant.created_at.toLocaleDateString()}
+                    {t('user.createdAt')}：{tenant.created_at.toLocaleDateString()}
                 </div>
             </CardContent>
         </Card>

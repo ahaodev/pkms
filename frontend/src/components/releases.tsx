@@ -10,6 +10,7 @@ import {Release} from '@/types/release.ts';
 import {ShareDialog} from '@/components/share-dialog';
 import {createShareLink, deleteRelease} from '@/lib/api/releases';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface ReleasesViewProps {
     selectedPackage: any;
@@ -28,6 +29,7 @@ export function Releases({
                              handleDownload,
                              onReleaseDeleted
                          }: ReleasesViewProps) {
+    const { t } = useI18n();
     const [shareDialog, setShareDialog] = useState<{
         isOpen: boolean;
         shareUrl: string;
@@ -48,32 +50,32 @@ export function Releases({
                 shareId: shareResponse.id,
                 currentExpiryHours: shareResponse.expiry_hours
             });
-            toast.success('分享链接已创建', {
-                description: '分享链接已生成。',
+            toast.success(t('release.shareCreated'), {
+                description: t('release.shareCreatedDescription'),
             });
         } catch (error) {
             console.error(error)
-            toast.error('创建分享链接失败', {
-                description: '无法创建分享链接，请稍后重试。',
+            toast.error(t('release.shareCreateError'), {
+                description: t('release.shareCreateErrorDescription'),
             });
         }
     };
 
     const handleDelete = async (release: Release) => {
-        if (!confirm(`确定要删除发布版本 v${release.version_code} 吗？此操作不可恢复。`)) {
+        if (!confirm(t('release.deleteConfirm', { version: release.version_code }))) {
             return;
         }
 
         try {
             await deleteRelease(release.id);
-            toast.success('删除成功', {
-                description: `发布版本 v${release.version_code} 已被删除。`,
+            toast.success(t('release.deleteSuccess'), {
+                description: t('release.deleteSuccessDescription', { version: release.version_code }),
             });
             onReleaseDeleted?.(release.id);
         } catch (error) {
             console.error(error);
-            toast.error('删除失败', {
-                description: '无法删除该发布版本，请稍后重试。',
+            toast.error(t('release.deleteError'), {
+                description: t('release.deleteErrorDescription'),
             });
         }
     };
@@ -95,10 +97,10 @@ export function Releases({
                     {selectedPackage?.name}
                 </h2>
                 <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">{releases.length} 个发布</Badge>
+                    <Badge variant="secondary">{releases.length} {t('release.count')}</Badge>
                     <Button onClick={handleCreateRelease}>
                         <Plus className="mr-2 h-4 w-4"/>
-                        新建发布
+                        {t('release.newRelease')}
                     </Button>
                 </div>
 
@@ -108,13 +110,13 @@ export function Releases({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>版本</TableHead>
-                                <TableHead>文件名</TableHead>
-                                <TableHead>大小</TableHead>
-                                <TableHead>下载次数</TableHead>
-                                <TableHead>发布时间</TableHead>
-                                <TableHead>变更日志</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead>{t('release.version')}</TableHead>
+                                <TableHead>{t('release.fileName')}</TableHead>
+                                <TableHead>{t('release.size')}</TableHead>
+                                <TableHead>{t('release.downloadCount')}</TableHead>
+                                <TableHead>{t('release.publishTime')}</TableHead>
+                                <TableHead>{t('release.changelog')}</TableHead>
+                                <TableHead className="text-right">{t('release.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -132,7 +134,7 @@ export function Releases({
                                     <TableCell>{formatDate(release.created_at.toISOString())}</TableCell>
                                     <TableCell className="max-w-xs">
                                         <div className="truncate text-sm text-muted-foreground" title={release.changelog}>
-                                            {release.changelog || '无变更说明'}
+                                            {release.changelog || t('release.noChangelog')}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -162,11 +164,11 @@ export function Releases({
             ) : (
                 <EmptyList
                     icon={PackageIcon}
-                    title={searchTerm ? '未找到匹配的发布版本' : '该包暂无版本发布'}
+                    title={searchTerm ? t('release.noReleasesFound') : t('release.noReleases')}
                     actionText={!searchTerm ? (
                         <div className="flex items-center">
                             <Plus className="mr-2 h-4 w-4"/>
-                            创建首个发布
+                            {t('release.createFirstRelease')}
                         </div>
                     ) : undefined}
                     onAction={!searchTerm ? handleCreateRelease : undefined}

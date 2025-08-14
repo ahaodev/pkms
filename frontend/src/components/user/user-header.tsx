@@ -1,17 +1,20 @@
 import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import { useI18n } from '@/contexts/i18n-context';
 
 interface UserHeaderProps {
   onCreateUser: () => void;
 }
 
 export function UserHeader({ onCreateUser }: UserHeaderProps) {
+  const { t } = useI18n();
+  
   return (
     <PageHeader
-      title="用户管理"
-      description="管理系统用户和权限分配"
+      title={t('user.title')}
+      description={t('user.description')}
       action={{
-        label: "添加用户",
+        label: t('user.addUser'),
         onClick: onCreateUser,
         icon: Plus
       }}

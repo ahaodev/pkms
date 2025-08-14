@@ -2,6 +2,7 @@ import { FolderOpen, Package as PackageIcon, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Project } from '@/types/project';
 import { ExtendedPackage } from '@/types/package';
+import { useI18n } from '@/contexts/i18n-context';
 
 interface UpgradeFiltersProps {
   projectFilter: string;
@@ -22,6 +23,8 @@ export function UpgradeFilters({
   onProjectFilterChange,
   onPackageFilterChange
 }: UpgradeFiltersProps) {
+  const { t } = useI18n();
+  
   // Filter packages by selected project
   const filteredPackages = projectFilter === 'all' 
     ? packages 
@@ -31,10 +34,10 @@ export function UpgradeFilters({
     <div className="flex flex-wrap gap-4">
       <Select value={projectFilter} onValueChange={onProjectFilterChange}>
         <SelectTrigger className="w-48">
-          <SelectValue placeholder="所有项目" />
+          <SelectValue placeholder={t('common.allProjects')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">所有项目</SelectItem>
+          <SelectItem value="all">{t('common.allProjects')}</SelectItem>
           {projects.map(project => (
             <SelectItem key={project.id} value={project.id}>
               <div className="flex items-center space-x-2">
@@ -52,10 +55,10 @@ export function UpgradeFilters({
         disabled={projectFilter !== 'all' && filteredPackages.length === 0}
       >
         <SelectTrigger className="w-48">
-          <SelectValue placeholder="所有包" />
+          <SelectValue placeholder={t('common.allPackages')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">所有包</SelectItem>
+          <SelectItem value="all">{t('common.allPackages')}</SelectItem>
           {filteredPackages.map(pkg => (
             <SelectItem key={pkg.id} value={pkg.id}>
               <div className="flex items-center space-x-2">
@@ -71,7 +74,7 @@ export function UpgradeFilters({
       
       <div className="flex items-center text-sm text-muted-foreground">
         <Activity className="mr-1 h-4 w-4" />
-        共 {totalTargets} 个升级目标
+        {t('common.total')} {totalTargets} {t('upgrade.targetsCount')}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import {useQueryClient} from '@tanstack/react-query';
+import { useI18n } from '@/contexts/i18n-context';
 import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
@@ -18,6 +19,7 @@ interface SharesTableProps {
 
 export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewClick }: SharesTableProps) {
   const queryClient = useQueryClient();
+  const { t } = useI18n();
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss');
@@ -29,7 +31,7 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
     }
     
     if (share.is_expired) {
-      return '已过期';
+      return t('share.expired');
     }
     
     // 显示过期日期
@@ -44,10 +46,10 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
         <CardContent className="flex items-center justify-center py-8">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">加载失败</h3>
-            <p className="text-muted-foreground mb-4">无法加载分享列表</p>
+            <h3 className="text-lg font-semibold mb-2">{t('common.loadFailed')}</h3>
+            <p className="text-muted-foreground mb-4">{t('share.loadFailed')}</p>
             <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['shares'] })}>
-              重试
+              {t('common.retry')}
             </Button>
           </div>
         </CardContent>
@@ -63,8 +65,8 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
     return (
       <EmptyList
         icon={Share2}
-        title="暂无分享链接"
-        description="在发布版本页面创建分享链接后，会显示在这里"
+        title={t('share.noShares')}
+        description={t('share.noSharesDescription')}
         className="p-0"
       />
     );
@@ -76,13 +78,13 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>项目</TableHead>
-              <TableHead>包</TableHead>
-              <TableHead>版本</TableHead>
-              <TableHead>分享码</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead>过期时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+              <TableHead>{t('project.name')}</TableHead>
+              <TableHead>{t('package.name')}</TableHead>
+              <TableHead>{t('release.version')}</TableHead>
+              <TableHead>{t('share.shareCode')}</TableHead>
+              <TableHead>{t('common.createdAt')}</TableHead>
+              <TableHead>{t('share.expiryTime')}</TableHead>
+              <TableHead className="text-right">{t('common.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -111,7 +113,7 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
                   </TableCell>
                   <TableCell className="text-sm">
                     {expiryDisplay && (
-                      <span className={expiryDisplay === '已过期' ? 'text-destructive' : 'text-muted-foreground'}>
+                      <span className={expiryDisplay === t('share.expired') ? 'text-destructive' : 'text-muted-foreground'}>
                         {expiryDisplay}
                       </span>
                     )}
@@ -123,7 +125,7 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
                         size="sm"
                         onClick={() => onViewClick(share)}
                         className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        title="查看分享"
+                        title={t('share.viewShare')}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -132,7 +134,7 @@ export function SharesTable({ shares, isLoading, error, onDeleteClick, onViewCli
                         size="sm"
                         onClick={() => onDeleteClick(share)}
                         className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                        title="删除分享"
+                        title={t('share.deleteShare')}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
