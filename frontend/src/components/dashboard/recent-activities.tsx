@@ -37,14 +37,14 @@ const getActivityBadgeColor = (type: string) => {
     }
 };
 
-const formatActivityType = (type: string) => {
+const formatActivityType = (type: string, t: (key: string) => string) => {
     switch (type) {
         case 'project_created':
-            return '项目创建';
+            return t('dashboard.activity.project_created');
         case 'package_created':
-            return '包创建';
+            return t('dashboard.activity.package_created');
         case 'user_joined':
-            return '用户加入';
+            return t('dashboard.activity.user_joined');
         default:
             return type;
     }
@@ -139,7 +139,7 @@ export function RecentActivities({activities, isLoading}: RecentActivitiesProps)
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                     <Badge variant="secondary" className={getActivityBadgeColor(activity.type)}>
-                                        {formatActivityType(activity.type)}
+                                        {formatActivityType(activity.type, t)}
                                     </Badge>
                                     <span className="text-xs text-muted-foreground">
                     {formatRelativeTime(activity.created_at, t)}

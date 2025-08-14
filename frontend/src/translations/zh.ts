@@ -278,6 +278,9 @@ export const zh = {
     "dashboard.minutesAgo": "分钟前",
     "dashboard.hoursAgo": "小时前",
     "dashboard.daysAgo": "天前",
+    "dashboard.activity.project_created": "项目创建",
+    "dashboard.activity.package_created": "包创建",
+    "dashboard.activity.user_joined": "用户加入",
     
     // Stats
     "stats.totalProjects": "项目总数",
