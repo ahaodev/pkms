@@ -7,6 +7,7 @@ import {Badge} from '@/components/ui/badge';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {AlertTriangle, Copy, Eye, EyeOff, Shield} from 'lucide-react';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 import type {ClientAccess} from '@/types/client-access';
 
 interface TokenDisplayDialogProps {
@@ -20,6 +21,7 @@ export function TokenDisplayDialog({
                                        onOpenChange,
                                        clientAccess,
                                    }: TokenDisplayDialogProps) {
+    const {t} = useI18n();
     const [showToken, setShowToken] = useState(false);
 
     const handleCopyToken = async () => {
@@ -27,9 +29,9 @@ export function TokenDisplayDialog({
 
         try {
             await navigator.clipboard.writeText(clientAccess.access_token);
-            toast.success('访问令牌已复制到剪贴板');
+            toast.success(t('clientAccess.tokenCopied'));
         } catch {
-            toast.error('请手动复制访问令牌');
+            toast.error(t('clientAccess.tokenCopyFailed'));
         }
     };
 
@@ -46,10 +48,10 @@ export function TokenDisplayDialog({
 
         try {
             await navigator.clipboard.writeText(example);
-            toast.success("已复制到剪贴板")
+            toast.success(t('clientAccess.exampleCopied'))
 
         } catch {
-            toast.error('复制失败,请手动复制示例代码');
+            toast.error(t('clientAccess.exampleCopyFailed'));
         }
     };
 
@@ -68,10 +70,10 @@ export function TokenDisplayDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Shield className="h-5 w-5"/>
-                        访问令牌详情
+                        {t('clientAccess.tokenDetails')}
                     </DialogTitle>
                     <DialogDescription>
-                        查看和管理客户端接入凭证的访问令牌
+                        {t('clientAccess.viewTokenDescription')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -79,7 +81,7 @@ export function TokenDisplayDialog({
                     {/* 基本信息 */}
                     <div className="space-y-4">
                         <div>
-                            <Label>凭证名称</Label>
+                            <Label>{t('clientAccess.credentialName')}</Label>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="font-medium">{clientAccess.name}</span>
                                 <Badge variant={
@@ -90,10 +92,10 @@ export function TokenDisplayDialog({
                                             : 'default'
                                 }>
                                     {!clientAccess.is_active
-                                        ? '已禁用'
+                                        ? t('clientAccess.inactive')
                                         : isExpired
-                                            ? '已过期'
-                                            : '正常'
+                                            ? t('clientAccess.expired')
+                                            : t('clientAccess.active')
                                     }
                                 </Badge>
                             </div>
@@ -101,13 +103,13 @@ export function TokenDisplayDialog({
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label>关联项目</Label>
+                                <Label>{t('clientAccess.associatedProject')}</Label>
                                 <p className="text-sm text-muted-foreground mt-1">
                                     {clientAccess.project_name}
                                 </p>
                             </div>
                             <div>
-                                <Label>关联包</Label>
+                                <Label>{t('clientAccess.associatedPackage')}</Label>
                                 <p className="text-sm text-muted-foreground mt-1">
                                     {clientAccess.package_name}
                                 </p>
@@ -121,8 +123,8 @@ export function TokenDisplayDialog({
                             <AlertTriangle className="h-4 w-4"/>
                             <AlertDescription>
                                 {!clientAccess.is_active
-                                    ? '此令牌已被禁用，客户端无法使用'
-                                    : '此令牌已过期，客户端无法使用'
+                                    ? t('clientAccess.tokenDisabledWarning')
+                                    : t('clientAccess.tokenExpiredWarning')
                                 }
                             </AlertDescription>
                         </Alert>
@@ -131,7 +133,7 @@ export function TokenDisplayDialog({
                     {/* 访问令牌 */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label>访问令牌</Label>
+                            <Label>{t('clientAccess.token')}</Label>
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -140,12 +142,12 @@ export function TokenDisplayDialog({
                                 {showToken ? (
                                     <>
                                         <EyeOff className="mr-2 h-4 w-4"/>
-                                        隐藏
+                                        {t('clientAccess.hide')}
                                     </>
                                 ) : (
                                     <>
                                         <Eye className="mr-2 h-4 w-4"/>
-                                        显示
+                                        {t('clientAccess.show')}
                                     </>
                                 )}
                             </Button>
@@ -169,7 +171,7 @@ export function TokenDisplayDialog({
                         <Alert>
                             <Shield className="h-4 w-4"/>
                             <AlertDescription>
-                                请妥善保管此令牌，不要在不安全的环境中暴露。如有泄露风险，请立即重新生成。
+                                {t('clientAccess.tokenSecurity')}
                             </AlertDescription>
                         </Alert>
                     </div>
@@ -177,14 +179,14 @@ export function TokenDisplayDialog({
                     {/* API 调用示例 */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label>API 调用示例</Label>
+                            <Label>{t('clientAccess.apiExample')}</Label>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCopyExample}
                             >
                                 <Copy className="mr-2 h-4 w-4"/>
-                                复制示例
+                                {t('clientAccess.copyExample')}
                             </Button>
                         </div>
 
@@ -192,11 +194,12 @@ export function TokenDisplayDialog({
                             <p className="text-sm font-medium mb-2">POST /api/v1/client-access/check-update</p>
                             <div className="space-y-2">
                                 <div>
-                                    <p className="text-xs text-muted-foreground mb-1">Headers:</p>
-                                    <pre className="text-sm text-muted-foreground">access-token: {showToken ? clientAccess.access_token : maskedToken(clientAccess.access_token)}</pre>
+                                    <p className="text-xs text-muted-foreground mb-1">{t('clientAccess.headers')}</p>
+                                    <pre
+                                        className="text-sm text-muted-foreground">access-token: {showToken ? clientAccess.access_token : maskedToken(clientAccess.access_token)}</pre>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-muted-foreground mb-1">Request Body:</p>
+                                    <p className="text-xs text-muted-foreground mb-1">{t('clientAccess.requestBody')}</p>
                                     <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
 {`{
   "current_version": "1.0.0",

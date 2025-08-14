@@ -124,7 +124,7 @@ export function RecentActivities({activities, isLoading}: RecentActivitiesProps)
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5"/>
-                    最近活动
+                    {t("dashboard.recentActivities")}
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -168,5 +168,3 @@ export function RecentActivities({activities, isLoading}: RecentActivitiesProps)
         </Card>
     );
 }
-
-export default RecentActivities;

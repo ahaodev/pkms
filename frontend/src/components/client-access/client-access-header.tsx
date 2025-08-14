@@ -1,17 +1,20 @@
 import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import { useI18n } from '@/contexts/i18n-context';
 
 interface ClientAccessHeaderProps {
   onCreateClick: () => void;
 }
 
 export function ClientAccessHeader({ onCreateClick }: ClientAccessHeaderProps) {
+  const { t } = useI18n();
+
   return (
     <PageHeader
-      title="接入管理"
-      description="管理客户端设备的接入凭证和访问权限"
+      title={t('clientAccess.management')}
+      description={t('clientAccess.description')}
       action={{
-        label: "创建接入凭证",
+        label: t('clientAccess.create'),
         onClick: onCreateClick,
         icon: Plus
       }}

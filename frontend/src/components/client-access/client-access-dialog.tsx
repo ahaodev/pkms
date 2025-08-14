@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useI18n } from '@/contexts/i18n-context';
 import {
   Dialog,
   DialogContent,
@@ -28,23 +29,24 @@ import { useProjects } from '@/hooks/use-projects';
 import { usePackages } from '@/hooks/use-packages';
 import type { ClientAccess, CreateClientAccessRequest, UpdateClientAccessRequest } from '@/types/client-access';
 
-const createSchema = z.object({
-  project_id: z.string().min(1, '请选择项目'),
-  package_id: z.string().min(1, '请选择包'),
-  name: z.string().min(1, '请输入名称').max(255, '名称不能超过255个字符'),
+// Create base schemas that will be used for type inference
+const baseCreateSchema = z.object({
+  project_id: z.string().min(1),
+  package_id: z.string().min(1),
+  name: z.string().min(1).max(255),
   description: z.string().optional(),
   expires_at: z.date().optional(),
 });
 
-const updateSchema = z.object({
-  name: z.string().min(1, '请输入名称').max(255, '名称不能超过255个字符'),
+const baseUpdateSchema = z.object({
+  name: z.string().min(1).max(255),
   description: z.string().optional(),
   is_active: z.boolean(),
   expires_at: z.date().optional(),
 });
 
-type CreateFormData = z.infer<typeof createSchema>;
-type UpdateFormData = z.infer<typeof updateSchema>;
+type CreateFormData = z.infer<typeof baseCreateSchema>;
+type UpdateFormData = z.infer<typeof baseUpdateSchema>;
 
 interface ClientAccessDialogProps {
   open: boolean;
@@ -61,6 +63,7 @@ export function ClientAccessDialog({
   onSubmit,
   loading = false,
 }: ClientAccessDialogProps) {
+  const { t } = useI18n();
   const isEdit = !!clientAccess;
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
@@ -69,6 +72,22 @@ export function ClientAccessDialog({
     projectId: selectedProjectId || undefined
   });
   const packages = packagesResult?.data?.data || [];
+
+  // Create schemas with translations
+  const createSchema = z.object({
+    project_id: z.string().min(1, t('clientAccess.projectRequired')),
+    package_id: z.string().min(1, t('clientAccess.packageRequired')),
+    name: z.string().min(1, t('clientAccess.nameRequired')).max(255, t('clientAccess.nameMaxLength')),
+    description: z.string().optional(),
+    expires_at: z.date().optional(),
+  });
+
+  const updateSchema = z.object({
+    name: z.string().min(1, t('clientAccess.nameRequired')).max(255, t('clientAccess.nameMaxLength')),
+    description: z.string().optional(),
+    is_active: z.boolean(),
+    expires_at: z.date().optional(),
+  });
 
   const createForm = useForm<CreateFormData>({
     resolver: zodResolver(createSchema),
@@ -153,12 +172,12 @@ export function ClientAccessDialog({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? '编辑接入凭证' : '创建接入凭证'}
+            {isEdit ? t('clientAccess.edit') : t('clientAccess.create')}
           </DialogTitle>
           <DialogDescription>
             {isEdit 
-              ? '修改客户端接入凭证的配置信息'
-              : '为指定的项目和包创建客户端接入凭证'
+              ? t('clientAccess.editDescription')
+              : t('clientAccess.createDescription')
             }
           </DialogDescription>
         </DialogHeader>
@@ -172,15 +191,15 @@ export function ClientAccessDialog({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>名称 *</FormLabel>
+                    <FormLabel>{t('clientAccess.name')} *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="输入接入凭证名称"
+                        placeholder={t('clientAccess.namePlaceholder')}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      用于标识此接入凭证的名称
+                      {t('clientAccess.nameDescription')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -193,10 +212,10 @@ export function ClientAccessDialog({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>描述</FormLabel>
+                    <FormLabel>{t('common.description')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="输入描述信息（可选）"
+                        placeholder={t('clientAccess.descriptionPlaceholder')}
                         className="resize-none"
                         {...field}
                       />
@@ -213,9 +232,9 @@ export function ClientAccessDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">启用状态</FormLabel>
+                      <FormLabel className="text-base">{t('clientAccess.enableStatus')}</FormLabel>
                       <FormDescription>
-                        禁用后客户端将无法使用此令牌
+                        {t('clientAccess.disabledDescription')}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -236,10 +255,10 @@ export function ClientAccessDialog({
                   onClick={() => onOpenChange(false)}
                   disabled={loading}
                 >
-                  取消
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? '处理中...' : '更新'}
+                  {loading ? t('clientAccess.processing') : t('common.update')}
                 </Button>
               </DialogFooter>
             </form>
@@ -253,14 +272,14 @@ export function ClientAccessDialog({
                 name="project_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>项目 *</FormLabel>
+                    <FormLabel>{t('clientAccess.project')} *</FormLabel>
                     <Select 
                       onValueChange={handleProjectChange} 
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择项目" />
+                          <SelectValue placeholder={t('clientAccess.selectProject')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -282,7 +301,7 @@ export function ClientAccessDialog({
                 name="package_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>包 *</FormLabel>
+                    <FormLabel>{t('clientAccess.package')} *</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       value={field.value}
@@ -290,7 +309,7 @@ export function ClientAccessDialog({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择包" />
+                          <SelectValue placeholder={t('clientAccess.selectPackage')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -302,7 +321,7 @@ export function ClientAccessDialog({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      请先选择项目
+                      {t('clientAccess.selectProjectFirst')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -315,15 +334,15 @@ export function ClientAccessDialog({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>名称 *</FormLabel>
+                    <FormLabel>{t('clientAccess.name')} *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="输入接入凭证名称"
+                        placeholder={t('clientAccess.namePlaceholder')}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      用于标识此接入凭证的名称
+                      {t('clientAccess.nameDescription')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -336,10 +355,10 @@ export function ClientAccessDialog({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>描述</FormLabel>
+                    <FormLabel>{t('common.description')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="输入描述信息（可选）"
+                        placeholder={t('clientAccess.descriptionPlaceholder')}
                         className="resize-none"
                         {...field}
                       />
@@ -357,10 +376,10 @@ export function ClientAccessDialog({
                   onClick={() => onOpenChange(false)}
                   disabled={loading}
                 >
-                  取消
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? '处理中...' : '创建'}
+                  {loading ? t('clientAccess.processing') : t('common.create')}
                 </Button>
               </DialogFooter>
             </form>

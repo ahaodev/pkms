@@ -27,6 +27,7 @@ import type {ClientAccess} from '@/types/client-access';
 import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
 import {EmptyList} from '@/components/ui/empty-list';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface ClientAccessListProps {
     clientAccesses: ClientAccess[] | null | undefined;
@@ -49,6 +50,7 @@ export function ClientAccessList({
                                      onRegenerateToken,
                                      onViewToken,
                                  }: ClientAccessListProps) {
+    const { t } = useI18n();
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
     const [selectedClientAccess, setSelectedClientAccess] = useState<ClientAccess | null>(null);
@@ -71,8 +73,8 @@ export function ClientAccessList({
         return (
             <EmptyList
                 icon={Package}
-                title="暂无设备接入凭证"
-                description="创建第一个接入凭证来允许客户端设备访问升级服务"
+                title={t('clientAccess.noCredentials')}
+                description={t('clientAccess.noCredentialsDescription')}
             />
         );
     }
@@ -80,9 +82,9 @@ export function ClientAccessList({
     const handleCopyToken = async (token: string) => {
         try {
             await navigator.clipboard.writeText(token);
-            toast.success("访问令牌已复制到剪贴板");
+            toast.success(t('clientAccess.tokenCopied'));
         } catch {
-            toast.error("复制失败，请手动复制访问令牌");
+            toast.error(t('clientAccess.tokenCopyFailed'));
         }
     };
 
@@ -93,9 +95,9 @@ export function ClientAccessList({
     };
 
     const getStatusText = (isActive: boolean, expiresAt?: string) => {
-        if (!isActive) return '已禁用';
-        if (expiresAt && new Date(expiresAt) < new Date()) return '已过期';
-        return '正常';
+        if (!isActive) return t('clientAccess.inactive');
+        if (expiresAt && new Date(expiresAt) < new Date()) return t('clientAccess.expired');
+        return t('clientAccess.active');
     };
 
     const handleDeleteClick = (clientAccess: ClientAccess) => {
@@ -130,13 +132,13 @@ export function ClientAccessList({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>项目</TableHead>
-                            <TableHead>包</TableHead>
-                            <TableHead>名称</TableHead>
-                            <TableHead>状态</TableHead>
-                            <TableHead>最后使用</TableHead>
-                            <TableHead>描述</TableHead>
-                            <TableHead className="text-right">操作</TableHead>
+                            <TableHead>{t('clientAccess.project')}</TableHead>
+                            <TableHead>{t('clientAccess.package')}</TableHead>
+                            <TableHead>{t('clientAccess.name')}</TableHead>
+                            <TableHead>{t('clientAccess.status')}</TableHead>
+                            <TableHead>{t('clientAccess.lastUsed')}</TableHead>
+                            <TableHead>{t('common.description')}</TableHead>
+                            <TableHead className="text-right">{t('common.actions')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -176,7 +178,7 @@ export function ClientAccessList({
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-muted-foreground">从未使用</span>
+                                            <span className="text-muted-foreground">{t('clientAccess.neverUsed')}</span>
                                         )}
                                     </TableCell>
                                     <TableCell>
@@ -211,7 +213,7 @@ export function ClientAccessList({
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem onClick={() => onEdit(clientAccess)}>
                                                         <Edit className="mr-2 h-4 w-4"/>
-                                                        编辑
+                                                        {t('common.edit')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => onToggleStatus(clientAccess.id, !clientAccess.is_active)}
@@ -219,19 +221,19 @@ export function ClientAccessList({
                                                         {clientAccess.is_active ? (
                                                             <>
                                                                 <EyeOff className="mr-2 h-4 w-4"/>
-                                                                禁用
+                                                                {t('clientAccess.disable')}
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <Eye className="mr-2 h-4 w-4"/>
-                                                                启用
+                                                                {t('clientAccess.enable')}
                                                             </>
                                                         )}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => handleRegenerateClick(clientAccess)}>
                                                         <RefreshCw className="mr-2 h-4 w-4"/>
-                                                        重新生成令牌
+                                                        {t('clientAccess.regenerateToken')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem
@@ -239,7 +241,7 @@ export function ClientAccessList({
                                                         className="text-destructive"
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4"/>
-                                                        删除
+                                                        {t('common.delete')}
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -256,19 +258,18 @@ export function ClientAccessList({
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认删除</AlertDialogTitle>
+                        <AlertDialogTitle>{t('clientAccess.deleteConfirm')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            确定要删除接入凭证 "{selectedClientAccess?.name}" 吗？此操作无法撤销，
-                            客户端将无法继续使用此令牌访问服务。
+                            {t('clientAccess.deleteConfirmDescription', { name: selectedClientAccess?.name })}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteConfirm}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                            删除
+                            {t('common.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -278,16 +279,15 @@ export function ClientAccessList({
             <AlertDialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认重新生成令牌</AlertDialogTitle>
+                        <AlertDialogTitle>{t('clientAccess.regenerateConfirm')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            确定要重新生成访问令牌吗？旧的令牌将立即失效，
-                            需要及时更新客户端配置。
+                            {t('clientAccess.regenerateConfirmDescription')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleRegenerateConfirm}>
-                            重新生成
+                            {t('clientAccess.regenerate')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

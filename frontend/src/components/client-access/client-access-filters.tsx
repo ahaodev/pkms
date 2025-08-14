@@ -4,6 +4,7 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Filter} from 'lucide-react';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
+import {useI18n} from '@/contexts/i18n-context';
 import type {ClientAccessFilters as Filters} from '@/types/client-access';
 
 interface ClientAccessFiltersProps {
@@ -15,6 +16,7 @@ export function ClientAccessFilters({
                                         filters,
                                         onFiltersChange,
                                     }: ClientAccessFiltersProps) {
+    const { t } = useI18n();
     const {data: projects = []} = useProjects();
     const packagesResult = usePackages({
         projectId: filters.project_id
@@ -40,23 +42,23 @@ export function ClientAccessFilters({
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Filter className="h-4 w-4"/>
-                    筛选条件
+                    {t('clientAccess.filterConditions')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* 项目筛选 */}
                     <div className="space-y-2">
-                        <Label>项目</Label>
+                        <Label>{t('clientAccess.project')}</Label>
                         <Select
                             value={filters.project_id || 'all'}
                             onValueChange={handleProjectChange}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="选择项目"/>
+                                <SelectValue placeholder={t('clientAccess.selectProject')}/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">全部项目</SelectItem>
+                                <SelectItem value="all">{t('clientAccess.allProjects')}</SelectItem>
                                 {projects.map((project) => (
                                     <SelectItem key={project.id} value={project.id}>
                                         {project.name}
@@ -68,17 +70,17 @@ export function ClientAccessFilters({
 
                     {/* 包筛选 */}
                     <div className="space-y-2">
-                        <Label>包</Label>
+                        <Label>{t('clientAccess.package')}</Label>
                         <Select
                             value={filters.package_id || 'all'}
                             onValueChange={handlePackageChange}
                             disabled={!filters.project_id}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="选择包"/>
+                                <SelectValue placeholder={t('clientAccess.selectPackage')}/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">全部包</SelectItem>
+                                <SelectItem value="all">{t('clientAccess.allPackages')}</SelectItem>
                                 {packages.map((pkg) => (
                                     <SelectItem key={pkg.id} value={pkg.id}>
                                         {pkg.name}
