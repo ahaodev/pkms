@@ -54,6 +54,7 @@ export const zh = {
     "common.creating": "创建中...",
     "common.retry": "重试",
     "common.loadFailed": "加载失败",
+    "common.updateError": "更新失败",
     
     // Auth
     "auth.login": "登录",
@@ -111,6 +112,13 @@ export const zh = {
     "project.icon": "项目图标",
     "project.delete": "删除项目",
     "project.update": "更新项目",
+    "project.createSuccess": "项目创建成功",
+    "project.createSuccessDescription": "项目「{{name}}」已成功创建。",
+    "project.createError": "创建失败",
+    "project.createFailedDescription": "项目创建失败，请重试。",
+    "project.updateSuccess": "项目更新成功",
+    "project.updateSuccessDescription": "项目「{{name}}」已成功更新。",
+    "project.updateFailedDescription": "项目更新失败，请重试。",
     
     // Packages
     "package.title": "软件包",

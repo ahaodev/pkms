@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {useCreateProject, useUpdateProject} from '@/hooks/use-projects';
 import {useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
+import {useI18n} from '@/contexts/i18n-context';
 
 interface ProjectFormData {
     name: string;
@@ -17,6 +18,7 @@ interface ProjectType {
 }
 
 export function useHierarchyDialogs() {
+    const {t} = useI18n();
     const [projectFormData, setProjectFormData] = useState<ProjectFormData>({
         name: '',
         description: '',
@@ -53,13 +55,13 @@ export function useHierarchyDialogs() {
     const handleCreateProject = async () => {
         try {
             await createProject.mutateAsync(projectFormData);
-            toast.success('项目创建成功', {
-                description: `项目 "${projectFormData.name}" 已成功创建。`,
+            toast.success(t('project.createSuccess'), {
+                description: t('project.createSuccessDescription', { name: projectFormData.name }),
             });
             closeDialog('createProject');
         } catch {
-            toast.error('创建失败', {
-                description: '项目创建失败，请重试。',
+            toast.error(t('project.createError'), {
+                description: t('project.createFailedDescription'),
             });
         }
     };
@@ -82,13 +84,13 @@ export function useHierarchyDialogs() {
                 id: editingProject.id,
                 update: projectFormData
             });
-            toast.success('项目更新成功', {
-                description: `项目 "${projectFormData.name}" 已成功更新。`,
+            toast.success(t('project.updateSuccess'), {
+                description: t('project.updateSuccessDescription', { name: projectFormData.name }),
             });
             closeDialog('editProject');
         } catch {
-            toast.error('更新失败', {
-                description: '项目更新失败，请重试。',
+            toast.error(t('common.updateError'), {
+                description: t('project.updateFailedDescription'),
             });
         }
     };

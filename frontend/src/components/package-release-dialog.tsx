@@ -156,7 +156,7 @@ export function PackageReleaseDialog({
 
                     {/* 类型选择禁止选择 */}
                     <div>
-                        <Label htmlFor="type">类型</Label>
+                        <Label htmlFor="type">{t('package.type')}</Label>
                         <Select
                             value={packageType}
                             disabled

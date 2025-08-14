@@ -54,6 +54,7 @@ export const en = {
     "common.creating": "Creating...",
     "common.retry": "Retry",
     "common.loadFailed": "Load Failed",
+    "common.updateError": "Update Failed",
     
     // Auth
     "auth.login": "Login",
@@ -102,6 +103,13 @@ export const en = {
     "project.deleteSuccess": "Delete Successful",
     "project.deleteSuccessDescription": "Project \"{{name}}\" deleted successfully.",
     "project.deleteFailedDescription": "Project deletion failed, please try again.",
+    "project.createSuccess": "Project created successfully",
+    "project.createSuccessDescription": "Project \"{{name}}\" has been successfully created.",
+    "project.createError": "Create failed",
+    "project.createFailedDescription": "Project creation failed, please try again.",
+    "project.updateSuccess": "Project updated successfully",
+    "project.updateSuccessDescription": "Project \"{{name}}\" has been successfully updated.",
+    "project.updateFailedDescription": "Project update failed, please try again.",
     "project.noProjectsFound": "No matching projects found",
     "project.noProjects": "No projects",
     "project.editDescription": "Edit project information.",
