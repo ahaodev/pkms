@@ -7,14 +7,14 @@ import LoginPage from "@/pages/login";
 // Non-critical pages - lazy load
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const HierarchyPage = lazy(() => import("@/pages/hierarchy"));
-const UsersPage = lazy(() => import("@/pages/users"));
+const UsersPage = lazy(() => import("@/pages/sys-users"));
 const UpgradePage = lazy(() => import("@/pages/upgrade"));
-const TenantsPage = lazy(() => import("@/pages/tenants"));
+const TenantsPage = lazy(() => import("@/pages/sys-tenants"));
 const ClientAccessPage = lazy(() => import("@/pages/client-access"));
-const SharesManagerPage = lazy(() => import("@/pages/shares-manager"));
-const MenuManagement = lazy(() => import("@/pages/menu-management"));
-const RoleManagement = lazy(() => import("@/pages/role-management"));
-const UserTenantRoleManagement = lazy(() => import("@/pages/user-tenant-role-management"));
+const SharesManagerPage = lazy(() => import("@/pages/shares"));
+const MenuManagement = lazy(() => import("@/pages/sys-menus"));
+const RoleManagement = lazy(() => import("@/pages/sys-roles"));
+const UserTenantRole = lazy(() => import("@/pages/sys-user-tenant-role"));
 
 export interface RouteConfig {
     path: string;
@@ -84,7 +84,7 @@ export const routes: RouteConfig[] = [
     },
     {
         path: "/user-tenant-role-management",
-        element: UserTenantRoleManagement,
+        element: UserTenantRole,
         requiresAuth: true,
         requiresAdmin: true,
     },

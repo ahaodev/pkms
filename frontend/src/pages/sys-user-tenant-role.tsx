@@ -25,7 +25,7 @@ import type {
   TenantRoleAssignment,
 } from '@/types/user-tenant-role';
 
-const UserTenantRoleManagement: React.FC = () => {
+const UserTenantRole: React.FC = () => {
   const { data: users = [], isLoading: usersLoading } = useUsers();
   const { data: tenants = [], isLoading: tenantsLoading } = useTenants();
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
@@ -436,4 +436,4 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
   );
 };
 
-export default UserTenantRoleManagement;
+export default UserTenantRole;

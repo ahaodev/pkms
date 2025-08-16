@@ -15,15 +15,15 @@ const componentMap: Record<string, React.LazyExoticComponent<React.ComponentType
   'HierarchyPage': lazy(() => import('@/pages/hierarchy')),
   'UpgradePage': lazy(() => import('@/pages/upgrade')),
   'ClientAccessPage': lazy(() => import('@/pages/client-access')),
-  'SharesManagerPage': lazy(() => import('@/pages/shares-manager')),
+  'SharesManagerPage': lazy(() => import('@/pages/shares')),
   
   // 系统管理页面
-  'TenantsPage': lazy(() => import('@/pages/tenants')),
-  'UsersPage': lazy(() => import('@/pages/users')),
+  'TenantsPage': lazy(() => import('@/pages/sys-tenants')),
+  'UsersPage': lazy(() => import('@/pages/sys-users')),
   
   // 新增的RBAC管理页面
-  'MenuManagement': lazy(() => import('@/pages/menu-management')),
-  'RoleManagement': lazy(() => import('@/pages/role-management')),
+  'MenuManagement': lazy(() => import('@/pages/sys-menus')),
+  'RoleManagement': lazy(() => import('@/pages/sys-roles')),
 };
 
 // 默认页面组件（当没有找到对应组件时使用）
@@ -215,11 +215,11 @@ export const StaticRoutes: React.FC = () => {
   const Dashboard = lazy(() => import('@/pages/dashboard'));
   const LoginPage = lazy(() => import('@/pages/login'));
   const HierarchyPage = lazy(() => import('@/pages/hierarchy'));
-  const UsersPage = lazy(() => import('@/pages/users'));
+  const UsersPage = lazy(() => import('@/pages/sys-users'));
   const UpgradePage = lazy(() => import('@/pages/upgrade'));
-  const TenantsPage = lazy(() => import('@/pages/tenants'));
+  const TenantsPage = lazy(() => import('@/pages/sys-tenants'));
   const ClientAccessPage = lazy(() => import('@/pages/client-access'));
-  const SharesManagerPage = lazy(() => import('@/pages/shares-manager'));
+  const SharesManagerPage = lazy(() => import('@/pages/shares'));
 
   return (
     <Routes>
