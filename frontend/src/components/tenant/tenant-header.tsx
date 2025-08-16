@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { PageAction } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
+import { PageHeader } from '@/components/page';
 import { useI18n } from '@/contexts/i18n-context';
 
 interface TenantHeaderProps {

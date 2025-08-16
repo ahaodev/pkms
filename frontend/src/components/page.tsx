@@ -1,5 +1,5 @@
 import React from 'react';
-import {PageHeader} from '@/components/page-header.tsx';
+import { Button } from '@/components/ui/button.tsx';
 import {LucideIcon} from 'lucide-react';
 
 interface PageAction {
@@ -23,6 +23,34 @@ interface PageProps {
 interface PageContentProps {
     children: React.ReactNode;
     className?: string;
+}
+
+// PageHeader component - merged from page-header.tsx and exported for standalone use
+export function PageHeader({ title, description, action, className }: {
+    title: string;
+    description: string;
+    action?: PageAction;
+    className?: string;
+}) {
+    return (
+        <div className={`flex items-center justify-between ${className || ''}`}>
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+                <p className="text-muted-foreground">{description}</p>
+            </div>
+            {action && (
+                <Button 
+                    onClick={action.onClick}
+                    variant={action.variant || 'default'}
+                    className="flex items-center gap-2"
+                    disabled={action.disabled}
+                >
+                    {action.icon && <action.icon className="h-4 w-4" />}
+                    {action.label}
+                </Button>
+            )}
+        </div>
+    );
 }
 
 // 主Page组件

@@ -13,7 +13,7 @@ import {
     UpdateUpgradeTargetRequest,
     UpgradeTarget
 } from '@/lib/api/upgrade';
-import {PageHeader} from "@/components/page-header";
+import {PageHeader} from "@/components/page";
 import {Plus} from "lucide-react";
 import {useI18n} from '@/contexts/i18n-context';
 

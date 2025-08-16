@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {useDashboardData} from '@/hooks/use-dashboard';
 import {useProjects} from '@/hooks/use-projects';
 import {RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
-import {PageHeader} from "@/components/page-header";
+import {PageHeader} from "@/components/page";
 import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
 import {useI18n} from "@/contexts/i18n-context";
 

@@ -17,7 +17,7 @@ import {PackageCreateDialog} from "@/components/ppr/package-create-dialog.tsx";
 import {iconOptions} from '@/lib/utils';
 import {useHierarchyDialogs} from '@/hooks/use-hierarchy-dialogs';
 import {useHierarchyNavigation} from '@/hooks/use-hierarchy-navigation';
-import {PageHeader} from "@/components/page-header";
+import {PageHeader} from "@/components/page";
 import {useI18n} from "@/contexts/i18n-context";
 
 export default function HierarchyPage() {

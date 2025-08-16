@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { PageHeader } from '@/components/page-header.tsx';
+import { PageHeader } from '@/components/page';
 import { useI18n } from '@/contexts/i18n-context';
 
 interface ClientAccessHeaderProps {

@@ -6,7 +6,7 @@ import {useShareDialogs, useShareFilters, useShares} from '@/hooks/use-shares';
 import {DeleteShareDialog, SharesTable} from '@/components/shares';
 import {ShareDialog} from '@/components/share-dialog';
 import {ErrorBoundary} from '@/components/ui/error-boundary';
-import {PageHeader} from "@/components/page-header";
+import {PageHeader} from "@/components/page";
 import {useI18n} from '@/contexts/i18n-context';
 
 function SharesManagerPage() {
