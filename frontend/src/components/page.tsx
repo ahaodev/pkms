@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Button } from '@/components/ui/button.tsx';
 import {LucideIcon} from 'lucide-react';
 
@@ -26,12 +26,12 @@ interface PageContentProps {
 }
 
 // PageHeader component - merged from page-header.tsx and exported for standalone use
-export function PageHeader({ title, description, action, className }: {
+export const PageHeader = memo(({ title, description, action, className }: {
     title: string;
     description: string;
     action?: PageAction;
     className?: string;
-}) {
+}) => {
     return (
         <div className={`flex items-center justify-between ${className || ''}`}>
             <div>
@@ -51,18 +51,18 @@ export function PageHeader({ title, description, action, className }: {
             )}
         </div>
     );
-}
+});
 
-// 主Page组件
-export function Page({
-                         title,
-                         description,
-                         action,
-                         isLoading = false,
-                         loadingMessage = "加载中...",
-                         children,
-                         className = ""
-                     }: PageProps) {
+// 主Page组件 - 使用memo优化渲染
+export const Page = memo(({
+    title,
+    description,
+    action,
+    isLoading = false,
+    loadingMessage = "加载中...",
+    children,
+    className = ""
+}: PageProps) => {
     // 如果正在加载，显示加载状态
     if (isLoading) {
         return (
@@ -85,16 +85,16 @@ export function Page({
             {children}
         </div>
     );
-}
+});
 
-// PageContent组件 - 用于包装页面内容区域
-export function PageContent({children, className = ""}: PageContentProps) {
+// PageContent组件 - 用于包装页面内容区域，使用memo优化
+export const PageContent = memo(({children, className = ""}: PageContentProps) => {
     return (
         <div className={`space-y-6 ${className}`}>
             {children}
         </div>
     );
-}
+});
 
 // 导出类型供其他组件使用
 export type {PageAction, PageProps, PageContentProps};

@@ -35,7 +35,7 @@ export default function Dashboard() {
     }
 
     // 如果仪表板数据加载失败，显示错误信息但仍然显示项目数据
-    if (dashboardError) {
+    if (dashboardError && process.env.NODE_ENV === 'development') {
         console.error('Dashboard data loading failed:', dashboardError);
     }
 

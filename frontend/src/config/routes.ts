@@ -1,15 +1,20 @@
-// Direct imports instead of lazy loading to avoid route issues
-import Dashboard from "@/pages/dashboard";
-import HierarchyPage from "@/pages/hierarchy";
+// Lazy loading for better code splitting and performance
+import { lazy } from 'react';
+
+// Critical pages - load immediately
 import LoginPage from "@/pages/login";
-import UsersPage from "@/pages/users";
-import UpgradePage from "@/pages/upgrade";
-import TenantsPage from "@/pages/tenants";
-import ClientAccessPage from "@/pages/client-access";
-import SharesManagerPage from "@/pages/shares-manager.tsx";
-import MenuManagement from "@/pages/menu-management";
-import RoleManagement from "@/pages/role-management";
-import UserTenantRoleManagement from "@/pages/user-tenant-role-management";
+
+// Non-critical pages - lazy load
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const HierarchyPage = lazy(() => import("@/pages/hierarchy"));
+const UsersPage = lazy(() => import("@/pages/users"));
+const UpgradePage = lazy(() => import("@/pages/upgrade"));
+const TenantsPage = lazy(() => import("@/pages/tenants"));
+const ClientAccessPage = lazy(() => import("@/pages/client-access"));
+const SharesManagerPage = lazy(() => import("@/pages/shares-manager"));
+const MenuManagement = lazy(() => import("@/pages/menu-management"));
+const RoleManagement = lazy(() => import("@/pages/role-management"));
+const UserTenantRoleManagement = lazy(() => import("@/pages/user-tenant-role-management"));
 
 export interface RouteConfig {
     path: string;

@@ -1,12 +1,12 @@
-import React, {Suspense, useMemo} from "react";
+import React, {Suspense, useMemo, memo} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 import {useAuth} from "@/providers/auth-provider.tsx";
 import {Layout} from "@/components/layout";
 import {routes} from "@/config/routes";
 import {useI18n} from "@/contexts/i18n-context";
 
-// Loading component for app initialization
-function AppLoader() {
+// Loading component for app initialization - memoized for performance
+const AppLoader = memo(() => {
     const { t } = useI18n();
     return (
         <div className="flex items-center justify-center h-screen">
@@ -16,7 +16,7 @@ function AppLoader() {
             </div>
         </div>
     );
-}
+});
 
 // Error boundary for route loading failures
 interface ErrorBoundaryState {
@@ -24,8 +24,8 @@ interface ErrorBoundaryState {
     error?: Error;
 }
 
-// Error content component with i18n support
-function ErrorContent() {
+// Error content component with i18n support - memoized for performance
+const ErrorContent = memo(() => {
     const { t } = useI18n();
     return (
         <div className="flex items-center justify-center h-screen">
@@ -41,7 +41,7 @@ function ErrorContent() {
             </div>
         </div>
     );
-}
+});
 
 class RouteErrorBoundary extends React.Component<
     { children: React.ReactNode },
@@ -72,7 +72,9 @@ interface RouteGuardProps {
 }
 
 function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
-    console.log(requiresAdmin);
+    if (process.env.NODE_ENV === 'development') {
+        console.log('RouteGuard requiresAdmin:', requiresAdmin);
+    }
     // Allow access for component-level permission handling
     // Individual components will handle permission-based content display
     return <>{children}</>;
