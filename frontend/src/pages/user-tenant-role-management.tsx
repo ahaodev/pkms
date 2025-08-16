@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PageHeader } from '@/components/ui/page-header';
 import { Trash2, Plus, Users, Building2, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUsers } from '@/hooks/use-users';
@@ -25,14 +26,14 @@ import type {
 } from '@/types/user-tenant-role';
 
 const UserTenantRoleManagement: React.FC = () => {
-  const { data: users = [] } = useUsers();
-  const { data: tenants = [] } = useTenants();
-  const { data: roles = [] } = useRoles();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+  const { data: tenants = [], isLoading: tenantsLoading } = useTenants();
+  const { data: roles = [], isLoading: rolesLoading } = useRoles();
   
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   
-  const { data: userTenantRoles = [], refetch } = useAllUserTenantRoles(selectedUserId);
+  const { data: userTenantRoles = [], refetch, isLoading: rolesDataLoading } = useAllUserTenantRoles(selectedUserId);
   const removeRoleMutation = useRemoveUserTenantRole();
 
   // 获取用户名称
@@ -86,25 +87,37 @@ const UserTenantRoleManagement: React.FC = () => {
     return acc;
   }, {} as Record<string, any[]>);
 
-  return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">用户租户角色管理</h1>
-          <p className="text-gray-600">管理用户在不同租户中的角色分配</p>
+  // 检查是否正在加载
+  const isLoading = usersLoading || tenantsLoading || rolesLoading;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="用户租户角色管理"
+          description="管理用户在不同租户中的角色分配"
+        />
+        <div className="text-center py-8 text-muted-foreground">
+          加载中...
         </div>
-        
-        <Button
-          onClick={() => setIsAssignDialogOpen(true)}
-          disabled={!selectedUserId}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          分配角色
-        </Button>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="用户租户角色管理"
+        description="管理用户在不同租户中的角色分配"
+        action={selectedUserId ? {
+          label: "分配角色",
+          onClick: () => setIsAssignDialogOpen(true),
+          icon: Plus
+        } : undefined}
+      />
 
       {/* 用户选择 */}
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -153,16 +166,21 @@ const UserTenantRoleManagement: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {Object.keys(groupedRoles).length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+            {rolesDataLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                加载角色数据中...
+              </div>
+            ) : Object.keys(groupedRoles).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
                 该用户暂无角色分配
               </div>
             ) : (
-              Object.entries(groupedRoles).map(([tenantId, roles]) => (
-                <div key={tenantId} className="mb-6 last:mb-0">
-                  <div className="flex items-center gap-2 mb-3">
+              <div className="space-y-6">
+                {Object.entries(groupedRoles).map(([tenantId, roles]) => (
+                  <div key={tenantId} className="space-y-4">
+                  <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    <Badge variant="outline" className="text-sm">
+                    <Badge variant="outline">
                       {getTenantName(tenantId)}
                     </Badge>
                     <div className="h-px bg-border flex-1"></div>
@@ -184,7 +202,7 @@ const UserTenantRoleManagement: React.FC = () => {
                             {getRoleName(role.role_id)}
                           </TableCell>
                           <TableCell>
-                            <code className="px-2 py-1 bg-gray-100 rounded text-sm">
+                            <code className="px-2 py-1 bg-muted rounded text-sm">
                               {getRoleCode(role.role_id)}
                             </code>
                           </TableCell>
@@ -206,8 +224,9 @@ const UserTenantRoleManagement: React.FC = () => {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
-              ))
+                  </div>
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -381,7 +400,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
           <div className="space-y-2">
             <Label>待分配的角色</Label>
             {tenantRoles.length === 0 ? (
-              <div className="text-sm text-muted-foreground p-3 border border-dashed rounded-md text-center">
+              <div className="text-center py-8 text-muted-foreground border border-dashed rounded-md">
                 暂无角色分配
               </div>
             ) : (

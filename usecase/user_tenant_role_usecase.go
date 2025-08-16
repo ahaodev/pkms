@@ -60,7 +60,7 @@ func (uu *userTenantRoleUsecase) AssignUserTenantRoles(ctx context.Context, req 
 		}
 
 		// 使用 Casbin 分配角色（使用角色代码）
-		if err := uu.casbinManager.AddRoleForUser(req.UserID, role.Code, assignment.TenantID); err != nil {
+		if _, err := uu.casbinManager.AddRoleForUser(req.UserID, role.Code, assignment.TenantID); err != nil {
 			return err
 		}
 	}
@@ -90,7 +90,7 @@ func (uu *userTenantRoleUsecase) RemoveUserTenantRole(ctx context.Context, req *
 	}
 
 	// 使用 Casbin 移除角色
-	if err := uu.casbinManager.RemoveRoleForUser(req.UserID, role.Code, req.TenantID); err != nil {
+	if _, err := uu.casbinManager.DeleteRoleForUser(req.UserID, role.Code, req.TenantID); err != nil {
 		return err
 	}
 
@@ -114,7 +114,7 @@ func (uu *userTenantRoleUsecase) RemoveAllUserRolesInTenant(ctx context.Context,
 
 	// 从 Casbin 中移除所有角色
 	for _, role := range roles {
-		if err := uu.casbinManager.RemoveRoleForUser(userID, role.Code, tenantID); err != nil {
+		if _, err := uu.casbinManager.DeleteRoleForUser(userID, role.Code, tenantID); err != nil {
 			// 记录错误但继续处理
 			continue
 		}
@@ -158,7 +158,7 @@ func (uu *userTenantRoleUsecase) HasUserRoleInTenant(ctx context.Context, userID
 
 func (uu *userTenantRoleUsecase) CheckUserPermissionInTenant(ctx context.Context, userID, tenantID, resource, action string) (bool, error) {
 	// 使用 Casbin 检查权限
-	result, err := uu.casbinManager.Enforce(userID, tenantID, resource, action)
+	result, err := uu.casbinManager.CheckPermission(userID, tenantID, resource, action)
 	if err != nil {
 		return false, err
 	}

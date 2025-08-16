@@ -157,7 +157,7 @@ const MenuManagement: React.FC = () => {
 
   return (
     <PermissionGuard permission="menu:read" fallback={<div>无权限访问</div>}>
-      <div className="container mx-auto p-6">
+      <div className="container space-y-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">菜单管理</h1>

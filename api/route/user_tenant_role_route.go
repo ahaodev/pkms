@@ -4,7 +4,6 @@ import (
 	"pkms/api/controller"
 	"pkms/api/middleware"
 	"pkms/bootstrap"
-	"pkms/domain"
 	"pkms/ent"
 	"pkms/internal/casbin"
 	"pkms/repository"
@@ -40,29 +39,32 @@ func NewUserTenantRoleRouter(
 		Env:                   env,
 	}
 
+	// 创建 Casbin 中间件
+	casbinMiddleware := middleware.NewCasbinMiddleware(casbinManager)
+
 	userTenantRoleGroup := group.Group("/user-tenant-role")
 	userTenantRoleGroup.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 
 	// 管理员权限：角色分配和移除
 	userTenantRoleGroup.POST("/assign",
-		middleware.CasbinMiddleware(casbinManager).RequirePermission("user", "write"),
+		casbinMiddleware.RequireRole("admin"),
 		userTenantRoleController.AssignUserTenantRoles)
 
 	userTenantRoleGroup.POST("/remove",
-		middleware.CasbinMiddleware(casbinManager).RequirePermission("user", "write"),
+		casbinMiddleware.RequireRole("admin"),
 		userTenantRoleController.RemoveUserTenantRole)
 
 	// 查询权限：用户角色信息
 	userTenantRoleGroup.GET("/user/:userId/tenant/:tenantId/roles",
-		middleware.CasbinMiddleware(casbinManager).RequirePermission("user", "read"),
+		casbinMiddleware.RequireAnyRole([]string{"admin", "pm", "user"}),
 		userTenantRoleController.GetUserRolesByTenant)
 
 	userTenantRoleGroup.GET("/user/:userId",
-		middleware.CasbinMiddleware(casbinManager).RequirePermission("user", "read"),
+		casbinMiddleware.RequireAnyRole([]string{"admin", "pm", "user"}),
 		userTenantRoleController.GetAllUserTenantRoles)
 
 	userTenantRoleGroup.GET("/tenant/:tenantId/role/:roleId/users",
-		middleware.CasbinMiddleware(casbinManager).RequirePermission("user", "read"),
+		casbinMiddleware.RequireAnyRole([]string{"admin", "pm", "user"}),
 		userTenantRoleController.GetUsersByTenantRole)
 
 	// 当前用户：无需特殊权限

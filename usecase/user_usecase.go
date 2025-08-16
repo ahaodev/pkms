@@ -60,7 +60,7 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 		return err
 	}
 	uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
-	uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
+	_, _ = uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	return nil
 }
 
@@ -106,7 +106,7 @@ func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.Crea
 			return user, err
 		}
 		uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
-		uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
+		_, _ = uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	}
 
 	// 处理租户角色分配
@@ -116,11 +116,11 @@ func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.Crea
 			if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, assignment.TenantID); err != nil {
 				// 可能已经存在，忽略错误继续
 			}
-			
+
 			// 使用 Casbin 分配角色
 			// 注意：这里需要根据实际的角色代码来设置
 			// TODO: 应该通过角色ID查询角色代码
-			if err := uu.casbinManager.AddRoleForUser(user.ID, assignment.RoleID, assignment.TenantID); err != nil {
+			if _, err := uu.casbinManager.AddRoleForUser(user.ID, assignment.RoleID, assignment.TenantID); err != nil {
 				return user, err
 			}
 		}

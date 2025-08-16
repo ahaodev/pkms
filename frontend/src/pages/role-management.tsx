@@ -67,7 +67,7 @@ const RoleManagement: React.FC = () => {
 
   return (
     <PermissionGuard permission="role:read" fallback={<div>无权限访问</div>}>
-      <div className="container mx-auto p-6">
+      <div className="container space-y-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">角色管理</h1>
@@ -86,12 +86,6 @@ const RoleManagement: React.FC = () => {
 
         {/* 角色列表 */}
         <Card>
-          <CardHeader>
-            <CardTitle>角色列表</CardTitle>
-            <CardDescription>
-              系统中的所有角色。系统角色无法删除，但可以编辑描述。
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
