@@ -9,7 +9,7 @@ import {UserFilters, UserList} from '@/components/user';
 import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
 import {UserEditDialog} from '@/components/user/user-edit-dialog';
-import {CustomSkeleton} from '@/components/custom-skeleton';
+import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
 
 interface UserFormData {
@@ -59,21 +59,7 @@ export default function UsersPage() {
     }, [users, searchTerm]);
 
 
-    if (isLoading) {
-        return (
-            <div className="space-y-6">
-                <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)} />
-                <UserFilters
-                    searchTerm=""
-                    roleFilter="all"
-                    totalUsers={0}
-                    onSearchChange={() => {}}
-                    onRoleFilterChange={() => {}}
-                />
-                <CustomSkeleton type="table" rows={6} columns={6} />
-            </div>
-        );
-    }
+    // 移除这个检查，让 Page 组件处理 loading 状态
 
     const handleCreateUser = async () => {
         if (!userForm.name || !userForm.password) {
@@ -177,57 +163,59 @@ export default function UsersPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <Page isLoading={isLoading}>
             {/* 页面头部 */}
             <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)} />
 
-            {/* 筛选器 */}
-            <UserFilters
-                searchTerm={searchTerm}
-                roleFilter="all"
-                totalUsers={filteredUsers.length}
-                onSearchChange={setSearchTerm}
-                onRoleFilterChange={() => {}}
-            />
+            <PageContent>
+                {/* 筛选器 */}
+                <UserFilters
+                    searchTerm={searchTerm}
+                    roleFilter="all"
+                    totalUsers={filteredUsers.length}
+                    onSearchChange={setSearchTerm}
+                    onRoleFilterChange={() => {}}
+                />
 
-            {/* 用户列表 */}
-            <UserList
-                users={filteredUsers}
-                currentUser={currentUser}
-                projects={projects}
-                onEdit={handleEditUser}
-                onDelete={handleDeleteUser}
-                onToggleStatus={handleToggleUserStatus}
-            />
+                {/* 用户列表 */}
+                <UserList
+                    users={filteredUsers}
+                    currentUser={currentUser}
+                    projects={projects}
+                    onEdit={handleEditUser}
+                    onDelete={handleDeleteUser}
+                    onToggleStatus={handleToggleUserStatus}
+                />
 
-            {/* 创建用户对话框 */}
-            <UserCreateDialog
-                open={isCreateDialogOpen}
-                onClose={() => {
-                    setIsCreateDialogOpen(false);
-                    resetForm();
-                }}
-                onSubmit={handleCreateUser}
-                userForm={userForm}
-                projects={projects}
-                groups={[]}
-                updateUserForm={updateUserForm}
-            />
+                {/* 创建用户对话框 */}
+                <UserCreateDialog
+                    open={isCreateDialogOpen}
+                    onClose={() => {
+                        setIsCreateDialogOpen(false);
+                        resetForm();
+                    }}
+                    onSubmit={handleCreateUser}
+                    userForm={userForm}
+                    projects={projects}
+                    groups={[]}
+                    updateUserForm={updateUserForm}
+                />
 
-            {/* 编辑用户对话框 */}
-            <UserEditDialog
-                open={isEditDialogOpen}
-                onClose={() => {
-                    setIsEditDialogOpen(false);
-                    setEditingUser(null);
-                    resetForm();
-                }}
-                onSubmit={handleUpdateUser}
-                userForm={userForm}
-                projects={projects}
-                groups={[]}
-                updateUserForm={updateUserForm}
-            />
-        </div>
+                {/* 编辑用户对话框 */}
+                <UserEditDialog
+                    open={isEditDialogOpen}
+                    onClose={() => {
+                        setIsEditDialogOpen(false);
+                        setEditingUser(null);
+                        resetForm();
+                    }}
+                    onSubmit={handleUpdateUser}
+                    userForm={userForm}
+                    projects={projects}
+                    groups={[]}
+                    updateUserForm={updateUserForm}
+                />
+            </PageContent>
+        </Page>
     );
 }

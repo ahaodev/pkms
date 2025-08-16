@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, PageAction } from '@/components/page.tsx';
+import { Page, PageHeader, PageAction, PageContent } from '@/components/page.tsx';
 import { PermissionGuard, PermissionButton } from '@/components/permissions/permission-guard.tsx';
 import { LucideIcon } from 'lucide-react';
 
@@ -66,21 +66,23 @@ export function ManagementPage({
       permission={permission} 
       fallback={<div className="text-center py-8 text-muted-foreground">{fallbackMessage}</div>}
     >
-      <Page
-        title={title}
-        description={description}
-        action={action?.permission ? undefined : pageAction}
-        isLoading={isLoading}
-        loadingMessage={loadingMessage}
-        className={className}
-      >
-        {/* Custom action with permission check */}
+      <Page isLoading={isLoading} loadingMessage={loadingMessage} className={className}>
+        <PageHeader
+          title={title}
+          description={description}
+          action={action?.permission ? undefined : pageAction}
+        />
+        
+        {/* 带权限控制的自定义 action */}
         {actionComponent && (
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end">
             {actionComponent}
           </div>
         )}
-        {children}
+        
+        <PageContent>
+          {children}
+        </PageContent>
       </Page>
     </PermissionGuard>
   );

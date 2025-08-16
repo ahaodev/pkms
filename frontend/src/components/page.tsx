@@ -11,9 +11,6 @@ interface PageAction {
 }
 
 interface PageProps {
-    title: string;
-    description: string;
-    action?: PageAction;
     isLoading?: boolean;
     loadingMessage?: string;
     children: React.ReactNode;
@@ -53,11 +50,8 @@ export const PageHeader = memo(({ title, description, action, className }: {
     );
 });
 
-// 主Page组件 - 使用memo优化渲染
+// 主Page组件 - 支持嵌套结构的容器组件
 export const Page = memo(({
-    title,
-    description,
-    action,
     isLoading = false,
     loadingMessage = "加载中...",
     children,
@@ -67,7 +61,6 @@ export const Page = memo(({
     if (isLoading) {
         return (
             <div className={`space-y-6 ${className}`}>
-                <PageHeader title={title} description={description}/>
                 <div className="text-center py-8 text-muted-foreground">
                     {loadingMessage}
                 </div>
@@ -77,11 +70,6 @@ export const Page = memo(({
 
     return (
         <div className={`space-y-6 ${className}`}>
-            <PageHeader
-                title={title}
-                description={description}
-                action={action}
-            />
             {children}
         </div>
     );

@@ -3,8 +3,7 @@ import {toast} from 'sonner';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
-import {CustomSkeleton} from '@/components/custom-skeleton';
-import {PageContent} from '@/components/page';
+import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
 
 export default function TenantsPage() {
@@ -21,14 +20,7 @@ export default function TenantsPage() {
     const [viewingTenant, setViewingTenant] = useState<Tenant | null>(null);
     const [tenantName, setTenantName] = useState('');
 
-    if (isLoading) {
-        return (
-            <PageContent>
-                <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)}/>
-                <CustomSkeleton type="table" rows={5} columns={4} />
-            </PageContent>
-        );
-    }
+    // 移除这个检查，让 Page 组件处理 loading 状态
 
     const handleCreateTenant = async () => {
         if (!tenantName.trim()) {
@@ -93,8 +85,10 @@ export default function TenantsPage() {
     };
 
     return (
-        <PageContent>
+        <Page isLoading={isLoading}>
             <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)} />
+            
+            <PageContent>
 
             <TenantList
                 tenants={tenants || []}
@@ -130,6 +124,7 @@ export default function TenantsPage() {
                 onClose={closeDialogs}
                 tenant={viewingTenant}
             />
-        </PageContent>
+            </PageContent>
+        </Page>
     );
 }

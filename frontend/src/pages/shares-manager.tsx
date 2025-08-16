@@ -6,7 +6,7 @@ import {useShareDialogs, useShareFilters, useShares} from '@/hooks/use-shares';
 import {DeleteShareDialog, SharesTable} from '@/components/shares';
 import {ShareDialog} from '@/components/share-dialog';
 import {ErrorBoundary} from '@/components/ui/error-boundary';
-import {PageHeader} from "@/components/page";
+import {Page, PageHeader, PageContent} from "@/components/page";
 import {useI18n} from '@/contexts/i18n-context';
 
 function SharesManagerPage() {
@@ -68,53 +68,54 @@ function SharesManagerPage() {
 
     return (
         <ErrorBoundary>
-            <div className="space-y-6">
-                {/* Header */}
+            <Page isLoading={isLoading}>
                 <PageHeader
                     title={t('share.title')}
                     description={t('share.description')}
                 />
 
-                {/* Filters */}
-                <ProjectPackageFilters
-                    projectFilter={filters.project}
-                    packageFilter={filters.package}
-                    totalCount={totalCount}
-                    countLabel={t('share.sharesCount')}
-                    projects={projects}
-                    packages={packages}
-                    onProjectFilterChange={updateProjectFilter}
-                    onPackageFilterChange={updatePackageFilter}
-                />
-
-                {/* Shares Table */}
-                <SharesTable
-                    shares={filteredShares}
-                    isLoading={isLoading}
-                    error={error}
-                    onDeleteClick={handleDeleteClick}
-                    onViewClick={handleViewClickWithFocus}
-                />
-
-                {/* Delete Confirmation Dialog */}
-                <DeleteShareDialog
-                    isOpen={dialogState.deleteOpen}
-                    shareToDelete={dialogState.shareToDelete}
-                    isDeleting={deleteMutation.isPending}
-                    onClose={closeDeleteDialog}
-                    onConfirm={handleDeleteConfirm}
-                />
-
-                {/* View Share Dialog */}
-                {dialogState.shareToView && (
-                    <ShareDialog
-                        isOpen={dialogState.viewOpen}
-                        onClose={handleCloseViewDialog}
-                        shareUrl={dialogState.shareToView.share_url}
-                        packageName={`${dialogState.shareToView.package_name} (${dialogState.shareToView.version})`}
+                <PageContent>
+                    {/* Filters */}
+                    <ProjectPackageFilters
+                        projectFilter={filters.project}
+                        packageFilter={filters.package}
+                        totalCount={totalCount}
+                        countLabel={t('share.sharesCount')}
+                        projects={projects}
+                        packages={packages}
+                        onProjectFilterChange={updateProjectFilter}
+                        onPackageFilterChange={updatePackageFilter}
                     />
-                )}
-            </div>
+
+                    {/* Shares Table */}
+                    <SharesTable
+                        shares={filteredShares}
+                        isLoading={isLoading}
+                        error={error}
+                        onDeleteClick={handleDeleteClick}
+                        onViewClick={handleViewClickWithFocus}
+                    />
+
+                    {/* Delete Confirmation Dialog */}
+                    <DeleteShareDialog
+                        isOpen={dialogState.deleteOpen}
+                        shareToDelete={dialogState.shareToDelete}
+                        isDeleting={deleteMutation.isPending}
+                        onClose={closeDeleteDialog}
+                        onConfirm={handleDeleteConfirm}
+                    />
+
+                    {/* View Share Dialog */}
+                    {dialogState.shareToView && (
+                        <ShareDialog
+                            isOpen={dialogState.viewOpen}
+                            onClose={handleCloseViewDialog}
+                            shareUrl={dialogState.shareToView.share_url}
+                            packageName={`${dialogState.shareToView.package_name} (${dialogState.shareToView.version})`}
+                        />
+                    )}
+                </PageContent>
+            </Page>
         </ErrorBoundary>
     );
 }

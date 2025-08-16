@@ -13,7 +13,7 @@ import {
     UpdateUpgradeTargetRequest,
     UpgradeTarget
 } from '@/lib/api/upgrade';
-import {PageHeader} from "@/components/page";
+import {Page, PageHeader, PageContent} from "@/components/page";
 import {Plus} from "lucide-react";
 import {useI18n} from '@/contexts/i18n-context';
 
@@ -163,8 +163,7 @@ export default function UpgradePage() {
     // Statistics - use filtered data
     const totalTargets = filteredUpgradeTargets.length;
     return (
-        <div className="space-y-6">
-            {/* Header */}
+        <Page isLoading={isLoading}>
             <PageHeader
                 title={t('upgrade.title')}
                 description={t('upgrade.description')}
@@ -177,54 +176,56 @@ export default function UpgradePage() {
                 }}
             />
 
-            {/* Filters */}
-            <ProjectPackageFilters
-                projectFilter={projectFilter}
-                packageFilter={packageFilter}
-                totalCount={totalTargets}
-                countLabel={t('upgrade.targetsCount')}
-                projects={projects}
-                packages={packages}
-                onProjectFilterChange={setProjectFilter}
-                onPackageFilterChange={setPackageFilter}
-            />
+            <PageContent>
+                {/* Filters */}
+                <ProjectPackageFilters
+                    projectFilter={projectFilter}
+                    packageFilter={packageFilter}
+                    totalCount={totalTargets}
+                    countLabel={t('upgrade.targetsCount')}
+                    projects={projects}
+                    packages={packages}
+                    onProjectFilterChange={setProjectFilter}
+                    onPackageFilterChange={setPackageFilter}
+                />
 
-            {/* Upgrade Targets Table */}
-            <UpgradeTargetsTable
-                upgradeTargets={filteredUpgradeTargets}
-                isLoading={isLoading}
-                onEdit={handleEdit}
-            />
+                {/* Upgrade Targets Table */}
+                <UpgradeTargetsTable
+                    upgradeTargets={filteredUpgradeTargets}
+                    isLoading={isLoading}
+                    onEdit={handleEdit}
+                />
 
-            {/* Create Upgrade Target Dialog */}
-            <CreateUpgradeTargetDialog
-                isOpen={isCreateDialogOpen}
-                onClose={() => {
-                    setIsCreateDialogOpen(false);
-                    resetForm();
-                }}
-                onSubmit={handleCreate}
-                formData={formData}
-                setFormData={setFormData}
-                projects={projects}
-                packages={packages}
-                isLoading={createUpgradeTargetMutation.isPending}
-            />
+                {/* Create Upgrade Target Dialog */}
+                <CreateUpgradeTargetDialog
+                    isOpen={isCreateDialogOpen}
+                    onClose={() => {
+                        setIsCreateDialogOpen(false);
+                        resetForm();
+                    }}
+                    onSubmit={handleCreate}
+                    formData={formData}
+                    setFormData={setFormData}
+                    projects={projects}
+                    packages={packages}
+                    isLoading={createUpgradeTargetMutation.isPending}
+                />
 
-            {/* Edit Upgrade Target Dialog */}
-            <EditUpgradeTargetDialog
-                isOpen={isEditDialogOpen}
-                onClose={() => {
-                    setIsEditDialogOpen(false);
-                    setSelectedTarget(null);
-                    resetEditForm();
-                }}
-                onSubmit={handleUpdate}
-                formData={editFormData}
-                setFormData={setEditFormData}
-                isLoading={updateUpgradeTargetMutation.isPending}
-            />
-        </div>
+                {/* Edit Upgrade Target Dialog */}
+                <EditUpgradeTargetDialog
+                    isOpen={isEditDialogOpen}
+                    onClose={() => {
+                        setIsEditDialogOpen(false);
+                        setSelectedTarget(null);
+                        resetEditForm();
+                    }}
+                    onSubmit={handleUpdate}
+                    formData={editFormData}
+                    setFormData={setEditFormData}
+                    isLoading={updateUpgradeTargetMutation.isPending}
+                />
+            </PageContent>
+        </Page>
     );
 }
 

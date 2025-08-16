@@ -12,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Edit, Plus } from 'lucide-react';
-import { PermissionButton } from '@/components/permissions/permission-guard';
-import { PageContent } from '@/components/page';
-import { ManagementPage } from '@/components/management-page';
+import { PermissionButton, PermissionGuard } from '@/components/permissions/permission-guard';
+import { Page, PageHeader, PageContent } from '@/components/page';
 import { useRoleManagement } from '@/hooks/use-roles';
 import { useTenants } from '@/hooks/use-tenants';
 import type { Role, CreateRoleRequest, UpdateRoleRequest } from '@/types/role';
@@ -64,19 +63,29 @@ const RoleManagement: React.FC = () => {
   };
 
   return (
-    <ManagementPage
-      title="角色管理"
-      description="管理系统角色和权限分配"
+    <PermissionGuard 
       permission="role:read"
-      isLoading={isLoading}
-      action={{
-        label: "创建角色",
-        onClick: () => setIsCreateDialogOpen(true),
-        icon: Plus,
-        permission: "role:create"
-      }}
+      fallback={<div className="text-center py-8 text-muted-foreground">无权限访问</div>}
     >
-      <PageContent>
+      <Page isLoading={isLoading}>
+        <PageHeader
+          title="角色管理"
+          description="管理系统角色和权限分配"
+        />
+        
+        {/* 带权限控制的创建按钮 */}
+        <div className="flex justify-end">
+          <PermissionButton
+            permission="role:create"
+            onClick={() => setIsCreateDialogOpen(true)}
+            variant="default"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            创建角色
+          </PermissionButton>
+        </div>
+        
+        <PageContent>
         {/* 角色列表 */}
         <Card>
           <CardContent>
@@ -184,8 +193,9 @@ const RoleManagement: React.FC = () => {
             isLoading={updateRole.isPending}
           />
         )}
-      </PageContent>
-    </ManagementPage>
+        </PageContent>
+      </Page>
+    </PermissionGuard>
   );
 };
 

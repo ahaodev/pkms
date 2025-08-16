@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Page, PageContent } from '@/components/page';
+import { Page, PageHeader, PageContent } from '@/components/page';
 import { Trash2, Plus, Users, Building2, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUsers } from '@/hooks/use-users';
@@ -91,16 +91,17 @@ const UserTenantRoleManagement: React.FC = () => {
   const isLoading = usersLoading || tenantsLoading || rolesLoading;
 
   return (
-    <Page
-      title="用户租户角色管理"
-      description="管理用户在不同租户中的角色分配"
-      isLoading={isLoading}
-      action={selectedUserId ? {
-        label: "分配角色",
-        onClick: () => setIsAssignDialogOpen(true),
-        icon: Plus
-      } : undefined}
-    >
+    <Page isLoading={isLoading}>
+      <PageHeader
+        title="用户租户角色管理"
+        description="管理用户在不同租户中的角色分配"
+        action={selectedUserId ? {
+          label: "分配角色",
+          onClick: () => setIsAssignDialogOpen(true),
+          icon: Plus
+        } : undefined}
+      />
+      
       <PageContent>
         {/* 用户选择 */}
         <Card>

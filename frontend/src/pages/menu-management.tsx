@@ -12,9 +12,8 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Plus, EyeOff } from 'lucide-react';
 import { menuApi } from '@/lib/api/menu';
-import { PermissionButton } from '@/components/permissions/permission-guard';
-import { PageContent } from '@/components/page';
-import { ManagementPage } from '@/components/management-page';
+import { PermissionButton, PermissionGuard } from '@/components/permissions/permission-guard';
+import { Page, PageHeader, PageContent } from '@/components/page';
 import type { MenuTreeNode, CreateMenuRequest, UpdateMenuRequest } from '@/types/menu';
 
 const MenuManagement: React.FC = () => {
@@ -154,19 +153,29 @@ const MenuManagement: React.FC = () => {
   };
 
   return (
-    <ManagementPage
-      title="菜单管理"
-      description="管理系统菜单和权限"
+    <PermissionGuard 
       permission="menu:read"
-      isLoading={isPending}
-      action={{
-        label: "创建菜单",
-        onClick: () => setIsCreateDialogOpen(true),
-        icon: Plus,
-        permission: "menu:create"
-      }}
+      fallback={<div className="text-center py-8 text-muted-foreground">无权限访问</div>}
     >
-      <PageContent>
+      <Page isLoading={isPending}>
+        <PageHeader
+          title="菜单管理"
+          description="管理系统菜单和权限"
+        />
+        
+        {/* 带权限控制的创建按钮 */}
+        <div className="flex justify-end">
+          <PermissionButton
+            permission="menu:create"
+            onClick={() => setIsCreateDialogOpen(true)}
+            variant="default"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            创建菜单
+          </PermissionButton>
+        </div>
+        
+        <PageContent>
         <Card>
           <CardHeader>
             <CardTitle>菜单树</CardTitle>
@@ -208,8 +217,9 @@ const MenuManagement: React.FC = () => {
             menuTree={menuTree}
           />
         )}
-      </PageContent>
-    </ManagementPage>
+        </PageContent>
+      </Page>
+    </PermissionGuard>
   );
 };
 
