@@ -15,14 +15,16 @@ type CasbinController struct {
 	casbinManager    *casbin.CasbinManager
 	userRepository   domain.UserRepository
 	tenantRepository domain.TenantRepository
+	menuUsecase      domain.MenuUsecase
 }
 
 // NewCasbinController 创建新的权限管理控制器
-func NewCasbinController(casbinManager *casbin.CasbinManager, userRepository domain.UserRepository, tenantRepository domain.TenantRepository) *CasbinController {
+func NewCasbinController(casbinManager *casbin.CasbinManager, userRepository domain.UserRepository, tenantRepository domain.TenantRepository, menuUsecase domain.MenuUsecase) *CasbinController {
 	return &CasbinController{
 		casbinManager:    casbinManager,
 		userRepository:   userRepository,
 		tenantRepository: tenantRepository,
+		menuUsecase:      menuUsecase,
 	}
 }
 
@@ -209,7 +211,7 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 // @Router       /casbin/user/permissions [get]
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
-	tenantID := c.GetString(constants.TenantID)
+	tenantID := c.GetHeader(constants.TenantID)
 
 	// 添加调试日志
 	fmt.Printf("GetUserPermissions - UserID: %s, TenantID: %s\n", userID, tenantID)
@@ -503,14 +505,109 @@ func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetHeader(constants.TenantID)
-	// 获取侧边栏权限
-	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
+
+	// 添加调试日志
+	fmt.Printf("GetSidebarPermissions - UserID: %s, TenantID: %s\n", userID, tenantID)
+	fmt.Printf("GetSidebarPermissions - MenuUsecase is nil: %t\n", cc.menuUsecase == nil)
+
+	// 如果没有MenuUsecase，使用旧的硬编码方式作为fallback
+	if cc.menuUsecase == nil {
+		sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
+		fmt.Printf("GetSidebarPermissions - Sidebar permissions: %v\n", sidebarPermissions)
+		response := gin.H{
+			"sidebar": sidebarPermissions,
+		}
+		c.JSON(http.StatusOK, domain.RespSuccess(response))
+		return
+	}
+
+	// 使用新的动态菜单系统
+	fmt.Printf("GetSidebarPermissions - About to call GetUserMenuTree\n")
+	menuTree, err := cc.menuUsecase.GetUserMenuTree(c, userID, tenantID)
+	if err != nil {
+		fmt.Printf("获取用户菜单失败，使用fallback: %v\n", err)
+		// fallback到旧方式
+		sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
+		fmt.Printf("GetSidebarPermissions (fallback) - Sidebar permissions: %v\n", sidebarPermissions)
+		response := gin.H{
+			"sidebar": sidebarPermissions,
+		}
+		c.JSON(http.StatusOK, domain.RespSuccess(response))
+		return
+	}
+	fmt.Printf("GetSidebarPermissions - GetUserMenuTree returned without error\n")
+
+	fmt.Printf("GetSidebarPermissions - Menu tree length: %d\n", len(menuTree))
+
+	// 提取菜单路径作为sidebar权限
+	var sidebarPermissions []string
+	for _, menu := range menuTree {
+		if menu.Path != "" {
+			// 将路径转换为权限标识（去掉前缀斜杠）
+			permission := menu.Path
+			if permission[0] == '/' {
+				permission = permission[1:]
+			}
+			sidebarPermissions = append(sidebarPermissions, permission)
+		}
+		// 递归添加子菜单权限
+		extractMenuPermissions(menu.Children, &sidebarPermissions)
+	}
 
 	response := gin.H{
-		"sidebar": sidebarPermissions,
+		"sidebar":   sidebarPermissions,
+		"menu_tree": menuTree, // 同时返回完整的菜单树，供前端使用
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetUserButtonPermissions godoc
+// @Summary      Get user button permissions
+// @Description  Get all button-level permissions for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=[]string}  "Button permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/user/button-permissions [get]
+func (cc *CasbinController) GetUserButtonPermissions(c *gin.Context) {
+	// 获取当前用户ID
+	userID := c.GetString(constants.UserID)
+	tenantID := c.GetHeader(constants.TenantID)
+
+	// 如果没有MenuUsecase，返回空权限
+	if cc.menuUsecase == nil {
+		c.JSON(http.StatusOK, domain.RespSuccess([]string{}))
+		return
+	}
+
+	// 获取用户的所有权限键
+	permissions, err := cc.menuUsecase.GetUserPermissions(c, userID, tenantID)
+	if err != nil {
+		fmt.Printf("获取用户权限失败: %v\n", err)
+		c.JSON(http.StatusInternalServerError, domain.RespError("获取权限失败: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(permissions))
+}
+
+// extractMenuPermissions 递归提取菜单权限
+func extractMenuPermissions(menus []*domain.MenuTreeNode, permissions *[]string) {
+	for _, menu := range menus {
+		if menu.Path != "" {
+			permission := menu.Path
+			if permission[0] == '/' {
+				permission = permission[1:]
+			}
+			*permissions = append(*permissions, permission)
+		}
+		if len(menu.Children) > 0 {
+			extractMenuPermissions(menu.Children, permissions)
+		}
+	}
 }
 
 // GetProjectPermissions godoc

@@ -5,6 +5,8 @@ import (
 	"pkms/ent"
 	"pkms/internal/casbin"
 	"pkms/repository"
+	"pkms/usecase"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,9 +16,22 @@ func NewCasbinRouter(db *ent.Client, casbinManager *casbin.CasbinManager, group 
 	// 创建仓储
 	userRepository := repository.NewUserRepository(db)
 	tenantRepository := repository.NewTenantRepository(db)
+	menuRepository := repository.NewMenuRepository(db)
+	menuActionRepository := repository.NewMenuActionRepository(db)
+	roleRepository := repository.NewRoleRepository(db)
+
+	// 创建用例
+	timeout := time.Duration(2) * time.Minute
+	menuUsecase := usecase.NewMenuUsecase(
+		menuRepository,
+		menuActionRepository,
+		roleRepository,
+		casbinManager,
+		timeout,
+	)
 
 	// 创建控制器
-	casbinController := controller.NewCasbinController(casbinManager, userRepository, tenantRepository)
+	casbinController := controller.NewCasbinController(casbinManager, userRepository, tenantRepository, menuUsecase)
 
 	// 策略管理路由
 	group.POST("/policies", casbinController.AddPolicy)
@@ -42,6 +57,7 @@ func NewCasbinRouter(db *ent.Client, casbinManager *casbin.CasbinManager, group 
 
 	// 权限查询路由
 	group.GET("/sidebar/permissions", casbinController.GetSidebarPermissions)
+	group.GET("/user/button-permissions", casbinController.GetUserButtonPermissions)
 	group.GET("/project/permissions", casbinController.GetProjectPermissions)
 	group.GET("/package/permissions", casbinController.GetPackagePermissions)
 

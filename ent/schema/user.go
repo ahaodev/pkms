@@ -54,8 +54,11 @@ func (User) Edges() []ent.Edge {
 		edge.To("created_upgrades", Upgrade.Type),
 		// User creates client accesses
 		edge.To("created_client_accesses", ClientAccess.Type),
+		// User belongs to tenants
 		edge.From("tenants", Tenant.Type).
 			Ref("users"),
+		// User has roles (多对多关系)
+		edge.To("roles", Role.Type),
 	}
 }
 

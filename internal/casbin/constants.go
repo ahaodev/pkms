@@ -9,19 +9,24 @@ const (
 	RoleViewer = "viewer" // 普通用户：查看权限
 )
 
-// 侧边栏权限（保持原有，但简化检查逻辑）
+// 侧边栏权限（更新为与系统菜单路径一致）
 const (
-	SidebarDashboard = "dashboard"
-	SidebarProjects  = "projects"
-	SidebarUpgrade   = "upgrade"
-	ClientAccess     = "access-manager"
-	ShareManager     = "shares"
-	SidebarSystem    = "system"
+	SidebarDashboard   = "dashboard"       // 对应 "/"
+	SidebarProjects    = "hierarchy"       // 对应 "/hierarchy"
+	SidebarUpgrade     = "upgrade"         // 对应 "/upgrade"
+	ClientAccess       = "access-manager"  // 对应 "/access-manager"
+	ShareManager       = "shares"          // 对应 "/shares"
+	SidebarTenants     = "tenants"         // 对应 "/tenants"
+	SidebarUsers       = "users"           // 对应 "/users"
+	SidebarPermissions = "permissions"     // 对应 "/permissions"
+	SidebarMenus       = "menu-management" // 对应 "/menu-management"
+	SidebarRoles       = "role-management" // 对应 "/role-management"
 )
 
-var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess, SidebarSystem}
-
-// var ADMIN_SIDEBAR = []string{SidebarDashboard, SidebarProjects, ShareManager, SidebarUpgrade, ClientAccess}
+var ADMIN_SIDEBAR = []string{
+	SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager,
+	SidebarTenants, SidebarUsers, SidebarPermissions, SidebarMenus, SidebarRoles,
+}
 
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}
 var USER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}

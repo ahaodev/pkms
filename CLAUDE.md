@@ -416,5 +416,5 @@ requested by the User.
   - Granular permissions across various resources and actions
 
 ### Development Reminders
-- 不用启动后端,前端服务,我已经启动
+- 不启动后端,前端服务,已经启动.如果未启动提醒用户启动
 - 遵循KISS原则

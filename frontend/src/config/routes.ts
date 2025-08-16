@@ -3,11 +3,12 @@ import Dashboard from "@/pages/dashboard";
 import HierarchyPage from "@/pages/hierarchy";
 import LoginPage from "@/pages/login";
 import UsersPage from "@/pages/users";
-import PermissionsPage from "@/pages/permissions";
 import UpgradePage from "@/pages/upgrade";
 import TenantsPage from "@/pages/tenants";
 import ClientAccessPage from "@/pages/client-access";
 import SharesManagerPage from "@/pages/shares-manager.tsx";
+import MenuManagement from "@/pages/menu-management";
+import RoleManagement from "@/pages/role-management";
 
 export interface RouteConfig {
     path: string;
@@ -58,14 +59,20 @@ export const routes: RouteConfig[] = [
         requiresAdmin: true,
     },
     {
-        path: "/permissions",
-        element: PermissionsPage,
+        path: "/tenants",
+        element: TenantsPage,
         requiresAuth: true,
         requiresAdmin: true,
     },
     {
-        path: "/tenants",
-        element: TenantsPage,
+        path: "/menu-management",
+        element: MenuManagement,
+        requiresAuth: true,
+        requiresAdmin: true,
+    },
+    {
+        path: "/role-management",
+        element: RoleManagement,
         requiresAuth: true,
         requiresAdmin: true,
     },
