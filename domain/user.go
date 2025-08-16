@@ -21,12 +21,19 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// TenantRoleAssignment 租户角色分配
+type TenantRoleAssignment struct {
+	TenantID string `json:"tenant_id" binding:"required"`
+	RoleID   string `json:"role_id" binding:"required"`
+}
+
 // CreateUserRequest 创建用户请求
 type CreateUserRequest struct {
-	Name         string `json:"name" binding:"required"`
-	Password     string `json:"password" binding:"required"`
-	IsActive     bool   `json:"is_active"`
-	CreateTenant bool   `json:"create_tenant"` // 是否同时创建对应的租户
+	Name         string                 `json:"name" binding:"required"`
+	Password     string                 `json:"password" binding:"required"`
+	IsActive     bool                   `json:"is_active"`
+	CreateTenant bool                   `json:"create_tenant"`          // 是否同时创建对应的租户
+	TenantRoles  []TenantRoleAssignment `json:"tenant_roles,omitempty"` // 租户角色分配
 }
 
 type UserRepository interface {

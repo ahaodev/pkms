@@ -19,16 +19,13 @@ export const usePermissions = () => {
     queryFn: menuApi.getUserButtonPermissions,
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
-    cacheTime: 10 * 60 * 1000, // 10分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟缓存
     retry: (failureCount, error) => {
       // 如果是权限错误，不重试
       if (error && typeof error === 'object' && 'status' in error && error.status === 403) {
         return false;
       }
       return failureCount < 2;
-    },
-    onError: (error) => {
-      console.warn('获取按钮权限失败:', error);
     },
   });
 
@@ -38,20 +35,17 @@ export const usePermissions = () => {
     queryFn: menuApi.getSidebarPermissions,
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 2,
-    onError: (error) => {
-      console.warn('获取菜单权限失败:', error);
-    },
   });
 
   // 计算状态而不是通过useEffect更新
   const computedState = useMemo(() => ({
     buttonPermissions: buttonPermissions || [],
-    menuPermissions: sidebarData?.sidebar || [],
+    menuPermissions: (sidebarData as { sidebar?: string[] })?.sidebar || [],
     isLoading: buttonLoading || menuLoading,
     error: null,
-  }), [buttonPermissions, sidebarData?.sidebar, buttonLoading, menuLoading]);
+  }), [buttonPermissions, sidebarData, buttonLoading, menuLoading]);
 
   // 检查按钮权限
   const hasPermission = useCallback((permission: string): boolean => {
@@ -60,8 +54,8 @@ export const usePermissions = () => {
     // 管理员拥有所有权限
     if (checkIsAdmin()) return true;
     
-    return computedState.buttonPermissions.includes(permission);
-  }, [computedState.buttonPermissions, checkIsAdmin]);
+    return (computedState.buttonPermissions as string[]).includes(permission);
+  }, [computedState.buttonPermissions, checkIsAdmin()]);
 
   // 检查多个权限（AND逻辑）
   const hasAllPermissions = useCallback((permissions: string[]): boolean => {
@@ -84,7 +78,7 @@ export const usePermissions = () => {
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     
     return computedState.menuPermissions.includes(cleanPath);
-  }, [computedState.menuPermissions, checkIsAdmin]);
+  }, [computedState.menuPermissions, checkIsAdmin()]);
 
   // 检查当前路由权限
   const hasCurrentRouteAccess = useCallback((): boolean => {
@@ -97,7 +91,7 @@ export const usePermissions = () => {
     if (checkIsAdmin()) return allMenus;
     
     return allMenus.filter(menu => hasMenuAccess(menu));
-  }, [hasMenuAccess, checkIsAdmin]);
+  }, [hasMenuAccess, checkIsAdmin()]);
 
   // 权限检查的便捷方法
   const can = useCallback((action: string, resource?: string): boolean => {

@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Plus, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Edit, Plus, EyeOff } from 'lucide-react';
 import { menuApi } from '@/lib/api/menu';
 import { PermissionGuard, PermissionButton } from '@/components/permissions/permission-guard';
 import type { MenuTreeNode, CreateMenuRequest, UpdateMenuRequest } from '@/types/menu';
@@ -23,7 +23,7 @@ const MenuManagement: React.FC = () => {
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
 
   // 获取菜单树
-  const { data: menuTree = [], isLoading } = useQuery({
+  const { data: menuTree = [], isPending } = useQuery({
     queryKey: ['menuTree'],
     queryFn: menuApi.getMenuTree,
     staleTime: 2 * 60 * 1000, // 2分钟缓存
@@ -33,7 +33,7 @@ const MenuManagement: React.FC = () => {
   const createMenuMutation = useMutation({
     mutationFn: menuApi.createMenu,
     onSuccess: () => {
-      queryClient.invalidateQueries(['menuTree']);
+      queryClient.invalidateQueries({ queryKey: ['menuTree'] });
       setIsCreateDialogOpen(false);
     },
   });
@@ -43,7 +43,7 @@ const MenuManagement: React.FC = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateMenuRequest }) =>
       menuApi.updateMenu(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['menuTree']);
+      queryClient.invalidateQueries({ queryKey: ['menuTree'] });
       setIsEditDialogOpen(false);
       setSelectedMenu(null);
     },
@@ -53,7 +53,7 @@ const MenuManagement: React.FC = () => {
   const deleteMenuMutation = useMutation({
     mutationFn: menuApi.deleteMenu,
     onSuccess: () => {
-      queryClient.invalidateQueries(['menuTree']);
+      queryClient.invalidateQueries({ queryKey: ['menuTree'] });
     },
   });
 
@@ -151,7 +151,7 @@ const MenuManagement: React.FC = () => {
     });
   };
 
-  if (isLoading) {
+  if (isPending) {
     return <div className="p-6">加载中...</div>;
   }
 
@@ -198,8 +198,7 @@ const MenuManagement: React.FC = () => {
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
           onSubmit={(data) => createMenuMutation.mutate(data)}
-          isLoading={createMenuMutation.isLoading}
-          menuTree={menuTree}
+          isPending={createMenuMutation.isPending}
         />
 
         {/* 编辑菜单对话框 */}
@@ -211,7 +210,7 @@ const MenuManagement: React.FC = () => {
             onSubmit={(data) =>
               updateMenuMutation.mutate({ id: selectedMenu.id, data })
             }
-            isLoading={updateMenuMutation.isLoading}
+            isPending={updateMenuMutation.isPending}
             menuTree={menuTree}
           />
         )}
@@ -225,16 +224,14 @@ interface CreateMenuDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: CreateMenuRequest) => void;
-  isLoading: boolean;
-  menuTree: MenuTreeNode[];
+  isPending: boolean;
 }
 
 const CreateMenuDialog: React.FC<CreateMenuDialogProps> = ({
   open,
   onOpenChange,
   onSubmit,
-  isLoading,
-  menuTree,
+  isPending,
 }) => {
   const [formData, setFormData] = useState<CreateMenuRequest>({
     name: '',
@@ -370,8 +367,8 @@ const CreateMenuDialog: React.FC<CreateMenuDialogProps> = ({
             >
               取消
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? '创建中...' : '创建'}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? '创建中...' : '创建'}
             </Button>
           </div>
         </form>
@@ -386,7 +383,7 @@ interface EditMenuDialogProps {
   onOpenChange: (open: boolean) => void;
   menu: MenuTreeNode;
   onSubmit: (data: UpdateMenuRequest) => void;
-  isLoading: boolean;
+  isPending: boolean;
   menuTree: MenuTreeNode[];
 }
 
@@ -395,7 +392,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   onOpenChange,
   menu,
   onSubmit,
-  isLoading,
+  isPending,
 }) => {
   const [formData, setFormData] = useState<UpdateMenuRequest>({
     name: menu.name,
@@ -504,8 +501,8 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
             >
               取消
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? '保存中...' : '保存'}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? '保存中...' : '保存'}
             </Button>
           </div>
         </form>

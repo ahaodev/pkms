@@ -111,14 +111,12 @@ interface PermissionMenuItemProps {
   permission: string;
   path?: string;
   children: React.ReactNode;
-  exact?: boolean;
 }
 
 export const PermissionMenuItem: React.FC<PermissionMenuItemProps> = ({
   permission,
   path,
   children,
-  exact = false,
 }) => {
   const { hasPermission, isAdmin, hasMenuAccess } = usePermissions();
 

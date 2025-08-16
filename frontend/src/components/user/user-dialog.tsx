@@ -13,6 +13,8 @@ import {Switch} from '@/components/ui/switch';
 import {Button} from '@/components/ui/button';
 import {Project} from '@/types/project';
 import {Group} from '@/types/group';
+import {TenantRoleAssignment} from '@/types/user-tenant-role';
+import {TenantRoleAssignmentComponent} from './tenant-role-assignment';
 import {useI18n} from '@/contexts/i18n-context';
 
 interface UserFormData {
@@ -20,6 +22,7 @@ interface UserFormData {
     password: string;
     is_active: boolean;
     create_tenant: boolean;
+    tenant_roles: TenantRoleAssignment[];
 }
 
 export interface UserDialogProps {
@@ -52,7 +55,7 @@ export function UserDialog({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>
@@ -115,6 +118,13 @@ export function UserDialog({
                             />
                             <Label htmlFor="create_tenant">{t('user.createCorrespondingTenant')}</Label>
                         </div>
+                    )}
+
+                    {!isEdit && (
+                        <TenantRoleAssignmentComponent
+                            assignments={userForm.tenant_roles}
+                            onChange={(assignments) => updateUserForm({tenant_roles: assignments})}
+                        />
                     )}
                 </div>
                 <DialogFooter>

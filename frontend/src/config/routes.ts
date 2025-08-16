@@ -9,6 +9,7 @@ import ClientAccessPage from "@/pages/client-access";
 import SharesManagerPage from "@/pages/shares-manager.tsx";
 import MenuManagement from "@/pages/menu-management";
 import RoleManagement from "@/pages/role-management";
+import UserTenantRoleManagement from "@/pages/user-tenant-role-management";
 
 export interface RouteConfig {
     path: string;
@@ -73,6 +74,12 @@ export const routes: RouteConfig[] = [
     {
         path: "/role-management",
         element: RoleManagement,
+        requiresAuth: true,
+        requiresAdmin: true,
+    },
+    {
+        path: "/user-tenant-role-management",
+        element: UserTenantRoleManagement,
         requiresAuth: true,
         requiresAdmin: true,
     },

@@ -16,12 +16,12 @@ import type {
 export const useRoles = () => {
   const { user } = useAuth();
   
-  return useQuery({
+  return useQuery<Role[]>({
     queryKey: ['roles'],
     queryFn: roleApi.getRoles,
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
-    cacheTime: 10 * 60 * 1000, // 10分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟缓存
   });
 };
 
@@ -34,7 +34,7 @@ export const useRole = (roleId: string) => {
     queryFn: () => roleApi.getRole(roleId),
     enabled: !!roleId,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -46,7 +46,7 @@ export const useUserRoles = (userId?: string) => {
     queryKey: ['userRoles', userId],
     queryFn: () => userId ? roleApi.getUserRolesByUserId(userId) : roleApi.getUserRoles(),
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -59,7 +59,7 @@ export const useRoleUsers = (roleId: string) => {
     queryFn: () => roleApi.getRoleUsers(roleId),
     enabled: !!roleId,
     staleTime: 2 * 60 * 1000, // 2分钟缓存，用户分配更新较频繁
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -72,7 +72,7 @@ export const useRolePermissions = (roleId: string) => {
     queryFn: () => roleApi.getRolePermissions(roleId),
     enabled: !!roleId,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -86,7 +86,7 @@ export const useRoleOperations = () => {
   const createRole = useMutation({
     mutationFn: (data: CreateRoleRequest) => roleApi.createRole(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['roles']);
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
     },
   });
 
@@ -95,9 +95,9 @@ export const useRoleOperations = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateRoleRequest }) =>
       roleApi.updateRole(id, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['roles']);
-      queryClient.invalidateQueries(['role', variables.id]);
-      queryClient.invalidateQueries(['rolePermissions']);
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['role', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['rolePermissions'] });
     },
   });
 
@@ -105,8 +105,8 @@ export const useRoleOperations = () => {
   const deleteRole = useMutation({
     mutationFn: (roleId: string) => roleApi.deleteRole(roleId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['roles']);
-      queryClient.invalidateQueries(['userRoles']);
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['userRoles'] });
     },
   });
 
@@ -115,8 +115,8 @@ export const useRoleOperations = () => {
     mutationFn: ({ roleId, data }: { roleId: string; data: AssignRoleRequest }) =>
       roleApi.assignRoleToUsers(roleId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['roleUsers', variables.roleId]);
-      queryClient.invalidateQueries(['userRoles']);
+      queryClient.invalidateQueries({ queryKey: ['roleUsers', variables.roleId] });
+      queryClient.invalidateQueries({ queryKey: ['userRoles'] });
     },
   });
 
@@ -125,8 +125,8 @@ export const useRoleOperations = () => {
     mutationFn: ({ roleId, data }: { roleId: string; data: AssignRoleRequest }) =>
       roleApi.removeRoleFromUsers(roleId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['roleUsers', variables.roleId]);
-      queryClient.invalidateQueries(['userRoles']);
+      queryClient.invalidateQueries({ queryKey: ['roleUsers', variables.roleId] });
+      queryClient.invalidateQueries({ queryKey: ['userRoles'] });
     },
   });
 
@@ -135,9 +135,9 @@ export const useRoleOperations = () => {
     mutationFn: ({ roleId, menuIds }: { roleId: string; menuIds: string[] }) =>
       roleApi.assignMenusToRole(roleId, menuIds),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['rolePermissions', variables.roleId]);
-      queryClient.invalidateQueries(['userMenuTree']);
-      queryClient.invalidateQueries(['userPermissions']);
+      queryClient.invalidateQueries({ queryKey: ['rolePermissions', variables.roleId] });
+      queryClient.invalidateQueries({ queryKey: ['userMenuTree'] });
+      queryClient.invalidateQueries({ queryKey: ['userPermissions'] });
     },
   });
 

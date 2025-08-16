@@ -25,7 +25,7 @@ type CreateRoleRequest struct {
 	Name        string   `json:"name" binding:"required"`
 	Code        string   `json:"code" binding:"required"`
 	Description string   `json:"description,omitempty"`
-	TenantID    string   `json:"tenant_id,omitempty"`
+	TenantID    string   `json:"tenant_id" binding:"required"` // 必须绑定租户
 	MenuIDs     []string `json:"menu_ids,omitempty"`
 }
 

@@ -121,4 +121,9 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	roleRouter := protectedRouter.Group("/role")
 	roleRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
 	NewRoleRouter(env, timeout, db, casbinManager, roleRouter)
+
+	// 用户租户角色管理路由，只有管理员可以访问
+	userTenantRoleRouter := protectedRouter.Group("/user-tenant-role")
+	userTenantRoleRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
+	NewUserTenantRoleRouter(env, timeout, db, casbinManager, userTenantRoleRouter)
 }

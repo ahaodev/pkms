@@ -22,7 +22,7 @@ export interface CreateRoleRequest {
   name: string;
   code: string;
   description?: string;
-  tenant_id?: string;
+  tenant_id: string; // 必须绑定租户
   menu_ids?: string[];
 }
 

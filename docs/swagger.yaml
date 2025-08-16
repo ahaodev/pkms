@@ -54,6 +54,18 @@ definitions:
     required:
     - user_ids
     type: object
+  domain.AssignUserTenantRoleRequest:
+    properties:
+      tenant_roles:
+        items:
+          $ref: '#/definitions/domain.TenantRoleAssignment'
+        type: array
+      user_id:
+        type: string
+    required:
+    - tenant_roles
+    - user_id
+    type: object
   domain.CheckPermissionRequest:
     properties:
       action:
@@ -210,10 +222,12 @@ definitions:
       name:
         type: string
       tenant_id:
+        description: 必须绑定租户
         type: string
     required:
     - code
     - name
+    - tenant_id
     type: object
   domain.CreateShareRequest:
     properties:
@@ -251,6 +265,11 @@ definitions:
         type: string
       password:
         type: string
+      tenant_roles:
+        description: 租户角色分配
+        items:
+          $ref: '#/definitions/domain.TenantRoleAssignment'
+        type: array
     required:
     - name
     - password
@@ -580,6 +599,19 @@ definitions:
     - tenant
     - user_id
     type: object
+  domain.RemoveUserTenantRoleRequest:
+    properties:
+      role_id:
+        type: string
+      tenant_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - role_id
+    - tenant_id
+    - user_id
+    type: object
   domain.Response:
     properties:
       code:
@@ -664,6 +696,16 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  domain.TenantRoleAssignment:
+    properties:
+      role_id:
+        type: string
+      tenant_id:
+        type: string
+    required:
+    - role_id
+    - tenant_id
     type: object
   domain.TenantUserRequest:
     properties:
@@ -773,6 +815,30 @@ definitions:
           type: string
         type: array
       user_id:
+        type: string
+    type: object
+  domain.UserTenantRole:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      role_code:
+        type: string
+      role_id:
+        type: string
+      role_name:
+        type: string
+      tenant_id:
+        type: string
+      tenant_name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      user_name:
+        description: 关联信息
         type: string
     type: object
   domain.UserUpdateRequest:
@@ -1645,6 +1711,35 @@ paths:
       security:
       - BearerAuth: []
       summary: Get user roles
+      tags:
+      - RBAC
+  /casbin/user/button-permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all button-level permissions for the current authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Button permissions
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user button permissions
       tags:
       - RBAC
   /casbin/user/permissions:
@@ -4516,6 +4611,225 @@ paths:
       summary: Create a new user
       tags:
       - Users
+  /user-tenant-role/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign multiple roles to a user across different tenants (admin
+        only)
+      parameters:
+      - description: User tenant role assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AssignUserTenantRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles assigned successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Assign roles to user in multiple tenants
+      tags:
+      - User Tenant Roles
+  /user-tenant-role/current:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all tenant-role assignments for the current authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current user tenant roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.UserTenantRole'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user's tenant role assignments
+      tags:
+      - User Tenant Roles
+  /user-tenant-role/remove:
+    post:
+      consumes:
+      - application/json
+      description: Remove a specific role from a user in a specific tenant (admin
+        only)
+      parameters:
+      - description: User tenant role removal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RemoveUserTenantRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role removed successfully
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove role from user in tenant
+      tags:
+      - User Tenant Roles
+  /user-tenant-role/tenant/{tenantId}/role/{roleId}/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users assigned to a specific role in a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenantId
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.User'
+                  type: array
+              type: object
+        "404":
+          description: Tenant or role not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get users by tenant role
+      tags:
+      - User Tenant Roles
+  /user-tenant-role/user/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all tenant-role assignments for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User tenant roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.UserTenantRole'
+                  type: array
+              type: object
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all user tenant role assignments
+      tags:
+      - User Tenant Roles
+  /user-tenant-role/user/{userId}/tenant/{tenantId}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all roles assigned to a user in a specific tenant
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Tenant ID
+        in: path
+        name: tenantId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Role'
+                  type: array
+              type: object
+        "404":
+          description: User or tenant not found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user roles in specific tenant
+      tags:
+      - User Tenant Roles
   /user/{id}:
     delete:
       consumes:

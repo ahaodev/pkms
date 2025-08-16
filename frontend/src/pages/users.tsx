@@ -4,6 +4,7 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
 import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
 import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
+import {TenantRoleAssignment} from '@/types/user-tenant-role';
 import {UserFilters, UserList} from '@/components/user';
 import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
@@ -16,6 +17,7 @@ interface UserFormData {
     password: string;
     is_active: boolean;
     create_tenant: boolean;
+    tenant_roles: TenantRoleAssignment[];
 }
 
 const initialFormData: UserFormData = {
@@ -23,6 +25,7 @@ const initialFormData: UserFormData = {
     password: '',
     is_active: true,
     create_tenant: false,
+    tenant_roles: [],
 };
 
 export default function UsersPage() {
@@ -83,6 +86,8 @@ export default function UsersPage() {
                 name: userForm.name,
                 password: userForm.password,
                 is_active: userForm.is_active,
+                create_tenant: userForm.create_tenant,
+                tenant_roles: userForm.tenant_roles,
             };
 
             await createUserMutation.mutateAsync(createRequest);
@@ -103,6 +108,7 @@ export default function UsersPage() {
             password: '',
             is_active: user.is_active,
             create_tenant: false,
+            tenant_roles: [],
         });
         setIsEditDialogOpen(true);
     };

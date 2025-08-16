@@ -46,20 +46,12 @@ export const useDynamicMenus = () => {
     queryFn: menuApi.getUserMenuTree,
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
-    cacheTime: 10 * 60 * 1000, // 10分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟缓存
     retry: (failureCount, error) => {
       if (error && typeof error === 'object' && 'status' in error && error.status === 403) {
         return false;
       }
       return failureCount < 2;
-    },
-    onError: (error) => {
-      console.warn('获取用户菜单失败:', error);
-      setState(prev => ({ 
-        ...prev, 
-        error: '获取菜单失败',
-        userMenus: [] 
-      }));
     },
   });
 
@@ -72,7 +64,7 @@ export const useDynamicMenus = () => {
     queryFn: menuApi.getMenuTree,
     enabled: !!user && isAdmin,
     staleTime: 10 * 60 * 1000, // 10分钟缓存
-    cacheTime: 15 * 60 * 1000, // 15分钟缓存
+    gcTime: 15 * 60 * 1000, // 15分钟缓存
   });
 
   // 获取用户权限列表
@@ -83,14 +75,14 @@ export const useDynamicMenus = () => {
     queryFn: menuApi.getUserPermissions,
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // 计算状态而不是通过useEffect更新
   const computedState = useMemo(() => ({
     userMenus: userMenuTree || [],
     allMenus: allMenuTree || [],
-    isLoading: menuLoading || (isAdmin && allMenuLoading),
+    isLoading: menuLoading || (isAdmin() ? allMenuLoading : false),
     error: menuError ? '获取菜单失败' : null,
     permissions: userPermissions || [],
   }), [userMenuTree, allMenuTree, menuLoading, allMenuLoading, menuError, userPermissions, isAdmin]);
@@ -99,14 +91,15 @@ export const useDynamicMenus = () => {
   const refreshMenus = useCallback(async () => {
     await Promise.all([
       refetchMenus(),
-      queryClient.invalidateQueries(['allMenuTree']),
-      queryClient.invalidateQueries(['userPermissions']),
+      queryClient.invalidateQueries({ queryKey: ['allMenuTree'] }),
+      queryClient.invalidateQueries({ queryKey: ['userPermissions'] }),
     ]);
   }, [refetchMenus, queryClient]);
 
   // 查找菜单项
-  const findMenuItem = useCallback((path: string, menus: MenuTreeNode[] = computedState.userMenus): MenuTreeNode | null => {
-    for (const menu of menus) {
+  const findMenuItem = useCallback((path: string, menus?: MenuTreeNode[]): MenuTreeNode | null => {
+    const searchMenus = menus || computedState.userMenus || [];
+    for (const menu of searchMenus) {
       if (menu.path === path) {
         return menu;
       }
@@ -138,13 +131,13 @@ export const useDynamicMenus = () => {
       return false;
     };
     
-    findPath(computedState.userMenus, path);
+    findPath(computedState.userMenus || [], path);
     return breadcrumbs;
   }, [computedState.userMenus]);
 
   // 检查菜单权限
   const hasMenuPermission = useCallback((menuPath: string): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin()) return true;
     
     const menu = findMenuItem(menuPath);
     return !!menu;
@@ -152,7 +145,7 @@ export const useDynamicMenus = () => {
 
   // 检查按钮权限
   const hasButtonPermission = useCallback((permissionKey: string): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin()) return true;
     
     return computedState.permissions.includes(permissionKey);
   }, [computedState.permissions, isAdmin]);
@@ -194,6 +187,9 @@ export const useDynamicMenus = () => {
       visible: menu.visible,
       children: menu.children,
       actions: menu.actions,
+      is_system: menu.is_system,
+      created_at: menu.created_at,
+      updated_at: menu.updated_at,
     }));
   }, [computedState.userMenus]);
 

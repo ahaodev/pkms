@@ -57,9 +57,10 @@ func (rc *RoleController) CreateRole(c *gin.Context) {
 		return
 	}
 
-	// 设置租户ID
+	// 验证租户ID
 	if request.TenantID == "" {
-		request.TenantID = c.GetHeader(constants.TenantID)
+		c.JSON(http.StatusBadRequest, domain.RespError("tenant_id is required"))
+		return
 	}
 
 	role, err := rc.RoleUsecase.CreateRole(c, &request)

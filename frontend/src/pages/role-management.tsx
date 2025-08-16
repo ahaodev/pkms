@@ -10,9 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Edit, Plus } from 'lucide-react';
 import { PermissionGuard, PermissionButton } from '@/components/permissions/permission-guard';
 import { useRoleManagement } from '@/hooks/use-roles';
+import { useTenants } from '@/hooks/use-tenants';
 import type { Role, CreateRoleRequest, UpdateRoleRequest } from '@/types/role';
 
 const RoleManagement: React.FC = () => {
@@ -23,10 +25,19 @@ const RoleManagement: React.FC = () => {
     updateRole,
     deleteRole,
   } = useRoleManagement();
+  
+  const { data: tenants = [] } = useTenants();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+
+  // 获取租户名称的辅助函数
+  const getTenantName = (tenantId?: string) => {
+    if (!tenantId) return '系统全局';
+    const tenant = tenants.find(t => t.id === tenantId);
+    return tenant?.name || tenantId;
+  };
 
   // 处理编辑角色
   const handleEditRole = (role: Role) => {
@@ -87,6 +98,7 @@ const RoleManagement: React.FC = () => {
                 <TableRow>
                   <TableHead>角色名称</TableHead>
                   <TableHead>角色代码</TableHead>
+                  <TableHead>所属租户</TableHead>
                   <TableHead>描述</TableHead>
                   <TableHead>类型</TableHead>
                   <TableHead>状态</TableHead>
@@ -102,6 +114,11 @@ const RoleManagement: React.FC = () => {
                       <code className="px-2 py-1 bg-gray-100 rounded text-sm">
                         {role.code}
                       </code>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {getTenantName(role.tenant_id)}
+                      </Badge>
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {role.description || '-'}
@@ -165,7 +182,7 @@ const RoleManagement: React.FC = () => {
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
           onSubmit={(data) => createRole.mutate(data)}
-          isLoading={createRole.isLoading}
+          isLoading={createRole.isPending}
         />
 
         {/* 编辑角色对话框 */}
@@ -177,7 +194,7 @@ const RoleManagement: React.FC = () => {
             onSubmit={(data) =>
               updateRole.mutate({ id: selectedRole.id, data })
             }
-            isLoading={updateRole.isLoading}
+            isLoading={updateRole.isPending}
           />
         )}
       </div>
@@ -199,16 +216,18 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   onSubmit,
   isLoading,
 }) => {
+  const { data: tenants = [] } = useTenants();
   const [formData, setFormData] = useState<CreateRoleRequest>({
     name: '',
     code: '',
     description: '',
+    tenant_id: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.code.trim()) {
-      alert('请填写角色名称和角色代码');
+    if (!formData.name.trim() || !formData.code.trim() || !formData.tenant_id.trim()) {
+      alert('请填写角色名称、角色代码和选择租户');
       return;
     }
     onSubmit(formData);
@@ -219,6 +238,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
       name: '',
       code: '',
       description: '',
+      tenant_id: '',
     });
   };
 
@@ -236,6 +256,31 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="tenant">所属租户 *</Label>
+            <Select
+              value={formData.tenant_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, tenant_id: value })
+              }
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="请选择租户" />
+              </SelectTrigger>
+              <SelectContent>
+                {tenants.map((tenant) => (
+                  <SelectItem key={tenant.id} value={tenant.id}>
+                    {tenant.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              角色必须归属于特定租户
+            </p>
+          </div>
+
           <div>
             <Label htmlFor="name">角色名称 *</Label>
             <Input
