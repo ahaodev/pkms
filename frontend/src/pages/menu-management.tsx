@@ -12,7 +12,9 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Plus, EyeOff } from 'lucide-react';
 import { menuApi } from '@/lib/api/menu';
-import { PermissionGuard, PermissionButton } from '@/components/permissions/permission-guard';
+import { PermissionButton } from '@/components/permissions/permission-guard';
+import { PageContent } from '@/components/page';
+import { ManagementPage } from '@/components/management-page';
 import type { MenuTreeNode, CreateMenuRequest, UpdateMenuRequest } from '@/types/menu';
 
 const MenuManagement: React.FC = () => {
@@ -151,28 +153,20 @@ const MenuManagement: React.FC = () => {
     });
   };
 
-  if (isPending) {
-    return <div className="p-6">加载中...</div>;
-  }
-
   return (
-    <PermissionGuard permission="menu:read" fallback={<div>无权限访问</div>}>
-      <div className="container space-y-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">菜单管理</h1>
-            <p className="text-gray-600">管理系统菜单和权限</p>
-          </div>
-
-          <PermissionButton
-            permission="menu:create"
-            onClick={() => setIsCreateDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            创建菜单
-          </PermissionButton>
-        </div>
-
+    <ManagementPage
+      title="菜单管理"
+      description="管理系统菜单和权限"
+      permission="menu:read"
+      isLoading={isPending}
+      action={{
+        label: "创建菜单",
+        onClick: () => setIsCreateDialogOpen(true),
+        icon: Plus,
+        permission: "menu:create"
+      }}
+    >
+      <PageContent>
         <Card>
           <CardHeader>
             <CardTitle>菜单树</CardTitle>
@@ -214,8 +208,8 @@ const MenuManagement: React.FC = () => {
             menuTree={menuTree}
           />
         )}
-      </div>
-    </PermissionGuard>
+      </PageContent>
+    </ManagementPage>
   );
 };
 

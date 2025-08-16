@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button.tsx';
 import { LucideIcon } from 'lucide-react';
 
 interface PageHeaderAction {

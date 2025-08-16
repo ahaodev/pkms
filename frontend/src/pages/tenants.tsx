@@ -4,6 +4,7 @@ import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/h
 import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 import {CustomSkeleton} from '@/components/custom-skeleton';
+import {PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
 
 export default function TenantsPage() {
@@ -22,10 +23,10 @@ export default function TenantsPage() {
 
     if (isLoading) {
         return (
-            <div className="space-y-6">
+            <PageContent>
                 <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)}/>
                 <CustomSkeleton type="table" rows={5} columns={4} />
-            </div>
+            </PageContent>
         );
     }
 
@@ -92,7 +93,7 @@ export default function TenantsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <PageContent>
             <TenantHeader onCreateTenant={() => setIsCreateDialogOpen(true)} />
 
             <TenantList
@@ -129,6 +130,6 @@ export default function TenantsPage() {
                 onClose={closeDialogs}
                 tenant={viewingTenant}
             />
-        </div>
+        </PageContent>
     );
 }

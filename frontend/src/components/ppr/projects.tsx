@@ -1,12 +1,12 @@
-import {Badge} from '@/components/ui/badge';
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {EmptyList} from '@/components/ui/empty-list';
+import {Badge} from '@/components/ui/badge.tsx';
+import {Button} from '@/components/ui/button.tsx';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card.tsx';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {ChevronRight, Edit, FolderOpen, Plus, Trash} from 'lucide-react';
-import {useDeleteProject} from '@/hooks/use-projects';
+import {useDeleteProject} from '@/hooks/use-projects.ts';
 import {toast} from 'sonner';
-import {getProjectIcon} from '@/lib/utils';
-import {useI18n} from '@/contexts/i18n-context';
+import {getProjectIcon} from '@/lib/utils.tsx';
+import {useI18n} from '@/contexts/i18n-context.tsx';
 
 
 interface ProjectsViewProps {

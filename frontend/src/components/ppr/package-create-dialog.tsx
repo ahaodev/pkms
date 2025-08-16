@@ -16,7 +16,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Package} from '@/types/package.ts';
 import {createPackage} from "@/lib/api";
 import {toast} from 'sonner';
-import {useI18n} from '@/contexts/i18n-context';
+import {useI18n} from '@/contexts/i18n-context.tsx';
 
 interface PackageCreateDialogProps {
     open: boolean;

@@ -1,7 +1,7 @@
-import {Badge} from '@/components/ui/badge';
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {EmptyList} from '@/components/ui/empty-list';
+import {Badge} from '@/components/ui/badge.tsx';
+import {Button} from '@/components/ui/button.tsx';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card.tsx';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -11,12 +11,12 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog.tsx';
 import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone, Trash} from 'lucide-react';
 import {useState} from 'react';
-import {useDeletePackage} from '@/hooks/use-packages';
+import {useDeletePackage} from '@/hooks/use-packages.ts';
 import {toast} from 'sonner';
-import {useI18n} from '@/contexts/i18n-context';
+import {useI18n} from '@/contexts/i18n-context.tsx';
 
 interface PackagesViewProps {
     selectedProject: any;

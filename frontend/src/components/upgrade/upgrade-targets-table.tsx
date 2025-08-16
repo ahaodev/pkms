@@ -6,7 +6,7 @@ import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Switch} from '@/components/ui/switch';
 import {CheckCircle, Edit, FolderOpen, Package as PackageIcon, Trash2, XCircle, Target} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {toast} from 'sonner';
 import {formatFileSize} from '@/lib/utils';
 import {deleteUpgradeTarget, updateUpgradeTarget, UpgradeTarget} from '@/lib/api/upgrade';

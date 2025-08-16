@@ -15,10 +15,10 @@ import {Textarea} from '@/components/ui/textarea.tsx';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select.tsx';
 import {Progress} from '@/components/ui/progress.tsx';
 import {ReleaseUpload, UploadProgress} from '@/types/release.ts';
-import {formatFileSize} from '@/lib/utils';
-import {uploadRelease} from '@/lib/api/packages';
+import {formatFileSize} from '@/lib/utils.tsx';
+import {uploadRelease} from '@/lib/api/packages.ts';
 import {toast} from 'sonner';
-import {useI18n} from '@/contexts/i18n-context';
+import {useI18n} from '@/contexts/i18n-context.tsx';
 
 interface PackageReleaseDialogProps {
     open: boolean;

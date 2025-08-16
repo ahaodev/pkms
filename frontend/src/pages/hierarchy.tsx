@@ -8,16 +8,16 @@ import {
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import {Search} from 'lucide-react';
-import {Projects} from '@/components/projects.tsx';
-import {Packages} from '@/components/packages.tsx';
-import {Releases} from '@/components/releases.tsx';
+import {Projects} from '@/components/ppr/projects.tsx';
+import {Packages} from '@/components/ppr/packages.tsx';
+import {Releases} from '@/components/ppr/releases.tsx';
 import {ProjectDialog} from '@/components/project';
-import {PackageReleaseDialog} from "@/components/package-release-dialog.tsx";
-import {PackageCreateDialog} from "@/components/package-create-dialog.tsx";
+import {PackageReleaseDialog} from "@/components/ppr/package-release-dialog.tsx";
+import {PackageCreateDialog} from "@/components/ppr/package-create-dialog.tsx";
 import {iconOptions} from '@/lib/utils';
 import {useHierarchyDialogs} from '@/hooks/use-hierarchy-dialogs';
 import {useHierarchyNavigation} from '@/hooks/use-hierarchy-navigation';
-import {PageHeader} from "@/components/ui";
+import {PageHeader} from "@/components/page-header";
 import {useI18n} from "@/contexts/i18n-context";
 
 export default function HierarchyPage() {

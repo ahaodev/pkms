@@ -1,16 +1,16 @@
 import {useState} from 'react';
-import {Badge} from '@/components/ui/badge';
-import {Button} from '@/components/ui/button';
-import {Card} from '@/components/ui/card';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Badge} from '@/components/ui/badge.tsx';
+import {Button} from '@/components/ui/button.tsx';
+import {Card} from '@/components/ui/card.tsx';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table.tsx';
 import {Download, Package as PackageIcon, Plus, Share2, Trash2} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
-import {formatDate, formatFileSize} from '@/lib/utils';
+import {EmptyList} from '@/components/empty-list.tsx';
+import {formatDate, formatFileSize} from '@/lib/utils.tsx';
 import {Release} from '@/types/release.ts';
-import {ShareDialog} from '@/components/share-dialog';
-import {createShareLink, deleteRelease} from '@/lib/api/releases';
+import {ShareDialog} from '@/components/share-dialog.tsx';
+import {createShareLink, deleteRelease} from '@/lib/api/releases.ts';
 import {toast} from 'sonner';
-import {useI18n} from '@/contexts/i18n-context';
+import {useI18n} from '@/contexts/i18n-context.tsx';
 
 interface ReleasesViewProps {
     selectedPackage: any;

@@ -1,5 +1,5 @@
 import {Clock, FolderPlus, Package, UserPlus} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback} from '@/components/ui/avatar';

@@ -3,7 +3,7 @@ import { useI18n } from '@/contexts/i18n-context';
 import {Card, CardContent} from '@/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {AlertCircle, Eye, Share2, Trash2} from 'lucide-react';
 import {format} from 'date-fns';
 import {ShareListItem} from '@/lib/api/shares';

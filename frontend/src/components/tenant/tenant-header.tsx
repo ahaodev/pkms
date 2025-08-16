@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageAction } from '@/components/page';
+import { PageHeader } from '@/components/page-header';
 import { useI18n } from '@/contexts/i18n-context';
 
 interface TenantHeaderProps {
@@ -9,15 +10,17 @@ interface TenantHeaderProps {
 export function TenantHeader({ onCreateTenant }: TenantHeaderProps) {
     const { t } = useI18n();
     
+    const action: PageAction = {
+        label: t('tenant.create'),
+        onClick: onCreateTenant,
+        icon: Plus
+    };
+    
     return (
         <PageHeader
             title={t('tenant.title')}
             description={t('tenant.description')}
-            action={{
-                label: t('tenant.create'),
-                onClick: onCreateTenant,
-                icon: Plus
-            }}
+            action={action}
         />
     );
 }
