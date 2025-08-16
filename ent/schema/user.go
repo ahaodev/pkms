@@ -59,6 +59,8 @@ func (User) Edges() []ent.Edge {
 			Ref("users"),
 		// User has roles (多对多关系)
 		edge.To("roles", Role.Type),
+		// User has tenant role assignments
+		edge.To("user_tenant_roles", UserTenantRole.Type),
 	}
 }
 

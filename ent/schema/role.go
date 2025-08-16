@@ -56,6 +56,8 @@ func (Role) Edges() []ent.Edge {
 		// 拥有该角色的用户（多对多）
 		edge.From("users", User.Type).
 			Ref("roles"),
+		// Role has tenant role assignments
+		edge.To("user_tenant_roles", UserTenantRole.Type),
 	}
 }
 
