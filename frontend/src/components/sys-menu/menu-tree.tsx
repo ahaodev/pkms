@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, EyeOff } from 'lucide-react';
-import { PermissionButton } from '@/components/permissions/permission-guard';
-import type { MenuTreeNode } from '@/types/menu';
+import React, {useState} from 'react';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent} from '@/components/ui/card';
+import {Badge} from '@/components/ui/badge';
+import {Edit, EyeOff, Trash2} from 'lucide-react';
+import {PermissionButton} from '@/components/permissions/permission-guard';
+import type {MenuTreeNode} from '@/types/menu';
 
 interface MenuTreeProps {
   menuTree: MenuTreeNode[];
@@ -107,12 +107,6 @@ export const MenuTree: React.FC<MenuTreeProps> = ({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>菜单树</CardTitle>
-        <CardDescription>
-          系统中的所有菜单按层级显示。系统菜单无法编辑或删除。
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         {!menuTree || menuTree.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
