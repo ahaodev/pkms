@@ -54,7 +54,16 @@ export default defineConfig({
           'charts': ['recharts'],
           
           // Utilities
-          'utils': ['date-fns', 'sonner']
+          'utils': ['date-fns', 'sonner'],
+          
+          // System management modules
+          'sys-management': [
+            './src/pages/sys-menus',
+            './src/pages/sys-roles', 
+            './src/pages/sys-users',
+            './src/pages/sys-tenants',
+            './src/pages/sys-user-tenant-role'
+          ]
         }
       }
     },

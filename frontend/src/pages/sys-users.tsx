@@ -11,6 +11,8 @@ import {UserCreateDialog} from '@/components/user/user-create-dialog';
 import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
+import {usePagination} from '@/hooks/use-pagination';
+import {DataPagination} from '@/components/ui/data-pagination';
 
 interface UserFormData {
     name: string;
@@ -43,6 +45,12 @@ export default function UsersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [userForm, setUserForm] = useState<UserFormData>(initialFormData);
 
+    // 分页状态
+    const pagination = usePagination({
+        initialPageSize: 20,
+        defaultPageSize: 20
+    });
+
     const updateUserForm = (updates: Partial<UserFormData>) => {
         setUserForm(prev => ({...prev, ...updates}));
     };
@@ -53,10 +61,20 @@ export default function UsersPage() {
 
     const filteredUsers = useMemo(() => {
         if (!users) return [];
-        return users.filter((user: User) => 
+        const filtered = users.filter((user: User) => 
             user.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [users, searchTerm]);
+        
+        // 更新分页总数
+        pagination.setTotalItems(filtered.length);
+        
+        return filtered;
+    }, [users, searchTerm, pagination]);
+
+    // 获取当前页显示的用户数据
+    const paginatedUsers = useMemo(() => {
+        return pagination.getPageData(filteredUsers);
+    }, [filteredUsers, pagination.currentPage, pagination.pageSize]);
 
 
     // 移除这个检查，让 Page 组件处理 loading 状态
@@ -179,12 +197,24 @@ export default function UsersPage() {
 
                 {/* 用户列表 */}
                 <UserList
-                    users={filteredUsers}
+                    users={paginatedUsers}
                     currentUser={currentUser}
                     projects={projects}
                     onEdit={handleEditUser}
                     onDelete={handleDeleteUser}
                     onToggleStatus={handleToggleUserStatus}
+                />
+
+                {/* 分页组件 */}
+                <DataPagination
+                    currentPage={pagination.currentPage}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.pageSize}
+                    totalItems={pagination.totalItems}
+                    onPageChange={pagination.setPage}
+                    onPageSizeChange={pagination.setPageSize}
+                    showSizeChanger={true}
+                    showQuickJumper={true}
                 />
 
                 {/* 创建用户对话框 */}

@@ -19,9 +19,9 @@ export function useUsers() {
       const response = await getUsers();
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 2 * 60 * 1000, // 2分钟缓存
+    gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
+    refetchOnMount: false // 不要每次mount都刷新
   });
 }
 
@@ -34,9 +34,9 @@ export function useUser(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 5 * 60 * 1000, // 5分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
+    refetchOnMount: false
   });
 }
 
@@ -49,9 +49,9 @@ export function useUserProjects(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 3 * 60 * 1000, // 3分钟缓存
+    gcTime: 7 * 60 * 1000, // 7分钟垃圾回收
+    refetchOnMount: false
   });
 }
 
