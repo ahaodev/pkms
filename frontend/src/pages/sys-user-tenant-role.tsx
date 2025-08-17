@@ -1,24 +1,19 @@
 // 用户租户角色管理页面
 
 import React, {useCallback, useMemo, useState} from 'react';
-import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Label} from '@/components/ui/label';
-import {Badge} from '@/components/ui/badge';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Page, PageContent, PageHeader} from '@/components/page';
-import {Building2, Plus, Shield, Trash2, Users} from 'lucide-react';
+import {Plus, Shield, Users} from 'lucide-react';
 import {toast} from 'sonner';
 import {useUsers} from '@/hooks/use-users';
 import {useTenants} from '@/hooks/use-tenants';
 import {useRoles} from '@/hooks/use-roles';
-import {useAllUserTenantRoles, useAssignUserTenantRoles, useRemoveUserTenantRole,} from '@/hooks/use-user-tenant-role';
+import {useAllUserTenantRoles, useRemoveUserTenantRole} from '@/hooks/use-user-tenant-role';
+import {UserTenantRoleTable, AssignRoleDialog} from '@/components/sys-user-tenant-role';
 import type {
-    AssignUserTenantRoleRequest,
     RemoveUserTenantRoleRequest,
-    TenantRoleAssignment,
     UserTenantRole as UserTenantRoleType,
 } from '@/types/user-tenant-role';
 
@@ -183,63 +178,15 @@ const UserTenantRole: React.FC = () => {
                                 <div className="text-center py-8 text-muted-foreground">
                                     加载角色数据中...
                                 </div>
-                            ) : Object.keys(groupedRoles).length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    该用户暂无角色分配
-                                </div>
                             ) : (
-                                <div className="space-y-6">
-                                    {Object.entries(groupedRoles).map(([tenantId, tenantRoles]) => (
-                                        <div key={tenantId} className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <Building2 className="h-4 w-4"/>
-                                                <Badge variant="outline">
-                                                    {getTenantName(tenantId)}
-                                                </Badge>
-                                                <div className="h-px bg-border flex-1"></div>
-                                            </div>
-
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>角色名称</TableHead>
-                                                        <TableHead>角色代码</TableHead>
-                                                        <TableHead>分配时间</TableHead>
-                                                        <TableHead className="text-right">操作</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {tenantRoles.map((role, index) => (
-                                                        <TableRow key={`${role.tenant_id}-${role.role_id}-${index}`}>
-                                                            <TableCell className="font-medium">
-                                                                {getRoleName(role.role_id)}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <code className="px-2 py-1 bg-muted rounded text-sm">
-                                                                    {getRoleCode(role.role_id)}
-                                                                </code>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {new Date(role.created_at).toLocaleDateString()}
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => handleRemoveRole(role)}
-                                                                    disabled={removeRoleMutation.isPending}
-                                                                    className="text-destructive hover:text-destructive"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4"/>
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    ))}
-                                </div>
+                                <UserTenantRoleTable
+                                    groupedRoles={groupedRoles}
+                                    getTenantName={getTenantName}
+                                    getRoleName={getRoleName}
+                                    getRoleCode={getRoleCode}
+                                    onRemoveRole={handleRemoveRole}
+                                    isRemoving={removeRoleMutation.isPending}
+                                />
                             )}
                         </CardContent>
                     </Card>
@@ -256,222 +203,5 @@ const UserTenantRole: React.FC = () => {
         </Page>
     );
 };
-
-// 分配角色对话框组件
-interface AssignRoleDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    userId: string;
-    onSuccess: () => void;
-}
-
-const AssignRoleDialog: React.FC<AssignRoleDialogProps> = React.memo(({
-                                                                          open,
-                                                                          onOpenChange,
-                                                                          userId,
-                                                                          onSuccess,
-                                                                      }) => {
-    const {data: tenants = []} = useTenants();
-    const {data: roles = []} = useRoles();
-    const assignRolesMutation = useAssignUserTenantRoles();
-
-    const [tenantRoles, setTenantRoles] = useState<TenantRoleAssignment[]>([]);
-    const [selectedTenant, setSelectedTenant] = useState('');
-    const [selectedRole, setSelectedRole] = useState('');
-
-    // 使用 useMemo 优化查找函数
-    const tenantMap = useMemo(() =>
-        new Map(tenants.map(tenant => [tenant.id, tenant])), [tenants]
-    );
-
-    const roleMap = useMemo(() =>
-        new Map(roles.map(role => [role.id, role])), [roles]
-    );
-
-    const getTenantName = useCallback((tenantId: string) => {
-        return tenantMap.get(tenantId)?.name || tenantId;
-    }, [tenantMap]);
-
-    const getRoleName = useCallback((roleId: string) => {
-        return roleMap.get(roleId)?.name || roleId;
-    }, [roleMap]);
-
-    // 获取指定租户的可用角色 - 优化
-    const getAvailableRolesForTenant = useCallback((tenantId: string) => {
-        return roles.filter((role) => role.tenant_id === tenantId || !role.tenant_id);
-    }, [roles]);
-
-    const availableRoles = useMemo(() =>
-            selectedTenant ? getAvailableRolesForTenant(selectedTenant) : [],
-        [selectedTenant, getAvailableRolesForTenant]
-    );
-
-    const handleAddAssignment = useCallback(() => {
-        if (!selectedTenant || !selectedRole) return;
-
-        // 检查是否已存在相同的分配
-        const exists = tenantRoles.some(
-            (assignment) =>
-                assignment.tenant_id === selectedTenant && assignment.role_id === selectedRole
-        );
-
-        if (exists) {
-            toast.error('该角色已分配');
-            return;
-        }
-
-        const newAssignment: TenantRoleAssignment = {
-            tenant_id: selectedTenant,
-            role_id: selectedRole,
-        };
-
-        setTenantRoles(prev => [...prev, newAssignment]);
-        setSelectedTenant('');
-        setSelectedRole('');
-    }, [selectedTenant, selectedRole, tenantRoles]);
-
-    const handleRemoveAssignment = useCallback((index: number) => {
-        setTenantRoles(prev => prev.filter((_, i) => i !== index));
-    }, []);
-
-    const handleSubmit = useCallback(async () => {
-        if (tenantRoles.length === 0) {
-            toast.error('请至少添加一个角色分配');
-            return;
-        }
-
-        const request: AssignUserTenantRoleRequest = {
-            user_id: userId,
-            tenant_roles: tenantRoles,
-        };
-
-        try {
-            await assignRolesMutation.mutateAsync(request);
-            toast.success('角色分配成功');
-            setTenantRoles([]);
-            onSuccess();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || '角色分配失败');
-        }
-    }, [tenantRoles, userId, assignRolesMutation, onSuccess]);
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>分配角色</DialogTitle>
-                    <DialogDescription>
-                        为用户分配在不同租户中的角色
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                    {/* 添加角色分配 */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <Label htmlFor="tenant">租户</Label>
-                            <Select value={selectedTenant} onValueChange={setSelectedTenant}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="选择租户"/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {tenants.map((tenant) => (
-                                        <SelectItem key={tenant.id} value={tenant.id}>
-                                            {tenant.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="role">角色</Label>
-                            <Select
-                                value={selectedRole}
-                                onValueChange={setSelectedRole}
-                                disabled={!selectedTenant}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="选择角色"/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableRoles.map((role) => (
-                                        <SelectItem key={role.id} value={role.id}>
-                                            {role.name} ({role.code})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="flex items-end">
-                            <Button
-                                onClick={handleAddAssignment}
-                                disabled={!selectedTenant || !selectedRole}
-                                className="w-full"
-                                type="button"
-                            >
-                                <Plus className="w-4 h-4 mr-2"/>
-                                添加
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* 已分配的角色列表 */}
-                    <div className="space-y-2">
-                        <Label>待分配的角色</Label>
-                        {tenantRoles.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground border border-dashed rounded-md">
-                                暂无角色分配
-                            </div>
-                        ) : (
-                            tenantRoles.map((assignment, index) => (
-                                <div
-                                    key={`${assignment.tenant_id}-${assignment.role_id}`}
-                                    className="flex items-center justify-between p-3 border rounded-md bg-muted/30"
-                                >
-                                    <div className="flex items-center space-x-2">
-                                        <Badge variant="outline">
-                                            {getTenantName(assignment.tenant_id)}
-                                        </Badge>
-                                        <span className="text-muted-foreground">→</span>
-                                        <Badge variant="secondary">
-                                            {getRoleName(assignment.role_id)}
-                                        </Badge>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleRemoveAssignment(index)}
-                                        className="text-destructive hover:text-destructive"
-                                    >
-                                        <Trash2 className="w-4 h-4"/>
-                                    </Button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    <div className="flex justify-end space-x-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            type="button"
-                        >
-                            取消
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={assignRolesMutation.isPending || tenantRoles.length === 0}
-                            type="button"
-                        >
-                            {assignRolesMutation.isPending ? '分配中...' : '确认分配'}
-                        </Button>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-});
 
 export default UserTenantRole;
