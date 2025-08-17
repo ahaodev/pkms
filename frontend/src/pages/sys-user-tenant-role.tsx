@@ -1,6 +1,6 @@
 // 用户租户角色管理页面
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -23,6 +23,7 @@ import type {
   AssignUserTenantRoleRequest,
   RemoveUserTenantRoleRequest,
   TenantRoleAssignment,
+  UserTenantRole as UserTenantRoleType,
 } from '@/types/user-tenant-role';
 
 const UserTenantRole: React.FC = () => {
@@ -33,35 +34,49 @@ const UserTenantRole: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   
-  const { data: userTenantRoles = [], refetch, isLoading: rolesDataLoading } = useAllUserTenantRoles(selectedUserId);
+  const { 
+    data: userTenantRoles = [], 
+    refetch, 
+    isLoading: rolesDataLoading 
+  } = useAllUserTenantRoles(selectedUserId, {
+    enabled: !!selectedUserId,
+    staleTime: 5 * 60 * 1000, // 5分钟
+    cacheTime: 10 * 60 * 1000, // 10分钟
+  });
   const removeRoleMutation = useRemoveUserTenantRole();
 
-  // 获取用户名称
-  const getUserName = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    return user?.name || userId;
-  };
+  // 使用 useMemo 优化查找函数
+  const userMap = useMemo(() => 
+    new Map(users.map(user => [user.id, user])), [users]
+  );
+  
+  const tenantMap = useMemo(() => 
+    new Map(tenants.map(tenant => [tenant.id, tenant])), [tenants]
+  );
+  
+  const roleMap = useMemo(() => 
+    new Map(roles.map(role => [role.id, role])), [roles]
+  );
 
-  // 获取租户名称
-  const getTenantName = (tenantId: string) => {
-    const tenant = tenants.find(t => t.id === tenantId);
-    return tenant?.name || tenantId;
-  };
+  // 优化后的获取函数
+  const getUserName = useCallback((userId: string) => {
+    return userMap.get(userId)?.name || userId;
+  }, [userMap]);
 
-  // 获取角色名称
-  const getRoleName = (roleId: string) => {
-    const role = roles.find(r => r.id === roleId);
-    return role?.name || roleId;
-  };
+  const getTenantName = useCallback((tenantId: string) => {
+    return tenantMap.get(tenantId)?.name || tenantId;
+  }, [tenantMap]);
 
-  // 获取角色代码
-  const getRoleCode = (roleId: string) => {
-    const role = roles.find(r => r.id === roleId);
-    return role?.code || roleId;
-  };
+  const getRoleName = useCallback((roleId: string) => {
+    return roleMap.get(roleId)?.name || roleId;
+  }, [roleMap]);
+
+  const getRoleCode = useCallback((roleId: string) => {
+    return roleMap.get(roleId)?.code || roleId;
+  }, [roleMap]);
 
   // 移除用户租户角色
-  const handleRemoveRole = async (userTenantRole: any) => {
+  const handleRemoveRole = useCallback(async (userTenantRole: UserTenantRoleType) => {
     const request: RemoveUserTenantRoleRequest = {
       user_id: userTenantRole.user_id,
       tenant_id: userTenantRole.tenant_id,
@@ -75,20 +90,39 @@ const UserTenantRole: React.FC = () => {
     } catch (error: any) {
       toast.error(error.response?.data?.message || '角色移除失败');
     }
-  };
+  }, [removeRoleMutation, refetch]);
 
-  // 按租户分组用户角色
-  const groupedRoles = userTenantRoles.reduce((acc, role) => {
-    const tenantId = role.tenant_id;
-    if (!acc[tenantId]) {
-      acc[tenantId] = [];
-    }
-    acc[tenantId].push(role);
-    return acc;
-  }, {} as Record<string, any[]>);
+  // 按租户分组用户角色 - 使用 useMemo 优化
+  const groupedRoles = useMemo(() => {
+    return userTenantRoles.reduce((acc, role) => {
+      const tenantId = role.tenant_id;
+      if (!acc[tenantId]) {
+        acc[tenantId] = [];
+      }
+      acc[tenantId].push(role);
+      return acc;
+    }, {} as Record<string, UserTenantRoleType[]>);
+  }, [userTenantRoles]);
 
   // 检查是否正在加载
-  const isLoading = usersLoading || tenantsLoading || rolesLoading;
+  const isLoading = useMemo(() => 
+    usersLoading || tenantsLoading || rolesLoading, 
+    [usersLoading, tenantsLoading, rolesLoading]
+  );
+
+  // 优化对话框状态处理
+  const handleOpenAssignDialog = useCallback(() => {
+    setIsAssignDialogOpen(true);
+  }, []);
+
+  const handleCloseAssignDialog = useCallback(() => {
+    setIsAssignDialogOpen(false);
+  }, []);
+
+  const handleAssignSuccess = useCallback(() => {
+    refetch();
+    setIsAssignDialogOpen(false);
+  }, [refetch]);
 
   return (
     <Page isLoading={isLoading}>
@@ -97,7 +131,7 @@ const UserTenantRole: React.FC = () => {
         description="管理用户在不同租户中的角色分配"
         action={selectedUserId ? {
           label: "分配角色",
-          onClick: () => setIsAssignDialogOpen(true),
+          onClick: handleOpenAssignDialog,
           icon: Plus
         } : undefined}
       />
@@ -163,7 +197,7 @@ const UserTenantRole: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(groupedRoles).map(([tenantId, roles]) => (
+                {Object.entries(groupedRoles).map(([tenantId, tenantRoles]) => (
                   <div key={tenantId} className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
@@ -183,7 +217,7 @@ const UserTenantRole: React.FC = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {roles.map((role, index) => (
+                      {tenantRoles.map((role, index) => (
                         <TableRow key={`${role.tenant_id}-${role.role_id}-${index}`}>
                           <TableCell className="font-medium">
                             {getRoleName(role.role_id)}
@@ -222,12 +256,9 @@ const UserTenantRole: React.FC = () => {
       {/* 分配角色对话框 */}
       <AssignRoleDialog
         open={isAssignDialogOpen}
-        onOpenChange={setIsAssignDialogOpen}
+        onOpenChange={handleCloseAssignDialog}
         userId={selectedUserId}
-        onSuccess={() => {
-          refetch();
-          setIsAssignDialogOpen(false);
-        }}
+        onSuccess={handleAssignSuccess}
       />
       </PageContent>
     </Page>
@@ -242,7 +273,7 @@ interface AssignRoleDialogProps {
   onSuccess: () => void;
 }
 
-const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
+const AssignRoleDialog: React.FC<AssignRoleDialogProps> = React.memo(({
   open,
   onOpenChange,
   userId,
@@ -256,7 +287,34 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
   const [selectedTenant, setSelectedTenant] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
 
-  const handleAddAssignment = () => {
+  // 使用 useMemo 优化查找函数
+  const tenantMap = useMemo(() => 
+    new Map(tenants.map(tenant => [tenant.id, tenant])), [tenants]
+  );
+  
+  const roleMap = useMemo(() => 
+    new Map(roles.map(role => [role.id, role])), [roles]
+  );
+
+  const getTenantName = useCallback((tenantId: string) => {
+    return tenantMap.get(tenantId)?.name || tenantId;
+  }, [tenantMap]);
+
+  const getRoleName = useCallback((roleId: string) => {
+    return roleMap.get(roleId)?.name || roleId;
+  }, [roleMap]);
+
+  // 获取指定租户的可用角色 - 优化
+  const getAvailableRolesForTenant = useCallback((tenantId: string) => {
+    return roles.filter((role) => role.tenant_id === tenantId || !role.tenant_id);
+  }, [roles]);
+
+  const availableRoles = useMemo(() => 
+    selectedTenant ? getAvailableRolesForTenant(selectedTenant) : [], 
+    [selectedTenant, getAvailableRolesForTenant]
+  );
+
+  const handleAddAssignment = useCallback(() => {
     if (!selectedTenant || !selectedRole) return;
 
     // 检查是否已存在相同的分配
@@ -275,17 +333,16 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
       role_id: selectedRole,
     };
 
-    setTenantRoles([...tenantRoles, newAssignment]);
+    setTenantRoles(prev => [...prev, newAssignment]);
     setSelectedTenant('');
     setSelectedRole('');
-  };
+  }, [selectedTenant, selectedRole, tenantRoles]);
 
-  const handleRemoveAssignment = (index: number) => {
-    const newAssignments = tenantRoles.filter((_, i) => i !== index);
-    setTenantRoles(newAssignments);
-  };
+  const handleRemoveAssignment = useCallback((index: number) => {
+    setTenantRoles(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (tenantRoles.length === 0) {
       toast.error('请至少添加一个角色分配');
       return;
@@ -304,24 +361,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
     } catch (error: any) {
       toast.error(error.response?.data?.message || '角色分配失败');
     }
-  };
-
-  const getTenantName = (tenantId: string) => {
-    const tenant = tenants.find(t => t.id === tenantId);
-    return tenant?.name || tenantId;
-  };
-
-  const getRoleName = (roleId: string) => {
-    const role = roles.find(r => r.id === roleId);
-    return role?.name || roleId;
-  };
-
-  // 获取指定租户的可用角色
-  const getAvailableRolesForTenant = (tenantId: string) => {
-    return roles.filter((role) => role.tenant_id === tenantId || !role.tenant_id);
-  };
-
-  const availableRoles = selectedTenant ? getAvailableRolesForTenant(selectedTenant) : [];
+  }, [tenantRoles, userId, assignRolesMutation, onSuccess]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -377,6 +417,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
                 onClick={handleAddAssignment}
                 disabled={!selectedTenant || !selectedRole}
                 className="w-full"
+                type="button"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 添加
@@ -420,12 +461,17 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              type="button"
+            >
               取消
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={assignRolesMutation.isPending || tenantRoles.length === 0}
+              type="button"
             >
               {assignRolesMutation.isPending ? '分配中...' : '确认分配'}
             </Button>
@@ -434,6 +480,6 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default UserTenantRole;
