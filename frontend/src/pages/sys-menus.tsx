@@ -7,7 +7,7 @@ import { menuApi } from '@/lib/api/menu';
 import { PermissionButton, PermissionGuard } from '@/components/permissions/permission-guard';
 import { Page, PageHeader, PageContent } from '@/components/page';
 import { CreateMenuDialog, EditMenuDialog, MenuTree } from '@/components/sys-menu';
-import type { MenuTreeNode, CreateMenuRequest, UpdateMenuRequest } from '@/types/menu';
+import type { MenuTreeNode, UpdateMenuRequest } from '@/types/menu';
 
 const MenuManagement: React.FC = () => {
   const queryClient = useQueryClient();

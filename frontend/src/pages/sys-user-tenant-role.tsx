@@ -38,11 +38,7 @@ const UserTenantRole: React.FC = () => {
     data: userTenantRoles = [], 
     refetch, 
     isLoading: rolesDataLoading 
-  } = useAllUserTenantRoles(selectedUserId, {
-    enabled: !!selectedUserId,
-    staleTime: 5 * 60 * 1000, // 5分钟
-    cacheTime: 10 * 60 * 1000, // 10分钟
-  });
+  } = useAllUserTenantRoles(selectedUserId);
   const removeRoleMutation = useRemoveUserTenantRole();
 
   // 使用 useMemo 优化查找函数

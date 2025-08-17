@@ -17,7 +17,6 @@ export const MenuTree: React.FC<MenuTreeProps> = ({
   menuTree,
   onEdit,
   onDelete,
-  isLoading,
 }) => {
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
 
