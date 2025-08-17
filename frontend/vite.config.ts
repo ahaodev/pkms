@@ -58,7 +58,6 @@ export default defineConfig({
           
           // System management modules
           'sys-management': [
-            './src/pages/sys-menus',
             './src/pages/sys-roles', 
             './src/pages/sys-users',
             './src/pages/sys-tenants',

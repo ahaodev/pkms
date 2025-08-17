@@ -2,8 +2,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { menuApi } from '@/lib/api/menu';
 import { useAuth } from '@/providers/auth-provider';
+import { staticMenuApi } from '@/lib/api/static-menu';
 
 
 /**
@@ -16,7 +16,7 @@ export const usePermissions = () => {
   // 获取用户按钮权限
   const { data: buttonPermissions = [], isLoading: buttonLoading } = useQuery({
     queryKey: ['userButtonPermissions', user?.id],
-    queryFn: menuApi.getUserButtonPermissions,
+    queryFn: staticMenuApi.getUserButtonPermissions,
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
     gcTime: 10 * 60 * 1000, // 10分钟缓存
@@ -32,7 +32,7 @@ export const usePermissions = () => {
   // 获取侧边栏权限（菜单权限）
   const { data: sidebarData, isLoading: menuLoading } = useQuery({
     queryKey: ['sidebarPermissions', user?.id],
-    queryFn: menuApi.getSidebarPermissions,
+    queryFn: staticMenuApi.getSidebarPermissions,
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

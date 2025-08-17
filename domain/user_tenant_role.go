@@ -10,14 +10,13 @@ type UserTenantRole struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
 	TenantID  string    `json:"tenant_id"`
-	RoleID    string    `json:"role_id"`
+	RoleCode  string    `json:"role_code"` // 使用角色代码而不是ID
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	// 关联信息
 	UserName   string `json:"user_name,omitempty"`
 	TenantName string `json:"tenant_name,omitempty"`
 	RoleName   string `json:"role_name,omitempty"`
-	RoleCode   string `json:"role_code,omitempty"`
 }
 
 // AssignUserTenantRoleRequest 分配用户租户角色请求
@@ -30,7 +29,7 @@ type AssignUserTenantRoleRequest struct {
 type RemoveUserTenantRoleRequest struct {
 	UserID   string `json:"user_id" binding:"required"`
 	TenantID string `json:"tenant_id" binding:"required"`
-	RoleID   string `json:"role_id" binding:"required"`
+	RoleCode string `json:"role_code" binding:"required"`
 }
 
 // UserTenantRoleRepository 用户租户角色数据访问接口
@@ -41,15 +40,15 @@ type UserTenantRoleRepository interface {
 	Delete(ctx context.Context, id string) error
 
 	// 查询操作
-	GetByUserTenantRole(ctx context.Context, userID, tenantID, roleID string) (*UserTenantRole, error)
-	GetRolesByUserTenant(ctx context.Context, userID, tenantID string) ([]*Role, error)
-	GetUsersByTenantRole(ctx context.Context, tenantID, roleID string) ([]*User, error)
-	GetTenantsByUserRole(ctx context.Context, userID, roleID string) ([]*Tenant, error)
+	GetByUserTenantRole(ctx context.Context, userID, tenantID, roleCode string) (*UserTenantRole, error)
+	GetRoleCodesByUserTenant(ctx context.Context, userID, tenantID string) ([]string, error)
+	GetUsersByTenantRole(ctx context.Context, tenantID, roleCode string) ([]*User, error)
+	GetTenantsByUserRole(ctx context.Context, userID, roleCode string) ([]*Tenant, error)
 	GetAllUserTenantRoles(ctx context.Context, userID string) ([]*UserTenantRole, error)
 
 	// 批量操作
-	AssignRolesToUserInTenant(ctx context.Context, userID, tenantID string, roleIDs []string) error
-	RemoveRolesFromUserInTenant(ctx context.Context, userID, tenantID string, roleIDs []string) error
+	AssignRolesToUserInTenant(ctx context.Context, userID, tenantID string, roleCodes []string) error
+	RemoveRolesFromUserInTenant(ctx context.Context, userID, tenantID string, roleCodes []string) error
 	RemoveAllRolesFromUser(ctx context.Context, userID string) error
 	RemoveAllRolesFromUserInTenant(ctx context.Context, userID, tenantID string) error
 }
@@ -62,11 +61,11 @@ type UserTenantRoleUsecase interface {
 	RemoveAllUserRolesInTenant(ctx context.Context, userID, tenantID string) error
 
 	// 查询操作
-	GetUserRolesByTenant(ctx context.Context, userID, tenantID string) ([]*Role, error)
-	GetUsersByTenantRole(ctx context.Context, tenantID, roleID string) ([]*User, error)
+	GetUserRolesByTenant(ctx context.Context, userID, tenantID string) ([]string, error)
+	GetUsersByTenantRole(ctx context.Context, tenantID, roleCode string) ([]*User, error)
 	GetAllUserTenantRoles(ctx context.Context, userID string) ([]*UserTenantRole, error)
 
 	// 权限检查
-	HasUserRoleInTenant(ctx context.Context, userID, tenantID, roleID string) (bool, error)
+	HasUserRoleInTenant(ctx context.Context, userID, tenantID, roleCode string) (bool, error)
 	CheckUserPermissionInTenant(ctx context.Context, userID, tenantID, resource, action string) (bool, error)
 }

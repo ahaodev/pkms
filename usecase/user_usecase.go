@@ -120,7 +120,7 @@ func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.Crea
 			// 使用 Casbin 分配角色
 			// 注意：这里需要根据实际的角色代码来设置
 			// TODO: 应该通过角色ID查询角色代码
-			if _, err := uu.casbinManager.AddRoleForUser(user.ID, assignment.RoleID, assignment.TenantID); err != nil {
+			if _, err := uu.casbinManager.AddRoleForUser(user.ID, assignment.RoleCode, assignment.TenantID); err != nil {
 				return user, err
 			}
 		}

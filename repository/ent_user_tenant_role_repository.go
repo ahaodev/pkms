@@ -4,9 +4,6 @@ import (
 	"context"
 	"pkms/domain"
 	"pkms/ent"
-	"pkms/ent/role"
-	"pkms/ent/tenant"
-	"pkms/ent/user"
 	"pkms/ent/usertenantrole"
 )
 
@@ -14,272 +11,253 @@ type entUserTenantRoleRepository struct {
 	client *ent.Client
 }
 
-func NewEntUserTenantRoleRepository(client *ent.Client) domain.UserTenantRoleRepository {
+func NewUserTenantRoleRepository(client *ent.Client) domain.UserTenantRoleRepository {
 	return &entUserTenantRoleRepository{
 		client: client,
 	}
 }
 
+// Create 创建用户租户角色关联
 func (repo *entUserTenantRoleRepository) Create(ctx context.Context, userTenantRole *domain.UserTenantRole) error {
-	_, err := repo.client.UserTenantRole.
-		Create().
+	created, err := repo.client.UserTenantRole.Create().
 		SetUserID(userTenantRole.UserID).
 		SetTenantID(userTenantRole.TenantID).
-		SetRoleID(userTenantRole.RoleID).
+		SetRoleCode(userTenantRole.RoleCode).
 		Save(ctx)
+	if err != nil {
+		return err
+	}
 
-	return err
+	userTenantRole.ID = created.ID
+	userTenantRole.CreatedAt = created.CreatedAt
+	userTenantRole.UpdatedAt = created.UpdatedAt
+	return nil
 }
 
+// GetByID 根据ID获取用户租户角色关联
 func (repo *entUserTenantRoleRepository) GetByID(ctx context.Context, id string) (*domain.UserTenantRole, error) {
-	ent, err := repo.client.UserTenantRole.
-		Query().
+	utr, err := repo.client.UserTenantRole.Query().
 		Where(usertenantrole.ID(id)).
 		WithUser().
 		WithTenant().
-		WithRole().
-		Only(ctx)
-
+		First(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return repo.toDomain(ent), nil
+	return repo.entToDomain(utr), nil
 }
 
+// Delete 删除用户租户角色关联
 func (repo *entUserTenantRoleRepository) Delete(ctx context.Context, id string) error {
-	return repo.client.UserTenantRole.
-		DeleteOneID(id).
-		Exec(ctx)
+	return repo.client.UserTenantRole.DeleteOneID(id).Exec(ctx)
 }
 
-func (repo *entUserTenantRoleRepository) GetByUserTenantRole(ctx context.Context, userID, tenantID, roleID string) (*domain.UserTenantRole, error) {
-	ent, err := repo.client.UserTenantRole.
-		Query().
+// GetByUserTenantRole 根据用户、租户、角色获取关联
+func (repo *entUserTenantRoleRepository) GetByUserTenantRole(ctx context.Context, userID, tenantID, roleCode string) (*domain.UserTenantRole, error) {
+	utr, err := repo.client.UserTenantRole.Query().
 		Where(
 			usertenantrole.UserID(userID),
 			usertenantrole.TenantID(tenantID),
-			usertenantrole.RoleID(roleID),
+			usertenantrole.RoleCode(roleCode),
 		).
 		WithUser().
 		WithTenant().
-		WithRole().
-		Only(ctx)
-
+		First(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return repo.toDomain(ent), nil
+	return repo.entToDomain(utr), nil
 }
 
-func (repo *entUserTenantRoleRepository) GetRolesByUserTenant(ctx context.Context, userID, tenantID string) ([]*domain.Role, error) {
-	roles, err := repo.client.Role.
-		Query().
-		Where(role.HasUserTenantRolesWith(
+// GetRoleCodesByUserTenant 获取用户在租户下的角色代码
+func (repo *entUserTenantRoleRepository) GetRoleCodesByUserTenant(ctx context.Context, userID, tenantID string) ([]string, error) {
+	utrs, err := repo.client.UserTenantRole.Query().
+		Where(
 			usertenantrole.UserID(userID),
 			usertenantrole.TenantID(tenantID),
-		)).
+		).
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var result []*domain.Role
-	for _, r := range roles {
-		result = append(result, &domain.Role{
-			ID:          r.ID,
-			Name:        r.Name,
-			Code:        r.Code,
-			Description: r.Description,
-			TenantID:    r.TenantID,
-			IsSystem:    r.IsSystem,
-			IsActive:    r.IsActive,
-			CreatedAt:   r.CreatedAt,
-			UpdatedAt:   r.UpdatedAt,
-		})
+	var roleCodes []string
+	for _, utr := range utrs {
+		roleCodes = append(roleCodes, utr.RoleCode)
 	}
-
-	return result, nil
+	return roleCodes, nil
 }
 
-func (repo *entUserTenantRoleRepository) GetUsersByTenantRole(ctx context.Context, tenantID, roleID string) ([]*domain.User, error) {
-	users, err := repo.client.User.
-		Query().
-		Where(user.HasUserTenantRolesWith(
+// GetUsersByTenantRole 获取租户下拥有指定角色的用户
+func (repo *entUserTenantRoleRepository) GetUsersByTenantRole(ctx context.Context, tenantID, roleCode string) ([]*domain.User, error) {
+	utrs, err := repo.client.UserTenantRole.Query().
+		Where(
 			usertenantrole.TenantID(tenantID),
-			usertenantrole.RoleID(roleID),
-		)).
+			usertenantrole.RoleCode(roleCode),
+		).
+		WithUser().
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var result []*domain.User
-	for _, u := range users {
-		result = append(result, &domain.User{
-			ID:        u.ID,
-			Name:      u.Username,
-			Password:  "", // 不返回密码
-			IsActive:  u.IsActive,
-			CreatedAt: u.CreatedAt,
-			UpdatedAt: u.UpdatedAt,
-		})
+	var users []*domain.User
+	for _, utr := range utrs {
+		if utr.Edges.User != nil {
+			user := &domain.User{
+				ID:       utr.Edges.User.ID,
+				Name:     utr.Edges.User.Username,
+				IsActive: utr.Edges.User.IsActive,
+			}
+			users = append(users, user)
+		}
 	}
-
-	return result, nil
+	return users, nil
 }
 
-func (repo *entUserTenantRoleRepository) GetTenantsByUserRole(ctx context.Context, userID, roleID string) ([]*domain.Tenant, error) {
-	tenants, err := repo.client.Tenant.
-		Query().
-		Where(tenant.HasUserTenantRolesWith(
+// GetTenantsByUserRole 获取用户拥有指定角色的租户
+func (repo *entUserTenantRoleRepository) GetTenantsByUserRole(ctx context.Context, userID, roleCode string) ([]*domain.Tenant, error) {
+	utrs, err := repo.client.UserTenantRole.Query().
+		Where(
 			usertenantrole.UserID(userID),
-			usertenantrole.RoleID(roleID),
-		)).
+			usertenantrole.RoleCode(roleCode),
+		).
+		WithTenant().
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var result []*domain.Tenant
-	for _, t := range tenants {
-		result = append(result, &domain.Tenant{
-			ID:        t.ID,
-			Name:      t.Name,
-			CreatedAt: t.CreatedAt,
-			UpdatedAt: t.UpdatedAt,
-		})
+	var tenants []*domain.Tenant
+	for _, utr := range utrs {
+		if utr.Edges.Tenant != nil {
+			tenant := &domain.Tenant{
+				ID:        utr.Edges.Tenant.ID,
+				Name:      utr.Edges.Tenant.Name,
+				CreatedAt: utr.Edges.Tenant.CreatedAt,
+				UpdatedAt: utr.Edges.Tenant.UpdatedAt,
+			}
+			tenants = append(tenants, tenant)
+		}
 	}
-
-	return result, nil
+	return tenants, nil
 }
 
+// GetAllUserTenantRoles 获取用户的所有租户角色关联
 func (repo *entUserTenantRoleRepository) GetAllUserTenantRoles(ctx context.Context, userID string) ([]*domain.UserTenantRole, error) {
-	ents, err := repo.client.UserTenantRole.
-		Query().
+	utrs, err := repo.client.UserTenantRole.Query().
 		Where(usertenantrole.UserID(userID)).
 		WithUser().
 		WithTenant().
-		WithRole().
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*domain.UserTenantRole
-	for _, ent := range ents {
-		result = append(result, repo.toDomain(ent))
+	for _, utr := range utrs {
+		result = append(result, repo.entToDomain(utr))
 	}
-
 	return result, nil
 }
 
-func (repo *entUserTenantRoleRepository) AssignRolesToUserInTenant(ctx context.Context, userID, tenantID string, roleIDs []string) error {
-	tx, err := repo.client.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	for _, roleID := range roleIDs {
+// AssignRolesToUserInTenant 为用户在租户下分配角色
+func (repo *entUserTenantRoleRepository) AssignRolesToUserInTenant(ctx context.Context, userID, tenantID string, roleCodes []string) error {
+	for _, roleCode := range roleCodes {
 		// 检查是否已存在
-		exists, err := tx.UserTenantRole.
-			Query().
+		exists, err := repo.client.UserTenantRole.Query().
 			Where(
 				usertenantrole.UserID(userID),
 				usertenantrole.TenantID(tenantID),
-				usertenantrole.RoleID(roleID),
+				usertenantrole.RoleCode(roleCode),
 			).
 			Exist(ctx)
-
 		if err != nil {
 			return err
 		}
-
 		if !exists {
-			_, err = tx.UserTenantRole.
-				Create().
+			_, err = repo.client.UserTenantRole.Create().
 				SetUserID(userID).
 				SetTenantID(tenantID).
-				SetRoleID(roleID).
+				SetRoleCode(roleCode).
 				Save(ctx)
-
 			if err != nil {
 				return err
 			}
 		}
 	}
-
 	return nil
 }
 
-func (repo *entUserTenantRoleRepository) RemoveRolesFromUserInTenant(ctx context.Context, userID, tenantID string, roleIDs []string) error {
-	_, err := repo.client.UserTenantRole.
-		Delete().
-		Where(
-			usertenantrole.UserID(userID),
-			usertenantrole.TenantID(tenantID),
-			usertenantrole.RoleIDIn(roleIDs...),
-		).
-		Exec(ctx)
-
-	return err
+// RemoveRolesFromUserInTenant 移除用户在租户下的角色
+func (repo *entUserTenantRoleRepository) RemoveRolesFromUserInTenant(ctx context.Context, userID, tenantID string, roleCodes []string) error {
+	for _, roleCode := range roleCodes {
+		_, err := repo.client.UserTenantRole.Delete().
+			Where(
+				usertenantrole.UserID(userID),
+				usertenantrole.TenantID(tenantID),
+				usertenantrole.RoleCode(roleCode),
+			).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
+// RemoveAllRolesFromUser 移除用户的所有角色
 func (repo *entUserTenantRoleRepository) RemoveAllRolesFromUser(ctx context.Context, userID string) error {
-	_, err := repo.client.UserTenantRole.
-		Delete().
+	_, err := repo.client.UserTenantRole.Delete().
 		Where(usertenantrole.UserID(userID)).
 		Exec(ctx)
-
 	return err
 }
 
+// RemoveAllRolesFromUserInTenant 移除用户在指定租户下的所有角色
 func (repo *entUserTenantRoleRepository) RemoveAllRolesFromUserInTenant(ctx context.Context, userID, tenantID string) error {
-	_, err := repo.client.UserTenantRole.
-		Delete().
+	_, err := repo.client.UserTenantRole.Delete().
 		Where(
 			usertenantrole.UserID(userID),
 			usertenantrole.TenantID(tenantID),
 		).
 		Exec(ctx)
-
 	return err
 }
 
-func (repo *entUserTenantRoleRepository) toDomain(ent *ent.UserTenantRole) *domain.UserTenantRole {
+// entToDomain 将Ent实体转换为Domain实体
+func (repo *entUserTenantRoleRepository) entToDomain(utr *ent.UserTenantRole) *domain.UserTenantRole {
 	result := &domain.UserTenantRole{
-		ID:        ent.ID,
-		UserID:    ent.UserID,
-		TenantID:  ent.TenantID,
-		RoleID:    ent.RoleID,
-		CreatedAt: ent.CreatedAt,
-		UpdatedAt: ent.UpdatedAt,
+		ID:        utr.ID,
+		UserID:    utr.UserID,
+		TenantID:  utr.TenantID,
+		RoleCode:  utr.RoleCode,
+		CreatedAt: utr.CreatedAt,
+		UpdatedAt: utr.UpdatedAt,
 	}
 
-	if ent.Edges.User != nil {
-		result.UserName = ent.Edges.User.Username
+	// 设置关联信息
+	if utr.Edges.User != nil {
+		result.UserName = utr.Edges.User.Username
+	}
+	if utr.Edges.Tenant != nil {
+		result.TenantName = utr.Edges.Tenant.Name
 	}
 
-	if ent.Edges.Tenant != nil {
-		result.TenantName = ent.Edges.Tenant.Name
-	}
-
-	if ent.Edges.Role != nil {
-		result.RoleName = ent.Edges.Role.Name
-		result.RoleCode = ent.Edges.Role.Code
+	// 根据角色代码设置角色名称
+	switch utr.RoleCode {
+	case domain.SystemRoleAdmin:
+		result.RoleName = "系统管理员"
+	case domain.TenantRoleOwner:
+		result.RoleName = "租户管理员"
+	case domain.TenantRoleUser:
+		result.RoleName = "普通用户"
+	case domain.TenantRoleViewer:
+		result.RoleName = "只读用户"
+	default:
+		result.RoleName = utr.RoleCode
 	}
 
 	return result

@@ -1,3 +1,2 @@
 // Routing components index
-
-export { DynamicRoutes, StaticRoutes } from './dynamic-routes';
+// Dynamic routes removed, using static routing from routes.ts

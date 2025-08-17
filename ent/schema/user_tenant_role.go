@@ -27,8 +27,8 @@ func (UserTenantRole) Fields() []ent.Field {
 			Comment("用户ID"),
 		field.String("tenant_id").
 			Comment("租户ID"),
-		field.String("role_id").
-			Comment("角色ID"),
+		field.String("role_code").
+			Comment("角色代码(admin/owner/user/viewer)"),
 		field.Time("created_at").
 			Default(time.Now).
 			Comment("创建时间"),
@@ -52,11 +52,6 @@ func (UserTenantRole) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("tenant_id"),
-		// 关联角色
-		edge.To("role", Role.Type).
-			Unique().
-			Required().
-			Field("role_id"),
 	}
 }
 
@@ -64,13 +59,13 @@ func (UserTenantRole) Edges() []ent.Edge {
 func (UserTenantRole) Indexes() []ent.Index {
 	return []ent.Index{
 		// 用户在同一租户下的角色唯一
-		index.Fields("user_id", "tenant_id", "role_id").Unique(),
+		index.Fields("user_id", "tenant_id", "role_code").Unique(),
 		// 按用户查询
 		index.Fields("user_id"),
 		// 按租户查询
 		index.Fields("tenant_id"),
 		// 按角色查询
-		index.Fields("role_id"),
+		index.Fields("role_code"),
 		// 按用户和租户查询
 		index.Fields("user_id", "tenant_id"),
 	}

@@ -21,14 +21,12 @@ func NewUserTenantRoleRouter(
 	group *gin.RouterGroup,
 ) {
 	// 初始化 repositories
-	userTenantRoleRepository := repository.NewEntUserTenantRoleRepository(db)
-	roleRepository := repository.NewRoleRepository(db)
+	userTenantRoleRepository := repository.NewUserTenantRoleRepository(db)
 	tenantRepository := repository.NewTenantRepository(db)
 
 	// 初始化 usecase
 	userTenantRoleUsecase := usecase.NewUserTenantRoleUsecase(
 		userTenantRoleRepository,
-		roleRepository,
 		tenantRepository,
 		casbinManager,
 		timeout,

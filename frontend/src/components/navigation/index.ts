@@ -1,7 +1,7 @@
 // Navigation components index
 
 export { 
-  DynamicNavigation, 
-  DynamicBreadcrumbs, 
-  DynamicPageTitle 
-} from './dynamic-navigation';
+  StaticNavigation,
+  usePageTitle,
+  useRequiresAdminAccess
+} from './static-navigation';

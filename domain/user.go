@@ -24,7 +24,7 @@ type User struct {
 // TenantRoleAssignment 租户角色分配
 type TenantRoleAssignment struct {
 	TenantID string `json:"tenant_id" binding:"required"`
-	RoleID   string `json:"role_id" binding:"required"`
+	RoleCode string `json:"role_code" binding:"required"`
 }
 
 // CreateUserRequest 创建用户请求

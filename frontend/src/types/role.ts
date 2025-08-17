@@ -2,7 +2,6 @@
 export type UserRole = 'admin' | 'user';
 
 // 新增的Role管理类型定义
-import type { Menu } from './menu';
 
 export interface Role {
   id: string;
@@ -12,7 +11,6 @@ export interface Role {
   tenant_id?: string;
   is_system: boolean;
   is_active: boolean;
-  menus?: Menu[];
   users?: any[]; // 使用any避免循环引用
   created_at: string;
   updated_at: string;
@@ -23,14 +21,12 @@ export interface CreateRoleRequest {
   code: string;
   description?: string;
   tenant_id: string; // 必须绑定租户
-  menu_ids?: string[];
 }
 
 export interface UpdateRoleRequest {
   name?: string;
   description?: string;
   is_active?: boolean;
-  menu_ids?: string[];
 }
 
 export interface AssignRoleRequest {

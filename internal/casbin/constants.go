@@ -9,7 +9,7 @@ const (
 	RoleViewer = "viewer" // 普通用户：查看权限
 )
 
-// 侧边栏权限（更新为与系统菜单路径一致）
+// 侧边栏权限（简化版本，删除菜单管理）
 const (
 	SidebarDashboard   = "dashboard"       // 对应 "/"
 	SidebarProjects    = "hierarchy"       // 对应 "/hierarchy"
@@ -19,13 +19,12 @@ const (
 	SidebarTenants     = "tenants"         // 对应 "/tenants"
 	SidebarUsers       = "users"           // 对应 "/users"
 	SidebarPermissions = "permissions"     // 对应 "/permissions"
-	SidebarMenus       = "menu-management" // 对应 "/menu-management"
 	SidebarRoles       = "role-management" // 对应 "/role-management"
 )
 
 var ADMIN_SIDEBAR = []string{
 	SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager,
-	SidebarTenants, SidebarUsers, SidebarPermissions, SidebarMenus, SidebarRoles,
+	SidebarTenants, SidebarUsers, SidebarPermissions, SidebarRoles,
 }
 
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}

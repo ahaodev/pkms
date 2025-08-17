@@ -12,7 +12,6 @@ const UpgradePage = lazy(() => import("@/pages/upgrade"));
 const TenantsPage = lazy(() => import("@/pages/sys-tenants"));
 const ClientAccessPage = lazy(() => import("@/pages/client-access"));
 const SharesManagerPage = lazy(() => import("@/pages/shares"));
-const MenuManagement = lazy(() => import("@/pages/sys-menus"));
 const RoleManagement = lazy(() => import("@/pages/sys-roles"));
 const UserTenantRole = lazy(() => import("@/pages/sys-user-tenant-role"));
 
@@ -67,12 +66,6 @@ export const routes: RouteConfig[] = [
     {
         path: "/tenants",
         element: TenantsPage,
-        requiresAuth: true,
-        requiresAdmin: true,
-    },
-    {
-        path: "/menu-management",
-        element: MenuManagement,
         requiresAuth: true,
         requiresAdmin: true,
     },

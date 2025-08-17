@@ -9,7 +9,6 @@ import (
 	"pkms/domain"
 	"pkms/ent"
 	"pkms/ent/migrate"
-	"pkms/ent/role"
 	"pkms/ent/user"
 	"pkms/internal/casbin"
 	"strings"
@@ -136,35 +135,6 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 
 	if adminCount > 0 {
 		log.Println("✅ Admin user already exists")
-		// 确保现有的admin用户也有正确的角色关联
-		adminUser, err := client.User.Query().Where(user.UsernameEQ("admin")).First(ctx)
-		if err != nil {
-			log.Printf("❌ Failed to find existing admin user: %v", err)
-			return
-		}
-
-		// 确保admin用户与admin角色实体关联（用于动态菜单系统）
-		adminRole, err := client.Role.Query().Where(role.Code("admin")).First(ctx)
-		if err != nil {
-			log.Printf("❌ Failed to find admin role entity: %v", err)
-			return
-		}
-
-		// 检查是否已经关联
-		hasRole, err := client.User.Query().Where(user.ID(adminUser.ID)).QueryRoles().Where(role.ID(adminRole.ID)).Exist(ctx)
-		if err != nil {
-			log.Printf("❌ Failed to check admin user role: %v", err)
-		} else if !hasRole {
-			// 为admin用户分配admin角色实体
-			err = client.User.UpdateOneID(adminUser.ID).AddRoles(adminRole).Exec(ctx)
-			if err != nil {
-				log.Printf("❌ Failed to assign admin role entity to existing admin user: %v", err)
-			} else {
-				log.Printf("✅ Admin role entity assigned to existing admin user successfully")
-			}
-		} else {
-			log.Printf("✅ Admin user already has admin role entity")
-		}
 		return
 	}
 
@@ -217,20 +187,7 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 		log.Printf("✅ Add Role For User In Tenant (方式2): 成功")
 	}
 
-	// 同时建立实体级别的角色关联（用于动态菜单系统）
-	// 查找admin角色实体
-	adminRole, err := client.Role.Query().Where(role.Code("admin")).First(ctx)
-	if err != nil {
-		log.Printf("❌ Failed to find admin role entity: %v", err)
-	} else {
-		// 为admin用户分配admin角色实体
-		err = client.User.UpdateOneID(adminUser.ID).AddRoles(adminRole).Exec(ctx)
-		if err != nil {
-			log.Printf("❌ Failed to assign admin role entity to admin user: %v", err)
-		} else {
-			log.Printf("✅ Admin role entity assigned to admin user successfully")
-		}
-	}
+	// 角色现在使用固定常量，不需要实体级别的关联
 
 	log.Printf("✅ Default admin user created: %s", adminUsername)
 	log.Println("⚠️ Please change the default password after first login!")

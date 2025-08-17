@@ -166,59 +166,12 @@ definitions:
     - package_id
     - project_id
     type: object
-  domain.CreateMenuActionRequest:
-    properties:
-      code:
-        type: string
-      description:
-        type: string
-      method:
-        type: string
-      name:
-        type: string
-      permission_key:
-        type: string
-      resource:
-        type: string
-    required:
-    - code
-    - name
-    - permission_key
-    - resource
-    type: object
-  domain.CreateMenuRequest:
-    properties:
-      component:
-        type: string
-      description:
-        type: string
-      icon:
-        type: string
-      name:
-        type: string
-      parent_id:
-        type: string
-      path:
-        type: string
-      sort:
-        type: integer
-      tenant_id:
-        type: string
-      visible:
-        type: boolean
-    required:
-    - name
-    type: object
   domain.CreateRoleRequest:
     properties:
       code:
         type: string
       description:
         type: string
-      menu_ids:
-        items:
-          type: string
-        type: array
       name:
         type: string
       tenant_id:
@@ -318,104 +271,18 @@ definitions:
       refreshToken:
         type: string
     type: object
-  domain.Menu:
+  domain.MenuItem:
     properties:
-      actions:
-        items:
-          $ref: '#/definitions/domain.MenuAction'
-        type: array
-      children:
-        items:
-          $ref: '#/definitions/domain.Menu'
-        type: array
       component:
-        type: string
-      created_at:
-        type: string
-      description:
         type: string
       icon:
         type: string
-      id:
-        type: string
-      is_system:
-        type: boolean
       name:
-        type: string
-      parent_id:
         type: string
       path:
         type: string
       sort:
         type: integer
-      tenant_id:
-        type: string
-      updated_at:
-        type: string
-      visible:
-        type: boolean
-    type: object
-  domain.MenuAction:
-    properties:
-      code:
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      is_system:
-        type: boolean
-      menu_id:
-        type: string
-      method:
-        type: string
-      name:
-        type: string
-      permission_key:
-        type: string
-      resource:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  domain.MenuTreeNode:
-    properties:
-      actions:
-        items:
-          $ref: '#/definitions/domain.MenuAction'
-        type: array
-      children:
-        items:
-          $ref: '#/definitions/domain.MenuTreeNode'
-        type: array
-      component:
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      is_system:
-        type: boolean
-      name:
-        type: string
-      parent_id:
-        type: string
-      path:
-        type: string
-      sort:
-        type: integer
-      tenant_id:
-        type: string
-      updated_at:
-        type: string
-      visible:
-        type: boolean
     type: object
   domain.Package:
     properties:
@@ -634,10 +501,6 @@ definitions:
         type: boolean
       is_system:
         type: boolean
-      menus:
-        items:
-          $ref: '#/definitions/domain.Menu'
-        type: array
       name:
         type: string
       tenant_id:
@@ -660,19 +523,6 @@ definitions:
       user:
         type: string
       user_name:
-        type: string
-    type: object
-  domain.RolePermission:
-    properties:
-      action:
-        type: string
-      menu_id:
-        type: string
-      permission_key:
-        type: string
-      resource:
-        type: string
-      role_id:
         type: string
     type: object
   domain.RolePermissionsResponse:
@@ -728,35 +578,12 @@ definitions:
       name:
         type: string
     type: object
-  domain.UpdateMenuRequest:
-    properties:
-      component:
-        type: string
-      description:
-        type: string
-      icon:
-        type: string
-      name:
-        type: string
-      parent_id:
-        type: string
-      path:
-        type: string
-      sort:
-        type: integer
-      visible:
-        type: boolean
-    type: object
   domain.UpdateRoleRequest:
     properties:
       description:
         type: string
       is_active:
         type: boolean
-      menu_ids:
-        items:
-          type: string
-        type: array
       name:
         type: string
     type: object
@@ -2068,465 +1895,34 @@ paths:
       summary: User login
       tags:
       - Authentication
-  /menu:
-    post:
-      consumes:
-      - application/json
-      description: Create a new menu item (admin only)
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      - description: Menu creation data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateMenuRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Menu created successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Menu'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Create a new menu
-      tags:
-      - Menus
-  /menu/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a menu and its actions (admin only)
-      parameters:
-      - description: Menu ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu deleted successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Cannot delete menu
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Menu not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Delete menu
-      tags:
-      - Menus
+  /menus/system:
     get:
       consumes:
       - application/json
-      description: Retrieve a specific menu by its ID
-      parameters:
-      - description: Menu ID
-        in: path
-        name: id
-        required: true
-        type: string
+      description: 获取系统预定义的固定菜单列表
       produces:
       - application/json
       responses:
         "200":
-          description: Menu retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Menu'
-              type: object
-        "404":
-          description: Menu not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get menu by ID
-      tags:
-      - Menus
-    put:
-      consumes:
-      - application/json
-      description: Update an existing menu (admin only)
-      parameters:
-      - description: Menu ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Menu update data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.UpdateMenuRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Menu'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Menu not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Update menu
-      tags:
-      - Menus
-  /menu/{id}/actions:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all actions for a specific menu
-      parameters:
-      - description: Menu ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu actions retrieved successfully
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/domain.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/domain.MenuAction'
-                  type: array
-              type: object
-        "404":
-          description: Menu not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get menu actions
-      tags:
-      - Menus
-    post:
-      consumes:
-      - application/json
-      description: Create a new action for a menu (admin only)
-      parameters:
-      - description: Menu ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Menu action creation data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateMenuActionRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Menu action created successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.MenuAction'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Create menu action
-      tags:
-      - Menus
-  /menu/actions/{actionId}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a menu action (admin only)
-      parameters:
-      - description: Action ID
-        in: path
-        name: actionId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu action deleted successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Cannot delete action
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Menu action not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Delete menu action
-      tags:
-      - Menus
-    put:
-      consumes:
-      - application/json
-      description: Update an existing menu action (admin only)
-      parameters:
-      - description: Action ID
-        in: path
-        name: actionId
-        required: true
-        type: string
-      - description: Menu action update data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateMenuActionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu action updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.MenuAction'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Menu action not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Update menu action
-      tags:
-      - Menus
-  /menu/check-permission:
-    get:
-      consumes:
-      - application/json
-      description: Check if current user has specific permission
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      - description: Permission key to check
-        in: query
-        name: permission_key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Permission check result
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: boolean
-              type: object
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Check user permission
-      tags:
-      - Menus
-  /menu/tree:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve the complete menu tree for the current tenant
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menu tree retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuTreeNode'
+                    $ref: '#/definitions/domain.MenuItem'
                   type: array
               type: object
         "500":
-          description: Internal server error
+          description: 服务器错误
           schema:
             $ref: '#/definitions/domain.Response'
       security:
       - BearerAuth: []
-      summary: Get menu tree
+      summary: 获取系统固定菜单
       tags:
-      - Menus
-  /menu/user-permissions:
-    get:
-      consumes:
-      - application/json
-      description: Get all permissions for the current user
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User permissions retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    type: string
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user permissions
-      tags:
-      - Menus
-  /menu/user-tree:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve menu tree based on user permissions
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User menu tree retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuTreeNode'
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user menu tree
-      tags:
-      - Menus
+      - 菜单管理
   /packages:
     get:
       consumes:
@@ -3635,87 +3031,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Assign role to users
-      tags:
-      - Roles
-  /role/{id}/menus:
-    post:
-      consumes:
-      - application/json
-      description: Assign multiple menus to a role (admin only)
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Menu IDs to assign
-        in: body
-        name: menuIds
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Menus assigned successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Assign menus to role
-      tags:
-      - Roles
-  /role/{id}/permissions:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all permissions for a specific role
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role permissions retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.RolePermission'
-                  type: array
-              type: object
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get role permissions
       tags:
       - Roles
   /role/{id}/remove:

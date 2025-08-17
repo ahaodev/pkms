@@ -112,15 +112,9 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
-	// 菜单管理路由，只有管理员可以访问
-	menuRouter := protectedRouter.Group("/menu")
-	menuRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
-	NewMenuRouter(env, timeout, db, casbinManager, menuRouter)
-
-	// 角色管理路由，只有管理员可以访问
-	roleRouter := protectedRouter.Group("/role")
-	roleRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
-	NewRoleRouter(env, timeout, db, casbinManager, roleRouter)
+	// 静态菜单路由，所有认证用户可访问
+	staticMenuRouter := protectedRouter.Group("/static-menu")
+	NewStaticMenuRouter(env, timeout, db, casbinManager, staticMenuRouter)
 
 	// 用户租户角色管理路由，只有管理员可以访问
 	userTenantRoleRouter := protectedRouter.Group("/user-tenant-role")

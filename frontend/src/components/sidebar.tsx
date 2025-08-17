@@ -10,9 +10,9 @@ import {
 import type {SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {Tenant} from '@/types/user';
-import { DynamicNavigation } from '@/components/navigation/dynamic-navigation';
+import { StaticNavigation } from '@/components/navigation/static-navigation';
 
-// Dynamic navigation components are now handled by DynamicNavigation
+// Static navigation replaces the dynamic menu system
 
 
 interface SidebarProps extends SimpleSidebarProps {
@@ -153,9 +153,9 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                         </Button>
                     </div>
 
-                    {/* Dynamic Navigation */}
+                    {/* Static Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <DynamicNavigation onClick={handleNavClick} />
+                        <StaticNavigation onClick={handleNavClick} />
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
