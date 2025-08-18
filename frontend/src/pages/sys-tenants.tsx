@@ -1,18 +1,17 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {toast} from 'sonner';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {Tenant} from '@/types/tenant';
 import {TenantDialog, TenantHeader, TenantList, TenantUsersDialog} from '@/components/tenant';
 import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
+import {usePagination} from '@/hooks/use-pagination';
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
-    PaginationLink,
-    PaginationNext,
     PaginationPrevious,
+    PaginationNext,
 } from '@/components/ui/pagination';
 
 export default function TenantsPage() {
@@ -28,25 +27,30 @@ export default function TenantsPage() {
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
     const [viewingTenant, setViewingTenant] = useState<Tenant | null>(null);
     const [tenantName, setTenantName] = useState('');
-    
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-    
-    // Calculate paginated data
-    const paginatedData = useMemo(() => {
-        const allTenants = tenants || [];
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedTenants = allTenants.slice(startIndex, endIndex);
-        const totalPages = Math.ceil(allTenants.length / itemsPerPage);
-        
-        return {
-            tenants: paginatedTenants,
-            totalPages,
-            totalItems: allTenants.length
-        };
-    }, [tenants, currentPage, itemsPerPage]);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // 分页状态
+    const pagination = usePagination({
+        initialPageSize: 20,
+        defaultPageSize: 20
+    });
+
+    const filteredTenants = useMemo(() => {
+        if (!tenants) return [];
+        return tenants.filter((tenant: Tenant) => 
+            tenant.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [tenants, searchTerm]);
+
+    // Update pagination total items when filtered tenants change
+    useEffect(() => {
+        pagination.setTotalItems(filteredTenants.length);
+    }, [filteredTenants.length, pagination]);
+
+    // 获取当前页显示的租户数据
+    const paginatedTenants = useMemo(() => {
+        return pagination.getPageData(filteredTenants);
+    }, [filteredTenants, pagination.currentPage, pagination.pageSize]);
 
     // 移除这个检查，让 Page 组件处理 loading 状态
 
@@ -61,7 +65,7 @@ export default function TenantsPage() {
             toast.success(t('tenant.createSuccess', { name: tenantName }));
             setIsCreateDialogOpen(false);
             setTenantName('');
-            setCurrentPage(1); // Reset to first page
+            pagination.setPage(1); // Reset to first page
         } catch {
             toast.error(t('tenant.createError'));
         }
@@ -99,12 +103,7 @@ export default function TenantsPage() {
         try {
             await deleteTenantMutation.mutateAsync(tenant.id);
             toast.success(t('tenant.deleteSuccess', { name: tenant.name }));
-            // Reset to first page after deletion to avoid empty page
-            const newTotalItems = (tenants?.length || 1) - 1;
-            const newTotalPages = Math.ceil(newTotalItems / itemsPerPage);
-            if (currentPage > newTotalPages && newTotalPages > 0) {
-                setCurrentPage(newTotalPages);
-            }
+            // Reset pagination will be handled automatically by the hook
         } catch {
             toast.error(t('tenant.deleteError'));
         }
@@ -125,8 +124,26 @@ export default function TenantsPage() {
             
             <PageContent>
 
+            {/* 筛选器 */}
+            <div className="mb-6">
+                <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="搜索租户..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                        总数: {filteredTenants.length}
+                    </div>
+                </div>
+            </div>
+
             <TenantList
-                tenants={paginatedData.tenants}
+                tenants={paginatedTenants}
                 onEdit={handleEditTenant}
                 onDelete={handleDeleteTenant}
                 onViewUsers={(tenant) => {
@@ -135,63 +152,44 @@ export default function TenantsPage() {
                 }}
             />
             
-            {paginatedData.totalPages > 1 && (
-                <div className="mt-6">
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious 
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                />
-                            </PaginationItem>
-                            
-                            {Array.from({ length: paginatedData.totalPages }, (_, i) => i + 1)
-                                .filter(page => {
-                                    // Show first page, last page, current page, and pages around current
-                                    return page === 1 || 
-                                           page === paginatedData.totalPages || 
-                                           Math.abs(page - currentPage) <= 1;
-                                })
-                                .map((page, index, array) => {
-                                    // Add ellipsis if there's a gap
-                                    const showEllipsisBefore = index > 0 && array[index - 1] < page - 1;
-                                    
-                                    return (
-                                        <React.Fragment key={page}>
-                                            {showEllipsisBefore && (
-                                                <PaginationItem>
-                                                    <PaginationEllipsis />
-                                                </PaginationItem>
-                                            )}
-                                            <PaginationItem>
-                                                <PaginationLink
-                                                    onClick={() => setCurrentPage(page)}
-                                                    isActive={currentPage === page}
-                                                    className="cursor-pointer"
-                                                >
-                                                    {page}
-                                                </PaginationLink>
-                                            </PaginationItem>
-                                        </React.Fragment>
-                                    );
-                                })
-                            }
-                            
-                            <PaginationItem>
-                                <PaginationNext 
-                                    onClick={() => setCurrentPage(prev => Math.min(paginatedData.totalPages, prev + 1))}
-                                    className={currentPage === paginatedData.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                    
-                    <div className="mt-4 text-center text-sm text-muted-foreground">
-                        显示 {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, paginatedData.totalItems)} / {paginatedData.totalItems} 项
-                    </div>
-                </div>
-            )}
+            {/* 分页组件 */}
+            <div className="py-4">
+                <Pagination>
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious 
+                                href="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (pagination.currentPage > 1) {
+                                        pagination.setPage(pagination.currentPage - 1);
+                                    }
+                                }}
+                                className={pagination.currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                        </PaginationItem>
+                        
+                        <PaginationItem>
+                            <span className="text-sm text-muted-foreground px-4">
+                                第 {pagination.currentPage} 页，共 {pagination.totalPages} 页 (总数: {pagination.totalItems})
+                            </span>
+                        </PaginationItem>
+
+                        <PaginationItem>
+                            <PaginationNext 
+                                href="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (pagination.currentPage < pagination.totalPages) {
+                                        pagination.setPage(pagination.currentPage + 1);
+                                    }
+                                }}
+                                className={pagination.currentPage >= pagination.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            </div>
 
             <TenantDialog
                 open={isCreateDialogOpen}

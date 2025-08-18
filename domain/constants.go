@@ -112,17 +112,6 @@ var AdminMenus = []MenuItem{
 		RequiresAuth:  true,
 		RequiresAdmin: true,
 	},
-	{
-		ID:            "role-management",
-		Name:          "角色管理",
-		Path:          "/role-management",
-		Icon:          "UserCheck",
-		Component:     "RoleManagement",
-		Sort:          8,
-		Visible:       true,
-		RequiresAuth:  true,
-		RequiresAdmin: true,
-	},
 }
 
 // 系统固定菜单（兼容性保留）
