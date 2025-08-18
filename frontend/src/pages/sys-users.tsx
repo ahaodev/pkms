@@ -1,10 +1,9 @@
-import {useMemo, useState} from 'react';
+import {useMemo, useState, useEffect} from 'react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {useProjects} from '@/hooks/use-projects';
 import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
 import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
-import {TenantRoleAssignment} from '@/types/user-tenant-role';
 import {UserFilters, UserList} from '@/components/user';
 import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
@@ -12,14 +11,19 @@ import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
 import {usePagination} from '@/hooks/use-pagination';
-import {DataPagination} from '@/components/ui/data-pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination';
 
 interface UserFormData {
     name: string;
     password: string;
     is_active: boolean;
     create_tenant: boolean;
-    tenant_roles: TenantRoleAssignment[];
 }
 
 const initialFormData: UserFormData = {
@@ -27,7 +31,6 @@ const initialFormData: UserFormData = {
     password: '',
     is_active: true,
     create_tenant: false,
-    tenant_roles: [],
 };
 
 export default function UsersPage() {
@@ -61,15 +64,15 @@ export default function UsersPage() {
 
     const filteredUsers = useMemo(() => {
         if (!users) return [];
-        const filtered = users.filter((user: User) => 
+        return users.filter((user: User) => 
             user.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        
-        // 更新分页总数
-        pagination.setTotalItems(filtered.length);
-        
-        return filtered;
-    }, [users, searchTerm, pagination]);
+    }, [users, searchTerm]);
+
+    // Update pagination total items when filtered users change
+    useEffect(() => {
+        pagination.setTotalItems(filteredUsers.length);
+    }, [filteredUsers.length, pagination]);
 
     // 获取当前页显示的用户数据
     const paginatedUsers = useMemo(() => {
@@ -91,7 +94,6 @@ export default function UsersPage() {
                 password: userForm.password,
                 is_active: userForm.is_active,
                 create_tenant: userForm.create_tenant,
-                tenant_roles: userForm.tenant_roles,
             };
 
             await createUserMutation.mutateAsync(createRequest);
@@ -112,7 +114,6 @@ export default function UsersPage() {
             password: '',
             is_active: user.is_active,
             create_tenant: false,
-            tenant_roles: [],
         });
         setIsEditDialogOpen(true);
     };
@@ -206,16 +207,43 @@ export default function UsersPage() {
                 />
 
                 {/* 分页组件 */}
-                <DataPagination
-                    currentPage={pagination.currentPage}
-                    totalPages={pagination.totalPages}
-                    pageSize={pagination.pageSize}
-                    totalItems={pagination.totalItems}
-                    onPageChange={pagination.setPage}
-                    onPageSizeChange={pagination.setPageSize}
-                    showSizeChanger={true}
-                    showQuickJumper={true}
-                />
+                <div className="py-4">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious 
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (pagination.currentPage > 1) {
+                                            pagination.setPage(pagination.currentPage - 1);
+                                        }
+                                    }}
+                                    className={pagination.currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                            
+                            <PaginationItem>
+                                <span className="text-sm text-muted-foreground px-4">
+                                    第 {pagination.currentPage} 页，共 {pagination.totalPages} 页 (总数: {pagination.totalItems})
+                                </span>
+                            </PaginationItem>
+
+                            <PaginationItem>
+                                <PaginationNext 
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (pagination.currentPage < pagination.totalPages) {
+                                            pagination.setPage(pagination.currentPage + 1);
+                                        }
+                                    }}
+                                    className={pagination.currentPage >= pagination.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
 
                 {/* 创建用户对话框 */}
                 <UserCreateDialog
