@@ -359,9 +359,9 @@ npm audit
 ```
 
 ### Branch Management
-- Current branch: `rbac-domains` (RBAC optimization work)
+- Current branch: `rbac` (RBAC optimization work)
 - Main branch for PRs: `main`
-- Recent commits focus on permission system optimization
+- Recent commits focus on page header fixes and RBAC system improvements
 
 ## Testing & Development
 
@@ -416,5 +416,4 @@ requested by the User.
   - Granular permissions across various resources and actions
 
 ### Development Reminders
-- 不启动后端,前端服务,已经启动.如果未启动提醒用户启动
 - 遵循KISS原则

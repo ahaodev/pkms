@@ -23,15 +23,6 @@ export const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   isLoading,
 }) => {
   const { data: tenants = [] } = useTenants();
-  
-  // Predefined roles
-  const predefinedRoles = [
-    { code: 'admin', name: '管理员', description: '系统管理员，拥有所有权限' },
-    { code: 'owner', name: '拥有者', description: '项目拥有者，拥有项目完整权限' },
-    { code: 'user', name: '用户', description: '普通用户，拥有基本访问权限' },
-    { code: 'viewer', name: '查看者', description: '只读用户，仅能查看内容' }
-  ];
-
   const [formData, setFormData] = useState<CreateRoleRequest>({
     name: '',
     code: '',
@@ -62,7 +53,7 @@ export const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
       onOpenChange(open);
       if (!open) resetForm();
     }}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>创建角色</DialogTitle>
           <DialogDescription>
@@ -110,33 +101,18 @@ export const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="code">角色类型 *</Label>
-            <Select
+            <Label htmlFor="code">角色代码 *</Label>
+            <Input
+              id="code"
               value={formData.code}
-              onValueChange={(value) => {
-                const selectedRole = predefinedRoles.find(r => r.code === value);
-                setFormData({ 
-                  ...formData, 
-                  code: value,
-                  name: selectedRole?.name || '',
-                  description: selectedRole?.description || ''
-                });
-              }}
+              onChange={(e) =>
+                setFormData({ ...formData, code: e.target.value.toLowerCase() })
+              }
+              placeholder="例如：pm"
               required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="请选择角色类型" />
-              </SelectTrigger>
-              <SelectContent>
-                {predefinedRoles.map((role) => (
-                  <SelectItem key={role.code} value={role.code}>
-                    {role.name} - {role.description}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             <p className="text-xs text-gray-500 mt-1">
-              角色类型决定用户的权限范围
+              角色代码将用于权限控制，只能包含字母、数字和下划线
             </p>
           </div>
 
@@ -186,7 +162,6 @@ export const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   onSubmit,
   isLoading,
 }) => {
-
   const [formData, setFormData] = useState<UpdateRoleRequest>({
     name: role.name,
     description: role.description || '',
@@ -204,7 +179,7 @@ export const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>编辑角色</DialogTitle>
           <DialogDescription>

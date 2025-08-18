@@ -57,8 +57,6 @@ func (User) Edges() []ent.Edge {
 		// User belongs to tenants
 		edge.From("tenants", Tenant.Type).
 			Ref("users"),
-		// User has tenant role assignments
-		edge.To("user_tenant_roles", UserTenantRole.Type),
 	}
 }
 

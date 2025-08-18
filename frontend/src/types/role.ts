@@ -21,12 +21,14 @@ export interface CreateRoleRequest {
   code: string;
   description?: string;
   tenant_id: string; // 必须绑定租户
+  menu_ids?: string[];
 }
 
 export interface UpdateRoleRequest {
   name?: string;
   description?: string;
   is_active?: boolean;
+  menu_ids?: string[];
 }
 
 export interface AssignRoleRequest {
@@ -40,4 +42,3 @@ export interface RolePermission {
   resource: string;
   action: string;
 }
-

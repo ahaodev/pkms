@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/api';
-import type { RolePolicyForm, UserRoleForm, UserPolicyForm } from '@/types';
+import type { UserRoleForm, UserPolicyForm } from '@/types';
 
 export function usePermissionOperations() {
     // 统一的成功/错误处理
@@ -19,37 +19,6 @@ export function usePermissionOperations() {
         console.error(errorMessage, error);
         toast.error(errorMessage);
         return false;
-    };
-
-    // 角色权限相关操作
-    const rolePermissions = {
-        add: async (formData: RolePolicyForm, onRefresh: () => Promise<void>) => {
-            try {
-                const response = await apiClient.post('/api/v1/casbin/role-policies', formData);
-                const success = handleApiResponse(response, '角色权限添加成功', '添加角色权限失败');
-                if (success) {
-                    await onRefresh();
-                }
-                return success;
-            } catch (error) {
-                return handleApiError(error, '添加角色权限失败');
-            }
-        },
-
-        remove: async (role: string, domain: string, object: string, action: string, onRefresh: () => Promise<void>) => {
-            try {
-                const response = await apiClient.delete('/api/v1/casbin/role-policies', {
-                    data: { role, tenant: domain, object, action }
-                });
-                const success = handleApiResponse(response, '角色权限删除成功', '删除角色权限失败');
-                if (success) {
-                    await onRefresh();
-                }
-                return success;
-            } catch (error) {
-                return handleApiError(error, '删除角色权限失败');
-            }
-        }
     };
 
     // 用户角色相关操作
@@ -115,7 +84,6 @@ export function usePermissionOperations() {
     };
 
     return {
-        rolePermissions,
         userRoles,
         userPermissions
     };

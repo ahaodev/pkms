@@ -45,15 +45,16 @@ func (smc *StaticMenuController) GetSystemMenus(c *gin.Context) {
 // @Router       /static-menu/user-menus [get]
 func (smc *StaticMenuController) GetUserMenus(c *gin.Context) {
 	// 获取当前用户信息
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
 		return
 	}
 
-	tenantID, exists := c.Get("tenant_id")
+	tenantID, exists := c.Get("x-tenant-id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, domain.RespError("未找到租户信息"))
+		// 如果没有租户ID，返回基础菜单（允许访问基本功能）
+		c.JSON(http.StatusOK, domain.RespSuccess(domain.BaseMenus))
 		return
 	}
 
@@ -89,13 +90,13 @@ func (smc *StaticMenuController) GetUserMenus(c *gin.Context) {
 // @Router       /static-menu/admin-menus [get]
 func (smc *StaticMenuController) GetAdminMenus(c *gin.Context) {
 	// 获取当前用户信息
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
 		return
 	}
 
-	tenantID, exists := c.Get("tenant_id")
+	tenantID, exists := c.Get("x-tenant-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到租户信息"))
 		return
@@ -130,13 +131,13 @@ func (smc *StaticMenuController) GetAdminMenus(c *gin.Context) {
 // @Router       /static-menu/all-menus [get]
 func (smc *StaticMenuController) GetAllMenus(c *gin.Context) {
 	// 获取当前用户信息
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
 		return
 	}
 
-	tenantID, exists := c.Get("tenant_id")
+	tenantID, exists := c.Get("x-tenant-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到租户信息"))
 		return
@@ -182,13 +183,13 @@ func (smc *StaticMenuController) CheckMenuAccess(c *gin.Context) {
 	}
 
 	// 获取当前用户信息
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("x-user-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到用户信息"))
 		return
 	}
 
-	tenantID, exists := c.Get("tenant_id")
+	tenantID, exists := c.Get("x-tenant-id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, domain.RespError("未找到租户信息"))
 		return

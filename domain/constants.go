@@ -123,17 +123,6 @@ var AdminMenus = []MenuItem{
 		RequiresAuth:  true,
 		RequiresAdmin: true,
 	},
-	{
-		ID:            "user-tenant-role-management",
-		Name:          "用户角色分配",
-		Path:          "/user-tenant-role-management",
-		Icon:          "Settings",
-		Component:     "UserTenantRole",
-		Sort:          9,
-		Visible:       true,
-		RequiresAuth:  true,
-		RequiresAdmin: true,
-	},
 }
 
 // 系统固定菜单（兼容性保留）

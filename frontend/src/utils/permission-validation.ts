@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import type { RolePolicyForm, UserRoleForm, UserPolicyForm } from '@/types';
+import type { UserRoleForm, UserPolicyForm } from '@/types';
 
 // 通用表单验证结果类型
 interface ValidationResult {
@@ -38,12 +38,6 @@ const getFieldDisplayName = (field: string): string => {
     return fieldMap[field] || field;
 };
 
-// 角色权限表单验证
-export const validateRolePermissionForm = (formData: RolePolicyForm): ValidationResult => {
-    const requiredFields = ['role', 'tenant', 'object', 'action'];
-    return validateRequiredFields(formData, requiredFields);
-};
-
 // 用户角色表单验证
 export const validateUserRoleForm = (formData: UserRoleForm): ValidationResult => {
     const requiredFields = ['user_id', 'role', 'tenant'];
@@ -65,12 +59,10 @@ export const createValidator = (requiredFields: string[]) => {
 
 // 权限表单类型判断和验证
 export const validatePermissionForm = (
-    formData: RolePolicyForm | UserRoleForm | UserPolicyForm,
-    formType: 'role-permissions' | 'user-roles' | 'user-permissions'
+    formData: UserRoleForm | UserPolicyForm,
+    formType: 'user-roles' | 'user-permissions'
 ): ValidationResult => {
     switch (formType) {
-        case 'role-permissions':
-            return validateRolePermissionForm(formData as RolePolicyForm);
         case 'user-roles':
             return validateUserRoleForm(formData as UserRoleForm);
         case 'user-permissions':

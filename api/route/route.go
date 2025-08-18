@@ -116,8 +116,4 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	staticMenuRouter := protectedRouter.Group("/static-menu")
 	NewStaticMenuRouter(env, timeout, db, casbinManager, staticMenuRouter)
 
-	// 用户租户角色管理路由，只有管理员可以访问
-	userTenantRoleRouter := protectedRouter.Group("/user-tenant-role")
-	userTenantRoleRouter.Use(casbinMiddleware.RequireRole(domain.SystemRoleAdmin))
-	NewUserTenantRoleRouter(env, timeout, db, casbinManager, userTenantRoleRouter)
 }

@@ -109,23 +109,6 @@ func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.Crea
 		_, _ = uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	}
 
-	// 处理租户角色分配
-	if len(request.TenantRoles) > 0 {
-		for _, assignment := range request.TenantRoles {
-			// 将用户添加到指定租户
-			if err := uu.tenantRepository.AddUserToTenant(ctx, user.ID, assignment.TenantID); err != nil {
-				// 可能已经存在，忽略错误继续
-			}
-
-			// 使用 Casbin 分配角色
-			// 注意：这里需要根据实际的角色代码来设置
-			// TODO: 应该通过角色ID查询角色代码
-			if _, err := uu.casbinManager.AddRoleForUser(user.ID, assignment.RoleCode, assignment.TenantID); err != nil {
-				return user, err
-			}
-		}
-	}
-
 	return user, nil
 }
 

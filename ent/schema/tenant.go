@@ -34,7 +34,5 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("projects", Project.Type),
 		edge.To("upgrades", Upgrade.Type),
 		edge.To("client_accesses", ClientAccess.Type),
-		// Tenant has user role assignments
-		edge.To("user_tenant_roles", UserTenantRole.Type),
 	}
 }

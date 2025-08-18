@@ -45,27 +45,6 @@ definitions:
     - tenant
     - user_id
     type: object
-  domain.AssignRoleRequest:
-    properties:
-      user_ids:
-        items:
-          type: string
-        type: array
-    required:
-    - user_ids
-    type: object
-  domain.AssignUserTenantRoleRequest:
-    properties:
-      tenant_roles:
-        items:
-          $ref: '#/definitions/domain.TenantRoleAssignment'
-        type: array
-      user_id:
-        type: string
-    required:
-    - tenant_roles
-    - user_id
-    type: object
   domain.CheckPermissionRequest:
     properties:
       action:
@@ -166,22 +145,6 @@ definitions:
     - package_id
     - project_id
     type: object
-  domain.CreateRoleRequest:
-    properties:
-      code:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      tenant_id:
-        description: 必须绑定租户
-        type: string
-    required:
-    - code
-    - name
-    - tenant_id
-    type: object
   domain.CreateShareRequest:
     properties:
       expiry_hours:
@@ -277,12 +240,20 @@ definitions:
         type: string
       icon:
         type: string
+      id:
+        type: string
       name:
         type: string
       path:
         type: string
+      requiresAdmin:
+        type: boolean
+      requiresAuth:
+        type: boolean
       sort:
         type: integer
+      visible:
+        type: boolean
     type: object
   domain.Package:
     properties:
@@ -466,19 +437,6 @@ definitions:
     - tenant
     - user_id
     type: object
-  domain.RemoveUserTenantRoleRequest:
-    properties:
-      role_id:
-        type: string
-      tenant_id:
-        type: string
-      user_id:
-        type: string
-    required:
-    - role_id
-    - tenant_id
-    - user_id
-    type: object
   domain.Response:
     properties:
       code:
@@ -486,31 +444,6 @@ definitions:
       data: {}
       msg:
         type: string
-    type: object
-  domain.Role:
-    properties:
-      code:
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      is_active:
-        type: boolean
-      is_system:
-        type: boolean
-      name:
-        type: string
-      tenant_id:
-        type: string
-      updated_at:
-        type: string
-      users:
-        items:
-          $ref: '#/definitions/domain.User'
-        type: array
     type: object
   domain.RoleDetail:
     properties:
@@ -549,12 +482,12 @@ definitions:
     type: object
   domain.TenantRoleAssignment:
     properties:
-      role_id:
+      role_code:
         type: string
       tenant_id:
         type: string
     required:
-    - role_id
+    - role_code
     - tenant_id
     type: object
   domain.TenantUserRequest:
@@ -572,15 +505,6 @@ definitions:
       description:
         type: string
       expires_at:
-        type: string
-      is_active:
-        type: boolean
-      name:
-        type: string
-    type: object
-  domain.UpdateRoleRequest:
-    properties:
-      description:
         type: string
       is_active:
         type: boolean
@@ -642,30 +566,6 @@ definitions:
           type: string
         type: array
       user_id:
-        type: string
-    type: object
-  domain.UserTenantRole:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: string
-      role_code:
-        type: string
-      role_id:
-        type: string
-      role_name:
-        type: string
-      tenant_id:
-        type: string
-      tenant_name:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: string
-      user_name:
-        description: 关联信息
         type: string
     type: object
   domain.UserUpdateRequest:
@@ -1895,34 +1795,6 @@ paths:
       summary: User login
       tags:
       - Authentication
-  /menus/system:
-    get:
-      consumes:
-      - application/json
-      description: 获取系统预定义的固定菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuItem'
-                  type: array
-              type: object
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取系统固定菜单
-      tags:
-      - 菜单管理
   /packages:
     get:
       consumes:
@@ -2802,393 +2674,6 @@ paths:
       summary: Upload release
       tags:
       - Releases
-  /role:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all roles for the current tenant
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Role'
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get roles
-      tags:
-      - Roles
-    post:
-      consumes:
-      - application/json
-      description: Create a new role (admin only)
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      - description: Role creation data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Role created successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Role'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Create a new role
-      tags:
-      - Roles
-  /role/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a role (admin only)
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role deleted successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Cannot delete role
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Delete role
-      tags:
-      - Roles
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a specific role by its ID
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Role'
-              type: object
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get role by ID
-      tags:
-      - Roles
-    put:
-      consumes:
-      - application/json
-      description: Update an existing role (admin only)
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Role update data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.UpdateRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Role'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Update role
-      tags:
-      - Roles
-  /role/{id}/assign:
-    post:
-      consumes:
-      - application/json
-      description: Assign a role to multiple users (admin only)
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User assignment data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.AssignRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role assigned successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Assign role to users
-      tags:
-      - Roles
-  /role/{id}/remove:
-    post:
-      consumes:
-      - application/json
-      description: Remove a role from multiple users (admin only)
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: User removal data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.AssignRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role removed successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove role from users
-      tags:
-      - Roles
-  /role/{id}/users:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all users assigned to a specific role
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role users retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.User'
-                  type: array
-              type: object
-        "404":
-          description: Role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get role users
-      tags:
-      - Roles
-  /role/user:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all roles assigned to the current user
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Role'
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user roles
-      tags:
-      - Roles
-  /role/user/{userId}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all roles assigned to a specific user (admin only)
-      parameters:
-      - description: Tenant ID
-        in: header
-        name: x-tenant-id
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Role'
-                  type: array
-              type: object
-        "404":
-          description: User not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user roles by user ID
-      tags:
-      - Roles
   /share/{code}:
     get:
       consumes:
@@ -3303,6 +2788,178 @@ paths:
       summary: Update share expiry
       tags:
       - Shares(management)
+  /static-menu/admin-menus:
+    get:
+      consumes:
+      - application/json
+      description: 获取管理员专用的菜单列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取管理员菜单
+      tags:
+      - 菜单管理
+  /static-menu/all-menus:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统中所有可用的菜单（管理员专用）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取所有菜单
+      tags:
+      - 菜单管理
+  /static-menu/check-access:
+    get:
+      consumes:
+      - application/json
+      description: 检查用户是否有特定菜单的访问权限
+      parameters:
+      - description: 菜单路径
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 检查成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: 检查菜单访问权限
+      tags:
+      - 菜单管理
+  /static-menu/system:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统预定义的固定菜单列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取系统固定菜单
+      tags:
+      - 菜单管理
+  /static-menu/user-menus:
+    get:
+      consumes:
+      - application/json
+      description: 根据用户权限获取可访问的菜单列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/domain.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取用户菜单
+      tags:
+      - 菜单管理
   /tenants:
     get:
       consumes:
@@ -3926,225 +3583,6 @@ paths:
       summary: Create a new user
       tags:
       - Users
-  /user-tenant-role/assign:
-    post:
-      consumes:
-      - application/json
-      description: Assign multiple roles to a user across different tenants (admin
-        only)
-      parameters:
-      - description: User tenant role assignment data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.AssignUserTenantRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Roles assigned successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Assign roles to user in multiple tenants
-      tags:
-      - User Tenant Roles
-  /user-tenant-role/current:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all tenant-role assignments for the current authenticated
-        user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Current user tenant roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.UserTenantRole'
-                  type: array
-              type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get current user's tenant role assignments
-      tags:
-      - User Tenant Roles
-  /user-tenant-role/remove:
-    post:
-      consumes:
-      - application/json
-      description: Remove a specific role from a user in a specific tenant (admin
-        only)
-      parameters:
-      - description: User tenant role removal data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.RemoveUserTenantRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Role removed successfully
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove role from user in tenant
-      tags:
-      - User Tenant Roles
-  /user-tenant-role/tenant/{tenantId}/role/{roleId}/users:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all users assigned to a specific role in a specific tenant
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: tenantId
-        required: true
-        type: string
-      - description: Role ID
-        in: path
-        name: roleId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Users retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.User'
-                  type: array
-              type: object
-        "404":
-          description: Tenant or role not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get users by tenant role
-      tags:
-      - User Tenant Roles
-  /user-tenant-role/user/{userId}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all tenant-role assignments for a specific user
-      parameters:
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User tenant roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.UserTenantRole'
-                  type: array
-              type: object
-        "404":
-          description: User not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get all user tenant role assignments
-      tags:
-      - User Tenant Roles
-  /user-tenant-role/user/{userId}/tenant/{tenantId}/roles:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all roles assigned to a user in a specific tenant
-      parameters:
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      - description: Tenant ID
-        in: path
-        name: tenantId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User roles retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Role'
-                  type: array
-              type: object
-        "404":
-          description: User or tenant not found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user roles in specific tenant
-      tags:
-      - User Tenant Roles
   /user/{id}:
     delete:
       consumes:

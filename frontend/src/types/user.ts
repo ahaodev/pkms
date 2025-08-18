@@ -1,5 +1,4 @@
 import {GroupPermission} from "@/types/group.ts";
-import {TenantRoleAssignment} from "@/types/user-tenant-role.ts";
 
 export type UserRole = 'admin' | 'user';
 
@@ -41,7 +40,6 @@ export interface CreateUserRequest {
     password: string;
     is_active?: boolean;
     create_tenant?: boolean;
-    tenant_roles?: TenantRoleAssignment[];
 }
 
 export interface UpdateUserRequest {

@@ -13,11 +13,14 @@
       "Bash(npx tsc:*)",
       "WebSearch",
       "Bash(go mod:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(go run:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
   },
+  "outputStyle": "default",
   "mcpServers": {
     "browsermcp": {
       "command": "npx",
