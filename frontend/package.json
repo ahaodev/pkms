@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -87,8 +88,10 @@
     "globals": "^15.15.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^4.1.11",
+    "terser": "^5.27.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.6"
+    "vite": "^7.0.6",
+    "vite-bundle-analyzer": "^0.11.0"
   }
 }

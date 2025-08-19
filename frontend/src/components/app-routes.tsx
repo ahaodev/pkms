@@ -71,10 +71,7 @@ interface RouteGuardProps {
     requiresAdmin?: boolean;
 }
 
-function RouteGuard({children, requiresAdmin = false}: RouteGuardProps) {
-    if (process.env.NODE_ENV === 'development') {
-        console.log('RouteGuard requiresAdmin:', requiresAdmin);
-    }
+function RouteGuard({children}: RouteGuardProps) {
     // Allow access for component-level permission handling
     // Individual components will handle permission-based content display
     return <>{children}</>;

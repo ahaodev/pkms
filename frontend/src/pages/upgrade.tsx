@@ -42,8 +42,6 @@ export default function UpgradePage() {
     const {data: packagesData} = usePackages();
     const packages = packagesData?.data || [];
 
-    console.log('All packages:', packages);
-    console.log('Projects:', projects);
 
     // Fetch upgrade targets
     const {data: upgradeTargetsData, isLoading, error} = useQuery({

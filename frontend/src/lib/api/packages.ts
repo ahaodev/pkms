@@ -19,8 +19,6 @@ export async function getPackages(filters?: PackageFilters): Promise<PageRespons
     if (filters?.pageSize) params.append('pageSize', filters.pageSize.toString());
 
     const url = `/api/v1/packages/?${params.toString()}`;
-    console.log('Fetching packages with URL:', url);
-    console.log('Filters:', filters);
     
     const resp = await apiClient.get(url);
     return resp.data;
@@ -108,7 +106,6 @@ export function transformReleaseFromBackend(backendRelease: any): Release {
 
 // 获取特定包的所有发布版本
 export async function getPackageReleases(packageId: string): Promise<ApiResponse<Release[]>> {
-    console.log("Fetching releases for package ID:", packageId);
     const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
     
     // Transform the backend data to frontend format

@@ -25,8 +25,8 @@ export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const {user} = useAuth();
 
-    function assignProjectToUser(userId: string, projectId: string) {
-        console.log(userId, projectId);
+    function assignProjectToUser(_userId: string, _projectId: string) {
+        console.log(_userId,_projectId)
     }
 
     return useMutation({

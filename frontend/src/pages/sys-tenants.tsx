@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import {toast} from 'sonner';
 import {useCreateTenant, useDeleteTenant, useTenants, useUpdateTenant} from '@/hooks/use-tenants';
 import {Tenant} from '@/types/tenant';
