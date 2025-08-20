@@ -2,11 +2,7 @@ name: aio
 
 on:
   push:
-    branches: [ main, dev ]
-    tags: [ 'v*' ]
-  pull_request:
-    branches: [ main, dev ]
-
+    branches: [ main ]
 permissions:
   contents: write
   packages: write
