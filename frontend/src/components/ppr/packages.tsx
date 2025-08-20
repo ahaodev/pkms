@@ -13,7 +13,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
 import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone, Trash} from 'lucide-react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {useDeletePackage} from '@/hooks/use-packages.ts';
 import {toast} from 'sonner';
 import {useI18n} from '@/contexts/i18n-context.tsx';
@@ -24,6 +24,7 @@ interface PackagesViewProps {
     searchTerm: string;
     handlePackageSelect: (packageId: string) => void;
     onCreatePackage: () => void;
+    onBackToProjects?: () => void; // 新增：鼠标后退回调
 }
 
 export function Packages({
@@ -31,7 +32,8 @@ export function Packages({
                              packages,
                              searchTerm,
                              handlePackageSelect,
-                             onCreatePackage
+                             onCreatePackage,
+                             onBackToProjects
                          }: PackagesViewProps) {
     const { t } = useI18n();
     const [deletePackageId, setDeletePackageId] = useState<string | null>(null);
@@ -61,6 +63,72 @@ export function Packages({
         // 检查包是否有releases（通过ReleaseCount或者latestRelease来判断）
         return !pkg.latestRelease && (!pkg.releaseCount || pkg.releaseCount === 0);
     };
+
+    // 监听鼠标后退按钮和浏览器后退，回退到 projects 页面
+    useEffect(() => {
+        // 使用全局window对象存储防抖标志，避免组件切换时标志丢失
+        const getGlobalFlag = () => (window as any).__hierarchyBackProcessing || false;
+        const setGlobalFlag = (value: boolean) => {
+            (window as any).__hierarchyBackProcessing = value;
+        };
+
+        const executeBackToProjects = () => {
+            if (getGlobalFlag()) {
+                console.log('🚫 Packages: Back action ignored - globally processing');
+                return;
+            }
+            
+            setGlobalFlag(true);
+            console.log('🎯 Packages: Executing back to projects (global flag set)');
+            
+            if (onBackToProjects) {
+                onBackToProjects();
+            }
+            
+            // 300ms防抖
+            setTimeout(() => {
+                setGlobalFlag(false);
+                console.log('✅ Packages: Global processing flag reset');
+            }, 300);
+        };
+
+        const handleMouseBack = (event: MouseEvent) => {
+            // 检查是否是鼠标后退按钮 (button 3)
+            if (event.button === 3) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                console.log('🖱️ Packages: Mouse back button pressed');
+                executeBackToProjects();
+                return false;
+            }
+        };
+
+        const handlePopState = (event: PopStateEvent) => {
+            console.log('⌨️ Packages: Browser back button pressed (popstate)');
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // 回到 projects 时不要推送历史状态，让浏览器正常处理
+            console.log('📝 Packages: Not pushing history state - going to projects view');
+            
+            executeBackToProjects();
+            return false;
+        };
+
+        // 添加事件监听器
+        document.addEventListener('mousedown', handleMouseBack, { capture: true });
+        window.addEventListener('popstate', handlePopState);
+        
+        // 推送历史状态以便拦截浏览器后退
+        window.history.pushState(null, '', window.location.href);
+
+        // 清理事件监听器
+        return () => {
+            document.removeEventListener('mousedown', handleMouseBack, { capture: true });
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [onBackToProjects]);
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">

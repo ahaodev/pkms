@@ -55,14 +55,21 @@ export function useHierarchyNavigation() {
     };
 
     const resetToProjects = () => {
+        console.log('🔄 resetToProjects() called - clearing both IDs');
+        console.log('   - Current projectId before:', selectedProjectId);
+        console.log('   - Current packageId before:', selectedPackageId);
         setSelectedProjectId(null);
         setSelectedPackageId(null);
         setReleasesCurrentPage(1);
+        console.log('   - Both IDs set to null');
     };
 
     const backToProject = () => {
+        console.log('🔄 backToProject() called - clearing packageId');
+        console.log('   - Current packageId before:', selectedPackageId);
         setSelectedPackageId(null);
         setReleasesCurrentPage(1);
+        console.log('   - setSelectedPackageId(null) called');
     };
 
     const handleDownload = async (release: Release) => {

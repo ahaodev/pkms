@@ -25,6 +25,8 @@ export default function HierarchyPage() {
     const navigation = useHierarchyNavigation();
     const dialogs = useHierarchyDialogs();
 
+    // 简化版：只处理全局的历史记录状态，具体的鼠标后退逻辑由各组件自己处理
+
     return (
         <Page isLoading={navigation.isLoading} loadingMessage={t('common.loading')}>
             <PageHeader title={t("project.management")} description={t("project.managementDescription")} />
@@ -84,6 +86,7 @@ export default function HierarchyPage() {
                             searchTerm={navigation.searchTerm}
                             handlePackageSelect={navigation.handlePackageSelect}
                             onCreatePackage={() => dialogs.openDialog('createPackage')}
+                            onBackToProjects={navigation.resetToProjects}
                         />
                     ) : (
                         <Releases
@@ -93,6 +96,7 @@ export default function HierarchyPage() {
                             handleCreateRelease={() => dialogs.openDialog('createRelease')}
                             handleDownload={navigation.handleDownload}
                             onReleaseDeleted={dialogs.handleReleaseUploadSuccess}
+                            onBackToPackages={navigation.backToProject}
                             currentPage={navigation.releasesCurrentPage}
                             setCurrentPage={navigation.setReleasesCurrentPage}
                             pageSize={navigation.releasesPageSize}
