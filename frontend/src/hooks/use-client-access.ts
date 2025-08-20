@@ -21,8 +21,6 @@ export function useClientAccessList(filters?: ClientAccessFilters) {
   return useQuery({
     queryKey: CLIENT_ACCESS_KEYS.list(filters),
     queryFn: () => clientAccessApi.getAllList(filters),
-    staleTime: 2 * 60 * 1000, // 2分钟
-    gcTime: 5 * 60 * 1000, // 5分钟
   });
 }
 
@@ -35,8 +33,6 @@ export function useClientAccessListWithPagination(
   return useQuery({
     queryKey: [...CLIENT_ACCESS_KEYS.list(filters), 'paginated', page, pageSize],
     queryFn: () => clientAccessApi.getList(filters, page, pageSize),
-    staleTime: 2 * 60 * 1000, // 2分钟
-    gcTime: 5 * 60 * 1000, // 5分钟
   });
 }
 
@@ -46,8 +42,6 @@ export function useClientAccess(id: string) {
     queryKey: CLIENT_ACCESS_KEYS.detail(id),
     queryFn: () => clientAccessApi.getById(id),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
   });
 }
 

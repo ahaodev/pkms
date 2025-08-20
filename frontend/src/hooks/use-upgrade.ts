@@ -51,10 +51,6 @@ export const useVersions = () => {
             const response = await apiClient.get('/api/v1/upgrade/versions');
             return response.data.data || [];
         },
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 
@@ -67,10 +63,6 @@ export const useVersionsByPlatform = (platform: string) => {
             return response.data.data || [];
         },
         enabled: !!platform,
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 
@@ -83,10 +75,6 @@ export const useVersion = (id: string) => {
             return response.data.data;
         },
         enabled: !!id,
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 
@@ -176,10 +164,6 @@ export const useLatestVersion = (platform: string) => {
             return response.data.data || null;
         },
         enabled: !!platform,
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 
@@ -208,10 +192,6 @@ export const useVersionStats = () => {
             const response = await apiClient.get('/api/v1/upgrade/stats');
             return response.data.data;
         },
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 

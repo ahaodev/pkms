@@ -20,10 +20,6 @@ export const usePackages = (filters?: PackageFilters) => {
             };
         },
         enabled: !!user && !!filters?.projectId,
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
         select: (result) => {
             if (!user || !result) {
                 return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };

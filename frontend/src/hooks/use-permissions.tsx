@@ -18,8 +18,6 @@ export const usePermissions = () => {
         queryKey: ['userPermissions', user?.id],
         queryFn: () => getUserPermissions(user!.id),
         enabled: !!user,
-        staleTime: 5 * 60 * 1000, // 5分钟缓存
-        gcTime: 10 * 60 * 1000, // 10分钟缓存
         select: (data) => data.data,
         retry: (failureCount, error) => {
             // 如果是权限错误，不重试

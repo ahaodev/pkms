@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getDashboardStats, getRecentActivities, transformDashboardStatsFromBackend } from '@/lib/api/dashboard';
 import type { DashboardStats, RecentActivity } from '@/lib/api/dashboard';
 import { SUCCESS } from '@/types/api-response';
+import { ACCESS_TOKEN } from '@/types/constants';
 
 // 使用仪表盘统计数据的 hook
 export function useDashboardStats() {
@@ -14,9 +15,7 @@ export function useDashboardStats() {
       }
       throw new Error(response.msg || 'Failed to fetch dashboard stats');
     },
-    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes (was cacheTime in older versions)
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
     retry: (failureCount, error: Error & { response?: { status?: number } }) => {
       // Don't retry on authentication errors
       if (error?.response?.status === 401) return false;
@@ -37,8 +36,6 @@ export function useRecentActivities(limit = 10) {
       throw new Error(response.msg || 'Failed to fetch recent activities');
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 3 * 60 * 1000, // 3 minutes (was cacheTime in older versions)
     retry: (failureCount, error: Error & { response?: { status?: number } }) => {
       if (error?.response?.status === 401) return false;
       return failureCount < 2;

@@ -98,8 +98,6 @@ export const StaticNavigation = memo<StaticNavigationProps>(({
     queryKey: ['userPermissions', user?.id],
     queryFn: () => getUserPermissions(user!.id),
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5分钟缓存
-    gcTime: 10 * 60 * 1000, // 10分钟缓存
     select: (data) => data.data, // 提取data字段
   });
 
@@ -165,7 +163,6 @@ export const usePageTitle = (currentPath: string): string => {
     queryKey: ['userPermissions', user?.id],
     queryFn: () => getUserPermissions(user!.id),
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
     select: (data) => data.data,
   });
 
@@ -188,7 +185,6 @@ export const useRequiresAdminAccess = (currentPath: string): boolean => {
     queryKey: ['userPermissions', user?.id],
     queryFn: () => getUserPermissions(user!.id),
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
     select: (data) => data.data,
   });
 

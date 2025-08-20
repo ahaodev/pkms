@@ -48,9 +48,6 @@ export function useShares() {
   const { data: shares, isLoading, error } = useQuery({
     queryKey: ['shares'],
     queryFn: sharesApi.getAllList,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false
   });
 
   return {
@@ -68,9 +65,6 @@ export function useSharesWithPagination(page: number = 1, pageSize: number = 20)
   const { data: paginatedData, isLoading, error } = useQuery({
     queryKey: ['shares', 'paginated', page, pageSize],
     queryFn: () => sharesApi.getAll(page, pageSize),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false
   });
 
   return {

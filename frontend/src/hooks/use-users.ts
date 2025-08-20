@@ -21,9 +21,6 @@ export function useUsers() {
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 2 * 60 * 1000, // 2分钟缓存
-    gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
-    refetchOnMount: false // 不要每次mount都刷新
   });
 }
 
@@ -37,9 +34,6 @@ export function useUsersWithPagination(page: number = 1, pageSize: number = 20) 
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 2 * 60 * 1000, // 2分钟缓存
-    gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
-    refetchOnMount: false // 不要每次mount都刷新
   });
 }
 
@@ -52,9 +46,6 @@ export function useUser(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5分钟缓存
-    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
-    refetchOnMount: false
   });
 }
 
@@ -67,9 +58,6 @@ export function useUserProjects(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 3 * 60 * 1000, // 3分钟缓存
-    gcTime: 7 * 60 * 1000, // 7分钟垃圾回收
-    refetchOnMount: false
   });
 }
 

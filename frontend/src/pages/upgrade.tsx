@@ -75,10 +75,6 @@ export default function UpgradePage() {
             
             return await getUpgradeTargets(filters);
         },
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false
     });
 
     // Handle query error

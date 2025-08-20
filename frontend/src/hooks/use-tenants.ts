@@ -24,9 +24,6 @@ export function useTenants() {
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: false
   });
 }
 
@@ -40,9 +37,6 @@ export function useTenantsWithPagination(page: number = 1, pageSize: number = 20
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: false
   });
 }
 
@@ -55,9 +49,6 @@ export function useTenant(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: false
   });
 }
 
@@ -70,9 +61,6 @@ export function useTenantUsers(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: false
   });
 }
 
@@ -150,9 +138,6 @@ export function useTenantUsersWithRole(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: false
   });
 }
 
