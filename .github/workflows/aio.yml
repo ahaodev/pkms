@@ -50,7 +50,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          #args: ${{ github.ref_type == 'tag' && 'release' || 'build --snapshot' }} --clean --debug
-          args: release --clean --debug
+          args: ${{ github.ref_type == 'tag' && 'release' || 'build --snapshot' }} --clean --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

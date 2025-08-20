@@ -27,6 +27,7 @@ dockers:
   - image_templates:
       - "docker.io/hao88/pkms:{{ .Tag }}"
       - "docker.io/hao88/pkms:latest"
+      - "docker.io/hao88/pkms:snapshot"
     dockerfile: Dockerfile
     use: buildx
     skip_push: false
