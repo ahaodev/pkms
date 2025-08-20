@@ -8,7 +8,6 @@ bin/
 logs
 # 忽略所有 ent 下的内容
 ent/*
-
 # 但保留 schema 和 gen 目录
 !ent/schema/
 !ent/schema/**
@@ -19,6 +18,11 @@ ent/*
 dist/
 *.db
 
+#*.md
+#!README.md
+
+build
+dist
 .cursor/
 nul
 main.exe

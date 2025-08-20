@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/model"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -22,6 +23,23 @@ type CasbinManager struct {
 	entClient *ent.Client
 }
 
+const modelConf = `
+[request_definition]
+r = sub, dom, obj, act
+
+[policy_definition]
+p = sub, dom, obj, act
+
+[role_definition]
+g = _, _, _
+
+[policy_effect]
+e = some(where (p.eft == allow))
+
+[matchers]
+m = g(r.sub, p.sub, r.dom) && (p.dom == "*" || r.dom == p.dom) && (p.obj == "*" || r.obj == p.obj) && (p.act == "*" || r.act == p.act)
+`
+
 func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 	var err error
 
@@ -32,9 +50,12 @@ func NewCasbinManager(entClient *ent.Client) *CasbinManager {
 			err = fmt.Errorf("failed to initialize casbin ent adapter: %v", adapterErr)
 			return
 		}
-
+		m, err := model.NewModelFromString(modelConf)
+		if err != nil {
+			panic(err)
+		}
 		// 创建 enforcer
-		enforcer, err = casbin.NewEnforcer("config/rbac_model.conf", adapter)
+		enforcer, err = casbin.NewEnforcer(m, adapter)
 		if err != nil {
 			err = fmt.Errorf("failed to create casbin enforcer: %v", err)
 			return
