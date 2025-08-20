@@ -1,6 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {createUser, deleteUser, getUsers, updateUser} from '@/lib/api/users';
 import {CreateUserRequest, UpdateUserRequest} from '@/types/user';
+import {ACCESS_TOKEN} from "@/types/constants.ts";
 
 // Get all users (for backwards compatibility, uses large page size)
 export function useUsers() {
@@ -10,7 +11,7 @@ export function useUsers() {
       const response = await getUsers(1,1000 );
       return response.data;
     },
-    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
   });
 }
 
@@ -23,7 +24,7 @@ export function useUsersWithPagination(page: number = 1, pageSize: number = 20) 
       // Backend now returns PagedResult wrapped in Response
       return response.data;
     },
-    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
   });
 }
 

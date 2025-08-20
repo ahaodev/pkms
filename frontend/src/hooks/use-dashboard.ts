@@ -35,7 +35,7 @@ export function useRecentActivities(limit = 10) {
       }
       throw new Error(response.msg || 'Failed to fetch recent activities');
     },
-    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
     retry: (failureCount, error: Error & { response?: { status?: number } }) => {
       if (error?.response?.status === 401) return false;
       return failureCount < 2;

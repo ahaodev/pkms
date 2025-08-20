@@ -1,6 +1,5 @@
 import { Users, User as UserIcon, Edit, Trash2, MoreHorizontal, Ban, CheckCircle } from 'lucide-react';
 import { User } from '@/types/user';
-import { Project } from '@/types/project';
 import { Group } from '@/types/group';
 import { EmptyList } from '@/components/empty-list.tsx';
 import { useI18n } from '@/contexts/i18n-context';
@@ -24,7 +23,6 @@ import {
 interface UserListProps {
   users: User[];
   currentUser: User | null;
-  projects?: Project[];
   groups?: Group[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
