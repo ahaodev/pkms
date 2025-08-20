@@ -4,23 +4,6 @@ import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {ACCESS_TOKEN} from "@/types/constants.ts";
 
-export const useProjects = (page: number = 1, pageSize: number = 20) => {
-    const {user} = useAuth();
-
-    return useQuery({
-        queryKey: ['projects', user?.id, page, pageSize],
-        queryFn: async () => {
-            const response = await ProjectsAPI.getProjects(page, pageSize);
-            return response.data; // 返回 PagedResult 结构
-        },
-        enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN), // 只有用户存在且有token时才执行
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
-    });
-};
-
 // 获取所有项目 (不分页，用于下拉框等)
 export const useAllProjects = () => {
     const {user} = useAuth();
@@ -32,10 +15,6 @@ export const useAllProjects = () => {
             return response.data; // 已经经过转换的 Project[]
         },
         enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN),
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
     });
 };
 

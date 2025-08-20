@@ -44,7 +44,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
     const queryClient = useQueryClient();
 
     const loadUserPermissions = async () => {
-        if (!user?.id) {
+        if (!user?.id || !currentTenant?.id) {
             setUserPermissions(null);
             return;
         }
@@ -107,7 +107,11 @@ export function AuthProvider({children}: { children: ReactNode }) {
     // Load user permissions when user or tenant changes
     useEffect(() => {
         if (user?.id && currentTenant?.id) {
-            loadUserPermissions();
+            // 使用debounce避免频繁调用
+            const timeoutId = setTimeout(() => {
+                loadUserPermissions();
+            }, 100);
+            return () => clearTimeout(timeoutId);
         }
     }, [user?.id, currentTenant?.id]);
 
@@ -161,9 +165,12 @@ export function AuthProvider({children}: { children: ReactNode }) {
         setCurrentTenant(tenant);
         localStorage.setItem(CURRENT_TENANT, tenant ? tenant.id : '');
 
-        // 如果租户发生了变化，清除所有查询缓存以强制刷新页面数据
-        if (previousTenantId !== tenant?.id) {
-            await queryClient.invalidateQueries();
+        // 仅在租户真正发生变化时才清除缓存，避免初始化时的不必要清除
+        if (previousTenantId && previousTenantId !== tenant?.id) {
+            // 仅清除与租户相关的查询，而不是所有查询
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            queryClient.invalidateQueries({ queryKey: ['tenants'] });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
         }
     };
     const isAdmin = (): boolean => userPermissions?.roles?.includes("admin") ?? false;

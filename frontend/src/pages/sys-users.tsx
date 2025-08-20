@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
-import {useAllProjects} from '@/hooks/use-projects';
 import {useCreateUser, useDeleteUser, useUpdateUser, useUsersWithPagination} from '@/hooks/use-users';
 import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
 import {UserList} from '@/components/user';
@@ -35,8 +34,7 @@ const initialFormData: UserFormData = {
 export default function UsersPage() {
     const {t} = useI18n();
     const {user: currentUser} = useAuth();
-    const {data: projects} = useAllProjects();
-    
+
     // 分页状态
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(20);
@@ -182,7 +180,6 @@ export default function UsersPage() {
                 <UserList
                     users={users}
                     currentUser={currentUser}
-                    projects={projects}
                     onEdit={handleEditUser}
                     onDelete={handleDeleteUser}
                     onToggleStatus={handleToggleUserStatus}
@@ -236,7 +233,6 @@ export default function UsersPage() {
                     }}
                     onSubmit={handleCreateUser}
                     userForm={userForm}
-                    projects={projects}
                     groups={[]}
                     updateUserForm={updateUserForm}
                 />
@@ -251,7 +247,6 @@ export default function UsersPage() {
                     }}
                     onSubmit={handleUpdateUser}
                     userForm={userForm}
-                    projects={projects}
                     groups={[]}
                     updateUserForm={updateUserForm}
                 />

@@ -1,0 +1,4 @@
+@echo off
+echo "生成swagger 文档"
+swag init -g cmd/main.go -o docs
+pause

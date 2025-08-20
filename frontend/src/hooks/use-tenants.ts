@@ -5,15 +5,13 @@ import {
   createTenant, 
   updateTenant, 
   deleteTenant, 
-  getTenant,
-  getTenantUsers,
-  addUserToTenant,
   removeUserFromTenant,
   getTenantUsersWithRole,
   addUserToTenantWithRole,
   updateTenantUserRole
 } from '@/lib/api/tenants';
 import { CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
+import {ACCESS_TOKEN} from "@/types/constants.ts";
 
 // Get all tenants (for backwards compatibility, uses large page size)
 export function useTenants() {
@@ -23,9 +21,7 @@ export function useTenants() {
       const response = await getAllTenants();
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
   });
 }
 
@@ -38,42 +34,9 @@ export function useTenantsWithPagination(page: number = 1, pageSize: number = 20
       // Backend now returns PagedResult wrapped in Response
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    enabled: !!localStorage.getItem(ACCESS_TOKEN),
   });
 }
-
-// Get specific tenant
-export function useTenant(tenantId: string) {
-  return useQuery({
-    queryKey: ['tenant', tenantId],
-    queryFn: async () => {
-      const response = await getTenant(tenantId);
-      return response.data;
-    },
-    enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
-  });
-}
-
-// Get tenant users
-export function useTenantUsers(tenantId: string) {
-  return useQuery({
-    queryKey: ['tenant-users', tenantId],
-    queryFn: async () => {
-      const response = await getTenantUsers(tenantId);
-      return response.data;
-    },
-    enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
-  });
-}
-
 // Create tenant mutation
 export function useCreateTenant() {
   const queryClient = useQueryClient();
@@ -112,19 +75,6 @@ export function useDeleteTenant() {
   });
 }
 
-// Add user to tenant mutation
-export function useAddUserToTenant() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ tenantId, userId }: { tenantId: string; userId: string }) => 
-      addUserToTenant(tenantId, userId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['tenant-users', variables.tenantId] });
-    }
-  });
-}
-
 // Remove user from tenant mutation
 export function useRemoveUserFromTenant() {
   const queryClient = useQueryClient();
@@ -148,9 +98,6 @@ export function useTenantUsersWithRole(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
   });
 }
 

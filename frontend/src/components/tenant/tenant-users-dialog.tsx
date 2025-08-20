@@ -33,7 +33,7 @@ export function TenantUsersDialog({open, onClose, tenant}: TenantUsersDialogProp
     const addUserMutation = useAddUserToTenantWithRole();
 
     // 获取可添加的用户（排除已在租户中的用户）
-    const availableUsers = allUsers?.filter((user: User) =>
+    const availableUsers = allUsers?.list.filter((user: User) =>
         !(tenantUsers as TenantUser[])?.some((tenantUser: TenantUser) => tenantUser.user_id === user.id)
     ) || [];
 

@@ -3,6 +3,7 @@ import {useCreateProject, useUpdateProject} from '@/hooks/use-projects';
 import {useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import {useI18n} from '@/contexts/i18n-context';
+import {Project} from '@/types/project';
 
 interface ProjectFormData {
     name: string;
@@ -10,12 +11,6 @@ interface ProjectFormData {
     icon: string;
 }
 
-interface ProjectType {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-}
 
 export function useHierarchyDialogs() {
     const {t} = useI18n();
@@ -24,7 +19,7 @@ export function useHierarchyDialogs() {
         description: '',
         icon: 'package2'
     });
-    const [editingProject, setEditingProject] = useState<ProjectType | null>(null);
+    const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [dialogs, setDialogs] = useState({
         createProject: false,
         editProject: false,
@@ -66,12 +61,12 @@ export function useHierarchyDialogs() {
         }
     };
 
-    const handleEditProject = (project: ProjectType) => {
+    const handleEditProject = (project: Project) => {
         setEditingProject(project);
         setProjectFormData({
             name: project.name,
             description: project.description,
-            icon: project.icon
+            icon: project.icon || 'package2'
         });
         openDialog('editProject');
     };

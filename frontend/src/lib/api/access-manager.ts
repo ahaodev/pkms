@@ -22,28 +22,6 @@ export const clientAccessApi = {
             .get<ApiResponse<PagedResult<ClientAccess>>>(`/api/v1/access-manager?${params.toString()}`)
             .then(res => res.data.data);
     },
-
-    // 获取所有客户端接入列表 (不分页，向后兼容)
-    getAllList: (filters?: ClientAccessFilters): Promise<ClientAccess[]> => {
-        const params = new URLSearchParams();
-        if (filters?.project_id) params.append('project_id', filters.project_id);
-        if (filters?.package_id) params.append('package_id', filters.package_id);
-        if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
-        if (filters?.search) params.append('search', filters.search);
-        params.append('page', '1');
-        params.append('page_size', '1000'); // Large number to get all
-
-        return apiClient
-            .get<ApiResponse<PagedResult<ClientAccess>>>(`/api/v1/access-manager?${params.toString()}`)
-            .then(res => res.data.data.list);
-    },
-
-    // 根据ID获取客户端接入
-    getById: (id: string): Promise<ClientAccess> =>
-        apiClient
-            .get<ApiResponse<ClientAccess>>(`/api/v1/access-manager/${id}`)
-            .then(res => res.data.data),
-
     // 创建客户端接入
     create: (data: CreateClientAccessRequest): Promise<ClientAccess> =>
         apiClient

@@ -1,10 +1,10 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse, PageResponse, PagedResult} from "@/types/api-response";
+import {ApiResponse, PagedResult} from "@/types/api-response";
 import {Package, PackageFilters} from '@/types/package';
 import {Release, ReleaseUpload, UploadProgress} from '@/types/release';
 
 // 获取所有包（支持过滤和分页）
-export async function getPackages(filters?: PackageFilters): Promise<PageResponse<Package>> {
+export async function getPackages(filters?: PackageFilters): Promise<PagedResult<Package>> {
     const params = new URLSearchParams();
     
     // Only add project_id if it's explicitly provided and not empty
@@ -114,7 +114,7 @@ export async function getPackageReleases(packageId: string, page: number = 1, pa
     const resp = await apiClient.get(`/api/v1/releases/package/${packageId}?${params.toString()}`);
     
     // Transform the backend data to frontend format
-    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
+    const releases = (resp.data.data.list || []).map(transformReleaseFromBackend);
     
     return {
         list: releases,
@@ -122,18 +122,5 @@ export async function getPackageReleases(packageId: string, page: number = 1, pa
         page: resp.data.data.page || page,
         page_size: resp.data.data.page_size || pageSize,
         total_pages: resp.data.data.total_pages || Math.ceil((resp.data.data.total || 0) / pageSize)
-    };
-}
-
-// 获取特定包的所有发布版本（不分页，保持向后兼容）
-export async function getPackageReleasesAll(packageId: string): Promise<ApiResponse<Release[]>> {
-    const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
-    
-    // Transform the backend data to frontend format
-    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
-    
-    return {
-        ...resp.data,
-        data: releases
     };
 }

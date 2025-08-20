@@ -81,7 +81,7 @@ export function ClientAccessFilters({
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">{t('clientAccess.allPackages')}</SelectItem>
-                                {packages.map((pkg) => (
+                                {packages.map((pkg: any) => (
                                     <SelectItem key={pkg.id} value={pkg.id}>
                                         {pkg.name}
                                     </SelectItem>

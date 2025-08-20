@@ -36,7 +36,7 @@ export default function Dashboard() {
     }
 
     return (
-        <Page isLoading={projectsLoading || dashboardLoading}>
+        <Page isLoading={projectsLoading}>
             <PageHeader
                 title={t("dashboard.title")}
                 description={t("dashboard.description")}

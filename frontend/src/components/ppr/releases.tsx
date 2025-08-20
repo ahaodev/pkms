@@ -47,7 +47,7 @@ export function Releases({
                              totalCount,
                              totalPages
                          }: ReleasesViewProps) {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [shareDialog, setShareDialog] = useState<{
         isOpen: boolean;
         shareUrl: string;
@@ -81,14 +81,14 @@ export function Releases({
     };
 
     const handleDelete = async (release: Release) => {
-        if (!confirm(t('release.deleteConfirm', { version: release.version_code }))) {
+        if (!confirm(t('release.deleteConfirm', {version: release.version_code}))) {
             return;
         }
 
         try {
             await deleteRelease(release.id);
             toast.success(t('release.deleteSuccess'), {
-                description: t('release.deleteSuccessDescription', { version: release.version_code }),
+                description: t('release.deleteSuccessDescription', {version: release.version_code}),
             });
             // Reset to first page after deletion if current page becomes empty
             const newTotal = totalCount - 1;
@@ -141,41 +141,43 @@ export function Releases({
                             <TableBody>
                                 {releases.map((release) => (
                                     <TableRow key={release.id}>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{release.version_name}</span>
-                                            <span className="text-sm text-muted-foreground">{release.version_code}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-mono text-sm">{release.file_name}</TableCell>
-                                    <TableCell>{formatFileSize(release.file_size)}</TableCell>
-                                    <TableCell>{release.download_count.toLocaleString()}</TableCell>
-                                    <TableCell>{formatDate(release.created_at.toISOString())}</TableCell>
-                                    <TableCell className="max-w-xs">
-                                        <div className="truncate text-sm text-muted-foreground" title={release.changelog}>
-                                            {release.changelog || t('release.noChangelog')}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end space-x-1">
-                                            <Button variant="ghost" size="sm"
-                                                    onClick={() => handleShare(release)}
-                                                    className="h-8 w-8 p-0">
-                                                <Share2 className="h-4 w-4"/>
-                                            </Button>
-                                            <Button variant="ghost" size="sm"
-                                                    onClick={() => handleDownload(release)}
-                                                    className="h-8 w-8 p-0">
-                                                <Download className="h-4 w-4"/>
-                                            </Button>
-                                            <Button variant="ghost" size="sm"
-                                                    onClick={() => handleDelete(release)}
-                                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive">
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{release.version_name}</span>
+                                                <span
+                                                    className="text-sm text-muted-foreground">{release.version_code}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-mono text-sm">{release.file_name}</TableCell>
+                                        <TableCell>{formatFileSize(release.file_size)}</TableCell>
+                                        <TableCell>{release.download_count.toLocaleString()}</TableCell>
+                                        <TableCell>{formatDate(release.created_at.toISOString())}</TableCell>
+                                        <TableCell className="max-w-xs">
+                                            <div className="truncate text-sm text-muted-foreground"
+                                                 title={release.changelog}>
+                                                {release.changelog || t('release.noChangelog')}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end space-x-1">
+                                                <Button variant="ghost" size="sm"
+                                                        onClick={() => handleShare(release)}
+                                                        className="h-8 w-8 p-0">
+                                                    <Share2 className="h-4 w-4"/>
+                                                </Button>
+                                                <Button variant="ghost" size="sm"
+                                                        onClick={() => handleDownload(release)}
+                                                        className="h-8 w-8 p-0">
+                                                    <Download className="h-4 w-4"/>
+                                                </Button>
+                                                <Button variant="ghost" size="sm"
+                                                        onClick={() => handleDelete(release)}
+                                                        className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4"/>
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
                             </TableBody>
                         </Table>

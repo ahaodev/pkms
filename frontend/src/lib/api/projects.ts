@@ -1,40 +1,40 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse, PagedResult} from "@/types/api-response";
+import {ApiResponse} from "@/types/api-response";
 import { Project } from '@/types/project';
-
-// 获取所有项目 (分页)
-export async function getProjects(page: number = 1, pageSize: number = 20): Promise<ApiResponse<PagedResult<Project>>> {
-    const resp = await apiClient.get("/api/v1/projects", {
-        params: {
-            page,
-            page_size: pageSize
-        }
-    });
-    
-    // 转换后端数据格式到前端格式
-    const transformedData = {
-        ...resp.data,
-        data: {
-            ...resp.data.data,
-            data: resp.data.data.data.map(transformProjectFromBackend)
-        }
-    };
-    return transformedData;
-}
 
 // 获取所有项目 (不分页，用于向后兼容)
 export async function getAllProjects(): Promise<ApiResponse<Project[]>> {
-    const resp = await apiClient.get("/api/v1/projects", {
-        params: {
-            page: 1,
-            page_size: 1000 // 使用后端允许的最大页面大小
+    try {
+        const resp = await apiClient.get("/api/v1/projects", {
+            params: {
+                page: 1,
+                page_size: 1000 // 后端最大页面大小限制为1000
+            }
+        });
+        
+        // Check if data structure is correct
+        if (!resp.data.data || !resp.data.data.list) {
+            return {
+                code: resp.data.code || 1,
+                msg: resp.data.msg || 'Invalid response structure',
+                data: []
+            };
         }
-    });
-    const transformedData = {
-        ...resp.data,
-        data: resp.data.data.data.map(transformProjectFromBackend)
-    };
-    return transformedData;
+        
+        // Backend returns PagedResult structure, we need to extract the list
+        const transformedData = {
+            ...resp.data,
+            data: resp.data.data.list.map(transformProjectFromBackend)
+        };
+        
+        return transformedData;
+    } catch (error) {
+        return {
+            code: 1,
+            msg: 'API call failed',
+            data: []
+        };
+    }
 }
 
 // 创建项目

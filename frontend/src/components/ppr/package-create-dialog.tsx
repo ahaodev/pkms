@@ -31,7 +31,7 @@ export function PackageCreateDialog({
                                         projectID,
                                         onSuccess
                                     }: PackageCreateDialogProps) {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [formData, setFormData] = useState<{
         projectId: string;
         name: string;
@@ -67,7 +67,7 @@ export function PackageCreateDialog({
         createPackage(formData)
             .then(response => {
                 if (response.code == 0) {
-                    toast.success(t('package.createSuccess', { name: formData.name }));
+                    toast.success(t('package.createSuccess', {name: formData.name}));
                     handleClose();
                     // Call onSuccess callback to refresh the packages list
                     onSuccess?.();

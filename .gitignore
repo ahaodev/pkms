@@ -23,5 +23,5 @@ dist/
 nul
 main.exe
 database
-#pkms.exe
-#pkms
+pkms.exe
+pkms
