@@ -32,8 +32,8 @@ export function useHierarchyNavigation() {
     const projects = projectsData || [];
     const packages = packagesData?.data || [];
     const releases = releasesData?.list || [];
-    const selectedProject = projects.find(p => p.id === selectedProjectId);
-    const selectedPackage = packages.find(p => p.id === selectedPackageId);
+    const selectedProject = projects.find((p: any) => p.id === selectedProjectId);
+    const selectedPackage = packages.find((p: any) => p.id === selectedPackageId);
     
     // Debug logging
     console.log('useHierarchyNavigation - packagesData:', packagesData);

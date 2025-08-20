@@ -313,7 +313,7 @@ export function ClientAccessDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {packages.map((pkg) => (
+                        {packages.map((pkg: any) => (
                           <SelectItem key={pkg.id} value={pkg.id}>
                             {pkg.name}
                           </SelectItem>

@@ -1,10 +1,10 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse, PageResponse, PagedResult} from "@/types/api-response";
+import {ApiResponse, PagedResult} from "@/types/api-response";
 import {Package, PackageFilters} from '@/types/package';
 import {Release, ReleaseUpload, UploadProgress} from '@/types/release';
 
 // 获取所有包（支持过滤和分页）
-export async function getPackages(filters?: PackageFilters): Promise<PageResponse<Package>> {
+export async function getPackages(filters?: PackageFilters): Promise<PagedResult<Package>> {
     const params = new URLSearchParams();
     
     // Only add project_id if it's explicitly provided and not empty
