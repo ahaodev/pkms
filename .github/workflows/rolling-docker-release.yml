@@ -1,9 +1,9 @@
-name: Docker Release
+name: rolling-docker-release
 
 on:
   workflow_dispatch:
   push:
-    tags: [ 'v*' ]
+    branches: [ main ]
 
 jobs:
   docker:
