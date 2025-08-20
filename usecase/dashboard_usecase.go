@@ -5,23 +5,19 @@ import (
 	"time"
 
 	"pkms/domain"
-	"pkms/internal/casbin"
 )
 
 type dashboardUsecase struct {
 	dashboardRepository domain.DashboardRepository
-	casbinManager       *casbin.CasbinManager
 	contextTimeout      time.Duration
 }
 
 func NewDashboardUsecase(
 	dashboardRepository domain.DashboardRepository,
-	casbinManager *casbin.CasbinManager,
 	timeout time.Duration,
 ) domain.DashboardUsecase {
 	return &dashboardUsecase{
 		dashboardRepository: dashboardRepository,
-		casbinManager:       casbinManager,
 		contextTimeout:      timeout,
 	}
 }

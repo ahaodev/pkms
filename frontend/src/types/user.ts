@@ -16,10 +16,24 @@ export interface User {
     updated_at: Date;
 }
 
+export interface MenuItem {
+    id: string;
+    name: string;
+    path: string;
+    icon: string;
+    component: string;
+    sort: number;
+    visible: boolean;
+    requiresAuth: boolean;
+    requiresAdmin: boolean;
+}
+
 export interface UserPermissions {
     user_id: string;
     permissions: string[][];
     roles: string[];
+    menus: MenuItem[];        // 用户可访问的菜单列表
+    is_admin: boolean;        // 是否管理员
 }
 
 export interface Profile {

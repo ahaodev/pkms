@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -16,21 +17,41 @@ type UserController struct {
 
 // GetUsers godoc
 // @Summary      Get all users
-// @Description  Retrieve all users (admin only)
+// @Description  Retrieve all users with pagination (admin only)
 // @Tags         Users
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  domain.Response{data=[]domain.User}  "Users retrieved successfully"
-// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Param        page     query  int  false  "Page number (default: 1)"
+// @Param        page_size query  int  false  "Page size (default: 20)"
+// @Success      200      {object}  domain.Response  "Users retrieved successfully"
+// @Failure      500      {object}  domain.Response  "Internal server error"
 // @Router       /user [get]
 func (uc *UserController) GetUsers(c *gin.Context) {
-	users, err := uc.UserUsecase.Fetch(c)
+	// 解析分页参数
+	var params domain.QueryParams
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil {
+			params.Page = v
+		}
+	}
+	if ps := c.Query("page_size"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil {
+			params.PageSize = v
+		}
+	}
+
+	// 验证和设置默认参数
+	domain.ValidateQueryParams(&params)
+
+	// 使用分页查询
+	result, err := uc.UserUsecase.FetchPaged(c, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(users))
+
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // CreateUser godoc

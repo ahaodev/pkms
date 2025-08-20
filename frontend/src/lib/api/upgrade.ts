@@ -1,4 +1,5 @@
 import { apiClient } from './api';
+import { PagedResult } from '@/types/api-response';
 
 // 升级目标类型定义
 export interface UpgradeTarget {
@@ -39,16 +40,21 @@ export interface UpdateUpgradeTargetRequest {
     is_active?: boolean;
 }
 
+
 // 升级目标 CRUD API
 export const getUpgradeTargets = async (filters?: {
     project_id?: string;
     package_id?: string;
     is_active?: boolean;
-}): Promise<{ data: UpgradeTarget[] }> => {
+    page?: number;
+    pageSize?: number;
+}): Promise<{ data: PagedResult<UpgradeTarget>; code: number; msg: string; }> => {
     const params = new URLSearchParams();
     if (filters?.project_id) params.append('project_id', filters.project_id);
     if (filters?.package_id) params.append('package_id', filters.package_id);
     if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.pageSize) params.append('page_size', filters.pageSize.toString());
 
     const response = await apiClient.get(`/api/v1/upgrades?${params.toString()}`);
     return response.data;

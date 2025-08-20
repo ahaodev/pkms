@@ -60,6 +60,43 @@ func (tr *entTenantRepository) Fetch(c context.Context) ([]*domain.Tenant, error
 	return result, nil
 }
 
+func (tr *entTenantRepository) FetchPaged(c context.Context, params domain.QueryParams) (*domain.TenantPagedResult, error) {
+	// 构建查询
+	query := tr.client.Tenant.
+		Query().
+		Where(tenant.Not(tenant.Name("admin")))
+
+	// 获取总数
+	total, err := query.Clone().Count(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// 应用分页
+	tenants, err := query.
+		Select(tenant.FieldID, tenant.FieldName, tenant.FieldCreatedAt, tenant.FieldUpdatedAt).
+		Offset((params.Page - 1) * params.PageSize).
+		Limit(params.PageSize).
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为域对象
+	var result []*domain.Tenant
+	for _, t := range tenants {
+		result = append(result, &domain.Tenant{
+			ID:        t.ID,
+			Name:      t.Name,
+			CreatedAt: t.CreatedAt,
+			UpdatedAt: t.UpdatedAt,
+		})
+	}
+
+	return domain.NewPagedResult(result, total, params.Page, params.PageSize), nil
+}
+
 func (tr *entTenantRepository) GetByID(c context.Context, id string) (*domain.Tenant, error) {
 	t, err := tr.client.Tenant.
 		Query().

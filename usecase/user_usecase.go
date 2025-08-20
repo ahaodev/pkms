@@ -118,6 +118,12 @@ func (uu *userUsecase) Fetch(c context.Context) ([]*domain.User, error) {
 	return uu.userRepository.Fetch(ctx)
 }
 
+func (uu *userUsecase) FetchPaged(c context.Context, params domain.QueryParams) (*domain.UserPagedResult, error) {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+	return uu.userRepository.FetchPaged(ctx, params)
+}
+
 func (uu *userUsecase) GetByUserName(c context.Context, userName string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()

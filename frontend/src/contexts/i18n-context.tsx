@@ -9,8 +9,8 @@ if (!i18n.isInitialized) {
     .use(initReactI18next)
     .init({
       resources,
-      lng: localStorage.getItem('pkms-language') || 'zh', // Default language
-      fallbackLng: 'zh',
+      lng: localStorage.getItem('pkms-language') || 'en', // Default language
+      fallbackLng: 'en',
       interpolation: {
         escapeValue: false, // React already escapes values
       },
@@ -29,7 +29,7 @@ interface I18nContextType {
 
 // Default context value
 const defaultContextValue: I18nContextType = {
-  language: 'zh',
+  language: 'en',
   setLanguage: () => {},
   t: (key: string) => key,
   isLoading: false,

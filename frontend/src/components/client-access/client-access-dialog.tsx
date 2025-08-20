@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useProjects } from '@/hooks/use-projects';
+import { useAllProjects } from '@/hooks/use-projects';
 import { usePackages } from '@/hooks/use-packages';
 import type { ClientAccess, CreateClientAccessRequest, UpdateClientAccessRequest } from '@/types/client-access';
 
@@ -67,7 +67,7 @@ export function ClientAccessDialog({
   const isEdit = !!clientAccess;
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
-  const { data: projects = [] } = useProjects();
+  const { data: projects = [] } = useAllProjects();
   const packagesResult = usePackages({
     projectId: selectedProjectId || undefined
   });

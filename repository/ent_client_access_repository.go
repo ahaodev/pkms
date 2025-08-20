@@ -99,7 +99,7 @@ func (r *entClientAccessRepository) GetByAccessToken(ctx context.Context, token 
 	return r.entToClientAccess(ca), nil
 }
 
-func (r *entClientAccessRepository) GetList(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*domain.ClientAccess, error) {
+func (r *entClientAccessRepository) GetList(ctx context.Context, tenantID string, filters map[string]interface{}, queryParams *domain.QueryParams) (*domain.PagedResult[*domain.ClientAccess], error) {
 	query := r.client.ClientAccess.
 		Query().
 		Where(clientaccess.TenantID(tenantID)).
@@ -122,7 +122,15 @@ func (r *entClientAccessRepository) GetList(ctx context.Context, tenantID string
 	// 按创建时间倒序排列
 	query = query.Order(ent.Desc(clientaccess.FieldCreatedAt))
 
-	clientAccesses, err := query.All(ctx)
+	// 获取总数
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 应用分页
+	offset := (queryParams.Page - 1) * queryParams.PageSize
+	clientAccesses, err := query.Offset(offset).Limit(queryParams.PageSize).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +140,7 @@ func (r *entClientAccessRepository) GetList(ctx context.Context, tenantID string
 		result = append(result, r.entToClientAccess(ca))
 	}
 
-	return result, nil
+	return domain.NewPagedResult(result, total, queryParams.Page, queryParams.PageSize), nil
 }
 
 func (r *entClientAccessRepository) Update(ctx context.Context, id string, updates map[string]interface{}) error {
@@ -183,18 +191,18 @@ func (r *entClientAccessRepository) UpdateUsage(ctx context.Context, token strin
 // entToClientAccess 将Ent实体转换为domain实体
 func (r *entClientAccessRepository) entToClientAccess(ca *ent.ClientAccess) *domain.ClientAccess {
 	access := &domain.ClientAccess{
-		ID:           ca.ID,
-		TenantID:     ca.TenantID,
-		ProjectID:    ca.ProjectID,
-		PackageID:    ca.PackageID,
-		AccessToken:  ca.AccessToken,
-		Name:         ca.Name,
-		Description:  ca.Description,
-		IsActive:     ca.IsActive,
-		UsageCount:   ca.UsageCount,
-		CreatedAt:    ca.CreatedAt,
-		UpdatedAt:    ca.UpdatedAt,
-		CreatedBy:    ca.CreatedBy,
+		ID:          ca.ID,
+		TenantID:    ca.TenantID,
+		ProjectID:   ca.ProjectID,
+		PackageID:   ca.PackageID,
+		AccessToken: ca.AccessToken,
+		Name:        ca.Name,
+		Description: ca.Description,
+		IsActive:    ca.IsActive,
+		UsageCount:  ca.UsageCount,
+		CreatedAt:   ca.CreatedAt,
+		UpdatedAt:   ca.UpdatedAt,
+		CreatedBy:   ca.CreatedBy,
 	}
 
 	// 处理可选字段（Ent使用零值表示空值）

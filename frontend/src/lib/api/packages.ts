@@ -1,5 +1,5 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse, PageResponse} from "@/types/api-response";
+import {ApiResponse, PageResponse, PagedResult} from "@/types/api-response";
 import {Package, PackageFilters} from '@/types/package';
 import {Release, ReleaseUpload, UploadProgress} from '@/types/release';
 
@@ -16,12 +16,12 @@ export async function getPackages(filters?: PackageFilters): Promise<PageRespons
     if (filters?.isLatest !== undefined) params.append('is_latest', filters.isLatest.toString());
     if (filters?.search) params.append('search', filters.search);
     if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.pageSize) params.append('pageSize', filters.pageSize.toString());
+    if (filters?.pageSize) params.append('page_size', filters.pageSize.toString());
 
     const url = `/api/v1/packages/?${params.toString()}`;
     
     const resp = await apiClient.get(url);
-    return resp.data;
+    return resp.data.data;
 }
 
 // 创建包（基本信息）
@@ -104,8 +104,29 @@ export function transformReleaseFromBackend(backendRelease: any): Release {
     };
 }
 
-// 获取特定包的所有发布版本
-export async function getPackageReleases(packageId: string): Promise<ApiResponse<Release[]>> {
+// 获取特定包的所有发布版本（支持分页）
+export async function getPackageReleases(packageId: string, page: number = 1, pageSize: number = 20): Promise<PagedResult<Release>> {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        page_size: pageSize.toString()
+    });
+    
+    const resp = await apiClient.get(`/api/v1/releases/package/${packageId}?${params.toString()}`);
+    
+    // Transform the backend data to frontend format
+    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
+    
+    return {
+        list: releases,
+        total: resp.data.data.total || 0,
+        page: resp.data.data.page || page,
+        page_size: resp.data.data.page_size || pageSize,
+        total_pages: resp.data.data.total_pages || Math.ceil((resp.data.data.total || 0) / pageSize)
+    };
+}
+
+// 获取特定包的所有发布版本（不分页，保持向后兼容）
+export async function getPackageReleasesAll(packageId: string): Promise<ApiResponse<Release[]>> {
     const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
     
     // Transform the backend data to frontend format

@@ -33,7 +33,7 @@ type MenuItem struct {
 var BaseMenus = []MenuItem{
 	{
 		ID:            "dashboard",
-		Name:          "仪表板",
+		Name:          "Dashboard",
 		Path:          "/",
 		Icon:          "Home",
 		Component:     "Dashboard",
@@ -44,7 +44,7 @@ var BaseMenus = []MenuItem{
 	},
 	{
 		ID:            "hierarchy",
-		Name:          "项目管理",
+		Name:          "PPR",
 		Path:          "/hierarchy",
 		Icon:          "FolderTree",
 		Component:     "HierarchyPage",
@@ -55,7 +55,7 @@ var BaseMenus = []MenuItem{
 	},
 	{
 		ID:            "upgrade",
-		Name:          "升级",
+		Name:          "Upgrade",
 		Path:          "/upgrade",
 		Icon:          "Rocket",
 		Component:     "UpgradePage",
@@ -66,7 +66,7 @@ var BaseMenus = []MenuItem{
 	},
 	{
 		ID:            "access-manager",
-		Name:          "访问管理",
+		Name:          "Access Management",
 		Path:          "/access-manager",
 		Icon:          "ShieldCheck",
 		Component:     "ClientAccessPage",
@@ -77,7 +77,7 @@ var BaseMenus = []MenuItem{
 	},
 	{
 		ID:            "shares",
-		Name:          "共享管理",
+		Name:          "Shares",
 		Path:          "/shares",
 		Icon:          "Share2",
 		Component:     "SharesManagerPage",
@@ -92,7 +92,7 @@ var BaseMenus = []MenuItem{
 var AdminMenus = []MenuItem{
 	{
 		ID:            "users",
-		Name:          "用户管理",
+		Name:          "Users",
 		Path:          "/users",
 		Icon:          "Users",
 		Component:     "UsersPage",
@@ -103,7 +103,7 @@ var AdminMenus = []MenuItem{
 	},
 	{
 		ID:            "tenants",
-		Name:          "租户管理",
+		Name:          "Tenants",
 		Path:          "/tenants",
 		Icon:          "Building2",
 		Component:     "TenantsPage",
@@ -118,7 +118,7 @@ var AdminMenus = []MenuItem{
 var SystemMenus = []MenuItem{
 	{
 		ID:            "admin",
-		Name:          "管理员",
+		Name:          "System Management",
 		Path:          "/admin",
 		Icon:          "Settings",
 		Component:     "AdminLayout",

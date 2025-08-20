@@ -1,22 +1,21 @@
-import {useMemo, useState, useEffect} from 'react';
+import {useState} from 'react';
 import {toast} from 'sonner';
 import {useAuth} from '@/providers/auth-provider.tsx';
-import {useProjects} from '@/hooks/use-projects';
-import {useCreateUser, useDeleteUser, useUpdateUser, useUsers} from '@/hooks/use-users';
+import {useAllProjects} from '@/hooks/use-projects';
+import {useCreateUser, useDeleteUser, useUpdateUser, useUsersWithPagination} from '@/hooks/use-users';
 import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
-import {UserFilters, UserList} from '@/components/user';
+import {UserList} from '@/components/user';
 import {UserHeader} from '@/components/user/user-header';
 import {UserCreateDialog} from '@/components/user/user-create-dialog';
 import {UserEditDialog} from '@/components/user/user-edit-dialog';
 import {Page, PageContent} from '@/components/page';
 import {useI18n} from '@/contexts/i18n-context';
-import {usePagination} from '@/hooks/use-pagination';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
 } from '@/components/ui/pagination';
 
 interface UserFormData {
@@ -36,8 +35,13 @@ const initialFormData: UserFormData = {
 export default function UsersPage() {
     const {t} = useI18n();
     const {user: currentUser} = useAuth();
-    const {data: projects} = useProjects();
-    const {data: users, isLoading} = useUsers();
+    const {data: projects} = useAllProjects();
+    
+    // 分页状态
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(20);
+    
+    const {data: paginatedData, isLoading} = useUsersWithPagination(currentPage, pageSize);
     const createUserMutation = useCreateUser();
     const updateUserMutation = useUpdateUser();
     const deleteUserMutation = useDeleteUser();
@@ -45,14 +49,12 @@ export default function UsersPage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [userForm, setUserForm] = useState<UserFormData>(initialFormData);
 
-    // 分页状态
-    const pagination = usePagination({
-        initialPageSize: 20,
-        defaultPageSize: 20
-    });
+    // 从分页数据中提取信息
+    const users = paginatedData?.list || [];
+    const totalUsers = paginatedData?.total || 0;
+    const totalPages = paginatedData?.total_pages || 1;
 
     const updateUserForm = (updates: Partial<UserFormData>) => {
         setUserForm(prev => ({...prev, ...updates}));
@@ -62,25 +64,6 @@ export default function UsersPage() {
         setUserForm(initialFormData);
     };
 
-    const filteredUsers = useMemo(() => {
-        if (!users) return [];
-        return users.filter((user: User) => 
-            user.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [users, searchTerm]);
-
-    // Update pagination total items when filtered users change
-    useEffect(() => {
-        pagination.setTotalItems(filteredUsers.length);
-    }, [filteredUsers.length, pagination]);
-
-    // 获取当前页显示的用户数据
-    const paginatedUsers = useMemo(() => {
-        return pagination.getPageData(filteredUsers);
-    }, [filteredUsers, pagination.currentPage, pagination.pageSize]);
-
-
-    // 移除这个检查，让 Page 组件处理 loading 状态
 
     const handleCreateUser = async () => {
         if (!userForm.name || !userForm.password) {
@@ -98,10 +81,11 @@ export default function UsersPage() {
 
             await createUserMutation.mutateAsync(createRequest);
 
-            toast.success(t('user.createSuccess', { name: userForm.name }));
+            toast.success(t('user.createSuccess', {name: userForm.name}));
 
             setIsCreateDialogOpen(false);
             resetForm();
+            setCurrentPage(1); // Reset to first page
         } catch (error: any) {
             toast.error(error.response?.data?.message || t('user.createError'));
         }
@@ -135,7 +119,7 @@ export default function UsersPage() {
                 update: updateRequest
             });
 
-            toast.success(t('user.updateSuccess', { name: userForm.name }));
+            toast.success(t('user.updateSuccess', {name: userForm.name}));
 
             setIsEditDialogOpen(false);
             setEditingUser(null);
@@ -151,13 +135,13 @@ export default function UsersPage() {
             return;
         }
 
-        if (!confirm(t('user.deleteConfirm', { name: user.name }))) {
+        if (!confirm(t('user.deleteConfirm', {name: user.name}))) {
             return;
         }
 
         try {
             await deleteUserMutation.mutateAsync(user.id);
-            toast.success(t('user.deleteSuccess', { name: user.name }));
+            toast.success(t('user.deleteSuccess', {name: user.name}));
         } catch (error: any) {
             toast.error(error.response?.data?.message || t('user.deleteError'));
         }
@@ -175,7 +159,7 @@ export default function UsersPage() {
             });
 
             const statusText = user.is_active ? t('user.disabled') : t('user.enabled');
-            toast.success(t('user.statusUpdateSuccess', { name: user.name, status: statusText }));
+            toast.success(t('user.statusUpdateSuccess', {name: user.name, status: statusText}));
         } catch (error: any) {
             toast.error(error.response?.data?.message || t('user.statusUpdateError'));
         }
@@ -184,21 +168,19 @@ export default function UsersPage() {
     return (
         <Page isLoading={isLoading}>
             {/* 页面头部 */}
-            <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)} />
+            <UserHeader onCreateUser={() => setIsCreateDialogOpen(true)}/>
 
             <PageContent>
-                {/* 筛选器 */}
-                <UserFilters
-                    searchTerm={searchTerm}
-                    roleFilter="all"
-                    totalUsers={filteredUsers.length}
-                    onSearchChange={setSearchTerm}
-                    onRoleFilterChange={() => {}}
-                />
+                {/* 统计信息 */}
+                <div className="mb-6">
+                    <div className="text-sm text-muted-foreground">
+                        总数: {totalUsers}
+                    </div>
+                </div>
 
                 {/* 用户列表 */}
                 <UserList
-                    users={paginatedUsers}
+                    users={users}
                     currentUser={currentUser}
                     projects={projects}
                     onEdit={handleEditUser}
@@ -206,44 +188,44 @@ export default function UsersPage() {
                     onToggleStatus={handleToggleUserStatus}
                 />
 
-                {/* 分页组件 */}
-                <div className="py-4">
+                {/* 分页组件 - 仅在总页数超过1页时显示 */}
+                {totalPages > 1 && (
                     <Pagination>
                         <PaginationContent>
                             <PaginationItem>
-                                <PaginationPrevious 
+                                <PaginationPrevious
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        if (pagination.currentPage > 1) {
-                                            pagination.setPage(pagination.currentPage - 1);
+                                        if (currentPage > 1) {
+                                            setCurrentPage(currentPage - 1);
                                         }
                                     }}
-                                    className={pagination.currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                                 />
                             </PaginationItem>
-                            
+
                             <PaginationItem>
                                 <span className="text-sm text-muted-foreground px-4">
-                                    第 {pagination.currentPage} 页，共 {pagination.totalPages} 页 (总数: {pagination.totalItems})
+                                    第 {currentPage} 页，共 {totalPages} 页 (总数: {totalUsers})
                                 </span>
                             </PaginationItem>
 
                             <PaginationItem>
-                                <PaginationNext 
+                                <PaginationNext
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        if (pagination.currentPage < pagination.totalPages) {
-                                            pagination.setPage(pagination.currentPage + 1);
+                                        if (currentPage < totalPages) {
+                                            setCurrentPage(currentPage + 1);
                                         }
                                     }}
-                                    className={pagination.currentPage >= pagination.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                                 />
                             </PaginationItem>
                         </PaginationContent>
                     </Pagination>
-                </div>
+                )}
 
                 {/* 创建用户对话框 */}
                 <UserCreateDialog

@@ -138,6 +138,51 @@ func (pr *entProjectRepository) Delete(c context.Context, id string) error {
 		Exec(c)
 }
 
+func (pr *entProjectRepository) FetchPaged(c context.Context, tenantID string, params domain.QueryParams) (*domain.ProjectPagedResult, error) {
+	// 计算总数
+	total, err := pr.client.Project.
+		Query().
+		Where(project.TenantID(tenantID)).
+		Count(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// 计算分页参数
+	offset := (params.Page - 1) * params.PageSize
+
+	// 查询分页数据
+	projects, err := pr.client.Project.
+		Query().
+		Where(project.TenantID(tenantID)).
+		WithPackages().
+		Offset(offset).
+		Limit(params.PageSize).
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为 domain 对象
+	var result []*domain.Project
+	for _, p := range projects {
+		result = append(result, &domain.Project{
+			ID:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Icon:         p.Icon,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+			CreatedBy:    p.CreatedBy,
+			TenantID:     p.TenantID,
+			PackageCount: len(p.Edges.Packages),
+		})
+	}
+
+	return domain.NewPagedResult(result, total, params.Page, params.PageSize), nil
+}
+
 func (pr *entProjectRepository) GetByUserID(c context.Context, userID string) ([]*domain.Project, error) {
 	projects, err := pr.client.Project.
 		Query().

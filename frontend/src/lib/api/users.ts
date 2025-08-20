@@ -1,5 +1,5 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse} from "@/types/api-response";
+import {ApiResponse, PagedResult} from "@/types/api-response";
 import { User, CreateUserRequest, UpdateUserRequest } from '@/types/user';
 
 // Transform backend user data to frontend format
@@ -14,9 +14,34 @@ function transformUserFromBackend(backendUser: any): User {
     };
 }
 
-// 获取所有用户
-export async function getUsers(): Promise<ApiResponse<User[]>> {
-    const resp = await apiClient.get("/api/v1/user/");
+// 获取所有用户 (分页)
+export async function getUsers(page: number = 1, pageSize: number = 20): Promise<ApiResponse<PagedResult<User>>> {
+    const resp = await apiClient.get("/api/v1/user/", {
+        params: {
+            page,
+            page_size: pageSize
+        }
+    });
+    
+    // Backend now returns PagedResult structure
+    const transformedData = {
+        ...resp.data,
+        data: {
+            ...resp.data.data,
+            list: resp.data.data.list.map(transformUserFromBackend)
+        }
+    };
+    return transformedData;
+}
+
+// 获取所有用户 (不分页，用于向后兼容)
+export async function getAllUsers(): Promise<ApiResponse<User[]>> {
+    const resp = await apiClient.get("/api/v1/user/", {
+        params: {
+            page: 1,
+            page_size: 1000 // 使用后端允许的最大页面大小
+        }
+    });
     const transformedData = {
         ...resp.data,
         data: resp.data.data.map(transformUserFromBackend)

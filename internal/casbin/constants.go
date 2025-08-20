@@ -11,20 +11,17 @@ const (
 
 // 侧边栏权限（简化版本，删除菜单管理）
 const (
-	SidebarDashboard   = "dashboard"       // 对应 "/"
-	SidebarProjects    = "hierarchy"       // 对应 "/hierarchy"
-	SidebarUpgrade     = "upgrade"         // 对应 "/upgrade"
-	ClientAccess       = "access-manager"  // 对应 "/access-manager"
-	ShareManager       = "shares"          // 对应 "/shares"
-	SidebarTenants     = "tenants"         // 对应 "/tenants"
-	SidebarUsers       = "users"           // 对应 "/users"
-	SidebarPermissions = "permissions"     // 对应 "/permissions"
-	SidebarRoles       = "role-management" // 对应 "/role-management"
+	SidebarDashboard = "dashboard"      // 对应 "/"
+	SidebarProjects  = "hierarchy"      // 对应 "/hierarchy"
+	SidebarUpgrade   = "upgrade"        // 对应 "/upgrade"
+	ClientAccess     = "access-manager" // 对应 "/access-manager"
+	ShareManager     = "shares"         // 对应 "/shares"
+	SidebarTenants   = "tenants"        // 对应 "/tenants"
+	SidebarUsers     = "users"          // 对应 "/users"
 )
 
 var ADMIN_SIDEBAR = []string{
-	SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager,
-	SidebarTenants, SidebarUsers, SidebarPermissions, SidebarRoles,
+	SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager, SidebarTenants, SidebarUsers,
 }
 
 var OWNER_SIDEBAR = []string{SidebarDashboard, SidebarProjects, SidebarUpgrade, ClientAccess, ShareManager}

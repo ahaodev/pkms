@@ -1,4 +1,5 @@
 import { apiClient } from './api';
+import { PagedResult } from '@/types/api-response';
 
 export interface ShareListItem {
   id: string;
@@ -35,10 +36,26 @@ export interface ShareResponse {
 }
 
 export const sharesApi = {
-  // Get all shares for current tenant
-  getAll: async (): Promise<ShareListItem[]> => {
-    const response = await apiClient.get('/api/v1/shares');
+  // Get all shares for current tenant (分页)
+  getAll: async (page: number = 1, pageSize: number = 20): Promise<PagedResult<ShareListItem>> => {
+    const response = await apiClient.get('/api/v1/shares', {
+      params: {
+        page,
+        page_size: pageSize
+      }
+    });
     return response.data.data;
+  },
+
+  // Get all shares for current tenant (不分页，向后兼容)
+  getAllList: async (): Promise<ShareListItem[]> => {
+    const response = await apiClient.get('/api/v1/shares', {
+      params: {
+        page: 1,
+        page_size: 1000 // 大数量获取所有
+      }
+    });
+    return response.data.data.data;
   },
 
   // Create a new share

@@ -91,7 +91,7 @@ func compareVersions(v1, v2 string) int {
 // @Security     BearerAuth
 // @Param        package_id   path     string  true   "Package ID"
 // @Param        page         query    int     false  "Page number (default: 1)"
-// @Param        pageSize     query    int     false  "Page size (default: 20)"
+// @Param        page_size     query    int     false  "Page size (default: 20)"
 // @Success      200          {object} domain.Response  "Successfully retrieved releases"
 // @Failure      400          {object} domain.Response  "Bad request - package_id is required"
 // @Failure      404          {object} domain.Response  "Releases not found"
@@ -108,18 +108,20 @@ func (rc *ReleaseController) GetReleases(c *gin.Context) {
 	}
 
 	// 解析分页参数
-	page := 1
-	pageSize := 20
+	var params domain.QueryParams
 	if p := c.Query("page"); p != "" {
 		if v, err := strconv.Atoi(p); err == nil {
-			page = v
+			params.Page = v
 		}
 	}
-	if ps := c.Query("pageSize"); ps != "" {
+	if ps := c.Query("page_size"); ps != "" {
 		if v, err := strconv.Atoi(ps); err == nil {
-			pageSize = v
+			params.PageSize = v
 		}
 	}
+
+	// 验证和设置默认参数
+	domain.ValidateQueryParams(&params)
 
 	releases, err := rc.ReleaseUsecase.GetReleasesByPackage(c, packageID)
 	if err != nil {
@@ -150,8 +152,8 @@ func (rc *ReleaseController) GetReleases(c *gin.Context) {
 
 	// Apply pagination manually since the usecase doesn't support it
 	total := len(releases)
-	start := (page - 1) * pageSize
-	end := start + pageSize
+	start := (params.Page - 1) * params.PageSize
+	end := start + params.PageSize
 
 	if start > total {
 		releases = []*domain.Release{}
@@ -162,7 +164,9 @@ func (rc *ReleaseController) GetReleases(c *gin.Context) {
 		releases = releases[start:end]
 	}
 
-	c.JSON(http.StatusOK, domain.RespPageSuccess(releases, total, page, pageSize))
+	// 创建分页结果
+	result := domain.NewPagedResult(releases, total, params.Page, params.PageSize)
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // GetRelease 获取特定发布版本

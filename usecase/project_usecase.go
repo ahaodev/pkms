@@ -49,6 +49,12 @@ func (pu *projectUsecase) Delete(c context.Context, id string) error {
 	return pu.projectRepository.Delete(ctx, id)
 }
 
+func (pu *projectUsecase) FetchPaged(c context.Context, tenantID string, params domain.QueryParams) (*domain.ProjectPagedResult, error) {
+	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
+	defer cancel()
+	return pu.projectRepository.FetchPaged(ctx, tenantID, params)
+}
+
 func (pu *projectUsecase) GetByUserID(c context.Context, userID string) ([]*domain.Project, error) {
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()

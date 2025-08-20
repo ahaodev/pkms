@@ -93,6 +93,11 @@ export default function HierarchyPage() {
                             handleCreateRelease={() => dialogs.openDialog('createRelease')}
                             handleDownload={navigation.handleDownload}
                             onReleaseDeleted={dialogs.handleReleaseUploadSuccess}
+                            currentPage={navigation.releasesCurrentPage}
+                            setCurrentPage={navigation.setReleasesCurrentPage}
+                            pageSize={navigation.releasesPageSize}
+                            totalCount={navigation.releasesTotalCount}
+                            totalPages={navigation.releasesTotalPages}
                         />
                     )}
                 </div>

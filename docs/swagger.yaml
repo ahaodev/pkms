@@ -181,11 +181,6 @@ definitions:
         type: string
       password:
         type: string
-      tenant_roles:
-        description: 租户角色分配
-        items:
-          $ref: '#/definitions/domain.TenantRoleAssignment'
-        type: array
     required:
     - name
     - password
@@ -194,13 +189,11 @@ definitions:
     properties:
       total_downloads:
         type: integer
-      total_groups:
-        type: integer
       total_packages:
         type: integer
       total_projects:
         type: integer
-      total_users:
+      total_releases:
         type: integer
     type: object
   domain.EnhancedPoliciesResponse:
@@ -469,6 +462,44 @@ definitions:
       role:
         type: string
     type: object
+  domain.ShareListItem:
+    properties:
+      code:
+        type: string
+      expired_at:
+        type: string
+      file_name:
+        type: string
+      id:
+        type: string
+      is_expired:
+        type: boolean
+      package_name:
+        type: string
+      project_name:
+        type: string
+      share_url:
+        type: string
+      start_at:
+        type: string
+      version:
+        type: string
+    type: object
+  domain.SharePagedResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/domain.ShareListItem'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   domain.Tenant:
     properties:
       created_at:
@@ -480,15 +511,20 @@ definitions:
       updated_at:
         type: string
     type: object
-  domain.TenantRoleAssignment:
+  domain.TenantPagedResult:
     properties:
-      role_code:
-        type: string
-      tenant_id:
-        type: string
-    required:
-    - role_code
-    - tenant_id
+      list:
+        items:
+          $ref: '#/definitions/domain.Tenant'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
     type: object
   domain.TenantUserRequest:
     properties:
@@ -555,6 +591,14 @@ definitions:
     type: object
   domain.UserPermissionsResponse:
     properties:
+      is_admin:
+        description: 是否管理员
+        type: boolean
+      menus:
+        description: 用户可访问的菜单列表
+        items:
+          $ref: '#/definitions/domain.MenuItem'
+        type: array
       permissions:
         items:
           items:
@@ -597,7 +641,7 @@ paths:
       consumes:
       - application/json
       description: Retrieve list of client access credentials with optional filters
-        (admin only)
+        and pagination (admin only)
       parameters:
       - description: Tenant ID
         in: header
@@ -616,19 +660,25 @@ paths:
         in: query
         name: is_active
         type: boolean
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20, max: 100)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Client access list retrieved successfully
+          description: Client access list retrieved successfully with pagination
           schema:
             allOf:
             - $ref: '#/definitions/domain.Response'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/domain.ClientAccess'
-                  type: array
+                  type: object
               type: object
         "500":
           description: Internal server error
@@ -1473,12 +1523,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all permissions and roles for the current authenticated user
+      description: Get all permissions, roles, and accessible menus for the current
+        authenticated user
       produces:
       - application/json
       responses:
         "200":
-          description: User permissions and roles
+          description: User permissions, roles and menus
           schema:
             allOf:
             - $ref: '#/definitions/domain.Response'
@@ -1492,7 +1543,7 @@ paths:
             $ref: '#/definitions/domain.Response'
       security:
       - BearerAuth: []
-      summary: Get user permissions
+      summary: Get user permissions with menus
       tags:
       - RBAC
   /casbin/users:
@@ -1812,7 +1863,7 @@ paths:
         type: integer
       - description: 'Page size (default: 20)'
         in: query
-        name: pageSize
+        name: page_size
         type: integer
       - description: Filter by project ID
         in: query
@@ -1824,14 +1875,7 @@ paths:
         "200":
           description: Successfully retrieved packages
           schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Package'
-                  type: array
-              type: object
+            $ref: '#/definitions/domain.Response'
         "400":
           description: Invalid request parameters
           schema:
@@ -2082,7 +2126,7 @@ paths:
         type: integer
       - description: 'Page size (default: 20)'
         in: query
-        name: pageSize
+        name: page_size
         type: integer
       produces:
       - application/json
@@ -2224,27 +2268,28 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve all projects for the current tenant
+      description: Retrieve all projects for the current tenant with pagination
       parameters:
       - description: Tenant ID
         in: header
         name: x-tenant-id
         required: true
         type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Projects retrieved successfully
           schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Project'
-                  type: array
-              type: object
+            $ref: '#/definitions/domain.Response'
         "500":
           description: Internal server error
           schema:
@@ -2707,12 +2752,30 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all shares for the current tenant
+      description: Get all shares for the current tenant with pagination
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Successfully retrieved shares
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.SharePagedResult'
+              type: object
+        "400":
+          description: Invalid query parameters
           schema:
             $ref: '#/definitions/domain.Response'
         "500":
@@ -2788,190 +2851,32 @@ paths:
       summary: Update share expiry
       tags:
       - Shares(management)
-  /static-menu/admin-menus:
-    get:
-      consumes:
-      - application/json
-      description: 获取管理员专用的菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuItem'
-                  type: array
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取管理员菜单
-      tags:
-      - 菜单管理
-  /static-menu/all-menus:
-    get:
-      consumes:
-      - application/json
-      description: 获取系统中所有可用的菜单（管理员专用）
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuItem'
-                  type: array
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取所有菜单
-      tags:
-      - 菜单管理
-  /static-menu/check-access:
-    get:
-      consumes:
-      - application/json
-      description: 检查用户是否有特定菜单的访问权限
-      parameters:
-      - description: 菜单路径
-        in: query
-        name: path
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 检查成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  type: boolean
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 检查菜单访问权限
-      tags:
-      - 菜单管理
-  /static-menu/system:
-    get:
-      consumes:
-      - application/json
-      description: 获取系统预定义的固定菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuItem'
-                  type: array
-              type: object
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取系统固定菜单
-      tags:
-      - 菜单管理
-  /static-menu/user-menus:
-    get:
-      consumes:
-      - application/json
-      description: 根据用户权限获取可访问的菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.MenuItem'
-                  type: array
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/domain.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取用户菜单
-      tags:
-      - 菜单管理
   /tenants:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all tenants
+      description: Retrieve a list of all tenants with pagination
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Successfully retrieved tenants
           schema:
-            $ref: '#/definitions/domain.Response'
+            allOf:
+            - $ref: '#/definitions/domain.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TenantPagedResult'
+              type: object
         "500":
           description: Internal server error
           schema:
@@ -3489,7 +3394,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all upgrade targets with optional filtering
+      description: Get all upgrade targets with optional filtering and pagination
       parameters:
       - description: Project ID
         in: query
@@ -3503,6 +3408,14 @@ paths:
         in: query
         name: is_active
         type: boolean
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
@@ -3523,21 +3436,23 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve all users (admin only)
+      description: Retrieve all users with pagination (admin only)
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Users retrieved successfully
           schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.User'
-                  type: array
-              type: object
+            $ref: '#/definitions/domain.Response'
         "500":
           description: Internal server error
           schema:

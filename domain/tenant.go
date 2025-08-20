@@ -31,6 +31,9 @@ type Tenant struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// TenantPagedResult 租户分页查询结果
+type TenantPagedResult = PagedResult[*Tenant]
+
 // TenantUser 租户用户关系
 type TenantUser struct {
 	ID        string    `json:"id"`
@@ -49,6 +52,7 @@ type TenantUser struct {
 type TenantRepository interface {
 	Create(c context.Context, tenant *Tenant) error
 	Fetch(c context.Context) ([]*Tenant, error)
+	FetchPaged(c context.Context, params QueryParams) (*TenantPagedResult, error)
 	GetByID(c context.Context, id string) (*Tenant, error)
 	Update(c context.Context, tenant *Tenant) error
 	Delete(c context.Context, id string) error
@@ -67,6 +71,7 @@ type TenantRepository interface {
 type TenantUseCase interface {
 	Create(c context.Context, tenant *Tenant) error
 	Fetch(c context.Context) ([]*Tenant, error)
+	FetchPaged(c context.Context, params QueryParams) (*TenantPagedResult, error)
 	GetByID(c context.Context, id string) (*Tenant, error)
 	Update(c context.Context, tenant *Tenant) error
 	Delete(c context.Context, id string) error

@@ -2,7 +2,7 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Filter} from 'lucide-react';
-import {useProjects} from '@/hooks/use-projects';
+import {useAllProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {useI18n} from '@/contexts/i18n-context';
 import type {ClientAccessFilters as Filters} from '@/types/client-access';
@@ -17,7 +17,7 @@ export function ClientAccessFilters({
                                         onFiltersChange,
                                     }: ClientAccessFiltersProps) {
     const { t } = useI18n();
-    const {data: projects = []} = useProjects();
+    const {data: projects = []} = useAllProjects();
     const packagesResult = usePackages({
         projectId: filters.project_id
     });

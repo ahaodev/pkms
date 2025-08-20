@@ -51,7 +51,7 @@ func (cac *AccessManagerController) CreateClientAccess(c *gin.Context) {
 
 // GetClientAccessList godoc
 // @Summary      Get client access credentials list
-// @Description  Retrieve list of client access credentials with optional filters (admin only)
+// @Description  Retrieve list of client access credentials with optional filters and pagination (admin only)
 // @Tags         Access Manager
 // @Accept       json
 // @Produce      json
@@ -60,11 +60,21 @@ func (cac *AccessManagerController) CreateClientAccess(c *gin.Context) {
 // @Param        project_id   query     string  false  "Filter by project ID"
 // @Param        package_id   query     string  false  "Filter by package ID"
 // @Param        is_active    query     bool    false  "Filter by active status"
-// @Success      200  {object}  domain.Response{data=[]domain.ClientAccess}  "Client access list retrieved successfully"
+// @Param        page         query     int     false  "Page number (default: 1)"
+// @Param        page_size    query     int     false  "Page size (default: 20, max: 100)"
+// @Success      200  {object}  domain.Response{data=object}  "Client access list retrieved successfully with pagination"
 // @Failure      500  {object}  domain.Response  "Internal server error"
 // @Router       /access-manager [get]
 func (cac *AccessManagerController) GetClientAccessList(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
+
+	// 解析分页参数
+	var queryParams domain.QueryParams
+	if err := c.ShouldBindQuery(&queryParams); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("分页参数解析失败: "+err.Error()))
+		return
+	}
+	domain.ValidateQueryParams(&queryParams)
 
 	// 构建过滤条件
 	filters := make(map[string]interface{})
@@ -80,7 +90,7 @@ func (cac *AccessManagerController) GetClientAccessList(c *gin.Context) {
 		}
 	}
 
-	accessList, err := cac.ClientAccessUsecase.GetList(c, tenantID, filters)
+	accessList, err := cac.ClientAccessUsecase.GetList(c, tenantID, filters, &queryParams)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return

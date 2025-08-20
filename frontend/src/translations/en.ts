@@ -17,6 +17,8 @@ export const en = {
     "nav.userManagement": "Users",
     "nav.permissionManagement": "Permissions",
     "nav.mainNavigation": "Main Navigation",
+    "nav.accessMgmt": "Access Management",
+    "nav.systemMgmt": "System Management",
     
     // Common
     "common.loading": "Loading...",
@@ -294,10 +296,12 @@ export const en = {
     "stats.totalProjects": "Total Projects",
     "stats.totalPackages": "Total Packages",
     "stats.totalUsers": "Total Users",
+    "stats.totalReleases": "Total Releases",
     "stats.totalDownloads": "Total Downloads",
     "stats.softwareProjects": "Software Projects",
     "stats.softwarePackages": "Software Packages",
     "stats.registeredUsers": "Registered Users",
+    "stats.softwareReleases": "Software Releases",
     "stats.totalDownloadCount": "Total Download Count",
     "message.logoutSuccess": "Logout successful",
     "message.saveSuccess": "Save successful",

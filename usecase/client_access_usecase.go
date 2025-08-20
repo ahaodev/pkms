@@ -77,11 +77,11 @@ func (u *clientAccessUsecase) Create(ctx context.Context, request *domain.Create
 	return u.clientAccessRepository.GetByID(c, access.ID)
 }
 
-func (u *clientAccessUsecase) GetList(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*domain.ClientAccess, error) {
+func (u *clientAccessUsecase) GetList(ctx context.Context, tenantID string, filters map[string]interface{}, queryParams *domain.QueryParams) (*domain.PagedResult[*domain.ClientAccess], error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
-	return u.clientAccessRepository.GetList(c, tenantID, filters)
+	return u.clientAccessRepository.GetList(c, tenantID, filters, queryParams)
 }
 
 func (u *clientAccessUsecase) GetByID(ctx context.Context, id string) (*domain.ClientAccess, error) {

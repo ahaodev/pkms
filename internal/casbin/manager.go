@@ -63,33 +63,33 @@ func (m *CasbinManager) GetEnforcer() *casbin.Enforcer {
 }
 
 // CheckPermission 检查权限
-func (m *CasbinManager) CheckPermission(userID, tenantID, object, action string) (bool, error) {
-	return m.enforcer.Enforce(userID, tenantID, object, action)
+func (m *CasbinManager) CheckPermission(user, tenant, object, action string) (bool, error) {
+	return m.enforcer.Enforce(user, tenant, object, action)
 }
 
 // AddPolicy 添加权限策略
-func (m *CasbinManager) AddPolicy(subject, tenantID, object, action string) (bool, error) {
-	return m.enforcer.AddPolicy(subject, tenantID, object, action)
+func (m *CasbinManager) AddPolicy(subject, tenant, object, action string) (bool, error) {
+	return m.enforcer.AddPolicy(subject, tenant, object, action)
 }
 
 // RemovePolicy 移除权限策略
-func (m *CasbinManager) RemovePolicy(subject, tenantID, object, action string) (bool, error) {
-	return m.enforcer.RemovePolicy(subject, tenantID, object, action)
+func (m *CasbinManager) RemovePolicy(subject, tenant, object, action string) (bool, error) {
+	return m.enforcer.RemovePolicy(subject, tenant, object, action)
 }
 
 // AddRoleForUser 为用户添加角色
-func (m *CasbinManager) AddRoleForUser(userID, role, tenantID string) (bool, error) {
-	return m.enforcer.AddRoleForUser(userID, role, tenantID)
+func (m *CasbinManager) AddRoleForUser(user, role, tenant string) (bool, error) {
+	return m.enforcer.AddRoleForUser(user, role, tenant)
 }
 
 // DeleteRoleForUser 删除用户角色
-func (m *CasbinManager) DeleteRoleForUser(userID, role, tenantID string) (bool, error) {
-	return m.enforcer.DeleteRoleForUser(userID, role, tenantID)
+func (m *CasbinManager) DeleteRoleForUser(user, role, tenant string) (bool, error) {
+	return m.enforcer.DeleteRoleForUser(user, role, tenant)
 }
 
 // GetRolesForUser 获取用户角色
-func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
-	roles, err := m.enforcer.GetRolesForUser(userID, tenantID)
+func (m *CasbinManager) GetRolesForUser(user, tenant string) []string {
+	roles, err := m.enforcer.GetRolesForUser(user, tenant)
 	if err != nil {
 		log.Printf("获取用户角色失败: %v", err)
 		return []string{}
@@ -98,8 +98,8 @@ func (m *CasbinManager) GetRolesForUser(userID, tenantID string) []string {
 }
 
 // GetUsersForRole 获取角色下的用户
-func (m *CasbinManager) GetUsersForRole(role, tenantID string) []string {
-	users, err := m.enforcer.GetUsersForRole(role, tenantID)
+func (m *CasbinManager) GetUsersForRole(role, tenant string) []string {
+	users, err := m.enforcer.GetUsersForRole(role, tenant)
 	if err != nil {
 		log.Printf("获取角色用户失败: %v", err)
 		return []string{}
@@ -108,8 +108,8 @@ func (m *CasbinManager) GetUsersForRole(role, tenantID string) []string {
 }
 
 // GetPermissionsForUser 获取用户权限
-func (m *CasbinManager) GetPermissionsForUser(userID, tenantID string) [][]string {
-	permissions, err := m.enforcer.GetPermissionsForUser(userID, tenantID)
+func (m *CasbinManager) GetPermissionsForUser(user, tenant string) [][]string {
+	permissions, err := m.enforcer.GetPermissionsForUser(user, tenant)
 	if err != nil {
 		log.Printf("获取用户权限失败: %v", err)
 		return [][]string{}
@@ -118,9 +118,9 @@ func (m *CasbinManager) GetPermissionsForUser(userID, tenantID string) [][]strin
 }
 
 // GetPermissionsForRole 获取角色权限
-func (m *CasbinManager) GetPermissionsForRole(role, tenantID string) [][]string {
+func (m *CasbinManager) GetPermissionsForRole(role, tenant string) [][]string {
 	// 使用GetImplicitPermissionsForUser获取角色的隐式权限
-	permissions, err := m.enforcer.GetImplicitPermissionsForUser(role, tenantID)
+	permissions, err := m.enforcer.GetImplicitPermissionsForUser(role, tenant)
 	if err != nil {
 		log.Printf("获取角色权限失败: %v", err)
 		return [][]string{}
@@ -187,13 +187,9 @@ func (m *CasbinManager) GetAllActions() []string {
 }
 
 // GetSidebarPermissions 直接基于角色返回权限
-func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string {
+func (m *CasbinManager) GetSidebarPermissions(user, tenant string) []string {
 	// 获取用户角色
-	userRoles := m.GetRolesForUser(userID, tenantID)
-	if len(userRoles) == 0 {
-		return []string{"dashboard", "projects"} // 默认权限
-	}
-
+	userRoles := m.GetRolesForUser(user, tenant)
 	// 基于角色返回权限
 	for _, role := range userRoles {
 		switch role {
@@ -203,17 +199,18 @@ func (m *CasbinManager) GetSidebarPermissions(userID, tenantID string) []string 
 			return OWNER_SIDEBAR
 		case domain.TenantRoleUser:
 			return USER_SIDEBAR
+		case domain.TenantRoleViewer:
+			return USER_SIDEBAR
 		}
 	}
-
 	return DEFAULT_SIDEBAR
 }
 
 // AddRoleForUserInTenant 为用户在指定租户中添加角色
-func (m *CasbinManager) AddRoleForUserInTenant(userID, role, tenantID string) error {
-	log.Printf("为用户 %s 在租户 %s 中添加角色 %s", userID, tenantID, role)
+func (m *CasbinManager) AddRoleForUserInTenant(user, role, tenant string) error {
+	log.Printf("为用户 %s 在租户 %s 中添加角色 %s", user, tenant, role)
 	// 使用域模式：sub, role, domain
-	_, err := m.enforcer.AddRoleForUserInDomain(userID, role, tenantID)
+	_, err := m.enforcer.AddRoleForUserInDomain(user, role, tenant)
 	if err != nil {
 		return fmt.Errorf("添加租户角色失败: %v", err)
 	}
@@ -221,9 +218,9 @@ func (m *CasbinManager) AddRoleForUserInTenant(userID, role, tenantID string) er
 }
 
 // DeleteRoleForUserInTenant 移除用户在指定租户中的角色
-func (m *CasbinManager) DeleteRoleForUserInTenant(userID, role, tenantID string) error {
-	log.Printf("移除用户 %s 在租户 %s 中的角色 %s", userID, tenantID, role)
-	_, err := m.enforcer.DeleteRoleForUserInDomain(userID, role, tenantID)
+func (m *CasbinManager) DeleteRoleForUserInTenant(user, role, tenant string) error {
+	log.Printf("移除用户 %s 在租户 %s 中的角色 %s", user, tenant, role)
+	_, err := m.enforcer.DeleteRoleForUserInDomain(user, role, tenant)
 	if err != nil {
 		return fmt.Errorf("移除租户角色失败: %v", err)
 	}
@@ -231,37 +228,37 @@ func (m *CasbinManager) DeleteRoleForUserInTenant(userID, role, tenantID string)
 }
 
 // GetRolesForUserInTenant 获取用户在指定租户中的所有角色
-func (m *CasbinManager) GetRolesForUserInTenant(userID, tenantID string) []string {
-	roles := m.enforcer.GetRolesForUserInDomain(userID, tenantID)
-	log.Printf("获取用户 %s 在租户 %s 中的角色: %v", userID, tenantID, roles)
+func (m *CasbinManager) GetRolesForUserInTenant(user, tenant string) []string {
+	roles := m.enforcer.GetRolesForUserInDomain(user, tenant)
+	log.Printf("获取用户 %s 在租户 %s 中的角色: %v", user, tenant, roles)
 	return roles
 }
 
 // GetUsersForRoleInTenant 获取在指定租户中具有特定角色的所有用户
-func (m *CasbinManager) GetUsersForRoleInTenant(role, tenantID string) []string {
-	users := m.enforcer.GetUsersForRoleInDomain(role, tenantID)
-	log.Printf("获取租户 %s 中具有角色 %s 的用户: %v", tenantID, role, users)
+func (m *CasbinManager) GetUsersForRoleInTenant(role, tenant string) []string {
+	users := m.enforcer.GetUsersForRoleInDomain(role, tenant)
+	log.Printf("获取租户 %s 中具有角色 %s 的用户: %v", tenant, role, users)
 	return users
 }
 
 // HasRoleInTenant 检查用户在指定租户中是否具有特定角色
-func (m *CasbinManager) HasRoleInTenant(userID, role, tenantID string) bool {
+func (m *CasbinManager) HasRoleInTenant(user, role, tenant string) bool {
 	// 检查域级别的角色 - 通过GetRolesForUserInDomain检查
-	roles := m.enforcer.GetRolesForUserInDomain(userID, tenantID)
+	roles := m.enforcer.GetRolesForUserInDomain(user, tenant)
 	for _, r := range roles {
 		if r == role {
-			log.Printf("用户 %s 在租户 %s 中具有角色 %s", userID, tenantID, role)
+			log.Printf("用户 %s 在租户 %s 中具有角色 %s", user, tenant, role)
 			return true
 		}
 	}
-	log.Printf("用户 %s 在租户 %s 中不具有角色 %s", userID, tenantID, role)
+	log.Printf("用户 %s 在租户 %s 中不具有角色 %s", user, tenant, role)
 	return false
 }
 
 // DeleteAllRolesForUserInTenant 移除用户在指定租户中的所有角色
-func (m *CasbinManager) DeleteAllRolesForUserInTenant(userID, tenantID string) error {
-	log.Printf("移除用户 %s 在租户 %s 中的所有角色", userID, tenantID)
-	_, err := m.enforcer.DeleteRolesForUserInDomain(userID, tenantID)
+func (m *CasbinManager) DeleteAllRolesForUserInTenant(user, tenant string) error {
+	log.Printf("移除用户 %s 在租户 %s 中的所有角色", user, tenant)
+	_, err := m.enforcer.DeleteRolesForUserInDomain(user, tenant)
 	if err != nil {
 		return fmt.Errorf("移除租户中所有角色失败: %v", err)
 	}

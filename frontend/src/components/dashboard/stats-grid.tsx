@@ -1,4 +1,4 @@
-import {Download, FolderOpen, Package as PackageIcon, Users} from 'lucide-react';
+import {Download, FolderOpen, Package as PackageIcon, Tag} from 'lucide-react';
 import {StatCard} from './stat-card';
 import {useI18n} from '@/contexts/i18n-context';
 
@@ -26,10 +26,10 @@ export function StatsGrid({stats}: StatsGridProps) {
             suffix: t('stats.softwarePackages')
         },
         {
-            key: 'totalUsers',
-            title: t('stats.totalUsers'),
-            icon: Users,
-            suffix: t('stats.registeredUsers')
+            key: 'totalReleases',
+            title: t('stats.totalReleases'),
+            icon: Tag,
+            suffix: t('stats.softwareReleases')
         },
         {
             key: 'totalDownloads',

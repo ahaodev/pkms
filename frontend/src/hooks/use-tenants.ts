@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  getTenants, 
+  getTenants,
+  getAllTenants,
   createTenant, 
   updateTenant, 
   deleteTenant, 
@@ -14,12 +15,27 @@ import {
 } from '@/lib/api/tenants';
 import { CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
 
-// Get all tenants
+// Get all tenants (for backwards compatibility, uses large page size)
 export function useTenants() {
   return useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      const response = await getTenants();
+      const response = await getAllTenants();
+      return response.data;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always'
+  });
+}
+
+// Get tenants with server-side pagination
+export function useTenantsWithPagination(page: number = 1, pageSize: number = 20) {
+  return useQuery({
+    queryKey: ['tenants', 'paginated', page, pageSize],
+    queryFn: async () => {
+      const response = await getTenants(page, pageSize);
+      // Backend now returns PagedResult wrapped in Response
       return response.data;
     },
     staleTime: 0,

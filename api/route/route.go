@@ -112,8 +112,4 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
 
-	// 静态菜单路由，所有认证用户可访问
-	staticMenuRouter := protectedRouter.Group("/static-menu")
-	NewStaticMenuRouter(env, timeout, db, casbinManager, staticMenuRouter)
-
 }

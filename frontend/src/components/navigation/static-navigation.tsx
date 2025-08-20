@@ -19,7 +19,10 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '@/providers/auth-provider';
-import { staticMenuApi, type StaticMenuItem } from '@/lib/api/static-menu';
+import { getUserPermissions } from '@/lib/api/auth';
+import type { MenuItem } from '@/types/user';
+import { useMenuTranslation } from '@/lib/utils/menu-i18n';
+import { useI18n } from '@/contexts/i18n-context';
 
 // 图标映射
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -36,7 +39,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 interface StaticNavItemProps {
-  menu: StaticMenuItem;
+  menu: MenuItem;
   onClick?: () => void;
 }
 
@@ -51,6 +54,7 @@ const StaticNavItem = memo<StaticNavItemProps>(({ menu, onClick }) => {
     ), []);
 
   const IconComponent = iconMap[menu.icon] || LayoutGrid;
+  const translatedName = useMenuTranslation(menu.id, menu.name);
 
   return (
     <Button
@@ -65,7 +69,7 @@ const StaticNavItem = memo<StaticNavItemProps>(({ menu, onClick }) => {
         className={navLinkClassName}
       >
         <IconComponent className="h-5 w-5" />
-        <span>{menu.name}</span>
+        <span>{translatedName}</span>
       </NavLink>
     </Button>
   );
@@ -86,28 +90,21 @@ export const StaticNavigation = memo<StaticNavigationProps>(({
   onClick, 
   className 
 }) => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+  const { t } = useI18n();
 
-  // 获取用户菜单数据
-  const { data: userMenus = [], isLoading, error } = useQuery({
-    queryKey: ['userMenus', user?.id],
-    queryFn: staticMenuApi.getUserMenus,
+  // 获取用户权限和菜单数据（合并接口）
+  const { data: userPermissions, isLoading, error } = useQuery({
+    queryKey: ['userPermissions', user?.id],
+    queryFn: () => getUserPermissions(user!.id),
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
     gcTime: 10 * 60 * 1000, // 10分钟缓存
+    select: (data) => data.data, // 提取data字段
   });
 
-  // 获取管理员菜单（如果是管理员）
-  const { data: adminMenus = [] } = useQuery({
-    queryKey: ['adminMenus'],
-    queryFn: staticMenuApi.getAdminMenus,
-    enabled: !!user && isAdmin(),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-
-  // 合并用户菜单和管理员菜单
-  const allMenus = isAdmin() ? [...userMenus, ...adminMenus] : userMenus;
+  // 获取菜单列表
+  const allMenus = userPermissions?.menus || [];
   
   // 去重并按sort字段排序
   const visibleMenus = allMenus
@@ -121,7 +118,7 @@ export const StaticNavigation = memo<StaticNavigationProps>(({
     return (
       <nav className={cn("space-y-1", className)} role="navigation">
         <div className="px-3 py-2 text-sm text-muted-foreground">
-          加载中...
+          {t('common.loading')}
         </div>
       </nav>
     );
@@ -132,7 +129,7 @@ export const StaticNavigation = memo<StaticNavigationProps>(({
     return (
       <nav className={cn("space-y-1", className)} role="navigation">
         <div className="px-3 py-2 text-sm text-red-500">
-          菜单加载失败
+          {t('common.loadFailed')}
         </div>
       </nav>
     );
@@ -161,41 +158,41 @@ StaticNavigation.displayName = 'StaticNavigation';
  * Hook：获取当前页面标题（根据路径匹配）
  */
 export const usePageTitle = (currentPath: string): string => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+  const { t } = useI18n();
   
-  const { data: userMenus = [] } = useQuery({
-    queryKey: ['userMenus', user?.id],
-    queryFn: staticMenuApi.getUserMenus,
+  const { data: userPermissions } = useQuery({
+    queryKey: ['userPermissions', user?.id],
+    queryFn: () => getUserPermissions(user!.id),
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
+    select: (data) => data.data,
   });
 
-  const { data: adminMenus = [] } = useQuery({
-    queryKey: ['adminMenus'],
-    queryFn: staticMenuApi.getAdminMenus,
-    enabled: !!user && isAdmin(),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const allMenus = isAdmin() ? [...userMenus, ...adminMenus] : userMenus;
+  const allMenus = userPermissions?.menus || [];
   const menu = allMenus.find(m => m.path === currentPath);
   
-  return menu?.name || '页面';
+  // 获取翻译后的菜单名称
+  const translatedName = menu ? useMenuTranslation(menu.id, menu.name) : t('common.pageLoadFailed');
+  
+  return translatedName;
 };
 
 /**
  * Hook：检查页面是否需要管理员权限
  */
 export const useRequiresAdminAccess = (currentPath: string): boolean => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   
-  const { data: adminMenus = [] } = useQuery({
-    queryKey: ['adminMenus'],
-    queryFn: staticMenuApi.getAdminMenus,
-    enabled: !!user && isAdmin(),
+  const { data: userPermissions } = useQuery({
+    queryKey: ['userPermissions', user?.id],
+    queryFn: () => getUserPermissions(user!.id),
+    enabled: !!user,
     staleTime: 5 * 60 * 1000,
+    select: (data) => data.data,
   });
 
-  const menu = adminMenus.find(m => m.path === currentPath);
+  const allMenus = userPermissions?.menus || [];
+  const menu = allMenus.find(m => m.path === currentPath);
   return menu?.requiresAdmin || false;
 };

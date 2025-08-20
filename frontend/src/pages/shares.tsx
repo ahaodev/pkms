@@ -1,31 +1,34 @@
-import {memo, useCallback, useRef} from 'react';
-import {ProjectPackageFilters} from '@/components/project-package-filters';
-import {useProjects} from '@/hooks/use-projects';
-import {usePackages} from '@/hooks/use-packages';
-import {useShareDialogs, useShareFilters, useShares} from '@/hooks/use-shares';
+import {memo, useCallback, useRef, useState} from 'react';
+import {useShareDialogs, useSharesWithPagination} from '@/hooks/use-shares';
 import {DeleteShareDialog, SharesTable} from '@/components/shares';
 import {ShareDialog} from '@/components/share-dialog';
 import {ErrorBoundary} from '@/components/ui/error-boundary';
 import {Page, PageHeader, PageContent} from "@/components/page";
 import {useI18n} from '@/contexts/i18n-context';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 
 function SharesManagerPage() {
     const {t} = useI18n();
-    // 基础数据
-    const {data: projects = []} = useProjects();
-    const {data: packagesData} = usePackages();
-    const packages = packagesData?.data || [];
     const lastFocusRef = useRef<HTMLElement | null>(null);
 
+    // 分页状态
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(20);
+
     // 自定义 hooks
-    const {shares, isLoading, error, deleteMutation} = useShares();
-    const {
-        filters,
-        filteredShares,
-        updateProjectFilter,
-        updatePackageFilter,
-        totalCount,
-    } = useShareFilters(shares, projects, packages);
+    const {paginatedData, isLoading, error, deleteMutation} = useSharesWithPagination(currentPage, pageSize);
+    
+    // 从分页数据中提取信息
+    const shares = paginatedData?.list || [];
+    const totalCount = paginatedData?.total || 0;
+    const totalPages = paginatedData?.total_pages || 1;
+    
     const {
         dialogState,
         handleDeleteClick,
@@ -75,26 +78,60 @@ function SharesManagerPage() {
                 />
 
                 <PageContent>
-                    {/* Filters */}
-                    <ProjectPackageFilters
-                        projectFilter={filters.project}
-                        packageFilter={filters.package}
-                        totalCount={totalCount}
-                        countLabel={t('share.sharesCount')}
-                        projects={projects}
-                        packages={packages}
-                        onProjectFilterChange={updateProjectFilter}
-                        onPackageFilterChange={updatePackageFilter}
-                    />
+                    {/* 统计信息 */}
+                    <div className="mb-6">
+                        <div className="text-sm text-muted-foreground">
+                            总数: {totalCount}
+                        </div>
+                    </div>
 
                     {/* Shares Table */}
                     <SharesTable
-                        shares={filteredShares}
+                        shares={shares}
                         isLoading={isLoading}
                         error={error}
                         onDeleteClick={handleDeleteClick}
                         onViewClick={handleViewClickWithFocus}
                     />
+                    
+                    {/* 分页组件 - 仅在总页数超过1页时显示 */}
+                    {totalPages > 1 && (
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage > 1) {
+                                                setCurrentPage(currentPage - 1);
+                                            }
+                                        }}
+                                        className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
+                                </PaginationItem>
+
+                                <PaginationItem>
+                                    <span className="text-sm text-muted-foreground px-4">
+                                        第 {currentPage} 页，共 {totalPages} 页 (总数: {totalCount})
+                                    </span>
+                                </PaginationItem>
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage < totalPages) {
+                                                setCurrentPage(currentPage + 1);
+                                            }
+                                        }}
+                                        className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    )}
 
                     {/* Delete Confirmation Dialog */}
                     <DeleteShareDialog

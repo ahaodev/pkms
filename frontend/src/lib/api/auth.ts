@@ -54,7 +54,7 @@ export async function validateToken(): Promise<ApiResponse<Profile>> {
     return resp.data;
 }
 
-// 获取指定用户权限和角色
+// 获取指定用户权限、角色和菜单信息（已合并接口）
 export async function getUserPermissions(userId: string): Promise<ApiResponse<UserPermissions>> {
     const resp = await apiClient.get(`/api/v1/casbin/users/${userId}/permissions`);
     return resp.data;

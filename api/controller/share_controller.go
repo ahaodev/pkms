@@ -79,24 +79,37 @@ func (sc *ShareController) DownloadSharedRelease(c *gin.Context) {
 
 // GetShares 获取分享列表
 // @Summary      Get share list
-// @Description  Get all shares for the current tenant
+// @Description  Get all shares for the current tenant with pagination
 // @Tags         Shares(management)
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object} domain.Response  "Successfully retrieved shares"
-// @Failure      500  {object} domain.Response  "Failed to get shares"
+// @Param        page     query  int  false  "Page number (default: 1)"
+// @Param        page_size query  int  false  "Page size (default: 20)"
+// @Success      200      {object} domain.Response{data=domain.SharePagedResult}  "Successfully retrieved shares"
+// @Failure      400      {object} domain.Response  "Invalid query parameters"
+// @Failure      500      {object} domain.Response  "Failed to get shares"
 // @Router       /shares [get]
 func (sc *ShareController) GetShares(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
 
-	shares, err := sc.ShareUsecase.GetAllSharesByTenant(c, tenantID)
+	// 解析分页参数
+	var params domain.QueryParams
+	if err := c.ShouldBindQuery(&params); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError("Invalid query parameters: "+err.Error()))
+		return
+	}
+
+	// 验证和设置默认分页参数
+	domain.ValidateQueryParams(&params)
+
+	result, err := sc.ShareUsecase.GetAllSharesByTenantPaged(c, tenantID, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError("Failed to get shares: "+err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, domain.RespSuccess(shares))
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // UpdateShareExpiry 更新分享过期时间

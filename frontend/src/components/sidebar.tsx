@@ -10,7 +10,7 @@ import {
 import type {SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {Tenant} from '@/types/user';
-import { StaticNavigation } from '@/components/navigation/static-navigation';
+import {StaticNavigation} from '@/components/navigation/static-navigation';
 
 // Static navigation replaces the dynamic menu system
 
@@ -57,10 +57,10 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
         };
 
         const isMobile = window.innerWidth < 1024;
-        
+
         if (isOpen) {
             document.addEventListener("keydown", handleKeyDown);
-            
+
             if (isMobile) {
                 document.addEventListener("mousedown", handleClickOutside);
                 document.body.style.overflow = 'hidden';
@@ -155,7 +155,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
 
                     {/* Static Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <StaticNavigation onClick={handleNavClick} />
+                        <StaticNavigation onClick={handleNavClick}/>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">

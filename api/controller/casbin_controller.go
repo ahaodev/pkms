@@ -198,13 +198,13 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 }
 
 // GetUserPermissions godoc
-// @Summary      Get user permissions
-// @Description  Get all permissions and roles for the current authenticated user
+// @Summary      Get user permissions with menus
+// @Description  Get all permissions, roles, and accessible menus for the current authenticated user
 // @Tags         RBAC
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  domain.Response{data=domain.UserPermissionsResponse}  "User permissions and roles"
+// @Success      200  {object}  domain.Response{data=domain.UserPermissionsResponse}  "User permissions, roles and menus"
 // @Failure      500  {object}  domain.Response  "Internal server error"
 // @Router       /casbin/user/permissions [get]
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
@@ -219,10 +219,43 @@ func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 
 	fmt.Printf("GetUserPermissions - Permissions: %v, Roles: %v\n", permissions, roles)
 
+	// 检查是否为系统管理员（只有admin角色才能访问用户管理和租户管理）
+	isAdmin := false
+	for _, role := range roles {
+		if role == domain.SystemRoleAdmin {
+			isAdmin = true
+			break
+		}
+	}
+
+	fmt.Printf("GetUserPermissions - IsAdmin: %v\n", isAdmin)
+
+	// 获取用户可访问的所有菜单（包括基础菜单和管理员菜单）
+	allMenus := make([]domain.MenuItem, 0)
+
+	// 添加用户基础菜单
+	for _, menu := range domain.BaseMenus {
+		hasPermission, err := cc.casbinManager.CheckPermission(userID, tenantID, menu.ID, "read")
+		if err != nil {
+			fmt.Printf("GetUserPermissions - Menu permission check error for %s: %v\n", menu.ID, err)
+			continue
+		}
+		if hasPermission {
+			allMenus = append(allMenus, menu)
+		}
+	}
+
+	// 如果是管理员，添加管理员菜单
+	if isAdmin {
+		allMenus = append(allMenus, domain.AdminMenus...)
+	}
+
 	response := domain.UserPermissionsResponse{
 		UserID:      userID,
 		Permissions: permissions,
 		Roles:       roles,
+		Menus:       allMenus,
+		IsAdmin:     isAdmin,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
