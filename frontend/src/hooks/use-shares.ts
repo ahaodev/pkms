@@ -47,13 +47,43 @@ export function useShares() {
 
   const { data: shares, isLoading, error } = useQuery({
     queryKey: ['shares'],
-    queryFn: sharesApi.getAll,
+    queryFn: sharesApi.getAllList,
     staleTime: 0, // 立即标记为过期，确保数据实时更新
     gcTime: 5 * 60 * 1000, // 保持5分钟缓存用于后退导航
     refetchOnWindowFocus: true, // 窗口重新获得焦点时刷新
   });
 
-  const deleteMutation = useMutation({
+  return {
+    shares,
+    isLoading,
+    error,
+    deleteMutation: createDeleteMutation(queryClient, toast),
+  };
+}
+
+export function useSharesWithPagination(page: number = 1, pageSize: number = 20) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: paginatedData, isLoading, error } = useQuery({
+    queryKey: ['shares', 'paginated', page, pageSize],
+    queryFn: () => sharesApi.getAll(page, pageSize),
+    staleTime: 0, // 立即标记为过期，确保数据实时更新
+    gcTime: 5 * 60 * 1000, // 保持5分钟缓存用于后退导航
+    refetchOnWindowFocus: true, // 窗口重新获得焦点时刷新
+  });
+
+  return {
+    paginatedData,
+    isLoading,
+    error,
+    deleteMutation: createDeleteMutation(queryClient, toast),
+  };
+}
+
+// 提取 delete mutation 创建逻辑
+function createDeleteMutation(queryClient: any, toast: any) {
+  return useMutation({
     mutationFn: sharesApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shares'] });
@@ -70,13 +100,6 @@ export function useShares() {
       });
     },
   });
-
-  return {
-    shares,
-    isLoading,
-    error,
-    deleteMutation,
-  };
 }
 
 export function useShareFilters(

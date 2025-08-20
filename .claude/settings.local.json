@@ -10,14 +10,23 @@
       "Bash(DB_TYPE=postgres go run ./cmd/main.go)",
       "Bash(npm run lint)",
       "Bash(rm:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebSearch",
+      "Bash(go mod:*)",
+      "Bash(touch:*)",
+      "Bash(go run:*)",
+      "Bash(npm run dev:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   },
+  "outputStyle": "default",
   "mcpServers": {
     "browsermcp": {
       "command": "npx",
-      "args": ["@browsermcp/mcp@latest"]
+      "args": [
+        "@browsermcp/mcp@latest"
+      ]
     }
   }
 }

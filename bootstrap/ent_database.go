@@ -172,11 +172,23 @@ func InitDefaultAdmin(client *ent.Client, env *Env, casbinManager *casbin.Casbin
 	}
 	log.Printf("✅ Add Policy: %v", ok)
 	// 使用新的默认权限系统
+	// 为admin用户分配admin角色
 	ok, err = casbinManager.AddRoleForUser(adminUser.ID, domain.SystemRoleAdmin, systemTenant.ID)
 	if err != nil {
 		log.Printf("❌ add role for user error: %v", err)
 	}
-	log.Printf("✅ Add Role For User: %v", ok)
+	log.Printf("✅ Add Role For User (方式1): %v", ok)
+
+	// 同时使用域级别的角色分配确保兼容性
+	err = casbinManager.AddRoleForUserInTenant(adminUser.ID, domain.SystemRoleAdmin, systemTenant.ID)
+	if err != nil {
+		log.Printf("❌ add role for user in tenant error: %v", err)
+	} else {
+		log.Printf("✅ Add Role For User In Tenant (方式2): 成功")
+	}
+
+	// 角色现在使用固定常量，不需要实体级别的关联
+
 	log.Printf("✅ Default admin user created: %s", adminUsername)
 	log.Println("⚠️ Please change the default password after first login!")
 }

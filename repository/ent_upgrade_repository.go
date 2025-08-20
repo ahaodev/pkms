@@ -152,6 +152,77 @@ func (r *entUpgradeRepository) GetUpgradeTargets(ctx context.Context, tenantID s
 	return result, nil
 }
 
+func (r *entUpgradeRepository) GetUpgradeTargetsPaged(ctx context.Context, tenantID string, filters map[string]interface{}, params domain.QueryParams) (*domain.UpgradeTargetPagedResult, error) {
+	query := r.client.Upgrade.
+		Query().
+		Where(upgrade.TenantID(tenantID)).
+		WithProject().
+		WithPackage().
+		WithRelease().
+		Order(ent.Desc(upgrade.FieldCreatedAt)) // 按创建时间降序排列
+
+	// 应用过滤条件
+	if projectID, ok := filters["project_id"].(string); ok && projectID != "" {
+		query = query.Where(upgrade.ProjectID(projectID))
+	}
+	if packageID, ok := filters["package_id"].(string); ok && packageID != "" {
+		query = query.Where(upgrade.PackageID(packageID))
+	}
+	if isActive, ok := filters["is_active"].(bool); ok {
+		query = query.Where(upgrade.IsActive(isActive))
+	}
+
+	// 获取总数
+	total, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 应用分页
+	offset := (params.Page - 1) * params.PageSize
+	upgrades, err := query.Offset(offset).Limit(params.PageSize).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.UpgradeTarget
+	for _, u := range upgrades {
+		target := &domain.UpgradeTarget{
+			ID:          u.ID,
+			TenantID:    u.TenantID,
+			ProjectID:   u.ProjectID,
+			PackageID:   u.PackageID,
+			ReleaseID:   u.ReleaseID,
+			Name:        u.Name,
+			Description: u.Description,
+			IsActive:    u.IsActive,
+			CreatedBy:   u.CreatedBy,
+			CreatedAt:   u.CreatedAt,
+			UpdatedAt:   u.UpdatedAt,
+		}
+
+		// 填充关联信息
+		if u.Edges.Project != nil {
+			target.ProjectName = u.Edges.Project.Name
+		}
+		if u.Edges.Package != nil {
+			target.PackageName = u.Edges.Package.Name
+			target.PackageType = u.Edges.Package.Type.String()
+		}
+		if u.Edges.Release != nil {
+			target.Version = u.Edges.Release.VersionCode
+			target.FileName = u.Edges.Release.FileName
+			target.FileSize = u.Edges.Release.FileSize
+			target.FileHash = u.Edges.Release.FileHash
+			target.DownloadURL = fmt.Sprintf("/api/files/download/%s", u.Edges.Release.ID)
+		}
+
+		result = append(result, target)
+	}
+
+	return domain.NewPagedResult(result, total, params.Page, params.PageSize), nil
+}
+
 func (r *entUpgradeRepository) UpdateUpgradeTarget(ctx context.Context, id string, updates map[string]interface{}) error {
 	query := r.client.Upgrade.UpdateOneID(id)
 

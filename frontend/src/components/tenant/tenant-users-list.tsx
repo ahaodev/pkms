@@ -1,5 +1,5 @@
 import {CheckCircle, Trash2, Users, XCircle} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';

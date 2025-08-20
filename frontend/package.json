@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -32,13 +33,14 @@
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slider": "^1.2.0",
-    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@shadcn/ui": "^0.0.4",
     "@tanstack/react-query": "^5.17.9",
     "@types/qrcode": "^1.5.5",
     "app-info-parser": "^1.1.6",
@@ -86,8 +88,10 @@
     "globals": "^15.15.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^4.1.11",
+    "terser": "^5.27.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.6"
+    "vite": "^7.0.6",
+    "vite-bundle-analyzer": "^0.11.0"
   }
 }

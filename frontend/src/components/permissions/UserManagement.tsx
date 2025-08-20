@@ -10,7 +10,7 @@ import {Badge} from '@/components/ui/badge';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {Input} from '@/components/ui/input';
 import {Eye, Trash2, UserPlus, Users, Loader2, Search} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {useTenants} from '@/hooks/use-tenants';
 import {usePermissionOperations} from '@/hooks/use-permission-operations';
 import {validateUserRoleForm} from '@/utils/permission-validation';

@@ -52,7 +52,7 @@ export function UserDialog({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>
@@ -116,6 +116,7 @@ export function UserDialog({
                             <Label htmlFor="create_tenant">{t('user.createCorrespondingTenant')}</Label>
                         </div>
                     )}
+
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>

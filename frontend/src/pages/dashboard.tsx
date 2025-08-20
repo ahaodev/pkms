@@ -1,10 +1,9 @@
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDashboardData} from '@/hooks/use-dashboard';
-import {useProjects} from '@/hooks/use-projects';
+import {useAllProjects} from '@/hooks/use-projects';
 import {RecentProjects, RecentActivities, StatsGrid,} from '@/components/dashboard';
-import {PageHeader} from "@/components/ui";
-import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
+import {Page, PageHeader, PageContent} from "@/components/page";
 import {useI18n} from "@/contexts/i18n-context";
 
 /**
@@ -14,7 +13,7 @@ import {useI18n} from "@/contexts/i18n-context";
 export default function Dashboard() {
     const navigate = useNavigate();
     const {t} = useI18n();
-    const {data: projects, isLoading: projectsLoading} = useProjects();
+    const {data: projects, isLoading: projectsLoading} = useAllProjects();
     const {stats, activities, isLoading: dashboardLoading, error: dashboardError} = useDashboardData();
 
     // 使用 useCallback 优化导航函数
@@ -30,38 +29,36 @@ export default function Dashboard() {
         navigateToHierarchy();
     }, [navigateToHierarchy]);
 
-    if (projectsLoading || dashboardLoading) {
-        return <CustomSkeleton type="dashboard" />;
-    }
 
     // 如果仪表板数据加载失败，显示错误信息但仍然显示项目数据
-    if (dashboardError) {
+    if (dashboardError && process.env.NODE_ENV === 'development') {
         console.error('Dashboard data loading failed:', dashboardError);
     }
 
     return (
-        <div className="space-y-6">
-            {/* 页面头部 */}
+        <Page isLoading={projectsLoading || dashboardLoading}>
             <PageHeader
                 title={t("dashboard.title")}
                 description={t("dashboard.description")}
             />
 
-            {/* 统计卡片 */}
-            <StatsGrid stats={stats}/>
+            <PageContent>
+                {/* 统计卡片 */}
+                <StatsGrid stats={stats}/>
 
-            {/* 最近项目 */}
-            <RecentProjects
-                projects={projects}
-                onViewProject={handleViewProject}
-                onViewAllProjects={handleViewAllProjects}
-            />
+                {/* 最近项目 */}
+                <RecentProjects
+                    projects={projects}
+                    onViewProject={handleViewProject}
+                    onViewAllProjects={handleViewAllProjects}
+                />
 
-            {/* 最近活动 */}
-            <RecentActivities
-                activities={activities}
-                isLoading={dashboardLoading}
-            />
-        </div>
+                {/* 最近活动 */}
+                <RecentActivities
+                    activities={activities}
+                    isLoading={dashboardLoading}
+                />
+            </PageContent>
+        </Page>
     );
 }

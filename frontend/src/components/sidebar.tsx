@@ -1,122 +1,18 @@
-import {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {NavLink} from "react-router-dom";
+import {memo, useCallback, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {
-    BarChart3,
-    Boxes,
     ChevronDown,
-    ChevronRight,
-    Globe,
-    Lock,
     Package,
-    Rocket,
-    Settings,
-    Share2,
-    Shield,
-    Users,
     X
 } from "lucide-react";
-import type {NavItemProps, SimpleSidebarProps} from '@/types';
+import type {SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
-import {apiClient} from '@/lib/api/api';
 import {Tenant} from '@/types/user';
-import {useI18n} from '@/contexts/i18n-context';
+import {StaticNavigation} from '@/components/navigation/static-navigation';
 
-interface NavItemWithClickProps extends NavItemProps {
-    onClick?: () => void;
-}
-
-/**
- * NavItem 组件：简化侧边栏导航项
- */
-const NavItem = memo<NavItemWithClickProps>(({to, icon, label, end, onClick}) => {
-    const navLinkClassName = useCallback(({isActive}: {isActive: boolean}) =>
-        cn(
-            "flex items-center space-x-3 w-full transition-all",
-            isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-        ), []);
-
-    return (
-        <Button
-            asChild
-            variant="ghost"
-            className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md"
-        >
-            <NavLink
-                to={to}
-                end={end}
-                onClick={onClick}
-                className={navLinkClassName}
-            >
-                {icon}
-                <span>{label}</span>
-            </NavLink>
-        </Button>
-    );
-});
-
-NavItem.displayName = 'NavItem';
-
-/**
- * CollapsibleGroup 组件：可折叠的菜单组
- */
-interface CollapsibleGroupProps {
-    icon: React.ReactNode;
-    label: string;
-    children: React.ReactNode;
-    defaultOpen?: boolean;
-    storageKey: string;
-}
-
-const CollapsibleGroup = memo<CollapsibleGroupProps>(({
-    icon,
-    label,
-    children,
-    defaultOpen = false,
-    storageKey
-}) => {
-    const [isOpen, setIsOpen] = useState(() => {
-        const stored = localStorage.getItem(storageKey);
-        return stored ? JSON.parse(stored) : defaultOpen;
-    });
-
-    const toggleOpen = useCallback(() => {
-        setIsOpen((prev: boolean) => {
-            const newValue = !prev;
-            localStorage.setItem(storageKey, JSON.stringify(newValue));
-            return newValue;
-        });
-    }, [storageKey]);
-
-    return (
-        <div className="space-y-1">
-            <Button
-                variant="ghost"
-                className="w-full justify-start px-3 py-2 text-sm font-medium rounded-md hover:text-foreground"
-                onClick={toggleOpen}
-            >
-                <div className="flex items-center space-x-3 w-full">
-                    {icon}
-                    <span className="flex-1 text-left">{label}</span>
-                    {isOpen ? (
-                        <ChevronDown className="h-4 w-4" />
-                    ) : (
-                        <ChevronRight className="h-4 w-4" />
-                    )}
-                </div>
-            </Button>
-            {isOpen && (
-                <div className="ml-4 space-y-1">
-                    {children}
-                </div>
-            )}
-        </div>
-    );
-});
-
-CollapsibleGroup.displayName = 'CollapsibleGroup';
+// Static navigation replaces the dynamic menu system
 
 
 interface SidebarProps extends SimpleSidebarProps {
@@ -130,9 +26,7 @@ interface SidebarProps extends SimpleSidebarProps {
  */
 export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) => {
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const {user, currentTenant, tenants, selectTenant} = useAuth();
-    const {t} = useI18n();
-    const [sidebarPermissions, setSidebarPermissions] = useState<string[]>([]);
+    const {currentTenant, tenants, selectTenant} = useAuth();
     const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
 
     // 切换租户逻辑
@@ -147,102 +41,6 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             onClose();
         }
     }, [onClose]);
-
-    // 获取侧边栏权限
-    const fetchSidebarPermissions = useCallback(async () => {
-        if (!user || !currentTenant) return;
-
-        try {
-            const response = await apiClient.get('/api/v1/casbin/sidebar/permissions');
-            if (response.data && response.data.code === 0) {
-                setSidebarPermissions(response.data.data.sidebar || []);
-            } else {
-                setSidebarPermissions([]);
-            }
-        } catch {
-            // Silently handle permission fetch failures - just hide all sidebar items
-            setSidebarPermissions([]);
-        }
-    }, [user, currentTenant]);
-
-    useEffect(() => {
-        fetchSidebarPermissions();
-    }, [fetchSidebarPermissions]);
-
-    // 检查是否有侧边栏权限
-    const hasPermission = useCallback((item: string) => {
-        return sidebarPermissions.includes(item);
-    }, [sidebarPermissions]);
-
-    // 导航项配置，避免重复渲染
-    const navigationItems = useMemo(() => [
-        {
-            permission: "dashboard",
-            to: "/",
-            icon: <BarChart3 className="h-5 w-5"/>,
-            label: t("nav.overview"),
-            end: true
-        },
-        {
-            permission: "projects",
-            to: "/hierarchy",
-            icon: <Boxes className="h-5 w-5"/>,
-            label: t("nav.projectManagement")
-        },
-        {
-            permission: "upgrade",
-            to: "/upgrade",
-            icon: <Rocket className="h-5 w-5"/>,
-            label: t("nav.upgradeManagement")
-        },
-        {
-            permission: "access-manager",
-            to: "/access-manager",
-            icon: <Shield className="h-5 w-5"/>,
-            label: t("nav.accessManagement")
-        },
-        {
-            permission: "shares",
-            to: "/shares",
-            icon: <Share2 className="h-5 w-5"/>,
-            label: t("nav.shareManagement")
-        }
-    ], [t]);
-
-    // 系统管理菜单项配置
-    const systemManagementItems = useMemo(() => [
-        {
-            permission: "system", // 统一使用 system 权限
-            to: "/tenants",
-            icon: <Globe className="h-5 w-5"/>,
-            label: t("nav.tenantManagement")
-        },
-        {
-            permission: "system", // 统一使用 systems 权限
-            to: "/users",
-            icon: <Users className="h-5 w-5"/>,
-            label: t("nav.userManagement")
-        },
-        {
-            permission: "system", // 统一使用 systems 权限
-            to: "/permissions",
-            icon: <Lock className="h-5 w-5"/>,
-            label: t("nav.permissionManagement")
-        }
-    ], [t]);
-
-    // 检查权限的辅助函数
-    const checkPermission = useCallback((permission: string | string[]) => {
-        if (Array.isArray(permission)) {
-            return permission.some(p => hasPermission(p));
-        }
-        return hasPermission(permission);
-    }, [hasPermission]);
-
-    // 检查是否有系统管理权限
-    const hasSystemManagementPermission = useMemo(() => {
-        return hasPermission("system");
-    }, [hasPermission]);
 
     // 移动端点击外部关闭、滚动处理和键盘导航
     useEffect(() => {
@@ -259,10 +57,10 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
         };
 
         const isMobile = window.innerWidth < 1024;
-        
+
         if (isOpen) {
             document.addEventListener("keydown", handleKeyDown);
-            
+
             if (isMobile) {
                 document.addEventListener("mousedown", handleClickOutside);
                 document.body.style.overflow = 'hidden';
@@ -355,45 +153,9 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                         </Button>
                     </div>
 
-                    {/* Navigation */}
+                    {/* Static Navigation */}
                     <ScrollArea className="flex-1 px-3 py-4">
-                        <nav className="space-y-1" role="navigation" aria-label={t("nav.mainNavigation")}>
-                            {/* 普通导航项 */}
-                            {navigationItems.map((item) => {
-                                if (!checkPermission(item.permission)) return null;
-                                
-                                return (
-                                    <NavItem
-                                        key={item.to}
-                                        to={item.to}
-                                        icon={item.icon}
-                                        label={item.label}
-                                        end={item.end}
-                                        onClick={handleNavClick}
-                                    />
-                                );
-                            })}
-
-                            {/* 系统管理分组 */}
-                            {hasSystemManagementPermission && (
-                                <CollapsibleGroup
-                                    icon={<Settings className="h-5 w-5" />}
-                                    label={t("nav.systemManagement")}
-                                    defaultOpen={false}
-                                    storageKey="sidebar-system-management-expanded"
-                                >
-                                    {systemManagementItems.map((item) => (
-                                        <NavItem
-                                            key={item.to}
-                                            to={item.to}
-                                            icon={item.icon}
-                                            label={item.label}
-                                            onClick={handleNavClick}
-                                        />
-                                    ))}
-                                </CollapsibleGroup>
-                            )}
-                        </nav>
+                        <StaticNavigation onClick={handleNavClick}/>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">

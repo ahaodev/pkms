@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getUsers, 
+  getAllUsers,
   createUser, 
   updateUser, 
   deleteUser, 
@@ -11,17 +12,32 @@ import {
 } from '@/lib/api/users';
 import { CreateUserRequest, UpdateUserRequest } from '@/types/user';
 
-// Get all users
+// Get all users (for backwards compatibility, uses large page size)
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await getUsers();
+      const response = await getAllUsers();
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 2 * 60 * 1000, // 2分钟缓存
+    gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
+    refetchOnMount: false // 不要每次mount都刷新
+  });
+}
+
+// Get users with server-side pagination
+export function useUsersWithPagination(page: number = 1, pageSize: number = 20) {
+  return useQuery({
+    queryKey: ['users', 'paginated', page, pageSize],
+    queryFn: async () => {
+      const response = await getUsers(page, pageSize);
+      // Backend now returns PagedResult wrapped in Response
+      return response.data;
+    },
+    staleTime: 2 * 60 * 1000, // 2分钟缓存
+    gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
+    refetchOnMount: false // 不要每次mount都刷新
   });
 }
 
@@ -34,9 +50,9 @@ export function useUser(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 5 * 60 * 1000, // 5分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
+    refetchOnMount: false
   });
 }
 
@@ -49,9 +65,9 @@ export function useUserProjects(userId: string) {
       return response.data;
     },
     enabled: !!userId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 3 * 60 * 1000, // 3分钟缓存
+    gcTime: 7 * 60 * 1000, // 7分钟垃圾回收
+    refetchOnMount: false
   });
 }
 

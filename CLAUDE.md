@@ -359,9 +359,9 @@ npm audit
 ```
 
 ### Branch Management
-- Current branch: `rbac-domains` (RBAC optimization work)
+- Current branch: `rbac` (RBAC optimization work)
 - Main branch for PRs: `main`
-- Recent commits focus on permission system optimization
+- Recent commits focus on page header fixes and RBAC system improvements
 
 ## Testing & Development
 
@@ -416,5 +416,68 @@ requested by the User.
   - Granular permissions across various resources and actions
 
 ### Development Reminders
-- 不用启动后端,前端服务,我已经启动
 - 遵循KISS原则
+- 用户已启动前后端
+
+## Single Test Execution
+
+### Backend Test Commands
+```bash
+# Run specific test file
+go test ./api/controller/user_controller_test.go -v
+
+# Run specific test function
+go test ./usecase -run TestUserUsecase_CreateUser -v
+
+# Run tests with coverage
+go test ./... -cover
+
+# Run tests in specific package
+go test ./repository -v
+```
+
+### Frontend Test Commands
+```bash
+cd frontend
+
+# Run specific test file (if Jest/Vitest is configured)
+npm test -- UserCard.test.tsx
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## Integration Testing
+
+### End-to-End Testing Setup
+```bash
+# Backend integration tests (requires database)
+go test -tags integration ./...
+
+# Test with PostgreSQL (if DB_TYPE=postgres is set)
+DB_TYPE=postgres DB_DSN="postgres://user:pass@localhost/testdb" go test ./...
+```
+
+## Essential Environment Variables
+
+Required for development:
+```bash
+# Backend
+ACCESS_TOKEN_SECRET=your-secret-key
+REFRESH_TOKEN_SECRET=your-refresh-secret
+DB_TYPE=sqlite  # or postgres
+DB_DSN=postgres://user:pass@localhost/db  # only for postgres
+
+# MinIO/S3 Configuration
+S3_ADDRESS=localhost:9000
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_USE_SSL=false
+S3_BUCKET_NAME=pkms-storage
+
+# Frontend (in frontend/.env)
+VITE_API_BASE_URL=http://localhost:65080
+```

@@ -1,5 +1,5 @@
 import {Tenant} from '@/types/tenant';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {Building, Edit, Trash2, Users, MoreHorizontal} from 'lucide-react';
 import {useI18n} from '@/contexts/i18n-context';
 import {

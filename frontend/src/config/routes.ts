@@ -1,13 +1,17 @@
-// Direct imports instead of lazy loading to avoid route issues
-import Dashboard from "@/pages/dashboard";
-import HierarchyPage from "@/pages/hierarchy";
+// Lazy loading for better code splitting and performance
+import { lazy } from 'react';
+
+// Critical pages - load immediately
 import LoginPage from "@/pages/login";
-import UsersPage from "@/pages/users";
-import PermissionsPage from "@/pages/permissions";
-import UpgradePage from "@/pages/upgrade";
-import TenantsPage from "@/pages/tenants";
-import ClientAccessPage from "@/pages/client-access";
-import SharesManagerPage from "@/pages/shares-manager.tsx";
+
+// Non-critical pages - lazy load
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const HierarchyPage = lazy(() => import("@/pages/hierarchy"));
+const UsersPage = lazy(() => import("@/pages/sys-users"));
+const UpgradePage = lazy(() => import("@/pages/upgrade"));
+const TenantsPage = lazy(() => import("@/pages/sys-tenants"));
+const ClientAccessPage = lazy(() => import("@/pages/client-access"));
+const SharesManagerPage = lazy(() => import("@/pages/shares"));
 
 export interface RouteConfig {
     path: string;
@@ -54,12 +58,6 @@ export const routes: RouteConfig[] = [
     {
         path: "/users",
         element: UsersPage,
-        requiresAuth: true,
-        requiresAdmin: true,
-    },
-    {
-        path: "/permissions",
-        element: PermissionsPage,
         requiresAuth: true,
         requiresAdmin: true,
     },

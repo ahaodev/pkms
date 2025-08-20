@@ -30,6 +30,9 @@ type UpgradeTarget struct {
 	DownloadURL string `json:"download_url,omitempty"`
 }
 
+// UpgradeTargetPagedResult 升级目标分页查询结果
+type UpgradeTargetPagedResult = PagedResult[*UpgradeTarget]
+
 // CreateUpgradeTargetRequest 创建升级目标请求
 type CreateUpgradeTargetRequest struct {
 	ProjectID   string `json:"project_id" binding:"required"`
@@ -109,7 +112,7 @@ type ClientAccessRepository interface {
 	Create(ctx context.Context, access *ClientAccess) error
 	GetByID(ctx context.Context, id string) (*ClientAccess, error)
 	GetByAccessToken(ctx context.Context, token string) (*ClientAccess, error)
-	GetList(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*ClientAccess, error)
+	GetList(ctx context.Context, tenantID string, filters map[string]interface{}, queryParams *QueryParams) (*PagedResult[*ClientAccess], error)
 	Update(ctx context.Context, id string, updates map[string]interface{}) error
 	Delete(ctx context.Context, id string) error
 	UpdateUsage(ctx context.Context, token string, ip string) error
@@ -118,7 +121,7 @@ type ClientAccessRepository interface {
 // ClientAccessUsecase 客户端接入业务逻辑接口
 type ClientAccessUsecase interface {
 	Create(ctx context.Context, request *CreateClientAccessRequest, userID, tenantID string) (*ClientAccess, error)
-	GetList(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*ClientAccess, error)
+	GetList(ctx context.Context, tenantID string, filters map[string]interface{}, queryParams *QueryParams) (*PagedResult[*ClientAccess], error)
 	GetByID(ctx context.Context, id string) (*ClientAccess, error)
 	Update(ctx context.Context, id string, request *UpdateClientAccessRequest) error
 	Delete(ctx context.Context, id string) error
@@ -134,6 +137,7 @@ type UpgradeRepository interface {
 	GetUpgradeTargetByID(ctx context.Context, id string) (*UpgradeTarget, error)
 	// 获取升级目标列表
 	GetUpgradeTargets(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*UpgradeTarget, error)
+	GetUpgradeTargetsPaged(ctx context.Context, tenantID string, filters map[string]interface{}, params QueryParams) (*UpgradeTargetPagedResult, error)
 	// 更新升级目标
 	UpdateUpgradeTarget(ctx context.Context, id string, updates map[string]interface{}) error
 	// 删除升级目标
@@ -150,6 +154,7 @@ type UpgradeUsecase interface {
 	CreateUpgradeTarget(ctx context.Context, request *CreateUpgradeTargetRequest, userID, tenantID string) (*UpgradeTarget, error)
 	// 获取升级目标列表
 	GetUpgradeTargets(ctx context.Context, tenantID string, filters map[string]interface{}) ([]*UpgradeTarget, error)
+	GetUpgradeTargetsPaged(ctx context.Context, tenantID string, filters map[string]interface{}, params QueryParams) (*UpgradeTargetPagedResult, error)
 	// 根据ID获取升级目标
 	GetUpgradeTargetByID(ctx context.Context, id string) (*UpgradeTarget, error)
 	// 更新升级目标

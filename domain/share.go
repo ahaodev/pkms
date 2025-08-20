@@ -52,11 +52,15 @@ type ShareListItem struct {
 	IsExpired   bool       `json:"is_expired"`
 }
 
+// SharePagedResult 分享分页查询结果
+type SharePagedResult = PagedResult[*ShareListItem]
+
 type ShareRepository interface {
 	Create(c context.Context, share *Share) (*Share, error)
 	GetByCode(c context.Context, code string) (*Share, error)
 	GetByReleaseID(c context.Context, releaseID string) ([]*Share, error)
 	GetAllByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	GetAllByTenantPaged(c context.Context, tenantID string, params QueryParams) (*SharePagedResult, error)
 	UpdateExpiry(c context.Context, id string, expiryHours int) (*Share, error)
 	DeleteByID(c context.Context, id string) error
 	DeleteExpired(c context.Context) error
@@ -66,6 +70,7 @@ type ShareUsecase interface {
 	CreateShare(c context.Context, req *CreateShareRequest) (*ShareResponse, error)
 	ValidateShare(c context.Context, code string) (*Share, error)
 	GetAllSharesByTenant(c context.Context, tenantID string) ([]*ShareListItem, error)
+	GetAllSharesByTenantPaged(c context.Context, tenantID string, params QueryParams) (*SharePagedResult, error)
 	UpdateShareExpiry(c context.Context, id string, req *UpdateShareExpiryRequest) (*ShareResponse, error)
 	DeleteShare(c context.Context, id string) error
 }

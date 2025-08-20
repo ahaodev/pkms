@@ -116,6 +116,13 @@ func (u *upgradeUsecase) GetUpgradeTargets(ctx context.Context, tenantID string,
 	return u.upgradeRepository.GetUpgradeTargets(c, tenantID, filters)
 }
 
+func (u *upgradeUsecase) GetUpgradeTargetsPaged(ctx context.Context, tenantID string, filters map[string]interface{}, params domain.QueryParams) (*domain.UpgradeTargetPagedResult, error) {
+	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	return u.upgradeRepository.GetUpgradeTargetsPaged(c, tenantID, filters, params)
+}
+
 func (u *upgradeUsecase) GetUpgradeTargetByID(ctx context.Context, id string) (*domain.UpgradeTarget, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()

@@ -60,7 +60,7 @@ func (uu *userUsecase) Create(c context.Context, user *domain.User) error {
 		return err
 	}
 	uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
-	uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
+	_, _ = uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	return nil
 }
 
@@ -106,7 +106,7 @@ func (uu *userUsecase) CreateWithOptions(c context.Context, request *domain.Crea
 			return user, err
 		}
 		uu.casbinManager.AddPolicy(domain.TenantRoleOwner, tenant.ID, "*", "*")
-		uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
+		_, _ = uu.casbinManager.AddRoleForUser(user.ID, domain.TenantRoleOwner, tenant.ID)
 	}
 
 	return user, nil
@@ -116,6 +116,12 @@ func (uu *userUsecase) Fetch(c context.Context) ([]*domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 	return uu.userRepository.Fetch(ctx)
+}
+
+func (uu *userUsecase) FetchPaged(c context.Context, params domain.QueryParams) (*domain.UserPagedResult, error) {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+	return uu.userRepository.FetchPaged(ctx, params)
 }
 
 func (uu *userUsecase) GetByUserName(c context.Context, userName string) (*domain.User, error) {

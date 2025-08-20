@@ -198,18 +198,18 @@ func (cc *CasbinController) CheckPermission(c *gin.Context) {
 }
 
 // GetUserPermissions godoc
-// @Summary      Get user permissions
-// @Description  Get all permissions and roles for the current authenticated user
+// @Summary      Get user permissions with menus
+// @Description  Get all permissions, roles, and accessible menus for the current authenticated user
 // @Tags         RBAC
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  domain.Response{data=domain.UserPermissionsResponse}  "User permissions and roles"
+// @Success      200  {object}  domain.Response{data=domain.UserPermissionsResponse}  "User permissions, roles and menus"
 // @Failure      500  {object}  domain.Response  "Internal server error"
 // @Router       /casbin/user/permissions [get]
 func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 	userID := c.GetString(constants.UserID)
-	tenantID := c.GetString(constants.TenantID)
+	tenantID := c.GetHeader(constants.TenantID)
 
 	// 添加调试日志
 	fmt.Printf("GetUserPermissions - UserID: %s, TenantID: %s\n", userID, tenantID)
@@ -219,10 +219,43 @@ func (cc *CasbinController) GetUserPermissions(c *gin.Context) {
 
 	fmt.Printf("GetUserPermissions - Permissions: %v, Roles: %v\n", permissions, roles)
 
+	// 检查是否为系统管理员（只有admin角色才能访问用户管理和租户管理）
+	isAdmin := false
+	for _, role := range roles {
+		if role == domain.SystemRoleAdmin {
+			isAdmin = true
+			break
+		}
+	}
+
+	fmt.Printf("GetUserPermissions - IsAdmin: %v\n", isAdmin)
+
+	// 获取用户可访问的所有菜单（包括基础菜单和管理员菜单）
+	allMenus := make([]domain.MenuItem, 0)
+
+	// 添加用户基础菜单
+	for _, menu := range domain.BaseMenus {
+		hasPermission, err := cc.casbinManager.CheckPermission(userID, tenantID, menu.ID, "read")
+		if err != nil {
+			fmt.Printf("GetUserPermissions - Menu permission check error for %s: %v\n", menu.ID, err)
+			continue
+		}
+		if hasPermission {
+			allMenus = append(allMenus, menu)
+		}
+	}
+
+	// 如果是管理员，添加管理员菜单
+	if isAdmin {
+		allMenus = append(allMenus, domain.AdminMenus...)
+	}
+
 	response := domain.UserPermissionsResponse{
 		UserID:      userID,
 		Permissions: permissions,
 		Roles:       roles,
+		Menus:       allMenus,
+		IsAdmin:     isAdmin,
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
@@ -503,14 +536,33 @@ func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 	// 获取当前用户ID
 	userID := c.GetString(constants.UserID)
 	tenantID := c.GetHeader(constants.TenantID)
-	// 获取侧边栏权限
+
+	// 使用固定的侧边栏权限检查
 	sidebarPermissions := cc.casbinManager.GetSidebarPermissions(userID, tenantID)
 
 	response := gin.H{
-		"sidebar": sidebarPermissions,
+		"sidebar":   sidebarPermissions,
+		"menu_tree": domain.SystemMenus, // 返回固定菜单
 	}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(response))
+}
+
+// GetUserButtonPermissions godoc
+// @Summary      Get user button permissions
+// @Description  Get all button-level permissions for the current authenticated user
+// @Tags         RBAC
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  domain.Response{data=[]string}  "Button permissions"
+// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Router       /casbin/user/button-permissions [get]
+func (cc *CasbinController) GetUserButtonPermissions(c *gin.Context) {
+	// 返回空的按钮权限列表（简化版本）
+	permissions := []string{}
+
+	c.JSON(http.StatusOK, domain.RespSuccess(permissions))
 }
 
 // GetProjectPermissions godoc

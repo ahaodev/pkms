@@ -42,6 +42,7 @@ func NewCasbinRouter(db *ent.Client, casbinManager *casbin.CasbinManager, group 
 
 	// 权限查询路由
 	group.GET("/sidebar/permissions", casbinController.GetSidebarPermissions)
+	group.GET("/user/button-permissions", casbinController.GetUserButtonPermissions)
 	group.GET("/project/permissions", casbinController.GetProjectPermissions)
 	group.GET("/package/permissions", casbinController.GetPackagePermissions)
 

@@ -25,9 +25,9 @@ type PackageController struct {
 // @Security     BearerAuth
 // @Param        x-tenant-id  header  string  true   "Tenant ID"
 // @Param        page         query   int     false  "Page number (default: 1)"
-// @Param        pageSize     query   int     false  "Page size (default: 20)"
+// @Param        page_size     query   int     false  "Page size (default: 20)"
 // @Param        project_id   query   string  false  "Filter by project ID"
-// @Success      200  {object}  domain.Response{data=[]domain.Package}  "Successfully retrieved packages"
+// @Success      200  {object}  domain.Response  "Successfully retrieved packages"
 // @Failure      400  {object}  domain.Response  "Invalid request parameters"
 // @Failure      401  {object}  domain.Response  "Unauthorized"
 // @Failure      403  {object}  domain.Response  "Forbidden"
@@ -35,20 +35,22 @@ type PackageController struct {
 // @Router       /packages [get]
 func (pc *PackageController) GetPackages(c *gin.Context) {
 	// 解析分页参数
-	page := 1
-	pageSize := 20
+	var params domain.QueryParams
 	projectID := c.Query("project_id")
 
 	if p := c.Query("page"); p != "" {
 		if v, err := strconv.Atoi(p); err == nil {
-			page = v
+			params.Page = v
 		}
 	}
-	if ps := c.Query("pageSize"); ps != "" {
+	if ps := c.Query("page_size"); ps != "" {
 		if v, err := strconv.Atoi(ps); err == nil {
-			pageSize = v
+			params.PageSize = v
 		}
 	}
+
+	// 验证和设置默认参数
+	domain.ValidateQueryParams(&params)
 
 	// 如果没有project_id，查询所有有权限的包
 	var packages []*domain.Package
@@ -57,15 +59,18 @@ func (pc *PackageController) GetPackages(c *gin.Context) {
 
 	if projectID == "" {
 		// 获取所有软件包（后续可以根据权限过滤）
-		packages, total, err = pc.PackageUsecase.GetAllPackages(c, page, pageSize)
+		packages, total, err = pc.PackageUsecase.GetAllPackages(c, params.Page, params.PageSize)
 	} else {
-		packages, total, err = pc.PackageUsecase.GetPackagesByProject(c, projectID, page, pageSize)
+		packages, total, err = pc.PackageUsecase.GetPackagesByProject(c, projectID, params.Page, params.PageSize)
 	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespPageSuccess(packages, total, page, pageSize))
+
+	// 创建分页结果
+	result := domain.NewPagedResult(packages, total, params.Page, params.PageSize)
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // CreatePackage 创建包

@@ -6,7 +6,6 @@ import (
 	"pkms/api/controller"
 	"pkms/bootstrap"
 	"pkms/ent"
-	"pkms/internal/casbin"
 	"pkms/repository"
 	"pkms/usecase"
 
@@ -17,11 +16,8 @@ func NewDashboardRouter(env *bootstrap.Env, timeout time.Duration, db *ent.Clien
 	// Create dashboard repository
 	dashboardRepo := repository.NewDashboardRepository(db)
 
-	// Create Casbin manager for permission checking
-	casbinManager := casbin.NewCasbinManager(db)
-
 	dc := &controller.DashboardController{
-		DashboardUsecase: usecase.NewDashboardUsecase(dashboardRepo, casbinManager, timeout),
+		DashboardUsecase: usecase.NewDashboardUsecase(dashboardRepo, timeout),
 		Env:              env,
 	}
 

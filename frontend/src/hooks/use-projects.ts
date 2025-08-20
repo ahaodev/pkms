@@ -4,16 +4,34 @@ import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {ACCESS_TOKEN} from "@/types/constants.ts";
 
-export const useProjects = () => {
+export const useProjects = (page: number = 1, pageSize: number = 20) => {
     const {user} = useAuth();
 
     return useQuery({
-        queryKey: ['projects', user?.id],
+        queryKey: ['projects', user?.id, page, pageSize],
         queryFn: async () => {
-            const response = await ProjectsAPI.getProjects();
-            return response.data.map(ProjectsAPI.transformProjectFromBackend);
+            const response = await ProjectsAPI.getProjects(page, pageSize);
+            return response.data; // 返回 PagedResult 结构
         },
         enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN), // 只有用户存在且有token时才执行
+        staleTime: 0,
+        gcTime: 0,
+        refetchOnMount: "always",
+        refetchOnWindowFocus: false,
+    });
+};
+
+// 获取所有项目 (不分页，用于下拉框等)
+export const useAllProjects = () => {
+    const {user} = useAuth();
+
+    return useQuery({
+        queryKey: ['all-projects', user?.id],
+        queryFn: async () => {
+            const response = await ProjectsAPI.getAllProjects();
+            return response.data; // 已经经过转换的 Project[]
+        },
+        enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN),
         staleTime: 0,
         gcTime: 0,
         refetchOnMount: "always",
@@ -25,8 +43,8 @@ export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const {user} = useAuth();
 
-    function assignProjectToUser(userId: string, projectId: string) {
-        console.log(userId, projectId);
+    function assignProjectToUser(_userId: string, _projectId: string) {
+        console.log(_userId,_projectId)
     }
 
     return useMutation({

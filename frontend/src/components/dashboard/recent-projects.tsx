@@ -1,5 +1,5 @@
 import {FolderOpen} from 'lucide-react';
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Project} from '@/types/project.ts';

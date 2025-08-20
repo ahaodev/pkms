@@ -10,13 +10,18 @@ export const ERROR: number = 1;   // 通用错误状态码
 export const NOT_FOUND: number = 404;
 export const UNAUTHORIZED: number = 401;
 
+// 分页结果类型 (与后端 domain.PagedResult 对应)
+export interface PagedResult<T> {
+    list: T[];
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
 // 分页响应类型
 export interface PageResponse<T> {
     code: number;
     msg: string;
-    data: T[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
+    data: PagedResult<T>;
 }

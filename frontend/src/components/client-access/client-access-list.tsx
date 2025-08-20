@@ -25,7 +25,7 @@ import {formatDistanceToNow} from 'date-fns';
 import {zhCN} from 'date-fns/locale';
 import type {ClientAccess} from '@/types/client-access';
 import {CustomSkeleton} from "@/components/custom-skeleton.tsx";
-import {EmptyList} from '@/components/ui/empty-list';
+import {EmptyList} from '@/components/empty-list.tsx';
 import {toast} from 'sonner';
 import {useI18n} from '@/contexts/i18n-context';
 

@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {useProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
-import {useReleases} from '@/hooks/use-releases';
+import {useReleasesWithPagination} from '@/hooks/use-releases';
 import {downloadRelease} from '@/lib/api/releases';
 import {toast} from 'sonner';
 import {Release} from '@/types/release';
@@ -14,16 +14,25 @@ export function useHierarchyNavigation() {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [releasesCurrentPage, setReleasesCurrentPage] = useState(1);
+    const [releasesPageSize] = useState(10);
 
-    const {data: projects} = useProjects();
+    const {data: projectsData} = useProjects();
     const {data: packagesData} = usePackages({
         projectId: selectedProjectId || undefined
     });
-    const {data: releasesData} = useReleases(selectedPackageId || undefined);
+    const {data: releasesData} = useReleasesWithPagination(
+        selectedPackageId || undefined, 
+        releasesCurrentPage, 
+        releasesPageSize
+    );
 
+    // Normalize shapes: projectsData is a PagedResult, packagesData already exposes .data array,
+    // releasesData is a PagedResult. Convert to arrays expected by components.
+    const projects = projectsData?.list || [];
     const packages = packagesData?.data || [];
-    const releases = releasesData?.data || [];
-    const selectedProject = projects?.find(p => p.id === selectedProjectId);
+    const releases = releasesData?.list || [];
+    const selectedProject = projects.find(p => p.id === selectedProjectId);
     const selectedPackage = packages.find(p => p.id === selectedPackageId);
 
     const handleProjectSelect = (projectId: string) => {
@@ -38,15 +47,18 @@ export function useHierarchyNavigation() {
 
     const handlePackageSelect = (packageId: string) => {
         setSelectedPackageId(packageId);
+        setReleasesCurrentPage(1); // 切换包时重置发布页码
     };
 
     const resetToProjects = () => {
         setSelectedProjectId(null);
         setSelectedPackageId(null);
+        setReleasesCurrentPage(1);
     };
 
     const backToProject = () => {
         setSelectedPackageId(null);
+        setReleasesCurrentPage(1);
     };
 
     const handleDownload = async (release: Release) => {
@@ -85,7 +97,7 @@ export function useHierarchyNavigation() {
     // Auto-select project from URL
     useEffect(() => {
         const projectId = searchParams.get('projectId');
-        if (projectId && projects) {
+        if (projectId && projects.length) {
             const project = projects.find(p => p.id === projectId);
             if (project) {
                 setSelectedProjectId(projectId);
@@ -99,7 +111,7 @@ export function useHierarchyNavigation() {
         selectedPackageId,
         selectedProject,
         selectedPackage,
-        projects: projects || [],
+    projects: projects,
         packages,
         releases,
         searchTerm,
@@ -110,5 +122,11 @@ export function useHierarchyNavigation() {
         backToProject,
         handleDownload,
         getSearchPlaceholder,
+        // 发布版本分页相关
+        releasesCurrentPage,
+        setReleasesCurrentPage,
+        releasesPageSize,
+        releasesTotalCount: releasesData?.total || 0,
+        releasesTotalPages: releasesData?.total_pages || 1,
     };
 }

@@ -25,7 +25,15 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 					return
 				}
 
+				// 设置用户ID
 				c.Set(constants.UserID, userID)
+
+				// 从请求头中获取租户ID
+				tenantID := c.Request.Header.Get("x-tenant-id")
+				if tenantID != "" {
+					c.Set(constants.TenantID, tenantID)
+				}
+
 				c.Next()
 				return
 			}

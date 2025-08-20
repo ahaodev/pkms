@@ -18,21 +18,34 @@ type TenantController struct {
 
 // GetTenants 获取所有租户
 // @Summary      Get all tenants
-// @Description  Retrieve a list of all tenants
+// @Description  Retrieve a list of all tenants with pagination
 // @Tags         Tenants
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object} domain.Response  "Successfully retrieved tenants"
-// @Failure      500  {object} domain.Response  "Internal server error"
+// @Param        page     query  int  false  "Page number (default: 1)"
+// @Param        page_size query  int  false  "Page size (default: 20)"
+// @Success      200      {object} domain.Response{data=domain.TenantPagedResult}  "Successfully retrieved tenants"
+// @Failure      500      {object} domain.Response  "Internal server error"
 // @Router       /tenants [get]
 func (tc *TenantController) GetTenants(c *gin.Context) {
-	tenants, err := tc.TenantUsecase.Fetch(c)
+	// 解析分页参数
+	var params domain.QueryParams
+	if err := c.ShouldBindQuery(&params); err != nil {
+		c.JSON(http.StatusBadRequest, domain.RespError(err.Error()))
+		return
+	}
+
+	// 验证和设置默认分页参数
+	domain.ValidateQueryParams(&params)
+
+	result, err := tc.TenantUsecase.FetchPaged(c, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(tenants))
+
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // CreateTenant 创建租户

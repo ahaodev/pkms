@@ -48,12 +48,9 @@ export function CreateUpgradeTargetDialog({
     // Filter packages by selected project
     const filteredPackages = formData.project_id
         ? packages.filter(pkg => {
-            console.log('Package:', pkg, 'project_id:', formData.project_id, 'pkg.projectId:', pkg.projectId);
             return pkg.projectId === formData.project_id;
         })
         : [];
-
-    console.log('Filtered packages count:', filteredPackages.length, 'for project:', formData.project_id);
 
     // Load releases when package is selected
     useEffect(() => {

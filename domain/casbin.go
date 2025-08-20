@@ -59,6 +59,8 @@ type UserPermissionsResponse struct {
 	UserID      string     `json:"user_id"`
 	Permissions [][]string `json:"permissions"`
 	Roles       []string   `json:"roles"`
+	Menus       []MenuItem `json:"menus"`    // 用户可访问的菜单列表
+	IsAdmin     bool       `json:"is_admin"` // 是否管理员
 }
 
 // RolePermissionsResponse 角色权限响应

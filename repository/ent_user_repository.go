@@ -63,6 +63,48 @@ func (ur *entUserRepository) Fetch(c context.Context) ([]*domain.User, error) {
 	return result, nil
 }
 
+func (ur *entUserRepository) FetchPaged(c context.Context, params domain.QueryParams) (*domain.UserPagedResult, error) {
+	// 构建基础查询，排除 admin 用户
+	baseQuery := ur.client.User.
+		Query().
+		Where(user.Not(user.Username("admin")))
+
+	// 获取总数 - 使用没有 Select 限制的查询
+	total, err := baseQuery.Clone().Count(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建用于获取数据的查询，带有 Select 字段限制
+	query := baseQuery.
+		Select(user.FieldID, user.FieldUsername, user.FieldIsActive, user.FieldCreatedAt, user.FieldUpdatedAt)
+
+	// 应用分页
+	offset := (params.Page - 1) * params.PageSize
+	users, err := query.
+		Offset(offset).
+		Limit(params.PageSize).
+		All(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为 domain.User
+	var result []*domain.User
+	for _, u := range users {
+		result = append(result, &domain.User{
+			ID:        u.ID,
+			Name:      u.Username,
+			IsActive:  u.IsActive,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+		})
+	}
+
+	return domain.NewPagedResult(result, total, params.Page, params.PageSize), nil
+}
+
 func (ur *entUserRepository) GetByUserName(c context.Context, userName string) (*domain.User, error) {
 	u, err := ur.client.User.
 		Query().

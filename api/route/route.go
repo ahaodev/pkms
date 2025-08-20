@@ -111,4 +111,5 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	dashboardRouter := protectedRouter.Group("/dashboard")
 	// 仪表板允许所有认证用户访问
 	NewDashboardRouter(env, timeout, db, dashboardRouter)
+
 }

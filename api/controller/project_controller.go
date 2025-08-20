@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"pkms/internal/constants"
+	"strconv"
 
 	"pkms/bootstrap"
 	"pkms/domain"
@@ -17,23 +18,44 @@ type ProjectController struct {
 
 // GetProjects godoc
 // @Summary      Get all projects
-// @Description  Retrieve all projects for the current tenant
+// @Description  Retrieve all projects for the current tenant with pagination
 // @Tags         Projects
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        x-tenant-id  header    string  true  "Tenant ID"
-// @Success      200  {object}  domain.Response{data=[]domain.Project}  "Projects retrieved successfully"
-// @Failure      500  {object}  domain.Response  "Internal server error"
+// @Param        page         query     int     false  "Page number (default: 1)"
+// @Param        page_size     query     int     false  "Page size (default: 20)"
+// @Success      200          {object}  domain.Response  "Projects retrieved successfully"
+// @Failure      500          {object}  domain.Response  "Internal server error"
 // @Router       /projects [get]
 func (pc *ProjectController) GetProjects(c *gin.Context) {
 	tenantID := c.GetHeader(constants.TenantID)
-	projects, err := pc.ProjectUsecase.Fetch(c, tenantID)
+
+	// 解析分页参数
+	var params domain.QueryParams
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil {
+			params.Page = v
+		}
+	}
+	if ps := c.Query("page_size"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil {
+			params.PageSize = v
+		}
+	}
+
+	// 验证和设置默认参数
+	domain.ValidateQueryParams(&params)
+
+	// 使用分页查询
+	result, err := pc.ProjectUsecase.FetchPaged(c, tenantID, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.RespError(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, domain.RespSuccess(projects))
+
+	c.JSON(http.StatusOK, domain.RespSuccess(result))
 }
 
 // CreateProject godoc

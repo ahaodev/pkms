@@ -1,5 +1,5 @@
 import {apiClient} from "@/lib/api/api";
-import {ApiResponse} from "@/types/api-response";
+import {ApiResponse, PagedResult} from "@/types/api-response";
 import { Tenant, CreateTenantRequest, UpdateTenantRequest } from '@/types/tenant';
 
 // Transform backend tenant data to frontend format
@@ -12,12 +12,36 @@ function transformTenantFromBackend(backendTenant: Record<string, unknown>): Ten
     };
 }
 
-// 获取所有租户
-export async function getTenants(): Promise<ApiResponse<Tenant[]>> {
-    const resp = await apiClient.get("/api/v1/tenants/");
+// 获取所有租户 (分页)
+export async function getTenants(page: number = 1, pageSize: number = 20): Promise<ApiResponse<PagedResult<Tenant>>> {
+    const resp = await apiClient.get("/api/v1/tenants/", {
+        params: {
+            page,
+            page_size: pageSize
+        }
+    });
+    
     const transformedData = {
         ...resp.data,
-        data: resp.data.data.map(transformTenantFromBackend)
+        data: {
+            ...resp.data.data,
+            list: resp.data.data.list.map(transformTenantFromBackend)
+        }
+    };
+    return transformedData;
+}
+
+// 获取所有租户 (不分页，用于下拉框等)
+export async function getAllTenants(): Promise<ApiResponse<Tenant[]>> {
+    const resp = await apiClient.get("/api/v1/tenants/", {
+        params: {
+            page: 1,
+            page_size: 1000 // 大数量获取所有
+        }
+    });
+    const transformedData = {
+        ...resp.data,
+        data: resp.data.data.list.map(transformTenantFromBackend)
     };
     return transformedData;
 }

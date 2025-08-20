@@ -7,6 +7,7 @@ import (
 	"pkms/api/route"
 	"pkms/bootstrap"
 	_ "pkms/docs"
+	"pkms/internal/initializer"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,6 +42,18 @@ func main() {
 	fileStorage := app.FileStorage
 	casbin := app.CasbinManager
 	timeout := time.Duration(env.ContextTimeout) * time.Second
+
+	// 初始化RBAC系统（必须在admin用户创建之前）
+	rbacInitializer := initializer.NewRBACInitializer(db, casbin)
+	if err := rbacInitializer.Initialize(); err != nil {
+		pkg.Log.Errorf("RBAC系统初始化失败: %v", err)
+		// 不能因为初始化失败就停止系统启动，记录错误并继续
+	} else {
+		pkg.Log.Info("RBAC系统初始化成功")
+	}
+
+	// 现在初始化admin用户（在RBAC系统初始化之后）
+	bootstrap.InitDefaultAdmin(db, env, casbin)
 
 	apiEngine := gin.Default()
 	route.Setup(app, timeout, db, casbin, fileStorage, apiEngine)

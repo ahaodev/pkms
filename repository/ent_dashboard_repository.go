@@ -44,16 +44,7 @@ func (dr *entDashboardRepository) GetStats(c context.Context, tenantID string) (
 		return domain.DashboardStats{}, err
 	}
 
-	// 获取租户用户数量
-	userCount, err := dr.client.User.
-		Query().
-		Where(user.HasTenantsWith(tenant.ID(tenantID))).
-		Count(c)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-
-	// 获取总下载数（通过项目->包->发布关联）
+	// 获取发布数量和总下载数（通过项目->包->发布关联）
 	releases, err := dr.client.Release.
 		Query().
 		Where(
@@ -65,8 +56,10 @@ func (dr *entDashboardRepository) GetStats(c context.Context, tenantID string) (
 		).
 		All(c)
 
+	totalReleases := 0
 	totalDownloads := 0
 	if err == nil {
+		totalReleases = len(releases)
 		for _, rel := range releases {
 			totalDownloads += rel.DownloadCount
 		}
@@ -75,8 +68,7 @@ func (dr *entDashboardRepository) GetStats(c context.Context, tenantID string) (
 	return domain.DashboardStats{
 		TotalProjects:  projectCount,
 		TotalPackages:  packageCount,
-		TotalUsers:     userCount,
-		TotalGroups:    0, // 暂时没有群组概念
+		TotalReleases:  totalReleases,
 		TotalDownloads: totalDownloads,
 	}, nil
 }

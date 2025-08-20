@@ -2,7 +2,7 @@ import { Users, User as UserIcon, Edit, Trash2, MoreHorizontal, Ban, CheckCircle
 import { User } from '@/types/user';
 import { Project } from '@/types/project';
 import { Group } from '@/types/group';
-import { EmptyList } from '@/components/ui/empty-list';
+import { EmptyList } from '@/components/empty-list.tsx';
 import { useI18n } from '@/contexts/i18n-context';
 import {
     Table,

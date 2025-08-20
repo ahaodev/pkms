@@ -5,8 +5,7 @@ import {ApiResponse} from "@/types/api-response";
 export interface DashboardStats {
     totalProjects: number;
     totalPackages: number;
-    totalUsers: number;
-    totalGroups?: number;
+    totalReleases: number;
     totalDownloads?: number;
     storageUsed?: number;
     activeUsers?: number;
@@ -40,7 +39,7 @@ export function transformDashboardStatsFromBackend(backendStats: any): Dashboard
     return {
         totalProjects: backendStats.total_projects || 0,
         totalPackages: backendStats.total_packages || 0,
-        totalUsers: backendStats.total_users || 0,
+        totalReleases: backendStats.total_releases || 0,
         totalDownloads: backendStats.total_downloads || 0,
         storageUsed: backendStats.storage_used || 0,
         activeUsers: backendStats.active_users || 0

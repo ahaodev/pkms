@@ -1,9 +1,9 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {CreateUpgradeTargetDialog, EditUpgradeTargetDialog, UpgradeTargetsTable} from '@/components/upgrade';
 import {ProjectPackageFilters} from '@/components/project-package-filters';
 import {toast} from 'sonner';
-import {useProjects} from '@/hooks/use-projects';
+import {useAllProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
 import {
     createUpgradeTarget,
@@ -13,9 +13,17 @@ import {
     UpdateUpgradeTargetRequest,
     UpgradeTarget
 } from '@/lib/api/upgrade';
-import {PageHeader} from "@/components/ui";
+import {Page, PageHeader, PageContent} from "@/components/page";
 import {Plus} from "lucide-react";
 import {useI18n} from '@/contexts/i18n-context';
+import {usePagination} from '@/hooks/use-pagination';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 
 export default function UpgradePage() {
     const {t} = useI18n();
@@ -37,20 +45,35 @@ export default function UpgradePage() {
 
     const queryClient = useQueryClient();
 
+    // 分页状态
+    const pagination = usePagination({
+        initialPageSize: 20,
+        defaultPageSize: 20
+    });
+
     // Fetch data
-    const {data: projects = []} = useProjects();
+    const {data: projects = []} = useAllProjects();
     const {data: packagesData} = usePackages();
     const packages = packagesData?.data || [];
 
-    console.log('All packages:', packages);
-    console.log('Projects:', projects);
 
-    // Fetch upgrade targets
+    // Fetch upgrade targets with pagination
     const {data: upgradeTargetsData, isLoading, error} = useQuery({
-        queryKey: ['upgrade-targets'],
+        queryKey: ['upgrade-targets', pagination.currentPage, pagination.pageSize, projectFilter, packageFilter],
         queryFn: async () => {
-            const response = await getUpgradeTargets();
-            return response.data;
+            const filters: any = {
+                page: pagination.currentPage,
+                pageSize: pagination.pageSize
+            };
+            
+            if (projectFilter !== 'all') {
+                filters.project_id = projectFilter;
+            }
+            if (packageFilter !== 'all') {
+                filters.package_id = packageFilter;
+            }
+            
+            return await getUpgradeTargets(filters);
         },
         staleTime: 0,
         gcTime: 0,
@@ -67,22 +90,17 @@ export default function UpgradePage() {
         }
     }, [error]);
 
-    const upgradeTargets: UpgradeTarget[] = upgradeTargetsData || [];
+    // 从分页响应中获取数据
+    const upgradeTargets: UpgradeTarget[] = upgradeTargetsData?.data.list || [];
+    const totalTargets = upgradeTargetsData?.data.total || 0;
+    const totalPages = upgradeTargetsData?.data.total_pages || 0;
 
-    // Filter upgrade targets based on selected filters
-    const filteredUpgradeTargets = useMemo(() => {
-        let filtered: UpgradeTarget[] = upgradeTargets;
-
-        if (projectFilter !== 'all') {
-            filtered = filtered.filter((target: UpgradeTarget) => target.project_id === projectFilter);
+    // Update pagination total items when API response changes
+    useEffect(() => {
+        if (upgradeTargetsData) {
+            pagination.setTotalItems(upgradeTargetsData.data.total);
         }
-
-        if (packageFilter !== 'all') {
-            filtered = filtered.filter((target: UpgradeTarget) => target.package_id === packageFilter);
-        }
-
-        return filtered;
-    }, [upgradeTargets, projectFilter, packageFilter]);
+    }, [upgradeTargetsData, pagination]);
 
     // Reset package filter when project filter changes
     useEffect(() => {
@@ -160,11 +178,8 @@ export default function UpgradePage() {
         });
     }, [selectedTarget, editFormData, updateUpgradeTargetMutation]);
 
-    // Statistics - use filtered data
-    const totalTargets = filteredUpgradeTargets.length;
     return (
-        <div className="space-y-6">
-            {/* Header */}
+        <Page isLoading={isLoading}>
             <PageHeader
                 title={t('upgrade.title')}
                 description={t('upgrade.description')}
@@ -177,54 +192,95 @@ export default function UpgradePage() {
                 }}
             />
 
-            {/* Filters */}
-            <ProjectPackageFilters
-                projectFilter={projectFilter}
-                packageFilter={packageFilter}
-                totalCount={totalTargets}
-                countLabel={t('upgrade.targetsCount')}
-                projects={projects}
-                packages={packages}
-                onProjectFilterChange={setProjectFilter}
-                onPackageFilterChange={setPackageFilter}
-            />
+            <PageContent>
+                {/* Filters */}
+                <ProjectPackageFilters
+                    projectFilter={projectFilter}
+                    packageFilter={packageFilter}
+                    totalCount={totalTargets}
+                    countLabel={t('upgrade.targetsCount')}
+                    projects={projects}
+                    packages={packages}
+                    onProjectFilterChange={setProjectFilter}
+                    onPackageFilterChange={setPackageFilter}
+                />
 
-            {/* Upgrade Targets Table */}
-            <UpgradeTargetsTable
-                upgradeTargets={filteredUpgradeTargets}
-                isLoading={isLoading}
-                onEdit={handleEdit}
-            />
+                {/* Upgrade Targets Table */}
+                <UpgradeTargetsTable
+                    upgradeTargets={upgradeTargets}
+                    isLoading={isLoading}
+                    onEdit={handleEdit}
+                />
 
-            {/* Create Upgrade Target Dialog */}
-            <CreateUpgradeTargetDialog
-                isOpen={isCreateDialogOpen}
-                onClose={() => {
-                    setIsCreateDialogOpen(false);
-                    resetForm();
-                }}
-                onSubmit={handleCreate}
-                formData={formData}
-                setFormData={setFormData}
-                projects={projects}
-                packages={packages}
-                isLoading={createUpgradeTargetMutation.isPending}
-            />
+                {/* 分页组件 - 仅在总页数超过1页时显示 */}
+                {totalPages > 1 && (
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (pagination.currentPage > 1) {
+                                            pagination.setPage(pagination.currentPage - 1);
+                                        }
+                                    }}
+                                    className={pagination.currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
 
-            {/* Edit Upgrade Target Dialog */}
-            <EditUpgradeTargetDialog
-                isOpen={isEditDialogOpen}
-                onClose={() => {
-                    setIsEditDialogOpen(false);
-                    setSelectedTarget(null);
-                    resetEditForm();
-                }}
-                onSubmit={handleUpdate}
-                formData={editFormData}
-                setFormData={setEditFormData}
-                isLoading={updateUpgradeTargetMutation.isPending}
-            />
-        </div>
+                            <PaginationItem>
+                                <span className="text-sm text-muted-foreground px-4">
+                                    第 {pagination.currentPage} 页，共 {totalPages} 页 (总数: {totalTargets})
+                                </span>
+                            </PaginationItem>
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (pagination.currentPage < totalPages) {
+                                            pagination.setPage(pagination.currentPage + 1);
+                                        }
+                                    }}
+                                    className={pagination.currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                )}
+
+                {/* Create Upgrade Target Dialog */}
+                <CreateUpgradeTargetDialog
+                    isOpen={isCreateDialogOpen}
+                    onClose={() => {
+                        setIsCreateDialogOpen(false);
+                        resetForm();
+                    }}
+                    onSubmit={handleCreate}
+                    formData={formData}
+                    setFormData={setFormData}
+                    projects={projects}
+                    packages={packages}
+                    isLoading={createUpgradeTargetMutation.isPending}
+                />
+
+                {/* Edit Upgrade Target Dialog */}
+                <EditUpgradeTargetDialog
+                    isOpen={isEditDialogOpen}
+                    onClose={() => {
+                        setIsEditDialogOpen(false);
+                        setSelectedTarget(null);
+                        resetEditForm();
+                    }}
+                    onSubmit={handleUpdate}
+                    formData={editFormData}
+                    setFormData={setEditFormData}
+                    isLoading={updateUpgradeTargetMutation.isPending}
+                />
+            </PageContent>
+        </Page>
     );
 }
 

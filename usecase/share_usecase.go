@@ -112,6 +112,13 @@ func (su *shareUsecase) GetAllSharesByTenant(c context.Context, tenantID string)
 	return su.shareRepository.GetAllByTenant(ctx, tenantID)
 }
 
+func (su *shareUsecase) GetAllSharesByTenantPaged(c context.Context, tenantID string, params domain.QueryParams) (*domain.SharePagedResult, error) {
+	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
+	defer cancel()
+
+	return su.shareRepository.GetAllByTenantPaged(ctx, tenantID, params)
+}
+
 func (su *shareUsecase) UpdateShareExpiry(c context.Context, id string, req *domain.UpdateShareExpiryRequest) (*domain.ShareResponse, error) {
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
 	defer cancel()

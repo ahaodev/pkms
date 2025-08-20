@@ -31,7 +31,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve list of client access credentials with optional filters (admin only)",
+                "description": "Retrieve list of client access credentials with optional filters and pagination (admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -67,11 +67,23 @@ const docTemplate = `{
                         "description": "Filter by active status",
                         "name": "is_active",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Client access list retrieved successfully",
+                        "description": "Client access list retrieved successfully with pagination",
                         "schema": {
                             "allOf": [
                                 {
@@ -81,10 +93,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/domain.ClientAccess"
-                                            }
+                                            "type": "object"
                                         }
                                     }
                                 }
@@ -1334,14 +1343,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/casbin/user/permissions": {
+        "/casbin/user/button-permissions": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all permissions and roles for the current authenticated user",
+                "description": "Get all button-level permissions for the current authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -1351,10 +1360,59 @@ const docTemplate = `{
                 "tags": [
                     "RBAC"
                 ],
-                "summary": "Get user permissions",
+                "summary": "Get user button permissions",
                 "responses": {
                     "200": {
-                        "description": "User permissions and roles",
+                        "description": "Button permissions",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/domain.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/casbin/user/permissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all permissions, roles, and accessible menus for the current authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RBAC"
+                ],
+                "summary": "Get user permissions with menus",
+                "responses": {
+                    "200": {
+                        "description": "User permissions, roles and menus",
                         "schema": {
                             "allOf": [
                                 {
@@ -1943,7 +2001,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Page size (default: 20)",
-                        "name": "pageSize",
+                        "name": "page_size",
                         "in": "query"
                     },
                     {
@@ -1957,22 +2015,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved packages",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/domain.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/domain.Package"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/domain.Response"
                         }
                     },
                     "400": {
@@ -2380,7 +2423,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Page size (default: 20)",
-                        "name": "pageSize",
+                        "name": "page_size",
                         "in": "query"
                     }
                 ],
@@ -2602,7 +2645,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve all projects for the current tenant",
+                "description": "Retrieve all projects for the current tenant with pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -2620,28 +2663,25 @@ const docTemplate = `{
                         "name": "x-tenant-id",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Projects retrieved successfully",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/domain.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/domain.Project"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/domain.Response"
                         }
                     },
                     "500": {
@@ -3379,7 +3419,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all shares for the current tenant",
+                "description": "Get all shares for the current tenant with pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -3390,9 +3430,41 @@ const docTemplate = `{
                     "Shares(management)"
                 ],
                 "summary": "Get share list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully retrieved shares",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/domain.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.SharePagedResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
                         "schema": {
                             "$ref": "#/definitions/domain.Response"
                         }
@@ -3449,6 +3521,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/shares/{id}/expiry": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the expiry time of a specific share",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shares(management)"
+                ],
+                "summary": "Update share expiry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Share ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update share expiry request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.UpdateShareExpiryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated share expiry",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Update share expiry failed",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/tenants": {
             "get": {
                 "security": [
@@ -3456,7 +3586,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a list of all tenants",
+                "description": "Retrieve a list of all tenants with pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -3467,11 +3597,37 @@ const docTemplate = `{
                     "Tenants"
                 ],
                 "summary": "Get all tenants",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully retrieved tenants",
                         "schema": {
-                            "$ref": "#/definitions/domain.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/domain.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.TenantPagedResult"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -4282,7 +4438,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all upgrade targets with optional filtering",
+                "description": "Get all upgrade targets with optional filtering and pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -4311,6 +4467,18 @@ const docTemplate = `{
                         "description": "Is active",
                         "name": "is_active",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4336,7 +4504,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve all users (admin only)",
+                "description": "Retrieve all users with pagination (admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -4347,26 +4515,25 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Users retrieved successfully",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/domain.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/domain.User"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/domain.Response"
                         }
                     },
                     "500": {
@@ -4939,16 +5106,13 @@ const docTemplate = `{
                 "total_downloads": {
                     "type": "integer"
                 },
-                "total_groups": {
-                    "type": "integer"
-                },
                 "total_packages": {
                     "type": "integer"
                 },
                 "total_projects": {
                     "type": "integer"
                 },
-                "total_users": {
+                "total_releases": {
                     "type": "integer"
                 }
             }
@@ -4998,6 +5162,38 @@ const docTemplate = `{
                 },
                 "refreshToken": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.MenuItem": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "requiresAdmin": {
+                    "type": "boolean"
+                },
+                "requiresAuth": {
+                    "type": "boolean"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "visible": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5324,6 +5520,64 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.ShareListItem": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "expired_at": {
+                    "type": "string"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_expired": {
+                    "type": "boolean"
+                },
+                "package_name": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
+                },
+                "share_url": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.SharePagedResult": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.ShareListItem"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "domain.Tenant": {
             "type": "object",
             "properties": {
@@ -5338,6 +5592,29 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.TenantPagedResult": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Tenant"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
                 }
             }
         },
@@ -5370,6 +5647,14 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.UpdateShareExpiryRequest": {
+            "type": "object",
+            "properties": {
+                "expiry_hours": {
+                    "type": "integer"
                 }
             }
         },
@@ -5433,6 +5718,17 @@ const docTemplate = `{
         "domain.UserPermissionsResponse": {
             "type": "object",
             "properties": {
+                "is_admin": {
+                    "description": "是否管理员",
+                    "type": "boolean"
+                },
+                "menus": {
+                    "description": "用户可访问的菜单列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.MenuItem"
+                    }
+                },
                 "permissions": {
                     "type": "array",
                     "items": {

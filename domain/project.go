@@ -61,9 +61,13 @@ type Project struct {
 	CreatedBy    string    `json:"created_by"`
 }
 
+// ProjectPagedResult 项目分页查询结果
+type ProjectPagedResult = PagedResult[*Project]
+
 type ProjectRepository interface {
 	Create(c context.Context, project *Project) error
 	Fetch(c context.Context, tenantID string) ([]*Project, error)
+	FetchPaged(c context.Context, tenantID string, params QueryParams) (*ProjectPagedResult, error)
 	FetchAll(c context.Context) ([]*Project, error)
 	GetByID(c context.Context, id string) (*Project, error)
 	Update(c context.Context, project *Project) error
@@ -74,6 +78,7 @@ type ProjectRepository interface {
 type ProjectUsecase interface {
 	Create(c context.Context, project *Project) error
 	Fetch(c context.Context, tenantID string) ([]*Project, error)
+	FetchPaged(c context.Context, tenantID string, params QueryParams) (*ProjectPagedResult, error)
 	GetByID(c context.Context, id string) (*Project, error)
 	Update(c context.Context, project *Project) error
 	Delete(c context.Context, id string) error

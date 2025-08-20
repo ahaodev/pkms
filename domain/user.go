@@ -29,9 +29,13 @@ type CreateUserRequest struct {
 	CreateTenant bool   `json:"create_tenant"` // 是否同时创建对应的租户
 }
 
+// UserPagedResult 用户分页查询结果
+type UserPagedResult = PagedResult[*User]
+
 type UserRepository interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]*User, error)
+	FetchPaged(c context.Context, params QueryParams) (*UserPagedResult, error)
 	FetchByTenant(c context.Context, tenantID string) ([]*User, error)
 	GetByUserName(c context.Context, userName string) (*User, error)
 	GetByID(c context.Context, id string) (*User, error)
@@ -43,6 +47,7 @@ type UserUseCase interface {
 	Create(c context.Context, user *User) error
 	CreateWithOptions(c context.Context, request *CreateUserRequest) (*User, error)
 	Fetch(c context.Context) ([]*User, error)
+	FetchPaged(c context.Context, params QueryParams) (*UserPagedResult, error)
 	GetByID(c context.Context, id string) (*User, error)
 	Update(c context.Context, user *User) error
 	Delete(c context.Context, id string) error
