@@ -39,12 +39,13 @@ export async function getAllUsers(): Promise<ApiResponse<User[]>> {
     const resp = await apiClient.get("/api/v1/user/", {
         params: {
             page: 1,
-            page_size: 1000 // 使用后端允许的最大页面大小
+            page_size: 1000 // 后端最大页面大小限制为1000
         }
     });
+    // Backend returns PagedResult structure, we need to extract the list
     const transformedData = {
         ...resp.data,
-        data: resp.data.data.map(transformUserFromBackend)
+        data: resp.data.data.list.map(transformUserFromBackend)
     };
     return transformedData;
 }

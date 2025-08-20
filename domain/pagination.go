@@ -35,7 +35,7 @@ func ValidateQueryParams(params *QueryParams) {
 	if params.PageSize <= 0 {
 		params.PageSize = 20
 	}
-	if params.PageSize > 100 {
-		params.PageSize = 100
+	if params.PageSize > 1000 {
+		params.PageSize = 1000
 	}
 }

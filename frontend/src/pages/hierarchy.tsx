@@ -26,7 +26,7 @@ export default function HierarchyPage() {
     const dialogs = useHierarchyDialogs();
 
     return (
-        <Page>
+        <Page isLoading={navigation.isLoading} loadingMessage={t('common.loading')}>
             <PageHeader title={t("project.management")} description={t("project.managementDescription")} />
             
             <PageContent>

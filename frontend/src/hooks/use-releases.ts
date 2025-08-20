@@ -14,9 +14,9 @@ export const useReleasesWithPagination = (packageId?: string, page: number = 1, 
         },
         enabled: !!packageId,
         staleTime: 0,
-        gcTime: 5 * 60 * 1000, // 保持5分钟缓存用于后退导航
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
+        gcTime: 0,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
     });
 };
 
@@ -35,7 +35,7 @@ export const useReleases = (packageId?: string) => {
         enabled: !!packageId,
         staleTime: 0,
         gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
     });
 };

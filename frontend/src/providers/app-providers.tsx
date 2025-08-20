@@ -8,10 +8,10 @@ const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             retry: 1,
-            staleTime: 0, // No caching - always fresh
-            gcTime: 0, // No garbage collection time - immediate cleanup
+            staleTime: 5 * 60 * 1000, // 5 minutes - reasonable caching
+            gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
             refetchOnWindowFocus: false, // Disable to prevent excessive refetching
-            refetchOnMount: "always", // Always refetch on mount
+            refetchOnMount: false, // Don't always refetch on mount
             refetchOnReconnect: false, // Disable to prevent excessive refetching
         },
     },

@@ -6,24 +6,24 @@ import {useAuth} from '@/providers/auth-provider.tsx';
 export const usePackages = (filters?: PackageFilters) => {
     const {user} = useAuth();
     
-    
     return useQuery({
         queryKey: ['packages', filters, user?.id],
         queryFn: async () => {
             const response = await PackagesAPI.getPackages(filters);
-            const transformedPackages = (response.data.list || []).map(PackagesAPI.transformPackageFromBackend);
+            const transformedPackages = (response.list || []).map(PackagesAPI.transformPackageFromBackend);
             return {
                 data: transformedPackages,
-                total: response.data.total,
-                page: response.data.page,
-                pageSize: response.data.page_size,
-                totalPages: response.data.total_pages,
+                total: response.total,
+                page: response.page,
+                pageSize: response.page_size,
+                totalPages: response.total_pages,
             };
         },
+        enabled: !!user && !!filters?.projectId,
         staleTime: 0,
         gcTime: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
         select: (result) => {
             if (!user || !result) {
                 return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };

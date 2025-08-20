@@ -14,6 +14,7 @@ export function useDashboardStats() {
       }
       throw new Error(response.msg || 'Failed to fetch dashboard stats');
     },
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes (was cacheTime in older versions)
     retry: (failureCount, error: Error & { response?: { status?: number } }) => {
@@ -35,6 +36,7 @@ export function useRecentActivities(limit = 10) {
       }
       throw new Error(response.msg || 'Failed to fetch recent activities');
     },
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 3 * 60 * 1000, // 3 minutes (was cacheTime in older versions)
     retry: (failureCount, error: Error & { response?: { status?: number } }) => {

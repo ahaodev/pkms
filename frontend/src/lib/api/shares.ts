@@ -52,10 +52,10 @@ export const sharesApi = {
     const response = await apiClient.get('/api/v1/shares', {
       params: {
         page: 1,
-        page_size: 1000 // 大数量获取所有
+        page_size: 1000 // 后端最大页面大小限制为1000
       }
     });
-    return response.data.data.data;
+    return response.data.data.list;
   },
 
   // Create a new share

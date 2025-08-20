@@ -14,9 +14,9 @@ export const useProjects = (page: number = 1, pageSize: number = 20) => {
             return response.data; // 返回 PagedResult 结构
         },
         enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN), // 只有用户存在且有token时才执行
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnMount: false,
         refetchOnWindowFocus: false,
     });
 };
@@ -32,9 +32,9 @@ export const useAllProjects = () => {
             return response.data; // 已经经过转换的 Project[]
         },
         enabled: !!user && !!localStorage.getItem(ACCESS_TOKEN),
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: "always",
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnMount: false,
         refetchOnWindowFocus: false,
     });
 };

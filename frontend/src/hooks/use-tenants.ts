@@ -23,9 +23,10 @@ export function useTenants() {
       const response = await getAllTenants();
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false
   });
 }
 
@@ -38,9 +39,10 @@ export function useTenantsWithPagination(page: number = 1, pageSize: number = 20
       // Backend now returns PagedResult wrapped in Response
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false
   });
 }
 
@@ -53,9 +55,9 @@ export function useTenant(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false
   });
 }
 
@@ -68,9 +70,9 @@ export function useTenantUsers(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false
   });
 }
 
@@ -148,9 +150,9 @@ export function useTenantUsersWithRole(tenantId: string) {
       return response.data;
     },
     enabled: !!tenantId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always'
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false
   });
 }
 

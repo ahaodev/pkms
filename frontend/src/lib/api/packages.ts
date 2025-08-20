@@ -114,7 +114,7 @@ export async function getPackageReleases(packageId: string, page: number = 1, pa
     const resp = await apiClient.get(`/api/v1/releases/package/${packageId}?${params.toString()}`);
     
     // Transform the backend data to frontend format
-    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
+    const releases = (resp.data.data.list || []).map(transformReleaseFromBackend);
     
     return {
         list: releases,
@@ -129,8 +129,8 @@ export async function getPackageReleases(packageId: string, page: number = 1, pa
 export async function getPackageReleasesAll(packageId: string): Promise<ApiResponse<Release[]>> {
     const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
     
-    // Transform the backend data to frontend format
-    const releases = (resp.data.data || []).map(transformReleaseFromBackend);
+    // Transform the backend data to frontend format - backend always returns paginated structure
+    const releases = (resp.data.data.list || []).map(transformReleaseFromBackend);
     
     return {
         ...resp.data,

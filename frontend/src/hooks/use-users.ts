@@ -20,6 +20,7 @@ export function useUsers() {
       const response = await getAllUsers();
       return response.data;
     },
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
     staleTime: 2 * 60 * 1000, // 2分钟缓存
     gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
     refetchOnMount: false // 不要每次mount都刷新
@@ -35,6 +36,7 @@ export function useUsersWithPagination(page: number = 1, pageSize: number = 20) 
       // Backend now returns PagedResult wrapped in Response
       return response.data;
     },
+    enabled: !!localStorage.getItem('ACCESS_TOKEN'),
     staleTime: 2 * 60 * 1000, // 2分钟缓存
     gcTime: 5 * 60 * 1000, // 5分钟垃圾回收
     refetchOnMount: false // 不要每次mount都刷新
