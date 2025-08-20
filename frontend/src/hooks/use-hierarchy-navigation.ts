@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {useAllProjects} from '@/hooks/use-projects';
 import {usePackages} from '@/hooks/use-packages';
@@ -6,6 +6,8 @@ import {useReleasesWithPagination} from '@/hooks/use-releases';
 import {downloadRelease} from '@/lib/api/releases';
 import {toast} from 'sonner';
 import {Release} from '@/types/release';
+import {Project} from '@/types/project';
+import {Package} from '@/types/package';
 import {useI18n} from '@/contexts/i18n-context';
 
 export function useHierarchyNavigation() {
@@ -29,22 +31,15 @@ export function useHierarchyNavigation() {
 
     // Normalize shapes: projectsData is an array from useAllProjects, packagesData already exposes .data array,
     // releasesData is a PagedResult. Convert to arrays expected by components.
-    const projects = projectsData || [];
+    const projects = useMemo(() => projectsData || [], [projectsData]);
     const packages = packagesData?.data || [];
     const releases = releasesData?.list || [];
-    const selectedProject = projects.find((p: any) => p.id === selectedProjectId);
-    const selectedPackage = packages.find((p: any) => p.id === selectedPackageId);
+    const selectedProject = projects.find((p: Project) => p.id === selectedProjectId);
+    const selectedPackage = packages.find((p: Package) => p.id === selectedPackageId);
     
-    // Debug logging
-    console.log('useHierarchyNavigation - packagesData:', packagesData);
-    console.log('useHierarchyNavigation - packages array:', packages);
-    console.log('useHierarchyNavigation - selectedProjectId:', selectedProjectId);
-    console.log('useHierarchyNavigation - selectedPackageId:', selectedPackageId);
+    // Data ready for components
 
     const handleProjectSelect = (projectId: string) => {
-        console.log('handleProjectSelect called with projectId:', projectId);
-        console.log('current selectedProjectId:', selectedProjectId);
-        
         if (selectedProjectId === projectId) {
             setSelectedProjectId(null);
             setSelectedPackageId(null);
@@ -52,8 +47,6 @@ export function useHierarchyNavigation() {
             setSelectedProjectId(projectId);
             setSelectedPackageId(null);
         }
-        
-        console.log('after update - selectedProjectId should be:', projectId);
     };
 
     const handlePackageSelect = (packageId: string) => {
@@ -91,8 +84,7 @@ export function useHierarchyNavigation() {
             toast.success(t('hierarchy.downloadCompleted'), {
                 description: t('hierarchy.downloadCompletedDescription', { fileName: release.file_name }),
             });
-        } catch (error) {
-            console.error(error)
+        } catch {
             toast.error(t('hierarchy.downloadFailed'), {
                 description: t('hierarchy.downloadFailedDescription'),
             });
