@@ -104,7 +104,7 @@ export function Packages({
                                         })()
                                     }
                                     <span>{pkg.name}</span>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:opacity-0 transition-opacity"/>
                                 </CardTitle>
                                 <CardDescription>{pkg.description}</CardDescription>
                             </CardHeader>

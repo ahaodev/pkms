@@ -1,4 +1,4 @@
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {Project} from '@/types/project';
 import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/providers/auth-provider.tsx';
@@ -22,11 +22,6 @@ export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const {user} = useAuth();
 
-    function assignProjectToUser(userId: string, projectId: string) {
-        // TODO: Implement project assignment logic if needed
-        console.debug('Project assignment needed:', { userId, projectId });
-    }
-
     return useMutation({
         mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy'>) => {
             const projectData = {
@@ -38,8 +33,7 @@ export const useCreateProject = () => {
             return ProjectsAPI.transformProjectFromBackend(response.data);
         },
         onSuccess: async (project) => {
-            // 如果是普通用户创建的项目，自动分配给自己
-            assignProjectToUser(`${user?.id}`, project.id);
+            console.log(project);
             // Invalidate both query keys to ensure all project lists refresh
             queryClient.invalidateQueries({queryKey: ['projects']});
             queryClient.invalidateQueries({queryKey: ['all-projects']});

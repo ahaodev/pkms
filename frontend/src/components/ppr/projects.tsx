@@ -93,7 +93,7 @@ export const Projects = memo<ProjectsViewProps>(function Projects({
                                 <CardTitle className="flex items-center space-x-3">
                                     {getProjectIcon(project.icon || 'package2', "h-5 w-5")}
                                     <span>{project.name}</span>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:opacity-0 transition-opacity"/>
                                 </CardTitle>
                                 <CardDescription>{project.description}</CardDescription>
                             </CardHeader>
