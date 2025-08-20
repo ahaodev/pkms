@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {Badge} from '@/components/ui/badge.tsx';
 import {Button} from '@/components/ui/button.tsx';
 import {Card} from '@/components/ui/card.tsx';
@@ -121,21 +121,18 @@ export function Releases({
 
         const executeBackToPackages = () => {
             if (getGlobalFlag()) {
-                console.log('🚫 Releases: Back action ignored - globally processing');
                 return;
             }
-            
+
             setGlobalFlag(true);
-            console.log('🎯 Releases: Executing back to packages (global flag set)');
-            
+
             if (onBackToPackages) {
                 onBackToPackages();
             }
-            
+
             // 300ms防抖
             setTimeout(() => {
                 setGlobalFlag(false);
-                console.log('✅ Releases: Global processing flag reset');
             }, 300);
         };
 
@@ -145,34 +142,31 @@ export function Releases({
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
-                console.log('🖱️ Releases: Mouse back button pressed');
+
                 executeBackToPackages();
                 return false;
             }
         };
 
         const handlePopState = (event: PopStateEvent) => {
-            console.log('⌨️ Releases: Browser back button pressed (popstate)');
             event.preventDefault();
             event.stopPropagation();
-            
             // 阻止浏览器默认导航
             window.history.pushState(null, '', window.location.href);
-            
             executeBackToPackages();
             return false;
         };
 
         // 添加事件监听器
-        document.addEventListener('mousedown', handleMouseBack, { capture: true });
+        document.addEventListener('mousedown', handleMouseBack, {capture: true});
         window.addEventListener('popstate', handlePopState);
-        
+
         // 推送历史状态以便拦截浏览器后退
         window.history.pushState(null, '', window.location.href);
 
         // 清理事件监听器
         return () => {
-            document.removeEventListener('mousedown', handleMouseBack, { capture: true });
+            document.removeEventListener('mousedown', handleMouseBack, {capture: true});
             window.removeEventListener('popstate', handlePopState);
         };
     }, [onBackToPackages]);

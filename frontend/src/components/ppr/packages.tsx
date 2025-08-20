@@ -12,8 +12,18 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
-import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone, Trash} from 'lucide-react';
-import {useState, useEffect} from 'react';
+import {
+    ChevronRight,
+    Globe,
+    Monitor,
+    Package as PackageIcon,
+    Package2,
+    Plus,
+    Server,
+    Smartphone,
+    Trash
+} from 'lucide-react';
+import {useEffect, useState} from 'react';
 import {useDeletePackage} from '@/hooks/use-packages.ts';
 import {toast} from 'sonner';
 import {useI18n} from '@/contexts/i18n-context.tsx';
@@ -35,10 +45,10 @@ export function Packages({
                              onCreatePackage,
                              onBackToProjects
                          }: PackagesViewProps) {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [deletePackageId, setDeletePackageId] = useState<string | null>(null);
     const deletePackageMutation = useDeletePackage();
-    
+
     // Filter packages based on search term
     const filteredPackages = packages.filter(pkg =>
         pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,7 +57,7 @@ export function Packages({
 
     const handleDeletePackage = async () => {
         if (!deletePackageId) return;
-        
+
         try {
             await deletePackageMutation.mutateAsync(deletePackageId);
             toast.success(t('package.deleteSuccess'));
@@ -74,21 +84,18 @@ export function Packages({
 
         const executeBackToProjects = () => {
             if (getGlobalFlag()) {
-                console.log('🚫 Packages: Back action ignored - globally processing');
                 return;
             }
-            
+
             setGlobalFlag(true);
-            console.log('🎯 Packages: Executing back to projects (global flag set)');
-            
+
             if (onBackToProjects) {
                 onBackToProjects();
             }
-            
+
             // 300ms防抖
             setTimeout(() => {
                 setGlobalFlag(false);
-                console.log('✅ Packages: Global processing flag reset');
             }, 300);
         };
 
@@ -98,7 +105,7 @@ export function Packages({
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
-                console.log('🖱️ Packages: Mouse back button pressed');
+
                 executeBackToProjects();
                 return false;
             }
@@ -108,24 +115,21 @@ export function Packages({
             console.log('⌨️ Packages: Browser back button pressed (popstate)');
             event.preventDefault();
             event.stopPropagation();
-            
-            // 回到 projects 时不要推送历史状态，让浏览器正常处理
-            console.log('📝 Packages: Not pushing history state - going to projects view');
-            
+
             executeBackToProjects();
             return false;
         };
 
         // 添加事件监听器
-        document.addEventListener('mousedown', handleMouseBack, { capture: true });
+        document.addEventListener('mousedown', handleMouseBack, {capture: true});
         window.addEventListener('popstate', handlePopState);
-        
+
         // 推送历史状态以便拦截浏览器后退
         window.history.pushState(null, '', window.location.href);
 
         // 清理事件监听器
         return () => {
-            document.removeEventListener('mousedown', handleMouseBack, { capture: true });
+            document.removeEventListener('mousedown', handleMouseBack, {capture: true});
             window.removeEventListener('popstate', handlePopState);
         };
     }, [onBackToProjects]);
@@ -172,7 +176,8 @@ export function Packages({
                                         })()
                                     }
                                     <span>{pkg.name}</span>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:opacity-0 transition-opacity"/>
+                                    <ChevronRight
+                                        className="h-4 w-4 text-muted-foreground ml-auto group-hover:opacity-0 transition-opacity"/>
                                 </CardTitle>
                                 <CardDescription>{pkg.description}</CardDescription>
                             </CardHeader>
@@ -192,7 +197,8 @@ export function Packages({
                             </CardContent>
                         </div>
                         {canDeletePackage(pkg) && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -235,7 +241,7 @@ export function Packages({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                             onClick={handleDeletePackage}
                             className="bg-red-600 hover:bg-red-700"
                         >
