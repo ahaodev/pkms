@@ -1,6 +1,8 @@
 FROM debian:trixie-slim
 
-RUN apk --no-cache add ca-certificates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /root/
 
 # 只需要复制二进制文件，前后都已经在releaser中处理了
