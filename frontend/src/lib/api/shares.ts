@@ -37,7 +37,7 @@ export interface ShareResponse {
 
 export const sharesApi = {
   // Get all shares for current tenant (分页)
-  getAll: async (page: number = 1, pageSize: number = 20): Promise<PagedResult<ShareListItem>> => {
+  getShares: async (page: number = 1, pageSize: number = 20): Promise<PagedResult<ShareListItem>> => {
     const response = await apiClient.get('/api/v1/shares', {
       params: {
         page,
@@ -46,18 +46,6 @@ export const sharesApi = {
     });
     return response.data.data;
   },
-
-  // Get all shares for current tenant (不分页，向后兼容)
-  getAllList: async (): Promise<ShareListItem[]> => {
-    const response = await apiClient.get('/api/v1/shares', {
-      params: {
-        page: 1,
-        page_size: 1000 // 后端最大页面大小限制为1000
-      }
-    });
-    return response.data.data.list;
-  },
-
   // Create a new share
   create: async (request: CreateShareRequest): Promise<ShareResponse> => {
     const response = await apiClient.post(`/api/v1/releases/${request.release_id}/share`, {

@@ -7,33 +7,38 @@ import {useDeleteProject} from '@/hooks/use-projects.ts';
 import {toast} from 'sonner';
 import {getProjectIcon} from '@/lib/utils.tsx';
 import {useI18n} from '@/contexts/i18n-context.tsx';
+import {Project} from '@/types/project';
+import {memo, useMemo, useCallback} from 'react';
 
 
 interface ProjectsViewProps {
-    projects: any[];
+    projects: Project[];
     searchTerm: string;
     handleProjectSelect: (projectId: string) => void;
     onCreateProject: () => void;
-    onEditProject: (project: any) => void;
+    onEditProject: (project: Project) => void;
 }
 
-export function Projects({
+export const Projects = memo<ProjectsViewProps>(function Projects({
                              projects,
                              searchTerm,
                              handleProjectSelect,
                              onCreateProject,
                              onEditProject
-                         }: ProjectsViewProps) {
-    const { t } = useI18n();
+                         }) {
+    const {t} = useI18n();
     const deleteProject = useDeleteProject();
 
     // Filter projects based on search term
-    const filteredProjects = projects?.filter(project =>
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
+    const filteredProjects = useMemo(() => {
+        if (!projects) return [];
+        return projects.filter(project =>
+            project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            project.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [projects, searchTerm]);
 
-    const handleDeleteProject = async (project: any) => {
+    const handleDeleteProject = useCallback(async (project: Project) => {
         if (project.packageCount > 0) {
             toast.error(t('project.deleteError'), {
                 description: t('project.deleteErrorDescription'),
@@ -41,19 +46,19 @@ export function Projects({
             return;
         }
 
-        if (window.confirm(t('project.deleteConfirm', { name: project.name }))) {
+        if (window.confirm(t('project.deleteConfirm', {name: project.name}))) {
             try {
                 await deleteProject.mutateAsync(project.id);
                 toast.success(t('project.deleteSuccess'), {
-                    description: t('project.deleteSuccessDescription', { name: project.name }),
+                    description: t('project.deleteSuccessDescription', {name: project.name}),
                 });
-            } catch (error) {
+            } catch {
                 toast.error(t('project.deleteError'), {
                     description: t('project.deleteFailedDescription'),
                 });
             }
         }
-    };
+    }, [deleteProject, t]);
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -72,7 +77,16 @@ export function Projects({
                 {filteredProjects.map((project) => (
                     <Card
                         key={project.id}
-                        className="cursor-pointer hover:shadow-md transition-shadow relative group"
+                        className="cursor-pointer hover:shadow-md transition-shadow relative group focus-within:ring-2 focus-within:ring-primary"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleProjectSelect(project.id);
+                            }
+                        }}
+                        aria-label={t('project.openProject', { name: project.name })}
                     >
                         <div onClick={() => handleProjectSelect(project.id)}>
                             <CardHeader>
@@ -99,6 +113,7 @@ export function Projects({
                                     e.stopPropagation();
                                     onEditProject(project);
                                 }}
+                                aria-label={t('project.editProject', { name: project.name })}
                             >
                                 <Edit className="h-4 w-4"/>
                             </Button>
@@ -109,7 +124,11 @@ export function Projects({
                                     e.stopPropagation();
                                     handleDeleteProject(project);
                                 }}
-                                disabled={deleteProject.isPending}
+                                disabled={deleteProject.isPending || project.packageCount > 0}
+                                aria-label={project.packageCount > 0 
+                                    ? t('project.cannotDeleteWithPackages', { name: project.name })
+                                    : t('project.deleteProject', { name: project.name })
+                                }
                             >
                                 <Trash
                                     className={`h-4 w-4 ${project.packageCount > 0 ? 'text-gray-400' : 'text-red-500'}`}/>
@@ -127,5 +146,5 @@ export function Projects({
             )}
         </div>
     );
-}
+});
 

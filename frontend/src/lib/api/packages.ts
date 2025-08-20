@@ -124,16 +124,3 @@ export async function getPackageReleases(packageId: string, page: number = 1, pa
         total_pages: resp.data.data.total_pages || Math.ceil((resp.data.data.total || 0) / pageSize)
     };
 }
-
-// 获取特定包的所有发布版本（不分页，保持向后兼容）
-export async function getPackageReleasesAll(packageId: string): Promise<ApiResponse<Release[]>> {
-    const resp = await apiClient.get(`/api/v1/releases/package/${packageId}`);
-    
-    // Transform the backend data to frontend format - backend always returns paginated structure
-    const releases = (resp.data.data.list || []).map(transformReleaseFromBackend);
-    
-    return {
-        ...resp.data,
-        data: releases
-    };
-}

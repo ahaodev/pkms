@@ -1,6 +1,6 @@
 import {apiClient} from "@/lib/api/api";
 import {ApiResponse, PagedResult} from "@/types/api-response";
-import { User, CreateUserRequest, UpdateUserRequest } from '@/types/user';
+import {CreateUserRequest, UpdateUserRequest, User} from '@/types/user';
 
 // Transform backend user data to frontend format
 function transformUserFromBackend(backendUser: any): User {
@@ -22,7 +22,7 @@ export async function getUsers(page: number = 1, pageSize: number = 20): Promise
             page_size: pageSize
         }
     });
-    
+
     // Backend now returns PagedResult structure
     const transformedData = {
         ...resp.data,
@@ -30,22 +30,6 @@ export async function getUsers(page: number = 1, pageSize: number = 20): Promise
             ...resp.data.data,
             list: resp.data.data.list.map(transformUserFromBackend)
         }
-    };
-    return transformedData;
-}
-
-// 获取所有用户 (不分页，用于向后兼容)
-export async function getAllUsers(): Promise<ApiResponse<User[]>> {
-    const resp = await apiClient.get("/api/v1/user/", {
-        params: {
-            page: 1,
-            page_size: 1000 // 后端最大页面大小限制为1000
-        }
-    });
-    // Backend returns PagedResult structure, we need to extract the list
-    const transformedData = {
-        ...resp.data,
-        data: resp.data.data.list.map(transformUserFromBackend)
     };
     return transformedData;
 }
@@ -88,26 +72,6 @@ export async function updateUser(id: string, update: UpdateUserRequest): Promise
 // 删除用户
 export async function deleteUser(id: string): Promise<ApiResponse<void>> {
     const resp = await apiClient.delete(`/api/v1/user/${id}`);
-    return resp.data;
-}
-
-// 获取用户的项目
-export async function getUserProjects(userId: string): Promise<ApiResponse<any[]>> {
-    const resp = await apiClient.get(`/api/v1/user/${userId}/projects`);
-    return resp.data;
-}
-
-// 分配用户到项目
-export async function assignUserToProject(userId: string, projectId: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.post(`/api/v1/user/${userId}/projects`, {
-        project_id: projectId
-    });
-    return resp.data;
-}
-
-// 从项目中移除用户
-export async function unassignUserFromProject(userId: string, projectId: string): Promise<ApiResponse<void>> {
-    const resp = await apiClient.delete(`/api/v1/user/${userId}/projects/${projectId}`);
     return resp.data;
 }
 

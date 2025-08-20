@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {Globe, Monitor, Smartphone} from 'lucide-react';
 import {Button} from '@/components/ui/button.tsx';
 import {
@@ -36,7 +36,7 @@ export function PackageReleaseDialog({
                                          packageId,
                                          packageType
                                      }: PackageReleaseDialogProps) {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -60,7 +60,7 @@ export function PackageReleaseDialog({
 
             const parser = new window.AppInfoParser(file);
             const result = await parser.parse();
-            
+
             if (result && result.versionName && result.versionCode) {
                 setFormData(prev => ({
                     ...prev,
@@ -96,7 +96,7 @@ export function PackageReleaseDialog({
                 setUploadProgress(progress);
             });
 
-            toast.success(t('release.publishSuccess', { version: formData.version_name }));
+            toast.success(t('release.publishSuccess', {version: formData.version_name}));
 
             // 重置表单
             resetForm();

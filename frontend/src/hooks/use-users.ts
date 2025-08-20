@@ -1,23 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getUsers, 
-  getAllUsers,
-  createUser, 
-  updateUser, 
-  deleteUser, 
-  getUser,
-  getUserProjects,
-  assignUserToProject,
-  unassignUserFromProject 
-} from '@/lib/api/users';
-import { CreateUserRequest, UpdateUserRequest } from '@/types/user';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {createUser, deleteUser, getUsers, updateUser} from '@/lib/api/users';
+import {CreateUserRequest, UpdateUserRequest} from '@/types/user';
 
 // Get all users (for backwards compatibility, uses large page size)
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await getAllUsers();
+      const response = await getUsers(1,1000 );
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
@@ -34,30 +24,6 @@ export function useUsersWithPagination(page: number = 1, pageSize: number = 20) 
       return response.data;
     },
     enabled: !!localStorage.getItem('ACCESS_TOKEN'),
-  });
-}
-
-// Get specific user
-export function useUser(userId: string) {
-  return useQuery({
-    queryKey: ['user', userId],
-    queryFn: async () => {
-      const response = await getUser(userId);
-      return response.data;
-    },
-    enabled: !!userId,
-  });
-}
-
-// Get user projects
-export function useUserProjects(userId: string) {
-  return useQuery({
-    queryKey: ['user-projects', userId],
-    queryFn: async () => {
-      const response = await getUserProjects(userId);
-      return response.data;
-    },
-    enabled: !!userId,
   });
 }
 
@@ -95,32 +61,6 @@ export function useDeleteUser() {
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-    }
-  });
-}
-
-// Assign user to project mutation
-export function useAssignUserToProject() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ userId, projectId }: { userId: string; projectId: string }) => 
-      assignUserToProject(userId, projectId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['user-projects', variables.userId] });
-    }
-  });
-}
-
-// Unassign user from project mutation
-export function useUnassignUserFromProject() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ userId, projectId }: { userId: string; projectId: string }) => 
-      unassignUserFromProject(userId, projectId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['user-projects', variables.userId] });
     }
   });
 }

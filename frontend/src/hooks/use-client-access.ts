@@ -16,14 +16,6 @@ const CLIENT_ACCESS_KEYS = {
   detail: (id: string) => [...CLIENT_ACCESS_KEYS.details(), id] as const,
 };
 
-// 获取客户端接入列表 (向后兼容，使用大页面获取所有数据)
-export function useClientAccessList(filters?: ClientAccessFilters) {
-  return useQuery({
-    queryKey: CLIENT_ACCESS_KEYS.list(filters),
-    queryFn: () => clientAccessApi.getAllList(filters),
-  });
-}
-
 // 获取客户端接入列表 (服务器端分页)
 export function useClientAccessListWithPagination(
   filters?: ClientAccessFilters, 
@@ -33,15 +25,6 @@ export function useClientAccessListWithPagination(
   return useQuery({
     queryKey: [...CLIENT_ACCESS_KEYS.list(filters), 'paginated', page, pageSize],
     queryFn: () => clientAccessApi.getList(filters, page, pageSize),
-  });
-}
-
-// 获取单个客户端接入详情
-export function useClientAccess(id: string) {
-  return useQuery({
-    queryKey: CLIENT_ACCESS_KEYS.detail(id),
-    queryFn: () => clientAccessApi.getById(id),
-    enabled: !!id,
   });
 }
 
