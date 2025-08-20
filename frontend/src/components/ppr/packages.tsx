@@ -12,8 +12,18 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
-import {ChevronRight, Globe, Monitor, Package as PackageIcon, Package2, Plus, Server, Smartphone, Trash} from 'lucide-react';
-import {useState} from 'react';
+import {
+    ChevronRight,
+    Globe,
+    Monitor,
+    Package as PackageIcon,
+    Package2,
+    Plus,
+    Server,
+    Smartphone,
+    Trash
+} from 'lucide-react';
+import {useEffect, useState} from 'react';
 import {useDeletePackage} from '@/hooks/use-packages.ts';
 import {toast} from 'sonner';
 import {useI18n} from '@/contexts/i18n-context.tsx';
@@ -24,6 +34,7 @@ interface PackagesViewProps {
     searchTerm: string;
     handlePackageSelect: (packageId: string) => void;
     onCreatePackage: () => void;
+    onBackToProjects?: () => void; // 新增：鼠标后退回调
 }
 
 export function Packages({
@@ -31,12 +42,13 @@ export function Packages({
                              packages,
                              searchTerm,
                              handlePackageSelect,
-                             onCreatePackage
+                             onCreatePackage,
+                             onBackToProjects
                          }: PackagesViewProps) {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [deletePackageId, setDeletePackageId] = useState<string | null>(null);
     const deletePackageMutation = useDeletePackage();
-    
+
     // Filter packages based on search term
     const filteredPackages = packages.filter(pkg =>
         pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +57,7 @@ export function Packages({
 
     const handleDeletePackage = async () => {
         if (!deletePackageId) return;
-        
+
         try {
             await deletePackageMutation.mutateAsync(deletePackageId);
             toast.success(t('package.deleteSuccess'));
@@ -61,6 +73,66 @@ export function Packages({
         // 检查包是否有releases（通过ReleaseCount或者latestRelease来判断）
         return !pkg.latestRelease && (!pkg.releaseCount || pkg.releaseCount === 0);
     };
+
+    // 监听鼠标后退按钮和浏览器后退，回退到 projects 页面
+    useEffect(() => {
+        // 使用全局window对象存储防抖标志，避免组件切换时标志丢失
+        const getGlobalFlag = () => (window as any).__hierarchyBackProcessing || false;
+        const setGlobalFlag = (value: boolean) => {
+            (window as any).__hierarchyBackProcessing = value;
+        };
+
+        const executeBackToProjects = () => {
+            if (getGlobalFlag()) {
+                return;
+            }
+
+            setGlobalFlag(true);
+
+            if (onBackToProjects) {
+                onBackToProjects();
+            }
+
+            // 300ms防抖
+            setTimeout(() => {
+                setGlobalFlag(false);
+            }, 300);
+        };
+
+        const handleMouseBack = (event: MouseEvent) => {
+            // 检查是否是鼠标后退按钮 (button 3)
+            if (event.button === 3) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                executeBackToProjects();
+                return false;
+            }
+        };
+
+        const handlePopState = (event: PopStateEvent) => {
+            console.log('⌨️ Packages: Browser back button pressed (popstate)');
+            event.preventDefault();
+            event.stopPropagation();
+
+            executeBackToProjects();
+            return false;
+        };
+
+        // 添加事件监听器
+        document.addEventListener('mousedown', handleMouseBack, {capture: true});
+        window.addEventListener('popstate', handlePopState);
+
+        // 推送历史状态以便拦截浏览器后退
+        window.history.pushState(null, '', window.location.href);
+
+        // 清理事件监听器
+        return () => {
+            document.removeEventListener('mousedown', handleMouseBack, {capture: true});
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [onBackToProjects]);
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -104,7 +176,8 @@ export function Packages({
                                         })()
                                     }
                                     <span>{pkg.name}</span>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto"/>
+                                    <ChevronRight
+                                        className="h-4 w-4 text-muted-foreground ml-auto group-hover:opacity-0 transition-opacity"/>
                                 </CardTitle>
                                 <CardDescription>{pkg.description}</CardDescription>
                             </CardHeader>
@@ -124,7 +197,8 @@ export function Packages({
                             </CardContent>
                         </div>
                         {canDeletePackage(pkg) && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -167,7 +241,7 @@ export function Packages({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                             onClick={handleDeletePackage}
                             className="bg-red-600 hover:bg-red-700"
                         >

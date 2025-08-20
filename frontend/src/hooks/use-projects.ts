@@ -1,4 +1,4 @@
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {Project} from '@/types/project';
 import * as ProjectsAPI from '@/lib/api/projects';
 import {useAuth} from '@/providers/auth-provider.tsx';
@@ -22,10 +22,6 @@ export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const {user} = useAuth();
 
-    function assignProjectToUser(_userId: string, _projectId: string) {
-        console.log(_userId,_projectId)
-    }
-
     return useMutation({
         mutationFn: async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'packageCount' | 'createdBy'>) => {
             const projectData = {
@@ -37,9 +33,10 @@ export const useCreateProject = () => {
             return ProjectsAPI.transformProjectFromBackend(response.data);
         },
         onSuccess: async (project) => {
-            // 如果是普通用户创建的项目，自动分配给自己
-            assignProjectToUser(`${user?.id}`, project.id);
+            console.log(project);
+            // Invalidate both query keys to ensure all project lists refresh
             queryClient.invalidateQueries({queryKey: ['projects']});
+            queryClient.invalidateQueries({queryKey: ['all-projects']});
         },
     });
 };
@@ -53,7 +50,9 @@ export const useUpdateProject = () => {
             return ProjectsAPI.transformProjectFromBackend(response.data);
         },
         onSuccess: (_, {id}) => {
+            // Invalidate all project-related queries
             queryClient.invalidateQueries({queryKey: ['projects']});
+            queryClient.invalidateQueries({queryKey: ['all-projects']});
             queryClient.invalidateQueries({queryKey: ['project', id]});
         },
     });
@@ -67,7 +66,9 @@ export const useDeleteProject = () => {
             await ProjectsAPI.deleteProject(id);
         },
         onSuccess: () => {
+            // Invalidate all project-related queries to ensure list refreshes
             queryClient.invalidateQueries({queryKey: ['projects']});
+            queryClient.invalidateQueries({queryKey: ['all-projects']});
         },
     });
 };

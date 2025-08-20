@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Badge} from '@/components/ui/badge.tsx';
 import {Button} from '@/components/ui/button.tsx';
 import {Card} from '@/components/ui/card.tsx';
@@ -26,6 +26,7 @@ interface ReleasesViewProps {
     handleCreateRelease: () => void;
     handleDownload: (release: Release) => void;
     onReleaseDeleted?: (releaseId: string) => void;
+    onBackToPackages?: () => void; // 新增：鼠标后退回调
     // 服务器端分页相关
     currentPage: number;
     setCurrentPage: (page: number) => void;
@@ -41,6 +42,7 @@ export function Releases({
                              handleCreateRelease,
                              handleDownload,
                              onReleaseDeleted,
+                             onBackToPackages,
                              currentPage,
                              setCurrentPage,
                              pageSize,
@@ -108,6 +110,66 @@ export function Releases({
     const closeShareDialog = () => {
         setShareDialog({isOpen: false, shareUrl: '', packageName: ''});
     };
+
+    // 监听鼠标后退按钮和浏览器后退，回退到 packages 页面
+    useEffect(() => {
+        // 使用全局window对象存储防抖标志，避免组件切换时标志丢失
+        const getGlobalFlag = () => (window as any).__hierarchyBackProcessing || false;
+        const setGlobalFlag = (value: boolean) => {
+            (window as any).__hierarchyBackProcessing = value;
+        };
+
+        const executeBackToPackages = () => {
+            if (getGlobalFlag()) {
+                return;
+            }
+
+            setGlobalFlag(true);
+
+            if (onBackToPackages) {
+                onBackToPackages();
+            }
+
+            // 300ms防抖
+            setTimeout(() => {
+                setGlobalFlag(false);
+            }, 300);
+        };
+
+        const handleMouseBack = (event: MouseEvent) => {
+            // 检查是否是鼠标后退按钮 (button 3)
+            if (event.button === 3) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                executeBackToPackages();
+                return false;
+            }
+        };
+
+        const handlePopState = (event: PopStateEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+            // 阻止浏览器默认导航
+            window.history.pushState(null, '', window.location.href);
+            executeBackToPackages();
+            return false;
+        };
+
+        // 添加事件监听器
+        document.addEventListener('mousedown', handleMouseBack, {capture: true});
+        window.addEventListener('popstate', handlePopState);
+
+        // 推送历史状态以便拦截浏览器后退
+        window.history.pushState(null, '', window.location.href);
+
+        // 清理事件监听器
+        return () => {
+            document.removeEventListener('mousedown', handleMouseBack, {capture: true});
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [onBackToPackages]);
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
