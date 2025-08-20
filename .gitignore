@@ -18,8 +18,13 @@ ent/*
 dist/
 *.db
 
-#*.md
-#!README.md
+*.md
+!README.md
+
+.*/
+!.chglog
+!.github
+!.gitignore
 
 build
 dist
