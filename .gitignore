@@ -34,3 +34,5 @@ main.exe
 database
 pkms.exe
 pkms
+
+*.json
