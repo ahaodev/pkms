@@ -12,8 +12,6 @@ import (
 	"pkms/internal/casbin"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const ApiUri = "/api/v1"
@@ -32,8 +30,8 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	frontend.Register(gin)
 	gin.RedirectTrailingSlash = true
 
-	// Swagger documentation
-	gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Swagger documentation (仅在开发环境启用)
+	setupSwagger(gin)
 
 	// 公开访问的路由组
 	publicRouter := gin.Group(ApiUri)

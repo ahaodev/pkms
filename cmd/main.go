@@ -6,10 +6,16 @@ import (
 
 	"pkms/api/route"
 	"pkms/bootstrap"
-	_ "pkms/docs"
 	"pkms/internal/initializer"
 
 	"github.com/gin-gonic/gin"
+)
+
+// 构建时注入的版本信息
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
 )
 
 // @title           PKMS API
@@ -33,6 +39,8 @@ import (
 // @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
+	// 记录版本信息
+	pkg.Log.Infof("PKMS starting - Version: %s, Commit: %s, Built: %s", version, commit, date)
 
 	app := bootstrap.App()
 	defer app.CloseDBConnection()

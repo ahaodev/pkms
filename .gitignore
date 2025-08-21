@@ -36,3 +36,8 @@ pkms.exe
 pkms
 
 *.json
+/pkms-dev
+/pkms-optimized
+/pkms-prod
+/pkms-prod.exe
+/pkms-test
