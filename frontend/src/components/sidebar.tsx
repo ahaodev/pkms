@@ -2,15 +2,12 @@ import {memo, useCallback, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {
-    ChevronDown,
-    Package,
-    X
-} from "lucide-react";
+import {ChevronDown, Package, X} from "lucide-react";
 import type {SimpleSidebarProps} from '@/types';
 import {useAuth} from '@/providers/auth-provider.tsx';
 import {Tenant} from '@/types/user';
 import {StaticNavigation} from '@/components/navigation/static-navigation';
+import {getVersion} from "@/lib/api/version.ts";
 
 // Static navigation replaces the dynamic menu system
 
@@ -28,6 +25,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
     const sidebarRef = useRef<HTMLDivElement>(null);
     const {currentTenant, tenants, selectTenant} = useAuth();
     const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
+    const [version, setVersion] = useState<string>("");
 
     // 切换租户逻辑
     const handleTenantChange = useCallback(async (tenant: { id: string, name: string }) => {
@@ -75,7 +73,18 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
             document.body.style.overflow = 'auto';
         };
     }, [isOpen, onClose]);
+    useEffect(() => {
+        getVersion()
+            .then((resp) => {
+                let backendVersion = resp.data;
+                console.log(backendVersion)
+                setVersion(backendVersion);
+            })
+            .catch((err) => {
+                console.error(err)
+            });
 
+    }, []);
 
     return (
         <>
@@ -159,7 +168,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
-                        v0.0.1
+                        {version ? `v${version}` : ""}
                     </div>
                 </div>
             </div>

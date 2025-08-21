@@ -40,14 +40,14 @@ var (
 
 func main() {
 	// 记录版本信息
-	pkg.Log.Infof("PKMS starting - Version: %s, Commit: %s, Built: %s", version, commit, date)
+	pkg.Log.Println("PKMS starting - Version: %s, Commit: %s, Built: %s", version, commit, date)
 
 	app := bootstrap.App()
 	defer app.CloseDBConnection()
 
 	env := app.Env
 	db := app.DB
-	fileStorage := app.FileStorage
+	app.Version = version
 	casbin := app.CasbinManager
 	timeout := time.Duration(env.ContextTimeout) * time.Second
 
@@ -64,7 +64,7 @@ func main() {
 	bootstrap.InitDefaultAdmin(db, env, casbin)
 
 	apiEngine := gin.Default()
-	route.Setup(app, timeout, db, casbin, fileStorage, apiEngine)
+	route.Setup(app, timeout, apiEngine)
 	err := apiEngine.Run(":65080")
 	if err != nil {
 		pkg.Log.Error(err)

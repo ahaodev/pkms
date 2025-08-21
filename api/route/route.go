@@ -2,22 +2,23 @@ package route
 
 import (
 	"fmt"
-	"pkms/frontend"
-	"time"
-
+	"pkms/api/controller"
 	"pkms/api/middleware"
 	"pkms/bootstrap"
 	"pkms/domain"
-	"pkms/ent"
-	"pkms/internal/casbin"
+	"pkms/frontend"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 const ApiUri = "/api/v1"
 
-func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, casbinManager *casbin.CasbinManager, fileStorage domain.FileRepository, gin *gin.Engine) {
+func Setup(app *bootstrap.Application, timeout time.Duration, gin *gin.Engine) {
 	env := app.Env
+	db := app.DB
+	fileStorage := app.FileStorage
+	casbinManager := app.CasbinManager
 	trustedProxies := []string{
 		"127.0.0.1",
 	}
@@ -46,6 +47,9 @@ func Setup(app *bootstrap.Application, timeout time.Duration, db *ent.Client, ca
 	// 客户端接入路由,需要验证 access token
 	publicClientAccessRouter := gin.Group("/client-access")
 	NewPublicClientAccessRouter(env, timeout, db, fileStorage, publicClientAccessRouter)
+
+	// 系统版本号接口
+	publicRouter.GET("/version", controller.NewSystemController(app).GetVersion)
 
 	// 受保护的路由组
 	protectedRouter := gin.Group(ApiUri)

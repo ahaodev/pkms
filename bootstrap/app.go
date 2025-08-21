@@ -1,10 +1,11 @@
 package bootstrap
 
 import (
-	"github.com/minio/minio-go/v7"
 	"pkms/domain"
 	"pkms/ent"
 	"pkms/internal/casbin"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type Application struct {
@@ -13,6 +14,7 @@ type Application struct {
 	MinioClient   *minio.Client         // 保留兼容性
 	FileStorage   domain.FileRepository // 新的通用文件存储接口
 	CasbinManager *casbin.CasbinManager
+	Version       string // 应用版本
 }
 
 func App() *Application {
