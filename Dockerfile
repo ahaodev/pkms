@@ -29,7 +29,6 @@ FROM debian:bookworm-slim AS runner
 WORKDIR /app
 COPY --from=compressor /app/kpms-runner .
 COPY --from=builder_go /app/.env.example .
-COPY --from=builder_go /app/config ./config
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
