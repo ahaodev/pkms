@@ -29,12 +29,11 @@ steps:
       # 清理旧镜像
       - docker images | grep 'hao88' | awk '{print $3}' | xargs -r -I{} sh -c 'docker rmi -f {} || true'
       - docker images | grep '52927295' | awk '{print $3}' | xargs -r -I{} sh -c 'docker rmi -f {} || true'
-      # - docker login -u "$DOCKER_USER" -p "$DOCKER_PWD".    # login to docker hub
       - echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
-      - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:amd64 --push . # Build and push multi-arch images
+      - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:rolling --push . # Build and push multi-arch images
       - docker buildx rm aBuildX  # Remove the Buildx builder
-      - docker run -d --name pkms --restart unless-stopped -p 65080:65080 hao88/pkms:amd64
+      - docker run -d --name pkms --restart unless-stopped -p 65080:65080 hao88/pkms:rolling
       # 检查容器状态
       - docker ps | grep pkms
 
