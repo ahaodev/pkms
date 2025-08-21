@@ -81,7 +81,7 @@ function SharesManagerPage() {
                     {/* 统计信息 */}
                     <div className="mb-6">
                         <div className="text-sm text-muted-foreground">
-                            总数: {totalCount}
+                            {t('share.totalShares', { count: totalCount })}
                         </div>
                     </div>
 

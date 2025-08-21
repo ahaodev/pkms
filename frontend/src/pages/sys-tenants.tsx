@@ -107,7 +107,7 @@ export default function TenantsPage() {
                 {/* 统计信息 */}
                 <div className="mb-6">
                     <div className="text-sm text-muted-foreground">
-                        总数: {totalItems}
+                        {t('tenant.totalTenants',{ count: totalItems })}
                     </div>
                 </div>
 

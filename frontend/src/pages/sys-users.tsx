@@ -172,7 +172,7 @@ export default function UsersPage() {
                 {/* 统计信息 */}
                 <div className="mb-6">
                     <div className="text-sm text-muted-foreground">
-                        总数: {totalUsers}
+                        {t('user.totalUsers',{ count: totalUsers })}
                     </div>
                 </div>
 
