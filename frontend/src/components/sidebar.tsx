@@ -168,7 +168,7 @@ export const Sidebar = memo<SidebarProps>(({isOpen, onClose, onTenantChange}) =>
                     </ScrollArea>
                     {/* 版本号显示在左下角 */}
                     <div className="px-3 pb-3 mt-auto text-xs text-muted-foreground text-center select-none">
-                        {version ? (version.startsWith('v') ? version : `v${version}`) : ""}
+                        {version ? version : ""}
                     </div>
                 </div>
             </div>
