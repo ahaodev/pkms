@@ -15,7 +15,7 @@ COPY . .
 COPY --from=build_web /app/frontend/dist /app/frontend/dist
 
 RUN go generate ./...
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=rolling}" -o kpms-runner  ./cmd/main.go
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=rolling" -o kpms-runner  ./cmd/main.go
 
 #-----------------upx kpms-runner -----------------
 FROM backplane/upx AS compressor
