@@ -9,7 +9,9 @@ trigger:
     - Single
     - pgsql
 node:
-  runner: n305
+  runner:
+   - n305
+   - msa2
 steps:
   - name: all_in_docker
     image: docker:dind
@@ -32,7 +34,7 @@ steps:
       - docker buildx create --name aBuildX --use      # Create and use a Buildx builder
       - docker buildx build --platform linux/amd64 -f Dockerfile -t hao88/pkms:rolling --push . # Build and push multi-arch images
       - docker buildx rm aBuildX  # Remove the Buildx builder
-      - docker run -d --name pkms --restart unless-stopped -p 65080:65080 -v /mnt/temporary/test/pkms/database:/app/database -v /mnt/temporary/test/pkms/uploads:/app/uploads -v /mnt/temporary/test/pkms/logs:/app/logs hao88/pkms:rolling
+      - docker run -d --name pkms --restart unless-stopped -p 65080:65080 -v /mnt/user/test/pkms/database:/app/database -v /mnt/user/test/pkms/uploads:/app/uploads -v /mnt/user/test/pkms/logs:/app/logs hao88/pkms:rolling
       - docker ps | grep pkms # 检查容器状态
 
 volumes:
