@@ -80,7 +80,5 @@ func (Release) Indexes() []ent.Index {
 		index.Fields("created_at"),
 		// Unique constraint: one version per package
 		index.Fields("package_id", "version_code", "version_name", "tag_name").Unique(),
-		// Unique constraint: one tag per package (if provided)
-		//index.Fields("package_id", "tag_name").Unique(),
 	}
 }
