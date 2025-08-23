@@ -278,6 +278,7 @@ func (cac *ClientAccessController) Release(c *gin.Context) {
 		FilePath:      uploadResp.ObjectName,
 		FileName:      header.Filename,
 		FileSize:      header.Size,
+		FileHash:      uploadResp.ETag,
 		DownloadCount: 0,
 		CreatedBy:     clientAccess.CreatedBy, // 使用客户端接入凭证的创建者
 		CreatedAt:     time.Now(),

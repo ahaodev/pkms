@@ -287,6 +287,7 @@ func (rc *ReleaseController) UploadRelease(c *gin.Context) {
 		FileName:    req.FileName,
 		FileSize:    req.FileSize,
 		FilePath:    uploadResp.ObjectName,
+		FileHash:    uploadResp.ETag,
 		CreatedBy:   userID,
 	}
 
