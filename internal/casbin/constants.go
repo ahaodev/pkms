@@ -1,7 +1,5 @@
 package casbin
 
-// DEMO阶段简化版权限系统 - 大胆删除复杂配置！
-
 // 简化的角色定义（只保留3个核心角色）
 const (
 	RoleAdmin  = "admin"  // 系统管理员：用户、租户管理
@@ -9,7 +7,7 @@ const (
 	RoleViewer = "viewer" // 普通用户：查看权限
 )
 
-// 侧边栏权限（简化版本，删除菜单管理）
+// 侧边栏权限（简化版）
 const (
 	SidebarDashboard = "dashboard"      // 对应 "/"
 	SidebarProjects  = "hierarchy"      // 对应 "/hierarchy"

@@ -559,7 +559,7 @@ func (cc *CasbinController) GetSidebarPermissions(c *gin.Context) {
 // @Failure      500  {object}  domain.Response  "Internal server error"
 // @Router       /casbin/user/button-permissions [get]
 func (cc *CasbinController) GetUserButtonPermissions(c *gin.Context) {
-	// 返回空的按钮权限列表（简化版本）
+
 	permissions := []string{}
 
 	c.JSON(http.StatusOK, domain.RespSuccess(permissions))

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 )
 
@@ -12,41 +11,6 @@ type CreatePackageRequest struct {
 	Name        string `json:"name" form:"name" binding:"required"`
 	Type        string `json:"type" form:"type" binding:"required"`
 	Description string `json:"description" form:"description"`
-}
-
-// ReleaseUploadRequest 上传包文件创建发布版本的请求
-type ReleaseUploadRequest struct {
-	PackageID    string `form:"package_id"`
-	Name         string `form:"name"`
-	Version      string `form:"version" binding:"required"`
-	Type         string `form:"type"`
-	TagName      string `form:"tag_name"`
-	Title        string `form:"title"`
-	Changelog    string `form:"changelog"`
-	IsPrerelease bool   `form:"is_prerelease"`
-	IsLatest     bool   `form:"is_latest"`
-	IsDraft      bool   `form:"is_draft"`
-
-	// 文件相关字段（不通过JSON传输）
-	File       io.Reader `json:"-"`
-	FileName   string    `json:"-"`
-	FileSize   int64     `json:"-"`
-	FileHeader string    `json:"-"`
-}
-
-// CreateReleaseRequest 创建发布请求
-type CreateReleaseRequest struct {
-	PackageID   string `json:"package_id" form:"package_id" binding:"required"`
-	VersionCode string `json:"version_code" form:"version_code" binding:"required"`
-	VersionName string `json:"version_name" form:"version_name" binding:"required"`
-	TagName     string `json:"tag_name" form:"tag_name"`
-	Changelog   string `json:"changelog" form:"changelog"`
-
-	// 文件相关字段（不通过JSON传输）
-	File       io.Reader `json:"-"`
-	FileName   string    `json:"-"`
-	FileSize   int64     `json:"-"`
-	FileHeader string    `json:"-"`
 }
 
 type Project struct {
