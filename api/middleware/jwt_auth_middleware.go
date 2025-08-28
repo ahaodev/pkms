@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"net/http"
+	"pkms/domain"
 	"pkms/internal/constants"
+	"pkms/internal/tokenutil"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"pkms/domain"
-	"pkms/internal/tokenutil"
 )
 
 func JwtAuthMiddleware(secret string) gin.HandlerFunc {

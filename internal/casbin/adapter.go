@@ -3,15 +3,16 @@ package casbin
 import (
 	"context"
 	"database/sql"
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
 	"fmt"
-	"github.com/casbin/casbin/v2/persist"
 	"pkms/ent"
 	"pkms/ent/casbinrule"
 	"pkms/ent/predicate"
 	"reflect"
 	"strings"
+
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	"github.com/casbin/casbin/v2/persist"
 
 	"github.com/casbin/casbin/v2/model"
 	_ "github.com/go-sql-driver/mysql"

@@ -1,11 +1,4 @@
-import {GroupPermission} from "@/types/group.ts";
-
 export type UserRole = 'admin' | 'user';
-
-export interface JwtUser {
-    id: string;
-    name: string;
-}
 
 export interface User {
     id: string;
@@ -59,24 +52,4 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
     name?: string;
     is_active?: boolean;
-}
-
-export interface ProfileUpdateRequest {
-    name?: string;
-    avatar?: string;
-}
-
-// 组管理相关类型
-export interface CreateGroupRequest {
-    name: string;
-    description: string;
-    color?: string;
-    permissions?: GroupPermission[];
-}
-
-export interface UpdateGroupRequest {
-    name?: string;
-    description?: string;
-    color?: string;
-    permissions?: GroupPermission[];
 }

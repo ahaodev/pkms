@@ -2,9 +2,10 @@ package frontend
 
 import (
 	"embed"
+	"strings"
+
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"strings"
 )
 
 //go:embed dist/*
