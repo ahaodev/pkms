@@ -14,9 +14,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FolderOpen, Package as PackageIcon, Activity } from 'lucide-react';
-import { getReleases } from '@/lib/api/releases';
+import {getReleases, Release} from '@/lib/api/releases';
+import { getPackages } from '@/lib/api/packages';
 import { CreateUpgradeTargetRequest } from '@/lib/api/upgrade';
-import { ExtendedPackage } from '@/types/package';
+import { Package } from '@/types/package';
 import { Project } from '@/types/project';
 import { useI18n } from '@/contexts/i18n-context';
 
@@ -27,7 +28,6 @@ interface CreateUpgradeTargetDialogProps {
     formData: CreateUpgradeTargetRequest;
     setFormData: React.Dispatch<React.SetStateAction<CreateUpgradeTargetRequest>>;
     projects: Project[];
-    packages: ExtendedPackage[];
     isLoading: boolean;
 }
 
@@ -38,27 +38,42 @@ export function CreateUpgradeTargetDialog({
     formData,
     setFormData,
     projects,
-    packages,
     isLoading
 }: CreateUpgradeTargetDialogProps) {
     const { t } = useI18n();
-    const [releases, setReleases] = useState<any[]>([]);
+    const [packages, setPackages] = useState<Package[]>([]);
+    const [loadingPackages, setLoadingPackages] = useState(false);
+    const [releases, setReleases] = useState<Release[]>([]);
     const [loadingReleases, setLoadingReleases] = useState(false);
 
-    // Filter packages by selected project
-    const filteredPackages = formData.project_id
-        ? packages.filter(pkg => {
-            return pkg.projectId === formData.project_id;
-        })
-        : [];
+    // Fetch packages when project is selected
+    useEffect(() => {
+        if (formData.project_id) {
+            setLoadingPackages(true);
+            getPackages({ projectId: formData.project_id })
+                .then((response) => {
+                    setPackages(response.list || []);
+                })
+                .catch((error) => {
+                    console.error('Failed to load packages:', error);
+                    setPackages([]);
+                })
+                .finally(() => {
+                    setLoadingPackages(false);
+                });
+        } else {
+            setPackages([]);
+        }
+    }, [formData.project_id]);
 
     // Load releases when package is selected
     useEffect(() => {
         if (formData.package_id) {
             setLoadingReleases(true);
             getReleases({ packageId: formData.package_id })
-                .then((response: { data: any[] }) => {
-                    setReleases(response.data || []);
+                .then((response) => {
+                    // API 返回格式: { data: { list: Release[], total: number, ... } }
+                    setReleases(response.data?.list || []);
                 })
                 .catch((error: any) => {
                     console.error('Failed to load releases:', error);
@@ -128,13 +143,18 @@ export function CreateUpgradeTargetDialog({
                         <Select
                             value={formData.package_id}
                             onValueChange={handlePackageChange}
-                            disabled={!formData.project_id}
+                            disabled={!formData.project_id || loadingPackages}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={formData.project_id ? t('upgrade.selectPackagePlaceholder') : t('upgrade.selectProjectFirst')} />
+                                <SelectValue placeholder={
+                                    loadingPackages ? t('upgrade.loadingPackages') :
+                                    formData.project_id ? t('upgrade.selectPackagePlaceholder') : t('upgrade.selectProjectFirst')
+                                } />
                             </SelectTrigger>
                             <SelectContent>
-                                {filteredPackages.map(pkg => (
+                                {packages
+                                    .filter(pkg => pkg && pkg.id) // Additional safety check
+                                    .map(pkg => (
                                     <SelectItem key={pkg.id} value={pkg.id}>
                                         <div className="flex items-center space-x-2">
                                             <PackageIcon className="h-4 w-4" />
@@ -145,6 +165,11 @@ export function CreateUpgradeTargetDialog({
                                         </div>
                                     </SelectItem>
                                 ))}
+                                {packages.length === 0 && formData.project_id && !loadingPackages && (
+                                    <div className="p-2 text-center text-sm text-muted-foreground">
+                                        {t('upgrade.noPackagesFound')}
+                                    </div>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>
@@ -164,19 +189,24 @@ export function CreateUpgradeTargetDialog({
                                 } />
                             </SelectTrigger>
                             <SelectContent>
-                                {releases.map(release => (
-                                    <SelectItem key={release.id} value={release.id}>
+                                {Array.isArray(releases) && releases.map(item => (
+                                    <SelectItem key={item.id} value={item.id}>
                                         <div className="flex items-center space-x-2">
                                             <Activity className="h-4 w-4" />
-                                            <span>{release.version_code}</span>
-                                            {release.version_name && (
+                                            <span>{item.version_code}</span>
+                                            {item.version_name && (
                                                 <span className="text-sm text-muted-foreground">
-                                                    - {release.version_name}
+                                                    - {item.version_name}
                                                 </span>
                                             )}
                                         </div>
                                     </SelectItem>
                                 ))}
+                                {(!Array.isArray(releases) || releases.length === 0) && formData.package_id && !loadingReleases && (
+                                    <div className="p-2 text-center text-sm text-muted-foreground">
+                                        {t('upgrade.noVersionsFound')}
+                                    </div>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>

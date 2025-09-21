@@ -3,22 +3,32 @@ import { apiClient } from './api';
 export interface Release {
     id: string;
     package_id: string;
-    version: string;
-    title?: string;
+    version_code: string;
+    version_name?: string;
     changelog?: string;
     file_path: string;
     file_name: string;
     file_size: number;
     file_hash?: string;
+    download_count: number;
+    share_expiry: string;
+    created_by: string;
     created_at: string;
-    updated_at: string;
 }
 
 export interface GetReleasesParams {
     packageId: string;
 }
 
-export const getReleases = async (params: GetReleasesParams): Promise<{ data: Release[] }> => {
+export const getReleases = async (params: GetReleasesParams): Promise<{
+    data: {
+        list: Release[],
+        total: number,
+        page: number,
+        page_size: number,
+        total_pages: number
+    }
+}> => {
     const response = await apiClient.get(`/api/v1/releases/package/${params.packageId}`);
     return response.data;
 };

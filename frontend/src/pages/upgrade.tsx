@@ -258,7 +258,6 @@ export default function UpgradePage() {
                     formData={formData}
                     setFormData={setFormData}
                     projects={projects}
-                    packages={packages}
                     isLoading={createUpgradeTargetMutation.isPending}
                 />
 
